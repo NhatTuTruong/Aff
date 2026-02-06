@@ -184,14 +184,12 @@ class CampaignResource extends Resource
                                     Forms\Components\TextInput::make('offer')
                                         ->label('Offer')
                                         ->maxLength(50)
-                                        ,
-                                    Forms\Components\TextInput::make('description')
-                                        ->label('Mô tả ngắn')
-                                        ->maxLength(500)
-                                        ->columnSpanFull()
-                                        ,
+                                        ->live(onBlur: false)
+                                        ->helperText('Nhập offer để xem gợi ý mô tả'),
                                     Forms\Components\Select::make('description_suggestion')
                                         ->label('Gợi ý mô tả')
+                                        ->searchable()
+                                        ->preload()
                                         ->options(function (Get $get) use ($descriptionTemplates): array {
                                             $rawOffer = trim((string) $get('offer'));
 
@@ -223,7 +221,8 @@ class CampaignResource extends Resource
                                                 ->toArray();
                                         })
                                         ->live()
-                                        ->hidden(fn (Get $get) => trim((string) $get('offer')) === '')
+                                        ->visible(fn (Get $get) => trim((string) $get('offer')) !== '')
+                                        ->helperText('Chọn một gợi ý mô tả từ danh sách')
                                         ->afterStateUpdated(function ($state, Set $set) {
                                             if (! empty($state)) {
                                                 // Khi chọn gợi ý thì đổ vào trường mô tả chính, cho phép user sửa tiếp
@@ -232,6 +231,11 @@ class CampaignResource extends Resource
                                                 $set('description_suggestion', null);
                                             }
                                         }),
+                                    Forms\Components\TextInput::make('description')
+                                        ->label('Mô tả ngắn')
+                                        ->maxLength(500)
+                                        ->columnSpanFull()
+                                        ->helperText('Mô tả chi tiết về mã giảm giá (có thể chọn từ gợi ý ở trên)'),
                                 ];
                             })
                             ->defaultItems(0)

@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\CampaignResource\Pages;
 
 use App\Filament\Admin\Resources\CampaignResource;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
 
 class EditCampaign extends EditRecord
@@ -13,10 +14,9 @@ class EditCampaign extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('save')
+            $this->getSaveFormAction()
                 ->label('Lưu')
-                ->color('primary')
-                ->action('save'),
+                ->formId('form'),
             Actions\Action::make('copy_url')
                 ->label('Copy Landing URL')
                 ->icon('heroicon-o-clipboard')
@@ -32,6 +32,15 @@ class EditCampaign extends EditRecord
                         ->send();
                 }),
             Actions\DeleteAction::make(),
+        ];
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction()
+                ->label('Lưu'),
+            $this->getCancelFormAction(),
         ];
     }
 }

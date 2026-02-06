@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\CampaignResource\Pages;
 
 use App\Filament\Admin\Resources\CampaignResource;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
 
@@ -14,10 +15,18 @@ class CreateCampaign extends CreateRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('save')
+            $this->getCreateFormAction()
                 ->label('Lưu')
-                ->color('primary')
-                ->action('create'),
+                ->formId('form'),
+        ];
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction()
+                ->label('Lưu'),
+            $this->getCancelFormAction(),
         ];
     }
 

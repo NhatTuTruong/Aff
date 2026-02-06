@@ -16,6 +16,11 @@ class Click extends Model
         'user_agent',
         'referer',
         'sub_id',
+        'device_type',
+        'browser',
+        'os',
+        'country',
+        'city',
     ];
 
     public function campaign(): BelongsTo

@@ -56,6 +56,11 @@ class Campaign extends Model
         return $this->hasMany(Coupon::class);
     }
 
+    public function pageViews(): HasMany
+    {
+        return $this->hasMany(PageView::class);
+    }
+
     public function getHeroImageAttribute()
     {
         return $this->assets()->where('type', 'hero')->first();

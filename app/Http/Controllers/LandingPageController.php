@@ -4,11 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;
+use App\Services\AnalyticsService;
 use Illuminate\Http\Request;
 
 class LandingPageController extends Controller
 {
-    public function show($slug)
+    protected AnalyticsService $analyticsService;
+
+    public function __construct(AnalyticsService $analyticsService)
+    {
+        $this->analyticsService = $analyticsService;
+    }
+
+    public function show($slug, Request $request)
     {
         // Allow viewing draft campaigns for testing (in development)
         // In production, you may want to restrict to 'active' only
@@ -21,6 +29,9 @@ class LandingPageController extends Controller
             abort(404);
         }
 
+        // Track page view
+        $pageView = $this->analyticsService->trackPageView($campaign, $request);
+
         $template = $campaign->template ?? 'default';
         
         // Check if template exists, fallback to default
@@ -28,6 +39,6 @@ class LandingPageController extends Controller
             $template = 'default';
         }
         
-        return view("landing.{$template}", compact('campaign'));
+        return view("landing.{$template}", compact('campaign', 'pageView'));
     }
 }

@@ -728,6 +728,64 @@ function toggleQA(el){
     const item = el.closest('.qa-item');
     item.classList.toggle('active');
 }
+
+// Track time on page and bounce rate
+<?php if(isset($pageView) && $pageView): ?>
+(function() {
+    const pageViewId = <?php echo e($pageView->id); ?>;
+    const startTime = Date.now();
+    let timeOnPage = 0;
+    let isBounce = true;
+    let hasInteracted = false;
+    
+    // Track user interactions to determine if it's a bounce
+    ['click', 'scroll', 'keydown', 'touchstart'].forEach(event => {
+        document.addEventListener(event, function() {
+            hasInteracted = true;
+            isBounce = false;
+        }, { once: true });
+    });
+    
+    // Update time on page periodically
+    setInterval(function() {
+        timeOnPage = Math.floor((Date.now() - startTime) / 1000);
+    }, 1000);
+    
+    // Send data when page is about to unload
+    window.addEventListener('beforeunload', function() {
+        timeOnPage = Math.floor((Date.now() - startTime) / 1000);
+        
+        // Use sendBeacon for reliable delivery
+        const data = JSON.stringify({
+            time_on_page: timeOnPage,
+            is_bounce: isBounce && !hasInteracted && timeOnPage < 30
+        });
+        
+        navigator.sendBeacon(
+            '<?php echo e(route("analytics.update-page-view", ":id")); ?>'.replace(':id', pageViewId),
+            data
+        );
+    });
+    
+    // Also send on visibility change (tab switch)
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            timeOnPage = Math.floor((Date.now() - startTime) / 1000);
+            fetch('<?php echo e(route("analytics.update-page-view", ":id")); ?>'.replace(':id', pageViewId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
+                },
+                body: JSON.stringify({
+                    time_on_page: timeOnPage,
+                    is_bounce: isBounce && !hasInteracted && timeOnPage < 30
+                })
+            }).catch(() => {}); // Ignore errors
+        }
+    });
+})();
+<?php endif; ?>
 </script>
 
 

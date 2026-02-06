@@ -18,6 +18,12 @@ class AssetResource extends Resource
     protected static ?string $model = Asset::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    
+    // Ẩn khỏi navigation menu
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 
     public static function form(Form $form): Form
     {

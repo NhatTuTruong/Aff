@@ -30,6 +30,11 @@ Route::get('/review/{slug}', [App\Http\Controllers\LandingPageController::class,
 Route::get('/out/{slug}', [App\Http\Controllers\ClickTrackingController::class, 'redirect'])
     ->name('click.redirect');
 
+// Analytics API
+Route::post('/api/track-page-view/{pageView}', [App\Http\Controllers\AnalyticsController::class, 'updatePageView'])
+    ->middleware('web')
+    ->name('analytics.update-page-view');
+
 // Legal Pages
 Route::get('/about', function () {
     return view('legal.about');
