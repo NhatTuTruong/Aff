@@ -8041,3 +8041,20 @@ Did you mean one of these?
 #3 D:/CampAff/artisan(35): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
 #4 {main}
 "} 
+[2026-02-06 12:59:32] laravel.EMERGENCY: Unable to create configured logger. Using emergency logger. {"exception":"[object] (InvalidArgumentException(code: 0): Log [] is not defined. at D:/CampAff/vendor/laravel/framework/src/Illuminate/Log/LogManager.php:212)
+[stacktrace]
+#0 D:/CampAff/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(137): Illuminate/Log/LogManager->resolve(NULL, NULL)
+#1 D:/CampAff/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(124): Illuminate/Log/LogManager->get(NULL)
+#2 D:/CampAff/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(681): Illuminate/Log/LogManager->driver()
+#3 D:/CampAff/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(317): Illuminate/Log/LogManager->error('Maximum executi...', Array)
+#4 D:/CampAff/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(278): Illuminate/Foundation/Exceptions/Handler->reportThrowable(Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#5 D:/CampAff/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(183): Illuminate/Foundation/Exceptions/Handler->report(Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#6 D:/CampAff/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(231): Illuminate/Foundation/Bootstrap/HandleExceptions->handleException(Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#7 D:/CampAff/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(255): Illuminate/Foundation/Bootstrap/HandleExceptions->handleShutdown()
+#8 [internal function]: Illuminate/Foundation/Bootstrap/HandleExceptions->Illuminate/Foundation/Bootstrap/{closure}()
+#9 {main}
+"} 
+[2026-02-06 12:59:32] laravel.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at D:/CampAff/storage/framework/views/b9619ffb3015fd4784fc81e4c5848c2b.php:1)
+[stacktrace]
+#0 {main}
+"} 

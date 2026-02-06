@@ -147,7 +147,8 @@ class CampaignResource extends Resource
                 
                 Forms\Components\Section::make('Mã giảm giá')
                     ->schema([
-                        Forms\Components\Repeater::make('coupons')
+                        Forms\Components\Repeater::make('couponItems')
+                            ->relationship('couponItems')
                             ->label('Danh sách mã giảm giá')
                             ->schema(function () {
                                 $descriptionTemplates = [
@@ -302,7 +303,7 @@ class CampaignResource extends Resource
                     ->query(function (Builder $query) {
                         return $query
                             ->whereNotNull('coupon_code')
-                            ->orWhereNotNull('coupons');
+                            ->orWhereHas('couponItems');
                     }),
             ])
             ->actions([
