@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('coupons_clicks_page_views', function (Blueprint $table) {
-            //
+            
         });
     }
 
