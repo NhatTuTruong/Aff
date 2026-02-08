@@ -26,8 +26,8 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            // Login disabled temporarily
-            // ->login()
+            ->login()
+            ->authGuard('web')
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -39,22 +39,22 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\\Filament\\Admin\\Widgets')
             ->widgets([
-                // AccountWidget disabled - requires authenticated user
                 // Widgets\AccountWidget::class,
-                // Widgets\FilamentInfoWidget::class, // Disabled to show custom widgets
+                // Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
-                // AuthenticateSession disabled - requires authenticated user
-                // AuthenticateSession::class,
+                AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+            ])
+            ->authMiddleware([
+                Authenticate::class,
             ]);
-            // Temporarily disabled authentication - authMiddleware removed to allow direct access to dashboard
     }
 }

@@ -11,9 +11,11 @@ class LoginResponse implements Responsable
 {
     public function toResponse($request): RedirectResponse | Redirector
     {
-        // Use intended() to respect any intended URL, fallback to dashboard
-        // This matches Filament's default behavior
-        return redirect()->intended(Filament::getUrl());
+        // Redirect to dashboard after successful login
+        $url = Filament::getUrl();
+        
+        // Use to() instead of intended() for better Livewire compatibility
+        return redirect()->to($url);
     }
 }
 
