@@ -459,6 +459,63 @@
     animation: pulseGlow 0.9s ease-in-out 3;
 }
 
+/* ===== TOP BANNER (ADDED – NO REMOVE OLD CODE) ===== */
+.campaign-banner {
+    height: 200px;
+    border-radius: 16px;
+    padding: 24px 28px;
+    display: flex;
+    align-items: center;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(99,102,241,0.9),
+            rgba(139,92,246,0.9)
+        );
+    color: #ffffff;
+    box-shadow: 0 18px 40px rgba(79,70,229,0.35);
+    position: relative;
+    overflow: hidden;
+}
+
+.campaign-banner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(255,255,255,0.18),
+            transparent 60%
+        );
+}
+
+.banner-content {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+}
+
+.banner-title {
+    font-size: 1.45rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+
+.banner-desc {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    opacity: 0.95;
+}
+
+@media(max-width:768px){
+    .campaign-banner{
+        height: auto;
+        padding: 22px;
+    }
+}
+
 
 </style>
 </head>
@@ -494,14 +551,18 @@
 
     <!-- RIGHT COLUMN (FULL, NOT REMOVED) -->
     <main class="right-column">
-        <section class="section coupon-intro">
-            <h2 class="coupon-intro-title">
-                {{ $campaign->brand->name ?? $campaign->title }} Coupons & Promo Codes
-            </h2>
-            <p class="coupon-intro-desc">
-                Save money with the latest verified coupon codes, deals, and special offers from
-                {{ $campaign->brand->name ?? $campaign->title }}. All coupons are tested and updated regularly.
-            </p>
+        <!-- TOP CAMPAIGN BANNER (ADDED) -->
+        <section class="campaign-banner">
+            <div class="banner-content">
+                <h1 class="banner-title">
+                    {{ $campaign->brand->name ?? $campaign->title }} Coupons & Promo Codes
+                </h1>
+                <p class="banner-desc">
+                    Save money with the latest verified coupon codes, deals, and special offers from
+                    {{ $campaign->brand->name ?? $campaign->title }}.
+                    All coupons are tested and updated regularly.
+                </p>
+            </div>
         </section>
 
         <section class="coupon-list">
