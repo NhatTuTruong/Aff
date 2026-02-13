@@ -70,7 +70,10 @@ class UserResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-pencil-square')
+                    ->tooltip('Sửa'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

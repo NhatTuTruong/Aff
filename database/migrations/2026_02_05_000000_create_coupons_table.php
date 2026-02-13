@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('campaign_id')
                 ->constrained()
                 ->cascadeOnDelete();
-            $table->string('code');
+            $table->string('code')->nullable();
             $table->string('offer')->nullable();
             $table->string('description', 500)->nullable();
             $table->date('starts_at')->nullable();

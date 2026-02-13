@@ -184,12 +184,19 @@ class ClickResource extends Resource
             ->headerActions([
                 ExportAction::make()
                     ->exporter(ClickExporter::class)
-                    ->label('Xuất dữ liệu')
-                    ->icon('heroicon-o-arrow-down-tray'),
+                    ->label('')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->tooltip('Xuất dữ liệu'),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-eye')
+                    ->tooltip('Xem'),
+                Tables\Actions\EditAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-pencil-square')
+                    ->tooltip('Sửa'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

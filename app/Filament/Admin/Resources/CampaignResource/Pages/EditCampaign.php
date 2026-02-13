@@ -17,20 +17,12 @@ class EditCampaign extends EditRecord
             $this->getSaveFormAction()
                 ->label('Lưu')
                 ->formId('form'),
-            Actions\Action::make('copy_url')
-                ->label('Copy Landing URL')
-                ->icon('heroicon-o-clipboard')
-                ->action(function () {
-                    $url = url(route('landing.show', $this->record->slug));
-                    // Copy to clipboard using Livewire dispatch
-                    $this->dispatch('copy-url', url: $url);
-                    
-                    \Filament\Notifications\Notification::make()
-                        ->title('URL copied to clipboard!')
-                        ->body($url)
-                        ->success()
-                        ->send();
-                }),
+            Actions\Action::make('view_landing')
+                ->label('')
+                ->icon('heroicon-o-eye')
+                ->tooltip('Xem trang landing page')
+                ->url(fn () => route('landing.show', $this->record->slug))
+                ->openUrlInNewTab(),
             Actions\DeleteAction::make(),
         ];
     }

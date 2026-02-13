@@ -62,10 +62,7 @@ class CampaignResource extends Resource
                             ->maxLength(255)
                             ->unique(ignoreRecord: true)
                             ->helperText('Tự động tạo từ tiêu đề. URL: /review/{slug}'),
-                        Forms\Components\TextInput::make('subtitle')
-                            ->label('Phụ đề')
-                            ->maxLength(255),
-                            Forms\Components\RichEditor::make('intro')
+                        Forms\Components\RichEditor::make('intro')
                             ->label('Giới thiệu')
                             ->toolbarButtons([
                                 'bold',
@@ -128,7 +125,9 @@ class CampaignResource extends Resource
                             ->multiple()
                             ->maxFiles(10)
                             ->helperText('Có thể upload nhiều ảnh sản phẩm (tối đa 10 ảnh)'),
-                    ]),
+                    ])
+                    ->collapsible()
+                    ->collapsed(),
                 
                 Forms\Components\Section::make('Affiliate & Nút kêu gọi (CTA)')
                     ->schema([
@@ -179,7 +178,6 @@ class CampaignResource extends Resource
                                 return [
                                     Forms\Components\TextInput::make('code')
                                         ->label('Mã giảm giá')
-                                        ->required()
                                         ->maxLength(255),
                                     Forms\Components\TextInput::make('offer')
                                         ->label('Offer')
@@ -234,10 +232,11 @@ class CampaignResource extends Resource
                                     Forms\Components\TextInput::make('description')
                                         ->label('Mô tả ngắn')
                                         ->maxLength(500)
-                                        ->columnSpanFull()
                                         ->helperText('Mô tả chi tiết về mã giảm giá (có thể chọn từ gợi ý ở trên)'),
                                 ];
                             })
+                            // Mỗi item (coupon) là 1 "thẻ", các thẻ xếp lưới 3 cột
+                            ->grid(3)
                             ->defaultItems(0)
                             ->columnSpanFull()
                             ->collapsible()
@@ -311,13 +310,21 @@ class CampaignResource extends Resource
                     }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-pencil-square')
+                    ->tooltip('Sửa'),
                 Tables\Actions\Action::make('view_landing')
-                    ->label('View')
+                    ->label('')
                     ->url(fn ($record) => route('landing.show', $record->slug))
                     ->openUrlInNewTab()
                     ->icon('heroicon-o-arrow-top-right-on-square')
-                    ->color('success'),
+                    ->color('success')
+                    ->tooltip('Xem landing page'),
+                Tables\Actions\DeleteAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-trash')
+                    ->tooltip('Xóa chiến dịch'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -3,19 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @php
+        $coupons = $campaign->couponItems ?? collect();
+        $maxPercent = 0;
+        foreach ($coupons as $c) {
+            $offerText = (string) ($c->offer ?? '');
+            if (preg_match('/(\d+)\s*%/i', $offerText, $m)) {
+                $val = (int) $m[1];
+                if ($val > $maxPercent) {
+                    $maxPercent = $val;
+                }
+            }
+        }
+        if ($maxPercent <= 0) {
+            $maxPercent = 75;
+        }
+    @endphp
     <title>{{ $campaign->title }} - Exclusive Deals & Coupons</title>
     <meta name="description" content="{{ $campaign->subtitle ?? $campaign->intro }}">
     <meta name="robots" content="index, follow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
-
-
     @if(config('app.ga4_id'))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('app.ga4_id') }}"></script>
     <script>
@@ -27,13 +36,20 @@
     @endif
 
     <style>
-        /* ===== ORIGINAL STYLE (UNCHANGED) ===== */
+        /* ===== BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary:#6366f1;--primary-dark:#4f46e5;--secondary:#8b5cf6;
-            --accent:#ec4899;--text-dark:#1f2937;--text-light:#6b7280;
-            --bg-light:#f9fafb;--bg-white:#ffffff;--border:#e5e7eb;
-            --shadow:0 2px 4px rgba(0,0,0,0.1);--shadow-lg:0 4px 12px rgba(0,0,0,0.15);
+            --primary:#22c55e;
+            --primary-dark:#16a34a;
+            --primary-soft:#bbf7d0;
+            --accent:#f97316;
+            --text-dark:#111827;
+            --text-light:#6b7280;
+            --bg-page:#f4f5f7;
+            --bg-card:#ffffff;
+            --border:#e5e7eb;
+            --shadow:0 1px 3px rgba(15,23,42,0.12);
+            --shadow-lg:0 18px 40px rgba(15,23,42,0.18);
         }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont,
@@ -41,43 +57,169 @@
             font-size: 0.9rem;
             line-height: 1.65;
             color: var(--text-dark);
-            background: var(--bg-light);
+            background: var(--bg-page);
         }
         a { text-decoration:none;color:inherit; }
+
+        /* ===== SHELL LAYOUT (CENTER WHITE PANEL) ===== */
+        .shell {
+            max-width: 1180px;
+            margin: 0 auto 40px;
+            padding: 20px 16px 40px;
+        }
+        .page-panel {
+            background: var(--bg-card);
+            border-radius: 18px;
+            box-shadow: var(--shadow-lg);
+            padding: 24px 26px 30px;
+        }
+
+        /* ===== HERO (TOP TITLE LIKE TENERE) ===== */
+        .hero {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        .hero-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 6px;
+        }
+        .hero-sub {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        .hero-sub strong {
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        /* ===== MAIN GRID (LEFT STORE CARD + RIGHT CONTENT) ===== */
         .page {
-            max-width:1200px;margin:0 auto;
-            padding:24px 16px 40px;
-            display:grid;grid-template-columns:320px 1fr;gap:24px;
+            margin-top: 22px;
+            display:grid;
+            grid-template-columns:320px 1fr;
+            gap:24px;
         }
         .left-card {
-            background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
-            border-radius:16px;padding:24px 22px 28px;color:#fff;
-            box-shadow:0 18px 45px rgba(79,70,229,0.35);
-            position:relative;overflow:hidden;
+            background: #ffffff;
+            border-radius:16px;
+            padding:24px 22px 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid #e5e7eb;
+            position:relative;
+            display:flex;
+            flex-direction:column;
         }
-        .left-inner { position:relative;z-index:1; }
         .brand-logo {
             max-width:180px;height:auto;object-fit:contain;
-            display:block;margin-bottom:16px;
+            display:block;margin:0 auto 12px;
+            border-radius: 999px;
+            background:#fff;
+            padding: 6px;
+            box-shadow:0 8px 20px rgba(0,0,0,0.18);
         }
-        .brand-name { font-size:1.8rem;font-weight:800;margin-bottom:6px; }
-        .brand-subtitle { font-size:0.95rem;opacity:0.95;margin-bottom:14px; }
+        .brand-name {
+            font-size:1.1rem;
+            font-weight: 800;
+            text-align:center;
+            margin-bottom:6px;
+        }
         .brand-rating {
             display:flex;align-items:center;gap:8px;
+            justify-content:center;
             margin-bottom:10px;font-size:0.8rem;
         }
         .stars { color:#fde047; }
-        .brand-meta { font-size:0.8rem;opacity:0.9;margin-bottom:4px; }
-        .brand-extra {
-            margin-top:12px;padding-top:10px;
-            border-top:1px solid rgba(255,255,255,0.25);
-            font-size:0.8rem;opacity:0.95;
+        .brand-meta { font-size:0.75rem;opacity:0.9;text-align:center;margin-bottom:4px; }
+        .stats-list {
+            border-top:1px solid #e5e7eb;
+            margin-top:10px;
+            padding-top:10px;
+            font-size:0.8rem;
         }
+        .stats-row {
+            display:flex;
+            justify-content:space-between;
+            padding:4px 0;
+        }
+        .stats-label { color:var(--text-light); }
+        .stats-value { font-weight:600; }
+        .sidebar-actions {
+            margin-top:14px;
+            display:flex;
+            gap:8px;
+        }
+        .btn-outline,
+        .btn-solid {
+            flex:1;
+            border-radius:999px;
+            padding:8px 10px;
+            font-size:0.8rem;
+            font-weight:700;
+            cursor:pointer;
+            border:1px solid transparent;
+            text-align:center;
+        }
+        .btn-outline {
+            border-color:#d1d5db;
+            background:#fff;
+        }
+        .btn-solid {
+            background:var(--primary);
+            color:#fff;
+        }
+        .btn-solid:hover { background:var(--primary-dark); }
+
         .right-column { display:flex;flex-direction:column;gap:18px; }
-        .coupon-list { display:flex;flex-direction:column;gap:10px; }
+
+        /* NOTE BAR & FILTERS */
+        .note-bar {
+            font-size:0.78rem;
+            color:var(--text-light);
+            background:#f9fafb;
+            border-radius:999px;
+            padding:6px 14px;
+            margin-bottom:12px;
+        }
+        .coupon-header {
+            margin-bottom:10px;
+        }
+        .coupon-header-title {
+            font-size:1rem;
+            font-weight:800;
+            letter-spacing:-0.02em;
+            margin-bottom:4px;
+        }
+        .coupon-header-meta {
+            font-size:0.8rem;
+            color:var(--text-light);
+        }
+        .filter-tabs {
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-top:10px;
+        }
+        .filter-pill {
+            border-radius:999px;
+            padding:6px 12px;
+            font-size:0.78rem;
+            border:1px solid #e5e7eb;
+            background:#fff;
+            cursor:pointer;
+        }
+        .filter-pill.active {
+            background:var(--primary-soft);
+            border-color:var(--primary);
+            color:var(--primary-dark);
+            font-weight:600;
+        }
+
+        .coupon-list { display:flex;flex-direction:column;gap:10px;margin-top:6px; }
         .coupon-row {
             background:#fff;border-radius:12px;
-            box-shadow:0 10px 30px rgba(15,23,42,0.12);
+            box-shadow:0 8px 26px rgba(15,23,42,0.12);
             padding:16px 18px;
             display:grid;grid-template-columns:minmax(0,1fr) auto;
             gap:14px;align-items:center;
@@ -459,72 +601,31 @@
     animation: pulseGlow 0.9s ease-in-out 3;
 }
 
-/* ===== TOP BANNER (ADDED – NO REMOVE OLD CODE) ===== */
-.campaign-banner {
-    height: 200px;
-    border-radius: 16px;
-    padding: 24px 28px;
-    display: flex;
-    align-items: center;
-    background:
-        linear-gradient(
-            135deg,
-            rgba(99,102,241,0.9),
-            rgba(139,92,246,0.9)
-        );
-    color: #ffffff;
-    box-shadow: 0 18px 40px rgba(79,70,229,0.35);
-    position: relative;
-    overflow: hidden;
-}
-
-.campaign-banner::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(
-            circle at top right,
-            rgba(255,255,255,0.18),
-            transparent 60%
-        );
-}
-
-.banner-content {
-    position: relative;
-    z-index: 1;
-    max-width: 720px;
-}
-
-.banner-title {
-    font-size: 1.45rem;
-    font-weight: 800;
-    margin-bottom: 8px;
-    letter-spacing: -0.02em;
-}
-
-.banner-desc {
-    font-size: 0.9rem;
-    line-height: 1.6;
-    opacity: 0.95;
-}
-
-@media(max-width:768px){
-    .campaign-banner{
-        height: auto;
-        padding: 22px;
-    }
-}
+        @media(max-width:960px){
+            .page{
+                grid-template-columns:1fr;
+            }
+        }
 
 
 </style>
 </head>
 
 <body>
-<div class="page">
-    <!-- LEFT CARD (UNCHANGED, TEXT TRANSLATED) -->
+<div class="shell">
+    <div class="page-panel">
+    <header class="hero">
+        <h1 class="hero-title">
+            {{ $campaign->brand->name ?? $campaign->title }} Coupons &amp; Promo Codes
+        </h1>
+        <p class="hero-sub">
+            Save up to <strong>{{ $maxPercent }}% off</strong> with verified discount codes &amp; exclusive deals.
+        </p>
+    </header>
+
+    <div class="page">
+    <!-- LEFT CARD -->
     <aside class="left-card">
-    <div class="review-center">
         @if($campaign->brand && $campaign->brand->image)
             <img src="{{ asset('storage/' . $campaign->brand->image) }}"
                 alt="{{ $campaign->brand->name }}"
@@ -535,41 +636,77 @@
                 class="brand-logo">
         @endif
 
-        <div class="review-stars">★★★★★</div>
-
-        <div class="review-rating-text">
-            4.8 / 5 based on 1,200+ verified reviews
+        <div class="brand-name">
+            {{ $campaign->brand->name ?? $campaign->title }}
         </div>
-
-        <button class="btn-get-coupon"
-            onclick="window.location.href='{{ route('click.redirect',$campaign->slug) }}'">
-            Get Coupon Alert
-        </button>
-    </div>
-
+        <div class="brand-rating">
+            <span class="stars">★★★★★</span>
+            <span>4.8 rating • 1,200+ reviews</span>
+        </div>
+        <div class="stats-list">
+            <div class="stats-row">
+                <span class="stats-label">Working codes</span>
+                <span class="stats-value">{{ ($campaign->couponItems ?? collect())->count() }}</span>
+            </div>
+            <div class="stats-row">
+                <span class="stats-label">Success rate</span>
+                <span class="stats-value">94%</span>
+            </div>
+            <div class="stats-row">
+                <span class="stats-label">Total saved</span>
+                <span class="stats-value">$7,229</span>
+            </div>
+        </div>
+        <div class="sidebar-actions">
+            <button class="btn-outline" type="button">
+                Reviews &amp; Info
+            </button>
+            <button class="btn-solid" type="button"
+                onclick="window.location.href='{{ route('click.redirect',$campaign->slug) }}'">
+                Shop Now
+            </button>
+        </div>
     </aside>
 
-    <!-- RIGHT COLUMN (FULL, NOT REMOVED) -->
+    <!-- RIGHT COLUMN -->
     <main class="right-column">
-        <!-- TOP CAMPAIGN BANNER (ADDED) -->
-        <section class="campaign-banner">
-            <div class="banner-content">
-                <h1 class="banner-title">
-                    {{ $campaign->brand->name ?? $campaign->title }} Coupons & Promo Codes
-                </h1>
-                <p class="banner-desc">
-                    Save money with the latest verified coupon codes, deals, and special offers from
-                    {{ $campaign->brand->name ?? $campaign->title }}.
-                    All coupons are tested and updated regularly.
-                </p>
+        <section>
+            <div class="note-bar">
+                Purchases through our links may earn us a commission, which helps us keep finding the best deals for you.
             </div>
-        </section>
+            <div class="coupon-header">
+                <div class="coupon-header-title">
+                    Active {{ $campaign->brand->name ?? $campaign->title }} coupons
+                </div>
+                <div class="coupon-header-meta">
+                    Last checked: 18 hours ago • Tracking coupons in the last 7 days.
+                </div>
+                <div class="filter-tabs">
+                    <button class="filter-pill active" type="button">All Deals</button>
+                    <button class="filter-pill" type="button">Codes</button>
+                    <button class="filter-pill" type="button">Deals</button>
+                    <button class="filter-pill" type="button">Free Shipping</button>
+                    <button class="filter-pill" type="button">First Order</button>
+                </div>
+            </div>
 
         <section class="coupon-list">
-            @php $coupons = $campaign->couponItems ?? collect(); @endphp
-
             @forelse($coupons as $coupon)
-            <article class="coupon-row" data-code="{{ $coupon->code }}">
+            @php
+                $hasCode = !empty($coupon->code);
+                $offerText = (string) ($coupon->offer ?? '');
+                $isFreeShipping = stripos($offerText, 'free shipping') !== false;
+                $tags = [];
+                if ($isFreeShipping) {
+                    $tags[] = 'free-shipping';
+                }
+                $tagAttr = implode(',', $tags);
+            @endphp
+            <article
+                class="coupon-row"
+                data-type="{{ $hasCode ? 'code' : 'deal' }}"
+                data-tags="{{ $tagAttr }}"
+            >
                 <div class="coupon-info">
                     <div class="coupon-title">
                         {{ $coupon->description ?: 'Exclusive coupon from '.($campaign->brand->name ?? $campaign->title) }}
@@ -578,18 +715,25 @@
                         <div class="coupon-offer">{{ $coupon->offer }}</div>
                     @endif
                     <div class="coupon-desc">
-                        Click “Get Deal” to reveal the code and visit the store.
+                        @if($hasCode)
+                            Click “Copy Code” to copy and apply it at checkout.
+                        @else
+                            Click “Get Deal” to activate this offer and shop now.
+                        @endif
                     </div>
                 </div>
                 <div class="coupon-actions">
-                    @if($coupon->code)
+                    @if($hasCode)
                         <div class="coupon-code peek">
                         {{ $coupon->code }}
                         </div>
                     @endif
                     <button class="btn-copy"
-                        onclick="openCouponPopup('{{ $coupon->code }}', this)">
-                        Get Deal
+                        data-type="{{ $hasCode ? 'code' : 'deal' }}"
+                        data-code="{{ $coupon->code }}"
+                        data-url="{{ route('click.redirect',$campaign->slug) }}"
+                        onclick="handleCouponClick(this)">
+                        {{ $hasCode ? 'Copy code' : 'Get deal' }}
                     </button>
                 </div>
             </article>
@@ -692,7 +836,9 @@
         </section>
 
     </main>
-</div>
+    </div><!-- /.page -->
+    </div><!-- /.page-panel -->
+</div><!-- /.shell -->
 
 <div id="couponModal" class="coupon-modal">
     <div class="coupon-modal-content">
@@ -738,23 +884,44 @@
 let currentCode = '';
 let currentCouponRow = null;
 
-function openCouponPopup(code, el){
-    // set lại context coupon
-    currentCode = code;
-    currentCouponRow = el.closest('.coupon-row');
+function handleCouponClick(btn){
+    const type = btn.dataset.type;
+    const code = btn.dataset.code || '';
+    const url = btn.dataset.url;
 
-    // set code trong popup
-    document.getElementById('modalCode').innerText = code;
+    const activeTabBtn = document.querySelector('.filter-pill.active');
+    const activeTab = activeTabBtn ? (activeTabBtn.dataset.tab || 'all') : 'all';
 
-    // RESET nút copy
-    const copyBtn = document.getElementById('copyCouponBtn');
-    if(copyBtn){
-        copyBtn.innerText = 'Copy code';
-        copyBtn.disabled = false;
+    // Nếu là deal (không có code) hoặc đang ở tab Deals → đi thẳng tới link aff
+    if (type === 'deal' || activeTab === 'deals') {
+        if (url) {
+            window.open(url, '_blank');
+        }
+        return;
     }
 
-    // mở popup
-    document.getElementById('couponModal').classList.add('active');
+    // Codes: mở modal + chuẩn bị copy + mở tab aff
+    currentCode = code;
+    currentCouponRow = btn.closest('.coupon-row');
+
+    const codeBox = document.getElementById('modalCode');
+    if (codeBox) {
+        codeBox.innerText = code;
+    }
+
+    const modal = document.getElementById('couponModal');
+    if (modal) {
+        modal.classList.add('active');
+    }
+
+    const goBtn = document.querySelector('.go-to-store-btn');
+    if (goBtn && url) {
+        goBtn.href = url;
+    }
+
+    if (url) {
+        window.open(url, '_blank');
+    }
 }
 
 function closeCouponPopup(){
@@ -785,6 +952,47 @@ function toggleQA(el){
     const item = el.closest('.qa-item');
     item.classList.toggle('active');
 }
+
+// Tabs filter
+document.addEventListener('DOMContentLoaded', function () {
+    const tabs = document.querySelectorAll('.filter-pill');
+    const rows = document.querySelectorAll('.coupon-row');
+
+    tabs.forEach((tab) => {
+        const label = tab.textContent.trim().toLowerCase();
+        if (label === 'all deals') tab.dataset.tab = 'all';
+        if (label === 'codes') tab.dataset.tab = 'codes';
+        if (label === 'deals') tab.dataset.tab = 'deals';
+        if (label === 'free shipping') tab.dataset.tab = 'free-shipping';
+    });
+
+    tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            const current = tab.dataset.tab || 'all';
+
+            rows.forEach(row => {
+                const type = row.dataset.type;
+                const tags = (row.dataset.tags || '').split(',').filter(Boolean);
+                let show = true;
+
+                if (current === 'codes') {
+                    show = type === 'code';
+                } else if (current === 'deals') {
+                    show = type === 'deal';
+                } else if (current === 'free-shipping') {
+                    show = tags.includes('free-shipping');
+                } else {
+                    show = true;
+                }
+
+                row.style.display = show ? 'grid' : 'none';
+            });
+        });
+    });
+});
 
 // Track time on page and bounce rate
 @if(isset($pageView) && $pageView)
