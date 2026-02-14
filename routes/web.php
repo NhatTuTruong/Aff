@@ -48,3 +48,8 @@ Route::get('/privacy', function () {
     return view('legal.privacy');
 })->name('legal.privacy');
 
+// Image upload for RichEditor paste
+Route::post('/admin/campaigns/upload-image', [App\Http\Controllers\ImageUploadController::class, 'upload'])
+    ->middleware('web')
+    ->name('campaigns.upload-image');
+

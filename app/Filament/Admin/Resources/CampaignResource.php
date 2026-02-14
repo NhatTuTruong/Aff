@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\CampaignResource\Pages;
 use App\Filament\Admin\Resources\CampaignResource\RelationManagers;
 use App\Models\Campaign;
+use App\Models\Brand;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -42,6 +43,22 @@ class CampaignResource extends Resource
                             ->relationship('brand', 'name')
                             ->searchable()
                             ->preload()
+                            ->live()
+                            ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                                if ($state) {
+                                    $brand = Brand::find($state);
+                                    if ($brand) {
+                                        // Tự động điền title nếu đang trống
+                                        if (empty($get('title'))) {
+                                            $set('title', $brand->name);
+                                        }
+                                        // Tự động điền slug nếu đang trống
+                                        if (empty($get('slug'))) {
+                                            $set('slug', \Illuminate\Support\Str::slug($brand->name));
+                                        }
+                                    }
+                                }
+                            })
                             ->createOptionForm([
                                 Forms\Components\TextInput::make('name')
                                     ->label('Tên cửa hàng')
@@ -70,6 +87,7 @@ class CampaignResource extends Resource
                                 'underline',
                                 'strikeThrough',
                                 'link',
+                                'image',
                                 'orderedList',
                                 'bulletList',
                                 'blockquote',
@@ -78,6 +96,9 @@ class CampaignResource extends Resource
                                 'redo',
                             ])
                             ->columnSpanFull()
+                            ->extraInputAttributes([
+                                'style' => 'min-height: 200px;',
+                            ])
                     ])->columns(2),
                 
                 Forms\Components\Section::make('Cài đặt chiến dịch')

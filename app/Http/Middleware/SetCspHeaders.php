@@ -15,28 +15,37 @@ class SetCspHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Skip CSP headers for Filament/Livewire requests to avoid conflicts
+        if ($request->is('admin/*') || 
+            $request->expectsJson() || 
+            $request->ajax() || 
+            $request->wantsJson() ||
+            str_contains($request->path(), 'livewire') ||
+            str_contains($request->path(), 'filament')) {
+            return $next($request);
+        }
+        
+        // For other requests, set CSP headers
         $response = $next($request);
 
-        // Only set CSP if not already set (allows server-level CSP to take precedence)
-        if ($response->headers->has('Content-Security-Policy')) {
-            return $response;
+        // Only set CSP if response is valid and headers can be accessed
+        if ($response instanceof Response && method_exists($response, 'headers')) {
+            if (!$response->headers->has('Content-Security-Policy')) {
+                $csp = "default-src 'self'; " .
+                       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; " .
+                       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
+                       "font-src 'self' https://fonts.gstatic.com data:; " .
+                       "img-src 'self' data: https:; " .
+                       "connect-src 'self' https://www.google-analytics.com wss: ws:; " .
+                       "frame-src 'self'; " .
+                       "object-src 'none'; " .
+                       "base-uri 'self'; " .
+                       "form-action 'self'; " .
+                       "frame-ancestors 'none';";
+
+                $response->headers->set('Content-Security-Policy', $csp);
+            }
         }
-
-        // Allow unsafe-eval for Livewire/Filament (required for dynamic component rendering)
-        // In production, consider using nonce-based CSP instead
-        $csp = "default-src 'self'; " .
-               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; " .
-               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
-               "font-src 'self' https://fonts.gstatic.com data:; " .
-               "img-src 'self' data: https:; " .
-               "connect-src 'self' https://www.google-analytics.com wss: ws:; " .
-               "frame-src 'self'; " .
-               "object-src 'none'; " .
-               "base-uri 'self'; " .
-               "form-action 'self'; " .
-               "frame-ancestors 'none';";
-
-        $response->headers->set('Content-Security-Policy', $csp);
 
         return $response;
     }

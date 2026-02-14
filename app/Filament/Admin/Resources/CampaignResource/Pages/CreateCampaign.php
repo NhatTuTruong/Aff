@@ -35,6 +35,7 @@ class CreateCampaign extends CreateRecord
         return $this->getResource()::getUrl('index');
     }
 
+
     protected function afterCreate(): void
     {
         $landingUrl = route('landing.show', $this->record->slug);
