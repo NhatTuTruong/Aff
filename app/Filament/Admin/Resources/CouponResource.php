@@ -53,6 +53,7 @@ class CouponResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultPaginationPageOption(25)
             ->columns([
                 Tables\Columns\TextColumn::make('campaign.title')
                     ->label('Chiến dịch')
@@ -77,6 +78,7 @@ class CouponResource extends Resource
                     ->dateTime()
                     ->sortable(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('campaign_id')
                     ->label('Chiến dịch')

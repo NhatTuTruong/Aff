@@ -8,7 +8,8 @@
     <meta name="robots" content="index, follow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    @include('partials.site-chrome-styles')
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -324,6 +325,7 @@ a{text-decoration:none;color:inherit}
 </head>
 
 <body>
+@include('partials.site-header')
 <div class="page">
     <!-- LEFT CARD (UNCHANGED, TEXT TRANSLATED) -->
     <aside class="left-card">
@@ -492,6 +494,8 @@ a{text-decoration:none;color:inherit}
 
     </main>
 </div>
+
+@include('partials.site-footer')
 
 <div id="couponModal" class="coupon-modal">
     <div class="coupon-modal-content">

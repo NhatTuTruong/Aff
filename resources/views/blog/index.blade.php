@@ -126,7 +126,7 @@
                     </a>
                 @endforeach
                 <div class="pagination-wrap">
-                    {{ $posts->links() }}
+                    {{ $posts->links('vendor.pagination.simple') }}
                 </div>
             @else
                 <div class="empty-state">

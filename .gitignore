@@ -4,6 +4,7 @@
 .env
 .env.*
 
+/public/storage/*
 /storage/*
 !/storage/app/public
 !/storage/framework/.gitignore

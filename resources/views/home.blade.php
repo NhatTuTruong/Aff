@@ -17,6 +17,10 @@
         letter-spacing: -0.03em;
         line-height: 1.2;
         margin-bottom: 0.75rem;
+        background: linear-gradient(135deg, var(--text-dark) 0%, var(--primary-dark) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
     .hero p {
         color: var(--text-muted);
@@ -82,10 +86,27 @@
     #coupons { scroll-margin-top: 5rem; }
     #stores { scroll-margin-top: 5rem; }
 
-    .stores-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 1.25rem;
+    .stores-carousel-wrap {
+        overflow: hidden;
+        margin: 0 -1.5rem;
+        padding: 0 1.5rem;
+    }
+    .stores-carousel-track {
+        display: flex;
+        width: max-content;
+        animation: storesScroll 30s linear infinite;
+    }
+    .stores-carousel-track:hover {
+        animation-play-state: paused;
+    }
+    @keyframes storesScroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+    .stores-carousel {
+        display: flex;
+        gap: 1rem;
+        padding: 0.5rem 0;
     }
     .store-card {
         background: var(--surface);
@@ -99,6 +120,8 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        flex-shrink: 0;
+        width: 150px;
     }
     .store-card:hover {
         border-color: var(--accent);
@@ -219,6 +242,54 @@
         </div>
     </section>
 
+    <section class="section" id="stores">
+        <div class="container">
+            <h2 class="section-title">Stores</h2>
+            @if($brands->count() > 0)
+                <div class="stores-carousel-wrap">
+                    <div class="stores-carousel-track">
+                        <div class="stores-carousel">
+                            @foreach($brands as $brand)
+                                @php $reviewSlug = $brand->campaigns->first()?->slug; @endphp
+                                <a href="{{ $reviewSlug ? route('landing.show', $reviewSlug) : url('/') . '?q=' . urlencode($brand->name) }}" class="store-card">
+                                    @if($brand->image)
+                                        <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}">
+                                    @else
+                                        <div style="width:64px;height:64px;border-radius:var(--radius-sm);background:var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.7rem;margin-bottom:0.75rem;">{{ Str::limit($brand->name, 2) }}</div>
+                                    @endif
+                                    <span class="name">{{ $brand->name }}</span>
+                                    @if($brand->category)<span class="category">{{ $brand->category->name }}</span>@endif
+                                </a>
+                            @endforeach
+                        </div>
+                        <div class="stores-carousel">
+                            @foreach($brands as $brand)
+                                @php $reviewSlug = $brand->campaigns->first()?->slug; @endphp
+                                <a href="{{ $reviewSlug ? route('landing.show', $reviewSlug) : url('/') . '?q=' . urlencode($brand->name) }}" class="store-card">
+                                    @if($brand->image)
+                                        <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}">
+                                    @else
+                                        <div style="width:64px;height:64px;border-radius:var(--radius-sm);background:var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.7rem;margin-bottom:0.75rem;">{{ Str::limit($brand->name, 2) }}</div>
+                                    @endif
+                                    <span class="name">{{ $brand->name }}</span>
+                                    @if($brand->category)<span class="category">{{ $brand->category->name }}</span>@endif
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @else
+                <div class="empty-state">
+                    @if($searchQuery)
+                        No stores found for "{{ $searchQuery }}". Try a different keyword.
+                    @else
+                        No stores available yet. Please check back later!
+                    @endif
+                </div>
+            @endif
+        </div>
+    </section>
+
     @if($hotCoupons->isNotEmpty())
     <section class="section" id="coupons">
         <div class="container">
@@ -248,37 +319,4 @@
         </div>
     </section>
     @endif
-
-    <section class="section" id="stores">
-        <div class="container">
-            <h2 class="section-title">Stores</h2>
-            @if($brands->count() > 0)
-                <div class="stores-grid">
-                    @foreach($brands as $brand)
-                        @php $reviewSlug = $brand->campaigns->first()?->slug; @endphp
-                        <a href="{{ $reviewSlug ? route('landing.show', $reviewSlug) : url('/') . '?q=' . urlencode($brand->name) }}" class="store-card">
-                            @if($brand->image)
-                                <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}">
-                            @else
-                                <div style="width:64px;height:64px;border-radius:var(--radius-sm);background:var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.7rem;margin-bottom:0.75rem;">{{ Str::limit($brand->name, 2) }}</div>
-                            @endif
-                            <span class="name">{{ $brand->name }}</span>
-                            @if($brand->category)<span class="category">{{ $brand->category->name }}</span>@endif
-                        </a>
-                    @endforeach
-                </div>
-                <div class="pagination-wrap">
-                    {{ $brands->links() }}
-                </div>
-            @else
-                <div class="empty-state">
-                    @if($searchQuery)
-                        No stores found for "{{ $searchQuery }}". Try a different keyword.
-                    @else
-                        No stores available yet. Please check back later!
-                    @endif
-                </div>
-            @endif
-        </div>
-    </section>
 @endsection

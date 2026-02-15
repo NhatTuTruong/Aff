@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\CampaignResource\Pages;
 use App\Filament\Admin\Resources\CampaignResource\RelationManagers;
+use App\Filament\Imports\CampaignImporter;
 use App\Models\Campaign;
 use App\Models\Brand;
 use Filament\Forms;
@@ -150,7 +151,7 @@ class CampaignResource extends Resource
                     ->collapsible()
                     ->collapsed(),
                 
-                Forms\Components\Section::make('Affiliate & Nút kêu gọi (CTA)')
+                Forms\Components\Section::make('Affiliate')
                     ->schema([
                         Forms\Components\TextInput::make('affiliate_url')
                             ->label('URL Affiliate')
@@ -158,11 +159,6 @@ class CampaignResource extends Resource
                             ->url()
                             ->columnSpanFull()
                             ->helperText('URL affiliate đầy đủ với tham số tracking'),
-                        Forms\Components\TextInput::make('cta_text')
-                            ->label('Nội dung nút kêu gọi (CTA)')
-                            ->required()
-                            ->maxLength(255)
-                            ->default('Get Coupon Alerts'),
                     ]),
                 
                 Forms\Components\Section::make('Mã giảm giá')
@@ -269,6 +265,14 @@ class CampaignResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultPaginationPageOption(25)
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(CampaignImporter::class)
+                    ->job(\App\Jobs\ImportCsvWithNullUser::class)
+                    ->label('Import CSV')
+                    ->icon('heroicon-o-arrow-up-tray'),
+            ])
             ->columns([
                 Tables\Columns\ImageColumn::make('logo')
                     ->label('Logo')
@@ -342,7 +346,8 @@ class CampaignResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getRelations(): array

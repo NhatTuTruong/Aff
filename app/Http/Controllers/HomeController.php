@@ -21,8 +21,8 @@ class HomeController extends Controller
             }))
             ->with(['category', 'campaigns' => fn ($q) => $q->limit(1)])
             ->orderBy('name')
-            ->paginate(24)
-            ->withQueryString();
+            ->limit(100)
+            ->get();
 
         $hotCoupons = Coupon::query()
             ->with(['campaign.brand'])

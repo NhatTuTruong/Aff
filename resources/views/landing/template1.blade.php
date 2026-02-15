@@ -24,7 +24,8 @@
     <meta name="robots" content="index, follow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    @include('partials.site-chrome-styles')
     @if(config('app.ga4_id'))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('app.ga4_id') }}"></script>
     <script>
@@ -1383,6 +1384,7 @@
 </head>
 
 <body>
+@include('partials.site-header')
 <div class="shell">
     <div class="page-panel">
     <header class="hero">
@@ -1706,6 +1708,8 @@
     </div><!-- /.page -->
     </div><!-- /.page-panel -->
 </div><!-- /.shell -->
+
+@include('partials.site-footer')
 
 <div id="couponModal" class="coupon-modal">
     <div class="coupon-modal-content">

@@ -53,6 +53,10 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->renderHook(
+                PanelsRenderHook::BODY_START,
+                fn () => view('components.import-notification-trigger')
+            )
+            ->renderHook(
                 PanelsRenderHook::SCRIPTS_AFTER,
                 fn () => view('components.rich-editor-paste-normalize')
             );

@@ -1,31 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
-        h1 { margin-bottom: 30px; }
-        p { margin-bottom: 20px; }
-        footer { background: #333; color: white; padding: 20px; text-align: center; margin-top: 60px; }
-        footer a { color: #fff; text-decoration: underline; margin: 0 10px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Contact Us</h1>
-        <p>If you have any questions or concerns, please feel free to reach out to us.</p>
-        <p>Email: contact@example.com</p>
-        <p>We aim to respond to all inquiries within 24-48 hours.</p>
-    </div>
-    <footer>
-        <a href="{{ route('legal.about') }}">About</a>
-        <a href="{{ route('legal.contact') }}">Contact</a>
-        <a href="{{ route('legal.privacy') }}">Privacy Policy</a>
-    </footer>
-</body>
-</html>
+@extends('layouts.app')
 
+@section('title', 'Contact Us - ' . config('app.name'))
+@section('description', 'Get in touch with us for questions and feedback.')
+
+@push('styles')
+<style>
+    .legal-container { max-width: 800px; margin: 0 auto; padding: 3rem 1.5rem; }
+    .legal-container h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(1.75rem, 4vw, 2.25rem);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+    .legal-container p { margin-bottom: 1rem; color: var(--text); }
+    .legal-container p:last-child { margin-bottom: 0; }
+    .legal-container a { color: var(--accent); text-decoration: none; }
+    .legal-container a:hover { text-decoration: underline; }
+</style>
+@endpush
+
+@section('content')
+<div class="legal-container">
+    <h1 class="font-heading">Contact Us</h1>
+    <p>If you have any questions or concerns, please feel free to reach out to us.</p>
+    <p>Email: {{ config('mail.from.address', 'contact@example.com') }}</p>
+    <p>We aim to respond to all inquiries within 24-48 hours.</p>
+</div>
+@endsection

@@ -11,14 +11,17 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0c0c0f;
-            --surface: #16161a;
-            --surface-hover: #1e1e24;
-            --text: #f4f4f5;
-            --text-muted: #a1a1aa;
-            --accent: #f59e0b;
-            --accent-hover: #d97706;
-            --border: #27272a;
+            --bg: #ffffff;
+            --surface: #f9fafb;
+            --surface-hover: #f3f4f6;
+            --text: #111827;
+            --text-dark: #111827;
+            --text-muted: #6b7280;
+            --primary: #22c55e;
+            --primary-dark: #16a34a;
+            --accent: var(--primary);
+            --accent-hover: var(--primary-dark);
+            --border: #e5e7eb;
             --radius: 12px;
             --radius-sm: 8px;
         }
@@ -36,7 +39,7 @@
 
         /* Header */
         .site-header {
-            background: rgba(12, 12, 15, 0.85);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             position: sticky;
@@ -137,6 +140,59 @@
             gap: 1rem;
         }
         .footer-bottom p { color: var(--text-muted); font-size: 0.875rem; }
+
+        /* Pagination */
+        .pagination-nav { margin-top: 2rem; }
+        .pagination-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.4rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .pagination-list li { display: inline-flex; }
+        .pagination-item {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2.25rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .pagination-item:hover:not(.pagination-disabled):not(.pagination-current) {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .pagination-disabled, .pagination-current {
+            color: var(--text-muted);
+            cursor: default;
+            pointer-events: none;
+        }
+        .pagination-current {
+            background: var(--surface-hover);
+            border-color: var(--accent);
+            color: var(--accent);
+            pointer-events: none;
+        }
+        .pagination-ellipsis {
+            border: none;
+            background: transparent;
+        }
+        .pagination-info {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
     </style>
     @stack('styles')
 </head>
