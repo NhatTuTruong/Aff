@@ -295,15 +295,6 @@ class CampaignResource extends Resource
                         'draft' => 'Bản nháp',
                         default => $state,
                     }),
-                Tables\Columns\TextColumn::make('title')
-                    ->label('Tiêu đề')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('subtitle')
-                    ->label('Phụ đề')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('cta_text')
-                    ->label('Nội dung nút CTA')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('template')
                     ->label('Template')
                     ->searchable(),

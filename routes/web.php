@@ -13,13 +13,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/blog', [App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
 
-// Redirect login route to Filament admin login
+// Tạm tắt login: /login chuyển thẳng về /admin
 Route::get('/login', function () {
-    return redirect(route('filament.admin.auth.login'));
+    return redirect('/admin');
 })->name('login');
 
 // Landing Pages

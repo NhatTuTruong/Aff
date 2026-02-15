@@ -29,4 +29,14 @@ class EditBrand extends EditRecord
             $this->getCancelFormAction(),
         ];
     }
+
+    /** Chọn ảnh từ popup "Chọn từ ảnh đã có" → cập nhật Logo / Hình ảnh cùng cơ chế như upload từ máy (state dạng [uuid => path]). */
+    public function selectLogoAndClose(string $path): void
+    {
+        $path = str_replace('\\', '/', ltrim($path, '/'));
+        if (!str_starts_with($path, 'brands/')) {
+            $path = 'brands/' . ltrim($path, '/');
+        }
+        $this->data['image'] = [\Illuminate\Support\Str::uuid()->toString() => $path];
+    }
 }

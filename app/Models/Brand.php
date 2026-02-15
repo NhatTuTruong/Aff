@@ -29,6 +29,15 @@ class Brand extends Model
         'approved' => 'boolean',
     ];
 
+    /** Chuẩn hóa path: form/Livewire có thể gửi array [uuid => path] hoặc [0 => path], DB lưu string. */
+    public function setImageAttribute($value): void
+    {
+        if (is_array($value)) {
+            $value = reset($value);
+        }
+        $this->attributes['image'] = is_string($value) ? str_replace('\\', '/', ltrim((string) $value, '/')) : $value;
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

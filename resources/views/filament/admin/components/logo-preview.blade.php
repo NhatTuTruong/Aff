@@ -12,8 +12,8 @@
                  class="w-24 h-24 object-contain rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 p-2">
         </div>
         <div class="flex-1">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Logo đã tải về</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Nhấn nút "Upload" ở trên để thêm logo vào form</p>
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Logo đã tải về (đã lưu vào nguồn)</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Dùng <strong>Chọn từ ảnh đã có</strong> bên dưới để thêm hoặc cập nhật vào Logo / Hình ảnh.</p>
         </div>
     </div>
 </div>

@@ -2,8 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Http\Middleware\Authenticate;
-use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
@@ -27,8 +25,9 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            // ->login() // Temporarily disabled
+            // ->login() // Tạm tắt login
             ->authGuard('web')
+            // ->authMiddleware([Authenticate::class]) // Tạm tắt để vào /admin không cần đăng nhập
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -47,14 +46,12 @@ class AdminPanelProvider extends PanelProvider
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
-                // AuthenticateSession::class, // Removed to allow guest access
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-            //     Authenticate::class,
-            ]) // Removed to allow guest access without login
+            ])
             ->renderHook(
                 PanelsRenderHook::SCRIPTS_AFTER,
                 fn () => view('components.rich-editor-paste-normalize')

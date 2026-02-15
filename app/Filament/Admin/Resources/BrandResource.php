@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Storage;
 
 class BrandResource extends Resource
 {
@@ -152,14 +153,11 @@ class BrandResource extends Resource
                                                     try {
                                                         \Illuminate\Support\Facades\Storage::disk('public')->put($path, $imageContent);
                                                         
-                                                        // Store preview path (not yet in main image field)
-                                                        $previewUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($path);
                                                         $set('logo_preview_path', $path);
                                                         $logoDownloaded = true;
                                                         
                                                         \Filament\Notifications\Notification::make()
-                                                            ->title('Đã tải logo thành công!')
-                                                            ->body("Logo từ: " . parse_url($logoUrl, PHP_URL_HOST) . ". Nhấn 'Upload' để thêm vào form.")
+                                                            ->title('Đã tải logo vào thư viện!')
                                                             ->success()
                                                             ->send();
                                                         break;
@@ -192,35 +190,6 @@ class BrandResource extends Resource
                                             ->send();
                                     }
                                 }),
-                            Forms\Components\Actions\Action::make('uploadLogo')
-                                ->icon('heroicon-o-arrow-up-tray')
-                                ->label('Upload')
-                                ->color('primary')
-                                ->visible(fn (Forms\Get $get) => !empty($get('logo_preview_path')))
-                                ->action(function (Forms\Get $get, Forms\Set $set) {
-                                    $previewPath = $get('logo_preview_path');
-                                    if (empty($previewPath)) {
-                                        \Filament\Notifications\Notification::make()
-                                            ->title('Không có logo để upload')
-                                            ->warning()
-                                            ->send();
-                                        return;
-                                    }
-                                    
-                                    // Move from preview to main image field
-                                    // Filament FileUpload with disk('public') expects path relative to storage/app/public
-                                    // Path format: 'brands/filename.png'
-                                    // Ensure path doesn't have leading slash
-                                    $imagePath = ltrim($previewPath, '/');
-                                    $set('image', $imagePath);
-                                    $set('logo_preview_path', null);
-                                    
-                                    \Filament\Notifications\Notification::make()
-                                        ->title('Đã upload logo thành công!')
-                                        ->body('Logo đã được thêm vào form. Nếu không thấy ảnh, vui lòng refresh trang.')
-                                        ->success()
-                                        ->send();
-                                }),
                         ])
                             ->columnSpanFull(),
                         Forms\Components\View::make('filament.admin.components.logo-preview')
@@ -229,21 +198,52 @@ class BrandResource extends Resource
                             ])
                             ->visible(fn (Forms\Get $get) => !empty($get('logo_preview_path')))
                             ->columnSpanFull(),
-                        Forms\Components\TextInput::make('events')
-                            ->label('Events')
-                            ->maxLength(255)
-                            ->placeholder('e.g., Uncategorized'),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\Group::make([
+                                    Forms\Components\FileUpload::make('image')
+                                        ->label('Logo / Hình ảnh')
+                                        ->image()
+                                        ->disk('public')
+                                        ->directory('brands')
+                                        ->maxSize(5120)
+                                        ->default(null)
+                                        ->helperText('Tải lên file, dùng "Lấy logo" từ domain, hoặc "Chọn từ ảnh đã có" bên dưới để thay/thêm ảnh.')
+                                        ->saveUploadedFileUsing(function (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string {
+                                            $path = $file->storeAs(
+                                                'brands',
+                                                $file->getClientOriginalName() ?: \Illuminate\Support\Str::ulid() . '.' . $file->getClientOriginalExtension(),
+                                                'public'
+                                            );
+                                            return $path;
+                                        }),
+                                    Forms\Components\View::make('filament.admin.components.brand-logo-picker')
+                                        ->viewData(function () {
+                                            $files = Storage::disk('public')->exists('brands')
+                                                ? Storage::disk('public')->files('brands')
+                                                : [];
+                                            $paths = collect($files)
+                                                ->filter(fn ($f) => preg_match('/\.(jpe?g|png|gif|webp)$/i', $f))
+                                                ->map(fn ($f) => [
+                                                    'path' => $f,
+                                                    'url' => Storage::disk('public')->url($f),
+                                                ])
+                                                ->sortByDesc(fn ($item) => Storage::disk('public')->lastModified($item['path']))
+                                                ->values()
+                                                ->all();
+                                            return ['images' => $paths];
+                                        }),
+                                ]),
+                                Forms\Components\TextInput::make('events')
+                                    ->label('Events')
+                                    ->maxLength(255)
+                                    ->placeholder('e.g., Uncategorized'),
+                            ])
+                            ->columnSpanFull(),
                     ])->columns(2),
                 
                 Forms\Components\Section::make('Media & Nội dung')
                     ->schema([
-                        Forms\Components\FileUpload::make('image')
-                            ->label('Hình ảnh')
-                            ->image()
-                            ->directory('brands')
-                            ->maxSize(5120)
-                            ->helperText('Tải lên hình ảnh brand hoặc sử dụng nút "Lấy logo" ở trên'),
-                            
                         Forms\Components\Toggle::make('approved')
                             ->label('Duyệt bài')
                             ->default(false),
