@@ -3,30 +3,66 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
+        // 1. Drop foreign key nếu tồn tại
+        $this->dropForeignIfExists('imports', 'user_id');
+
+        // 2. Change column -> nullable
         Schema::table('imports', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
             $table->unsignedBigInteger('user_id')->nullable()->change();
-            $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
+        });
+
+        // 3. Add lại foreign key
+        Schema::table('imports', function (Blueprint $table) {
+            $table->foreign('user_id')
+                  ->references('id')
+                  ->on('users')
+                  ->nullOnDelete();
+        });
+    }
+
+    public function down(): void
+    {
+        // 1. Drop foreign key nếu tồn tại
+        $this->dropForeignIfExists('imports', 'user_id');
+
+        // 2. Change column -> NOT NULL
+        Schema::table('imports', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id')->nullable(false)->change();
+        });
+
+        // 3. Add lại foreign key cascade
+        Schema::table('imports', function (Blueprint $table) {
+            $table->foreign('user_id')
+                  ->references('id')
+                  ->on('users')
+                  ->cascadeOnDelete();
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Drop foreign key nếu tồn tại (tránh lỗi 1091)
      */
-    public function down(): void
+    private function dropForeignIfExists(string $table, string $column): void
     {
-        Schema::table('imports', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->unsignedBigInteger('user_id')->nullable(false)->change();
-            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
-        });
+        $exists = DB::select("
+            SELECT CONSTRAINT_NAME
+            FROM information_schema.KEY_COLUMN_USAGE
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = ?
+              AND COLUMN_NAME = ?
+              AND REFERENCED_TABLE_NAME IS NOT NULL
+        ", [$table, $column]);
+
+        if (!empty($exists)) {
+            Schema::table($table, function (Blueprint $table) use ($column) {
+                $table->dropForeign([$column]);
+            });
+        }
     }
 };
