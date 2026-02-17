@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\BlockedIp;
 use App\Models\Campaign;
 use App\Models\PageView;
 use App\Models\Click;
@@ -11,13 +12,17 @@ use Illuminate\Support\Facades\Session;
 class AnalyticsService
 {
     /**
-     * Track a page view
+     * Track a page view (skipped if IP is blocked)
      */
-    public function trackPageView(Campaign $campaign, Request $request): PageView
+    public function trackPageView(Campaign $campaign, Request $request): ?PageView
     {
+        $ip = $request->ip();
+        if (BlockedIp::isBlocked($ip)) {
+            return null;
+        }
+
         $sessionId = Session::getId();
         $userAgent = $request->userAgent();
-        $ip = $request->ip();
         
         // Get device info
         $deviceType = PageView::getDeviceType($userAgent);
@@ -44,12 +49,16 @@ class AnalyticsService
     }
 
     /**
-     * Track a click
+     * Track a click (skipped if IP is blocked)
      */
-    public function trackClick(Campaign $campaign, Request $request): Click
+    public function trackClick(Campaign $campaign, Request $request): ?Click
     {
-        $userAgent = $request->userAgent();
         $ip = $request->ip();
+        if (BlockedIp::isBlocked($ip)) {
+            return null;
+        }
+
+        $userAgent = $request->userAgent();
         
         // Get device info
         $deviceType = PageView::getDeviceType($userAgent);

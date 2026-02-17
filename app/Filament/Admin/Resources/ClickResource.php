@@ -5,11 +5,14 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\ClickResource\Pages;
 use App\Filament\Admin\Resources\ClickResource\RelationManagers;
 use App\Filament\Exports\ClickExporter;
+use App\Models\BlockedIp;
 use App\Models\Click;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,15 +24,15 @@ class ClickResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-cursor-arrow-rays';
     
-    protected static ?string $navigationLabel = 'Clicks & Analytics';
+    protected static ?string $navigationLabel = 'Chi tiết Clicks';
     
     protected static ?string $modelLabel = 'Click';
     
     protected static ?string $pluralModelLabel = 'Clicks';
     
-    protected static ?string $navigationGroup = 'Quản lý';
+    protected static ?string $navigationGroup = 'Clicks';
     
-    protected static ?int $navigationSort = 10; // Đặt dưới cùng
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -119,6 +122,18 @@ class ClickResource extends Resource
                     ->sortable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('country')
+                    ->label('Quốc gia')
+                    ->options(function () {
+                        return Click::query()
+                            ->whereNotNull('country')
+                            ->where('country', '!=', '')
+                            ->distinct()
+                            ->pluck('country', 'country')
+                            ->sort()
+                            ->toArray();
+                    })
+                    ->searchable(),
                 Tables\Filters\SelectFilter::make('campaign_id')
                     ->label('Chiến dịch')
                     ->relationship('campaign', 'title')
@@ -188,10 +203,29 @@ class ClickResource extends Resource
                 ExportAction::make()
                     ->exporter(ClickExporter::class)
                     ->label('')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->tooltip('Xuất dữ liệu'),
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->tooltip('Xuất XLSX (yêu cầu đăng nhập & queue)')
+                    ->visible(fn () => auth()->check()),
             ])
             ->actions([
+                Action::make('blockIp')
+                    ->label('')
+                    ->icon('heroicon-o-shield-exclamation')
+                    ->color('danger')
+                    ->tooltip('Chặn IP')
+                    ->requiresConfirmation()
+                    ->modalHeading('Chặn IP này?')
+                    ->modalDescription(fn (Click $record): string => "IP {$record->ip} sẽ bị chặn. Các click/view từ IP này sẽ không được thống kê.")
+                    ->action(function (Click $record): void {
+                        BlockedIp::firstOrCreate(
+                            ['ip' => $record->ip],
+                            ['reason' => 'Chặn từ danh sách Clicks']
+                        );
+                        Notification::make()
+                            ->title("Đã chặn IP {$record->ip}")
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\ViewAction::make()
                     ->label('')
                     ->icon('heroicon-o-eye')
