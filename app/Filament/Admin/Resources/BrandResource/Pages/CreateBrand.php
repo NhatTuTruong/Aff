@@ -7,6 +7,7 @@ use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 
 class CreateBrand extends CreateRecord
 {
@@ -37,7 +38,8 @@ class CreateBrand extends CreateRecord
         return $data;
     }
 
-    /** Chọn ảnh từ popup "Chọn từ ảnh đã có" → cập nhật Logo / Hình ảnh cùng cơ chế như upload từ máy (state dạng [uuid => path]). */
+    /** Chọn ảnh từ popup Livewire "Chọn từ thư viện" → cập nhật Logo / Hình ảnh cùng cơ chế như upload từ máy. */
+    #[On('logo-selected')]
     public function selectLogoAndClose(string $path): void
     {
         $path = str_replace('\\', '/', ltrim($path, '/'));

@@ -6,6 +6,7 @@ use App\Filament\Admin\Resources\BrandResource;
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
+use Livewire\Attributes\On;
 
 class EditBrand extends EditRecord
 {
@@ -30,7 +31,8 @@ class EditBrand extends EditRecord
         ];
     }
 
-    /** Chọn ảnh từ popup "Chọn từ ảnh đã có" → cập nhật Logo / Hình ảnh cùng cơ chế như upload từ máy (state dạng [uuid => path]). */
+    /** Chọn ảnh từ popup Livewire "Chọn từ thư viện" → cập nhật Logo / Hình ảnh cùng cơ chế như upload từ máy. */
+    #[On('logo-selected')]
     public function selectLogoAndClose(string $path): void
     {
         $path = str_replace('\\', '/', ltrim($path, '/'));

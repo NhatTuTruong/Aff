@@ -7,6 +7,7 @@ use App\Models\Campaign;
 use App\Models\Category;
 use App\Models\Coupon;
 use Filament\Actions\Imports\Models\Import;
+use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Tables\Actions\Action;
@@ -82,6 +83,21 @@ class ImportStatus extends Page implements HasTable
                     ->placeholder('–'),
             ])
             ->defaultSort('created_at', 'desc')
+            ->filters([
+                \Filament\Tables\Filters\Filter::make('created_at')
+                    ->label('Ngày tạo')
+                    ->form([
+                        Forms\Components\DatePicker::make('created_from')
+                            ->label('Từ ngày'),
+                        Forms\Components\DatePicker::make('created_until')
+                            ->label('Đến ngày'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when($data['created_from'] ?? null, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
+                            ->when($data['created_until'] ?? null, fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
+                    }),
+            ])
             ->actions([
                 Action::make('viewFailed')
                     ->label('Xem lỗi')
@@ -96,13 +112,14 @@ class ImportStatus extends Page implements HasTable
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('gray')
                     ->visible(fn (Import $record): bool => $record->getFailedRowsCount() > 0)
-                    ->url(fn (Import $record): string => route('filament.imports.failed-rows.download', ['import' => $record]))
+                    ->url(fn (Import $record): string => route('admin.imports.failed-rows.download', ['import' => $record]))
                     ->openUrlInNewTab(),
                 Action::make('rollback')
-                    ->label('Khôi phục')
+                    ->label(fn (Import $record): string => $record->rollback_at ? 'Đã khôi phục' : 'Khôi phục')
                     ->icon('heroicon-o-arrow-uturn-left')
-                    ->color('danger')
+                    ->color(fn (Import $record): string => $record->rollback_at ? 'gray' : 'danger')
                     ->visible(fn (Import $record): bool => (bool) $record->completed_at)
+                    ->disabled(fn (Import $record): bool => (bool) $record->rollback_at)
                     ->requiresConfirmation()
                     ->modalHeading('Xác nhận khôi phục')
                     ->modalDescription(fn (Import $record): string => static::getRollbackDescription($record))
@@ -146,13 +163,15 @@ class ImportStatus extends Page implements HasTable
     {
         $importId = $import->getKey();
 
-        DB::transaction(function () use ($importId): void {
+        DB::transaction(function () use ($import, $importId): void {
             $campaignIds = Campaign::where('import_id', $importId)->pluck('id');
 
-            Coupon::whereIn('campaign_id', $campaignIds)->delete();
-            Campaign::where('import_id', $importId)->delete();
-            Brand::where('import_id', $importId)->delete();
-            Category::where('import_id', $importId)->delete();
+            Coupon::whereIn('campaign_id', $campaignIds)->forceDelete();
+            Campaign::where('import_id', $importId)->forceDelete();
+            Brand::where('import_id', $importId)->forceDelete();
+            Category::where('import_id', $importId)->forceDelete();
+
+            $import->update(['rollback_at' => now()]);
         });
 
         Notification::make()

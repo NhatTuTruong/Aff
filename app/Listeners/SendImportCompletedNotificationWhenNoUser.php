@@ -36,7 +36,7 @@ class SendImportCompletedNotificationWhenNoUser
                 NotificationAction::make('downloadFailedRowsCsv')
                     ->label("Tải file dòng lỗi ({$failedRowsCount} dòng)")
                     ->color('danger')
-                    ->url(route('filament.imports.failed-rows.download', ['import' => $import], absolute: false), shouldOpenInNewTab: true)
+                    ->url(route('admin.imports.failed-rows.download', ['import' => $import], absolute: false), shouldOpenInNewTab: true)
                     ->markAsRead(),
             ]);
         }

@@ -21,10 +21,22 @@ class FileManager extends Page
     protected static ?int $navigationSort = 5;
     
     public $currentDirectory = '';
+
     public $directories = [];
+
     public $files = [];
+
+    public $allFiles = [];
+
     public $selectedFiles = [];
+
     public $uploadedFiles = [];
+
+    public string $dateFilter = 'all';
+
+    public ?string $dateFrom = null;
+
+    public ?string $dateTo = null;
 
     public function mount(): void
     {
@@ -49,7 +61,7 @@ class FileManager extends Page
             ->toArray();
         
         // Get files
-        $this->files = collect($disk->files($path))
+        $this->allFiles = collect($disk->files($path))
             ->map(function ($file) use ($disk) {
                 return [
                     'name' => basename($file),
@@ -61,6 +73,60 @@ class FileManager extends Page
                 ];
             })
             ->toArray();
+
+        $this->applyDateFilter();
+    }
+
+    public function applyDateFilter(): void
+    {
+        $now = time();
+        $todayStart = strtotime('today 00:00:00');
+        $weekStart = strtotime('-7 days 00:00:00');
+        $monthStart = strtotime('-30 days 00:00:00');
+
+        $this->files = collect($this->allFiles)->filter(function ($file) use ($now, $todayStart, $weekStart, $monthStart) {
+            $ts = $file['last_modified'] ?? 0;
+            return match ($this->dateFilter) {
+                'today' => $ts >= $todayStart,
+                'week' => $ts >= $weekStart,
+                'month' => $ts >= $monthStart,
+                'range' => $this->filterByDateRange($ts),
+                default => true,
+            };
+        })->values()->toArray();
+    }
+
+    protected function filterByDateRange(int $timestamp): bool
+    {
+        if (! $this->dateFrom && ! $this->dateTo) {
+            return true;
+        }
+        $ts = $timestamp;
+        if ($this->dateFrom && $ts < strtotime($this->dateFrom . ' 00:00:00')) {
+            return false;
+        }
+        if ($this->dateTo && $ts > strtotime($this->dateTo . ' 23:59:59')) {
+            return false;
+        }
+        return true;
+    }
+
+    public function setDateFilter(string $filter): void
+    {
+        $this->dateFilter = $filter;
+        $this->applyDateFilter();
+    }
+
+    public function updatedDateFrom(): void
+    {
+        $this->dateFilter = 'range';
+        $this->applyDateFilter();
+    }
+
+    public function updatedDateTo(): void
+    {
+        $this->dateFilter = 'range';
+        $this->applyDateFilter();
     }
 
     public function navigateToDirectory(string $directory): void
@@ -108,6 +174,15 @@ class FileManager extends Page
 
     public function uploadFiles(): void
     {
+        if (empty($this->uploadedFiles)) {
+            \Filament\Notifications\Notification::make()
+                ->warning()
+                ->title('Chưa chọn tệp')
+                ->body('Vui lòng chọn ít nhất một tệp tin để tải lên.')
+                ->send();
+            return;
+        }
+
         $this->validate([
             'uploadedFiles.*' => 'file|max:10240', // Max 10MB per file
         ]);

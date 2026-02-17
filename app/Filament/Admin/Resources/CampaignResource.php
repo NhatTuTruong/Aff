@@ -63,7 +63,12 @@ class CampaignResource extends Resource
                             ->createOptionForm([
                                 Forms\Components\TextInput::make('name')
                                     ->label('Tên cửa hàng')
-                                    ->required(),
+                                    ->required()
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn ($state, Forms\Set $set) => $set(
+                                        'slug',
+                                        \Illuminate\Support\Str::slug($state)
+                                    )),
                                 Forms\Components\TextInput::make('slug')
                                     ->required(),
                             ])
@@ -71,15 +76,24 @@ class CampaignResource extends Resource
                         Forms\Components\TextInput::make('title')
                             ->label('Tiêu đề')
                             ->required()
-                            ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, Forms\Set $set) => $set('slug', \Illuminate\Support\Str::slug($state))),
+                            ->afterStateUpdated(fn ($state, Forms\Set $set) => $set(
+                                'slug',
+                                \Illuminate\Support\Str::slug($state)
+                            )),
                         Forms\Components\TextInput::make('slug')
                             ->label('Slug')
                             ->required()
-                            ->maxLength(255)
-                            ->unique(ignoreRecord: true)
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (\Illuminate\Validation\Rules\Unique $rule) => $rule->whereNull('deleted_at')
+                            )
                             ->helperText('Tự động tạo từ tiêu đề. URL: /review/{slug}'),
+                        Forms\Components\TextInput::make('affiliate_url')
+                            ->label('URL Affiliate')
+                            ->required()
+                            ->url()
+                            ->helperText('URL affiliate đầy đủ với tham số tracking'),
                         Forms\Components\RichEditor::make('intro')
                             ->label('Giới thiệu')
                             ->toolbarButtons([
@@ -151,15 +165,6 @@ class CampaignResource extends Resource
                     ->collapsible()
                     ->collapsed(),
                 
-                Forms\Components\Section::make('Affiliate')
-                    ->schema([
-                        Forms\Components\TextInput::make('affiliate_url')
-                            ->label('URL Affiliate')
-                            ->required()
-                            ->url()
-                            ->columnSpanFull()
-                            ->helperText('URL affiliate đầy đủ với tham số tracking'),
-                    ]),
                 
                 Forms\Components\Section::make('Mã giảm giá')
                     ->schema([
@@ -274,16 +279,34 @@ class CampaignResource extends Resource
                     ->icon('heroicon-o-arrow-up-tray'),
             ])
             ->columns([
-                Tables\Columns\ImageColumn::make('logo')
+                Tables\Columns\ImageColumn::make('brand.image')
                     ->label('Logo')
-                    ->circular(),
+                    ->disk('public')
+                    ->circular()
+                    ->defaultImageUrl(url('/images/placeholder.png')),
+                Tables\Columns\TextColumn::make('title')
+                    ->label('Tên chiến dịch')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(15)
+                    ->wrap(),
+                Tables\Columns\TextColumn::make('landing_url')
+                    ->label('URL')
+                    ->state(fn ($record) => url(route('landing.show', ['slug' => $record->slug])))
+                    ->copyable()
+                    ->copyMessage('Đã copy URL')
+                    ->copyMessageDuration(1500)
+                    ->limit(45)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('brand.name')
                     ->label('Cửa hàng')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(15),
                 Tables\Columns\TextColumn::make('slug')
                     ->label('Slug')
-                    ->searchable(),
+                    ->searchable()
+                    ->limit(15),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Trạng thái')
                     ->badge()
@@ -305,8 +328,7 @@ class CampaignResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Ngày tạo')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Ngày cập nhật')
                     ->dateTime()
@@ -317,6 +339,32 @@ class CampaignResource extends Resource
                 Tables\Filters\SelectFilter::make('brand')
                     ->label('Lọc theo cửa hàng')
                     ->relationship('brand', 'name'),
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Trạng thái')
+                    ->options([
+                        'active' => 'Hoạt động',
+                        'paused' => 'Tạm dừng',
+                        'draft' => 'Bản nháp',
+                    ]),
+                Tables\Filters\Filter::make('created_at')
+                    ->label('Ngày tạo')
+                    ->form([
+                        Forms\Components\DatePicker::make('created_from')
+                            ->label('Từ ngày'),
+                        Forms\Components\DatePicker::make('created_until')
+                            ->label('Đến ngày'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'] ?? null,
+                                fn (Builder $q, $date) => $q->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'] ?? null,
+                                fn (Builder $q, $date) => $q->whereDate('created_at', '<=', $date),
+                            );
+                    }),
                 Tables\Filters\Filter::make('has_offers')
                     ->label('Có Offer / Mã giảm giá')
                     ->query(function (Builder $query) {
@@ -324,12 +372,32 @@ class CampaignResource extends Resource
                             ->whereNotNull('coupon_code')
                             ->orWhereHas('couponItems');
                     }),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->label('')
                     ->icon('heroicon-o-pencil-square')
                     ->tooltip('Sửa'),
+                Tables\Actions\ReplicateAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->tooltip('Nhân bản')
+                    ->mutateRecordDataUsing(function (array $data, Campaign $record): array {
+                        $baseTitle = $record->title;
+                        $baseSlug = $record->slug;
+                        $title = $baseTitle . '-copy';
+                        $slug = $baseSlug . '-copy';
+                        $n = 0;
+                        while (Campaign::where('title', $title)->exists() || Campaign::where('slug', $slug)->exists()) {
+                            $n++;
+                            $title = $baseTitle . '-copy' . $n;
+                            $slug = $baseSlug . '-copy' . $n;
+                        }
+                        $data['title'] = $title;
+                        $data['slug'] = $slug;
+                        return $data;
+                    }),
                 Tables\Actions\Action::make('view_landing')
                     ->label('')
                     ->url(fn ($record) => route('landing.show', $record->slug))
@@ -341,13 +409,30 @@ class CampaignResource extends Resource
                     ->label('')
                     ->icon('heroicon-o-trash')
                     ->tooltip('Xóa chiến dịch'),
+                Tables\Actions\RestoreAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->tooltip('Khôi phục'),
+                Tables\Actions\ForceDeleteAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->tooltip('Xóa vĩnh viễn'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScope(SoftDeletingScope::class);
     }
 
     public static function getRelations(): array

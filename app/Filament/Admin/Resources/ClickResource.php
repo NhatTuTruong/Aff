@@ -71,8 +71,9 @@ class ClickResource extends Resource
                     ->label('Chiến dịch')
                     ->searchable()
                     ->sortable()
-                    ->limit(30),
+                    ->limit(15),
                 Tables\Columns\TextColumn::make('campaign.brand.name')
+                    ->limit(15)
                     ->label('Cửa hàng')
                     ->searchable()
                     ->sortable(),
@@ -180,6 +181,7 @@ class ClickResource extends Resource
                             fn (Builder $query, $subId): Builder => $query->where('sub_id', 'like', "%{$subId}%"),
                         );
                     }),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->defaultSort('created_at', 'desc')
             ->headerActions([
@@ -198,10 +200,25 @@ class ClickResource extends Resource
                     ->label('')
                     ->icon('heroicon-o-pencil-square')
                     ->tooltip('Sửa'),
+                Tables\Actions\DeleteAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-trash')
+                    ->tooltip('Xóa'),
+                Tables\Actions\RestoreAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->tooltip('Khôi phục'),
+                Tables\Actions\ForceDeleteAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->tooltip('Xóa vĩnh viễn'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\ExportBulkAction::make()
                         ->exporter(ClickExporter::class),
                 ]),
@@ -220,5 +237,11 @@ class ClickResource extends Resource
         return [
             'index' => Pages\ListClicks::route('/'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScope(SoftDeletingScope::class);
     }
 }

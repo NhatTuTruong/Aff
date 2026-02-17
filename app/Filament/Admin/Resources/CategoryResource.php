@@ -38,14 +38,18 @@ class CategoryResource extends Resource
                         Forms\Components\TextInput::make('name')
                             ->label('Tên danh mục')
                             ->required()
-                            ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, Forms\Set $set) => $set('slug', \Illuminate\Support\Str::slug($state))),
+                            ->afterStateUpdated(fn ($state, Forms\Set $set) => $set(
+                                'slug',
+                                \Illuminate\Support\Str::slug($state)
+                            )),
                         Forms\Components\TextInput::make('slug')
                             ->label('Slug')
                             ->required()
-                            ->maxLength(255)
-                            ->unique(ignoreRecord: true)
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (\Illuminate\Validation\Rules\Unique $rule) => $rule->whereNull('deleted_at')
+                            )
                             ->helperText('Tự động tạo từ tên danh mục'),
                         Forms\Components\Textarea::make('description')
                             ->label('Mô tả')
@@ -66,9 +70,11 @@ class CategoryResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Tên danh mục')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(15),
                 Tables\Columns\TextColumn::make('slug')
-                    ->searchable(),
+                    ->searchable()
+                    ->limit(15),
                 Tables\Columns\TextColumn::make('description')
                     ->label('Mô tả')
                     ->limit(50)
@@ -117,6 +123,7 @@ class CategoryResource extends Resource
                                 fn (\Illuminate\Database\Eloquent\Builder $q, $date) => $q->whereDate('created_at', '<=', $date),
                             );
                     }),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
@@ -124,14 +131,44 @@ class CategoryResource extends Resource
                     ->label('')
                     ->icon('heroicon-o-pencil-square')
                     ->tooltip('Sửa'),
+                Tables\Actions\ReplicateAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->tooltip('Nhân bản')
+                    ->mutateRecordDataUsing(function (array $data, Category $record): array {
+                        $baseName = $record->name;
+                        $baseSlug = $record->slug;
+                        $name = $baseName . '-copy';
+                        $slug = $baseSlug . '-copy';
+                        $n = 0;
+                        while (Category::where('name', $name)->exists() || Category::where('slug', $slug)->exists()) {
+                            $n++;
+                            $name = $baseName . '-copy' . $n;
+                            $slug = $baseSlug . '-copy' . $n;
+                        }
+                        $data['name'] = $name;
+                        $data['slug'] = $slug;
+                        return $data;
+                    }),
                 Tables\Actions\DeleteAction::make()
                     ->label('')
                     ->icon('heroicon-o-trash')
                     ->tooltip('Xóa'),
+                Tables\Actions\RestoreAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->tooltip('Khôi phục'),
+                Tables\Actions\ForceDeleteAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->tooltip('Xóa vĩnh viễn'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -150,5 +187,11 @@ class CategoryResource extends Resource
             'create' => Pages\CreateCategory::route('/create'),
             'edit' => Pages\EditCategory::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScope(SoftDeletingScope::class);
     }
 }

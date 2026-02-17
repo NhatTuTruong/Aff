@@ -67,17 +67,32 @@ class AssetResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->label('')
                     ->icon('heroicon-o-pencil-square')
                     ->tooltip('Sửa'),
+                Tables\Actions\DeleteAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-trash')
+                    ->tooltip('Xóa'),
+                Tables\Actions\RestoreAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->tooltip('Khôi phục'),
+                Tables\Actions\ForceDeleteAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->tooltip('Xóa vĩnh viễn'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -96,5 +111,11 @@ class AssetResource extends Resource
             'create' => Pages\CreateAsset::route('/create'),
             'edit' => Pages\EditAsset::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScope(SoftDeletingScope::class);
     }
 }

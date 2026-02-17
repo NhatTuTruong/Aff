@@ -8,6 +8,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms;
 
 class CouponResource extends Resource
@@ -58,11 +59,13 @@ class CouponResource extends Resource
                 Tables\Columns\TextColumn::make('campaign.title')
                     ->label('Chiến dịch')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(15),
                 Tables\Columns\TextColumn::make('campaign.brand.name')
                     ->label('Cửa hàng')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(15),
                 Tables\Columns\TextColumn::make('code')
                     ->label('Mã giảm giá')
                     ->searchable(),
@@ -104,6 +107,7 @@ class CouponResource extends Resource
                                 fn (Builder $q, $date) => $q->whereDate('created_at', '<=', $date),
                             );
                     }),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
@@ -114,8 +118,23 @@ class CouponResource extends Resource
                     ->label('')
                     ->icon('heroicon-o-trash')
                     ->tooltip('Xóa'),
+                Tables\Actions\RestoreAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->tooltip('Khôi phục'),
+                Tables\Actions\ForceDeleteAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->tooltip('Xóa vĩnh viễn'),
             ])
-            ->bulkActions([]);
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
+                ]),
+            ]);
     }
 
     public static function getPages(): array
@@ -123,6 +142,12 @@ class CouponResource extends Resource
         return [
             'index' => Pages\ListCoupons::route('/'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScope(SoftDeletingScope::class);
     }
 }
 

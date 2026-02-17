@@ -52,3 +52,8 @@ Route::post('/admin/campaigns/upload-image', [App\Http\Controllers\ImageUploadCo
     ->middleware('web')
     ->name('campaigns.upload-image');
 
+// Tải CSV lỗi import (custom route - xử lý import có user_id null)
+Route::get('/admin/imports/{import}/failed-rows/download', [App\Http\Controllers\DownloadImportFailedRowsCsvController::class, '__invoke'])
+    ->middleware('web')
+    ->name('admin.imports.failed-rows.download');
+

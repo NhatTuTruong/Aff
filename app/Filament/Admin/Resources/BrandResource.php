@@ -44,7 +44,12 @@ class BrandResource extends Resource
                             ->createOptionForm([
                                 Forms\Components\TextInput::make('name')
                                     ->label('Tên danh mục')
-                                    ->required(),
+                                    ->required()
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn ($state, Forms\Set $set) => $set(
+                                        'slug',
+                                        \Illuminate\Support\Str::slug($state)
+                                    )),
                                 Forms\Components\TextInput::make('slug')
                                     ->required(),
                             ])
@@ -52,14 +57,18 @@ class BrandResource extends Resource
                         Forms\Components\TextInput::make('name')
                             ->label('Tên cửa hàng')
                             ->required()
-                            ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, Forms\Set $set) => $set('slug', \Illuminate\Support\Str::slug($state))),
+                            ->afterStateUpdated(fn ($state, Forms\Set $set) => $set(
+                                'slug',
+                                \Illuminate\Support\Str::slug($state)
+                            )),
                         Forms\Components\TextInput::make('slug')
                             ->label('Slug')
                             ->required()
-                            ->maxLength(255)
-                            ->unique(ignoreRecord: true)
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (\Illuminate\Validation\Rules\Unique $rule) => $rule->whereNull('deleted_at')
+                            )
                             ->helperText('Tự động tạo từ tên'),
                         Forms\Components\TextInput::make('domain')
                             ->label('Domain')
@@ -206,9 +215,9 @@ class BrandResource extends Resource
                                         ->image()
                                         ->disk('public')
                                         ->directory('brands')
-                                        ->maxSize(5120)
+                                        ->maxSize(2048)
                                         ->default(null)
-                                        ->helperText('Tải lên file, dùng "Lấy logo" từ domain, hoặc "Chọn từ ảnh đã có" bên dưới để thay/thêm ảnh.')
+                                        ->helperText('Tải lên file (tối đa 2MB), dùng "Lấy logo" từ domain, hoặc "Chọn từ ảnh đã có" bên dưới để thay/thêm ảnh.')
                                         ->saveUploadedFileUsing(function (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string {
                                             $path = $file->storeAs(
                                                 'brands',
@@ -217,22 +226,7 @@ class BrandResource extends Resource
                                             );
                                             return $path;
                                         }),
-                                    Forms\Components\View::make('filament.admin.components.brand-logo-picker')
-                                        ->viewData(function () {
-                                            $files = Storage::disk('public')->exists('brands')
-                                                ? Storage::disk('public')->files('brands')
-                                                : [];
-                                            $paths = collect($files)
-                                                ->filter(fn ($f) => preg_match('/\.(jpe?g|png|gif|webp)$/i', $f))
-                                                ->map(fn ($f) => [
-                                                    'path' => $f,
-                                                    'url' => Storage::disk('public')->url($f),
-                                                ])
-                                                ->sortByDesc(fn ($item) => Storage::disk('public')->lastModified($item['path']))
-                                                ->values()
-                                                ->all();
-                                            return ['images' => $paths];
-                                        }),
+                                    Forms\Components\View::make('filament.admin.components.brand-logo-picker-livewire'),
                                 ]),
                                 Forms\Components\TextInput::make('events')
                                     ->label('Events')
@@ -275,17 +269,22 @@ class BrandResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
                     ->circular()
-                    ->defaultImageUrl(url('/images/placeholder.png')),
+                    ->size(30)
+                    ->defaultImageUrl(url('/images/placeholder.png'))
+                    ->extraImgAttributes(['loading' => 'lazy']),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Tên cửa hàng')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(15),
                 Tables\Columns\TextColumn::make('slug')
-                    ->searchable(),
+                    ->searchable()
+                    ->limit(15),
                 Tables\Columns\TextColumn::make('category.name')
                     ->label('Danh mục')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(15),
                 Tables\Columns\TextColumn::make('events')
                     ->searchable(),
                 Tables\Columns\IconColumn::make('approved')
@@ -333,23 +332,60 @@ class BrandResource extends Resource
                                 fn (\Illuminate\Database\Eloquent\Builder $q, $date) => $q->whereDate('created_at', '<=', $date),
                             );
                     }),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->label('')
                     ->icon('heroicon-o-pencil-square')
                     ->tooltip('Sửa'),
+                Tables\Actions\ReplicateAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->tooltip('Nhân bản')
+                    ->mutateRecordDataUsing(function (array $data, Brand $record): array {
+                        $baseName = $record->name;
+                        $baseSlug = $record->slug;
+                        $name = $baseName . '-copy';
+                        $slug = $baseSlug . '-copy';
+                        $n = 0;
+                        while (Brand::where('name', $name)->exists() || Brand::where('slug', $slug)->exists()) {
+                            $n++;
+                            $name = $baseName . '-copy' . $n;
+                            $slug = $baseSlug . '-copy' . $n;
+                        }
+                        $data['name'] = $name;
+                        $data['slug'] = $slug;
+                        return $data;
+                    }),
                 Tables\Actions\DeleteAction::make()
                     ->label('')
                     ->icon('heroicon-o-trash')
                     ->tooltip('Xóa'),
+                Tables\Actions\RestoreAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->tooltip('Khôi phục'),
+                Tables\Actions\ForceDeleteAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->tooltip('Xóa vĩnh viễn'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScope(SoftDeletingScope::class);
     }
 
     public static function getRelations(): array
