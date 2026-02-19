@@ -21,7 +21,13 @@ class EditCampaign extends EditRecord
                 ->label('')
                 ->icon('heroicon-o-eye')
                 ->tooltip('Xem trang landing page')
-                ->url(fn () => route('landing.show', $this->record->slug))
+                ->url(function () {
+                    $parts = explode('/', $this->record->slug, 2);
+                    if (count($parts) === 2) {
+                        return route('landing.show', ['userCode' => $parts[0], 'slug' => $parts[1]]);
+                    }
+                    return route('landing.show', ['userCode' => '00000', 'slug' => $this->record->slug]);
+                })
                 ->openUrlInNewTab(),
             Actions\DeleteAction::make(),
         ];

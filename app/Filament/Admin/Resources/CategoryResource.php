@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\CategoryResource\Pages;
 use App\Filament\Admin\Resources\CategoryResource\RelationManagers;
 use App\Models\Category;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -39,10 +40,12 @@ class CategoryResource extends Resource
                             ->label('Tên danh mục')
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, Forms\Set $set) => $set(
-                                'slug',
-                                \Illuminate\Support\Str::slug($state)
-                            )),
+                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                $user = \Filament\Facades\Filament::auth()->user();
+                                $userCode = $user?->code ?? '00000';
+                                $baseSlug = \Illuminate\Support\Str::slug($state);
+                                $set('slug', "{$userCode}/{$baseSlug}");
+                            }),
                         Forms\Components\TextInput::make('slug')
                             ->label('Slug')
                             ->required()
@@ -138,13 +141,21 @@ class CategoryResource extends Resource
                     ->mutateRecordDataUsing(function (array $data, Category $record): array {
                         $baseName = $record->name;
                         $baseSlug = $record->slug;
+                        
+                        // Tách user_code và slug
+                        $parts = explode('/', $baseSlug, 2);
+                        $userCode = count($parts) === 2 ? $parts[0] : (\Filament\Facades\Filament::auth()->user()?->code ?? '00000');
+                        $slugPart = count($parts) === 2 ? $parts[1] : $baseSlug;
+                        
                         $name = $baseName . '-copy';
-                        $slug = $baseSlug . '-copy';
+                        $newSlugPart = $slugPart . '-copy';
+                        $slug = "{$userCode}/{$newSlugPart}";
                         $n = 0;
-                        while (Category::where('name', $name)->exists() || Category::where('slug', $slug)->exists()) {
+                        while (Category::where('name', $name)->where('user_id', $record->user_id)->exists() || Category::where('slug', $slug)->exists()) {
                             $n++;
                             $name = $baseName . '-copy' . $n;
-                            $slug = $baseSlug . '-copy' . $n;
+                            $newSlugPart = $slugPart . '-copy' . $n;
+                            $slug = "{$userCode}/{$newSlugPart}";
                         }
                         $data['name'] = $name;
                         $data['slug'] = $slug;
@@ -191,7 +202,13 @@ class CategoryResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
+        $userId = Filament::auth()->id();
+
         return parent::getEloquentQuery()
-            ->withoutGlobalScope(SoftDeletingScope::class);
+            ->withoutGlobalScope(SoftDeletingScope::class)
+            ->when(
+                $userId,
+                fn (Builder $query) => $query->where('user_id', $userId),
+            );
     }
 }

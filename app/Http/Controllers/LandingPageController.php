@@ -16,11 +16,17 @@ class LandingPageController extends Controller
         $this->analyticsService = $analyticsService;
     }
 
-    public function show($slug, Request $request)
+    public function show($userCode, $slug, Request $request)
     {
-        // Allow viewing draft campaigns for testing (in development)
-        // In production, you may want to restrict to 'active' only
-        $campaign = Campaign::where('slug', $slug)
+        // Tìm user theo code
+        $user = \App\Models\User::where('code', $userCode)->firstOrFail();
+        
+        // Tìm campaign theo slug đầy đủ (user_code/slug)
+        $fullSlug = "{$userCode}/{$slug}";
+        $campaign = Campaign::where('slug', $fullSlug)
+            ->whereHas('brand', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
             ->with(['assets', 'brand', 'couponItems'])
             ->firstOrFail();
 

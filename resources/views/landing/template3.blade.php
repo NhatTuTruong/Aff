@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @php
+        // Parse slug để lấy userCode và slugPart
+        $slugParts = explode('/', $campaign->slug, 2);
+        $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
+        $slugPart = count($slugParts) === 2 ? $slugParts[1] : $campaign->slug;
+    @endphp
     <title>{{ $campaign->title }} - Exclusive Deals & Coupons</title>
     <meta name="description" content="{{ $campaign->subtitle ?? $campaign->intro }}">
     <meta name="robots" content="index, follow">
@@ -369,7 +375,7 @@ a{text-decoration:none;color:inherit}
         </div>
 
         <button class="btn-get-coupon"
-            onclick="window.location.href='{{ route('click.redirect',$campaign->slug) }}'">
+            onclick="window.location.href='{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}'">
             Get Coupon Alert
         </button>
     </div>
@@ -549,7 +555,7 @@ a{text-decoration:none;color:inherit}
             <button class="coupon-btn copy" id="copyCouponBtn" onclick="copyCoupon(this)">
                 Copy Code
             </button>
-            <a href="{{ route('click.redirect',$campaign->slug) }}"
+            <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}"
             target="_blank"
             class="btn-get-coupon go-to-store-btn">
                 Go to Store

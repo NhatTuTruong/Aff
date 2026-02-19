@@ -3,23 +3,21 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class AdminUserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * Lưu ý: User model có cast 'password' => 'hashed', nên truyền plain password.
      */
     public function run(): void
     {
-        // Tạo user admin nếu chưa tồn tại
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'admin@campaff.com'],
             [
                 'name' => 'Administrator',
-                'password' => Hash::make('password'),
+                'password' => 'password', // Sẽ tự hash qua cast (tránh double hash)
                 'email_verified_at' => now(),
             ]
         );

@@ -15,8 +15,6 @@ class User extends Authenticatable implements FilamentUser
     
     public function canAccessPanel(Panel $panel): bool
     {
-        // Allow all users in local environment
-        // In production, you can add more restrictions here
         return true;
     }
 
@@ -29,6 +27,8 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'is_admin',
+        'code',
     ];
 
     /**
@@ -49,6 +49,32 @@ class User extends Authenticatable implements FilamentUser
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_admin' => 'boolean',
     ];
+
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (empty($user->code)) {
+                // Kiểm tra xem column code có tồn tại không (tránh lỗi khi migration chưa chạy)
+                try {
+                    do {
+                        $code = str_pad((string) random_int(10000, 99999), 5, '0', STR_PAD_LEFT);
+                    } while (\Illuminate\Support\Facades\DB::table('users')->where('code', $code)->exists());
+                    
+                    $user->code = $code;
+                } catch (\Exception $e) {
+                    // Nếu column chưa tồn tại, bỏ qua (migration sẽ xử lý)
+                }
+            }
+        });
+    }
 }
 

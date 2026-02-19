@@ -7,6 +7,7 @@ use App\Models\Campaign;
 use App\Models\Category;
 use App\Models\Coupon;
 use Filament\Actions\Imports\Models\Import;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -15,6 +16,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class ImportStatus extends Page implements HasTable
@@ -35,9 +37,42 @@ class ImportStatus extends Page implements HasTable
 
     public function table(Table $table): Table
     {
+        $userId = Filament::auth()->id();
+        
         return $table
             ->defaultPaginationPageOption(25)
-            ->query(Import::query()->where('importer', \App\Filament\Imports\CampaignImporter::class)->orderByDesc('created_at'))
+            ->query(Import::query()
+                ->where('importer', \App\Filament\Imports\CampaignImporter::class)
+                ->when($userId, function (Builder $query) use ($userId) {
+                    // Lọc import theo user_id thông qua import_id trong campaign/brand/category
+                    $query->where(function ($q) use ($userId) {
+                        // Import có user_id trùng với user hiện tại
+                        $q->where('user_id', $userId)
+                          // Hoặc import tạo ra campaign của user hiện tại (qua brand.user_id)
+                          ->orWhereIn('id', function ($subQuery) use ($userId) {
+                              $subQuery->select('campaigns.import_id')
+                                  ->from('campaigns')
+                                  ->join('brands', 'campaigns.brand_id', '=', 'brands.id')
+                                  ->whereNotNull('campaigns.import_id')
+                                  ->where('brands.user_id', $userId);
+                          })
+                          // Hoặc import tạo ra brand của user hiện tại
+                          ->orWhereIn('id', function ($subQuery) use ($userId) {
+                              $subQuery->select('import_id')
+                                  ->from('brands')
+                                  ->whereNotNull('import_id')
+                                  ->where('user_id', $userId);
+                          })
+                          // Hoặc import tạo ra category của user hiện tại
+                          ->orWhereIn('id', function ($subQuery) use ($userId) {
+                              $subQuery->select('import_id')
+                                  ->from('categories')
+                                  ->whereNotNull('import_id')
+                                  ->where('user_id', $userId);
+                          });
+                    });
+                })
+                ->orderByDesc('created_at'))
             ->columns([
                 TextColumn::make('file_name')
                     ->label('File')

@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
@@ -25,9 +26,9 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            // ->login() // Tạm tắt login
+            ->login()
             ->authGuard('web')
-            // ->authMiddleware([Authenticate::class]) // Tạm tắt để vào /admin không cần đăng nhập
+            ->authMiddleware([Authenticate::class])
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -43,7 +44,6 @@ class AdminPanelProvider extends PanelProvider
                 // Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
-                EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
                 ShareErrorsFromSession::class,

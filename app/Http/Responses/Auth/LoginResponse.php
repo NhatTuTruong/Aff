@@ -5,17 +5,48 @@ namespace App\Http\Responses\Auth;
 use Filament\Facades\Filament;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse as Responsable;
 use Illuminate\Http\RedirectResponse;
-use Livewire\Features\SupportRedirects\Redirector;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class LoginResponse implements Responsable
 {
-    public function toResponse($request): RedirectResponse | Redirector
+    public function toResponse($request)
     {
-        // Redirect to dashboard after successful login
-        $url = Filament::getUrl();
+        // Get the panel instance first
+        $panel = Filament::getCurrentPanel();
+        $url = $panel ? $panel->getUrl() : '/admin';
         
-        // Use to() instead of intended() for better Livewire compatibility
-        return redirect()->to($url);
+        // Log authentication status before redirect
+        try {
+            Log::info('LoginResponse: User authenticated', [
+                'user_id' => Auth::id(),
+                'user_email' => Auth::user()?->email,
+                'session_id' => $request->session()->getId(),
+            ]);
+        } catch (\Exception $e) {
+            // Ignore logging errors
+        }
+        
+        // IMPORTANT: Do NOT regenerate session here
+        // Filament/Laravel handles session regeneration automatically after login
+        // Regenerating here can cause the new session cookie to not be set properly
+        
+        // Just ensure session is saved
+        $request->session()->save();
+        
+        try {
+            Log::info('LoginResponse: Before redirect', [
+                'session_id' => $request->session()->getId(),
+                'auth_check' => Auth::check(),
+            ]);
+            Log::info('LoginResponse: Redirecting to', ['url' => $url]);
+        } catch (\Exception $e) {
+            // Ignore logging errors
+        }
+        
+        // Create redirect response
+        // The session middleware will handle attaching the session cookie
+        return redirect($url);
     }
 }
 

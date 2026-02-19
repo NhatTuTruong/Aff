@@ -124,10 +124,27 @@ class CampaignImporter extends Importer
     protected function beforeSave(): void
     {
         $this->record->import_id = $this->import->getKey();
-        $slug = $this->record->slug ?: Str::slug($this->record->title);
-        if (Campaign::where('slug', $slug)->where('id', '!=', $this->record->id ?? 0)->exists()) {
-            throw new RowImportFailedException("Slug chiến dịch đã tồn tại: {$slug}");
+        
+        // Lấy user_code từ brand
+        $user = $this->record->brand?->user ?? \App\Models\User::find($this->record->brand?->user_id);
+        $userCode = $user?->code ?? '00000';
+        
+        $baseSlug = $this->record->slug ?: Str::slug($this->record->title);
+        $fullSlug = "{$userCode}/{$baseSlug}";
+        
+        // Kiểm tra slug đã tồn tại trong cùng user
+        if (Campaign::where('slug', $fullSlug)
+            ->where('id', '!=', $this->record->id ?? 0)
+            ->whereHas('brand', function ($q) use ($user) {
+                if ($user) {
+                    $q->where('user_id', $user->id);
+                }
+            })
+            ->exists()) {
+            throw new RowImportFailedException("Slug chiến dịch đã tồn tại: {$fullSlug}");
         }
+        
+        $this->record->slug = $fullSlug;
     }
 
     protected function afterSave(): void
@@ -189,14 +206,27 @@ class CampaignImporter extends Importer
             ]);
         }
 
-        $slug = Str::slug($name);
-        $category = Category::where('slug', $slug)->orWhere('name', $name)->first();
+        $userId = \Illuminate\Support\Facades\Auth::id();
+        $user = \App\Models\User::find($userId);
+        $userCode = $user?->code ?? '00000';
+        
+        $baseSlug = Str::slug($name);
+        $fullSlug = "{$userCode}/{$baseSlug}";
+        
+        // Tìm category theo slug đầy đủ hoặc name trong cùng user
+        $category = Category::where(function ($q) use ($fullSlug, $name, $userId) {
+            $q->where('slug', $fullSlug)
+              ->orWhere(function ($q2) use ($name, $userId) {
+                  $q2->where('name', $name)->where('user_id', $userId);
+              });
+        })->first();
 
         return $category ?? Category::create([
             'name' => $name,
-            'slug' => $slug,
+            'slug' => $fullSlug,
             'is_active' => true,
             'import_id' => $importId,
+            'user_id' => $userId,
         ]);
     }
 
@@ -215,8 +245,20 @@ class CampaignImporter extends Importer
             throw new RowImportFailedException("Không tìm thấy cửa hàng với ID: {$name}");
         }
 
-        $slug = Str::slug($name);
-        $brand = Brand::where('slug', $slug)->orWhere('name', $name)->first();
+        $userId = \Illuminate\Support\Facades\Auth::id();
+        $user = \App\Models\User::find($userId);
+        $userCode = $user?->code ?? '00000';
+        
+        $baseSlug = Str::slug($name);
+        $fullSlug = "{$userCode}/{$baseSlug}";
+        
+        // Tìm brand theo slug đầy đủ hoặc name trong cùng user
+        $brand = Brand::where(function ($q) use ($fullSlug, $name, $userId) {
+            $q->where('slug', $fullSlug)
+              ->orWhere(function ($q2) use ($name, $userId) {
+                  $q2->where('name', $name)->where('user_id', $userId);
+              });
+        })->first();
 
         if ($brand) {
             if (! $brand->image && ! empty($domain)) {
@@ -241,7 +283,13 @@ class CampaignImporter extends Importer
             }
         }
 
-        if (Brand::where('slug', $slug)->orWhere('name', $name)->exists()) {
+        // Kiểm tra trùng trong cùng user
+        if (Brand::where(function ($q) use ($fullSlug, $name, $userId) {
+            $q->where('slug', $fullSlug)
+              ->orWhere(function ($q2) use ($name, $userId) {
+                  $q2->where('name', $name)->where('user_id', $userId);
+              });
+        })->exists()) {
             throw new RowImportFailedException("Tên cửa hàng đã tồn tại: {$name}");
         }
 
@@ -249,11 +297,12 @@ class CampaignImporter extends Importer
 
         return Brand::create([
             'name' => $name,
-            'slug' => $slug,
+            'slug' => $fullSlug,
             'category_id' => $category->id,
             'image' => $imagePath,
             'approved' => true,
             'import_id' => $importId,
+            'user_id' => $userId,
         ]);
     }
 

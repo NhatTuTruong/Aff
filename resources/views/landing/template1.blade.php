@@ -18,6 +18,11 @@
         if ($maxPercent <= 0) {
             $maxPercent = 75;
         }
+        
+        // Parse slug để lấy userCode và slugPart
+        $slugParts = explode('/', $campaign->slug, 2);
+        $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
+        $slugPart = count($slugParts) === 2 ? $slugParts[1] : $campaign->slug;
     @endphp
     <title>{{ $campaign->title }} - Exclusive Deals & Coupons</title>
     <meta name="description" content="{{ $campaign->subtitle ?? $campaign->intro }}">
@@ -1435,7 +1440,7 @@
                 Reviews &amp; Info
             </button>
             <button class="btn-solid" type="button"
-                onclick="window.location.href='{{ route('click.redirect',$campaign->slug) }}'">
+                onclick="window.location.href='{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}'">
                 Shop Now
             </button>
         </div>
@@ -1584,7 +1589,7 @@
                             data-type="{{ $hasCode ? 'code' : 'deal' }}"
                             data-code="{{ $coupon->code }}"
                             data-coupon-id="{{ $coupon->id }}"
-                            data-url="{{ route('click.redirect',$campaign->slug) }}"
+                            data-url="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}"
                             onclick="return handleCouponClick(this)">
                             GET CODE
                         </button>

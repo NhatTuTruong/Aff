@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\UserResource\Pages;
 use App\Filament\Admin\Resources\UserResource\RelationManagers;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -16,6 +17,18 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
+
+    public static function canViewAny(): bool
+    {
+        $user = Filament::auth()->user();
+
+        return $user instanceof User && $user->isAdmin();
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canViewAny();
+    }
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
     
@@ -38,11 +51,25 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
+                Forms\Components\Toggle::make('is_admin')
+                    ->label('Quản trị viên')
+                    ->helperText('Chỉ admin mới có quyền quản lý tài khoản user'),
                 Forms\Components\DateTimePicker::make('email_verified_at'),
                 Forms\Components\TextInput::make('password')
+                    ->label('Mật khẩu mới')
                     ->password()
-                    ->required()
+                    ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null)
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->required(fn (string $operation): bool => $operation === 'create')
+                    ->helperText(fn ($record) => $record ? 'Để trống nếu không muốn thay đổi mật khẩu' : 'Nhập mật khẩu cho user mới')
                     ->maxLength(255),
+                Forms\Components\TextInput::make('password_hash')
+                    ->label('Password Hash (chỉ đọc)')
+                    ->default(fn ($record) => $record?->password ?? '')
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->visible(fn ($record) => $record !== null)
+                    ->helperText('Hash của mật khẩu hiện tại (không thể decrypt)'),
             ]);
     }
 
@@ -56,6 +83,16 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
+                Tables\Columns\IconColumn::make('is_admin')
+                    ->label('Admin')
+                    ->boolean(),
+                Tables\Columns\TextColumn::make('password')
+                    ->label('Password Hash')
+                    ->limit(30)
+                    ->copyable()
+                    ->copyMessage('Đã sao chép password hash')
+                    ->tooltip('Click để sao chép')
+                    ->searchable(false),
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable(),

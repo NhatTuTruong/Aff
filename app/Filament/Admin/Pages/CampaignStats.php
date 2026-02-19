@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Pages;
 use App\Models\Campaign;
 use App\Models\Click;
 use App\Models\PageView;
+use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
@@ -32,10 +33,19 @@ class CampaignStats extends Page implements HasTable
 
     public function table(Table $table): Table
     {
+        $userId = Filament::auth()->id();
+
         return $table
             ->query(
                 Campaign::query()
                     ->where('status', 'active')
+                    ->when(
+                        $userId,
+                        fn ($query) => $query->whereHas(
+                            'brand',
+                            fn ($brandQuery) => $brandQuery->where('user_id', $userId),
+                        ),
+                    )
                     ->withCount('clicks')
                     ->orderByDesc('clicks_count')
             )

@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\AssetResource\Pages;
 use App\Filament\Admin\Resources\AssetResource\RelationManagers;
 use App\Models\Asset;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -115,7 +116,16 @@ class AssetResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
+        $userId = Filament::auth()->id();
+
         return parent::getEloquentQuery()
-            ->withoutGlobalScope(SoftDeletingScope::class);
+            ->withoutGlobalScope(SoftDeletingScope::class)
+            ->when(
+                $userId,
+                fn (Builder $query) => $query->whereHas(
+                    'campaign.brand',
+                    fn (Builder $brandQuery) => $brandQuery->where('user_id', $userId),
+                ),
+            );
     }
 }

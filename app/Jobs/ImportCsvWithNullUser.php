@@ -87,6 +87,15 @@ class ImportCsvWithNullUser extends BaseImportCsv
         ));
 
         $this->handleExceptions($exceptions);
+        
+        // Restore lại user gốc để tránh logout
+        // if ($this->originalUser instanceof Authenticatable && $user instanceof Authenticatable && $user->id !== $this->originalUser->id) {
+        //     if (method_exists(auth()->guard(), 'login')) {
+        //         auth()->login($this->originalUser);
+        //     } else {
+        //         auth()->setUser($this->originalUser);
+        //     }
+        // }
     }
 
     /**

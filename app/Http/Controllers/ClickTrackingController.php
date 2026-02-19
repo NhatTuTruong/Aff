@@ -16,10 +16,18 @@ class ClickTrackingController extends Controller
         $this->analyticsService = $analyticsService;
     }
 
-    public function redirect($slug, Request $request)
+    public function redirect($userCode, $slug, Request $request)
     {
-        // Allow viewing draft campaigns for testing (in development)
-        $campaign = Campaign::where('slug', $slug)->firstOrFail();
+        // Tìm user theo code
+        $user = \App\Models\User::where('code', $userCode)->firstOrFail();
+        
+        // Tìm campaign theo slug đầy đủ (user_code/slug)
+        $fullSlug = "{$userCode}/{$slug}";
+        $campaign = Campaign::where('slug', $fullSlug)
+            ->whereHas('brand', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->firstOrFail();
         
         // Only restrict to active in production
         if (app()->environment('production') && $campaign->status !== 'active') {

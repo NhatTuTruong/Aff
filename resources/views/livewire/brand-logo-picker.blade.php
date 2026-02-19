@@ -20,11 +20,21 @@
              @click.stop>
             <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Chọn ảnh đã upload</h3>
-                <button type="button"
-                        wire:click="closeModal"
-                        class="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-2 focus:ring-primary-500">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button"
+                            wire:click="refreshImages"
+                            wire:loading.attr="disabled"
+                            class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50">
+                        <span wire:loading.remove wire:target="refreshImages">↻</span>
+                        <span wire:loading wire:target="refreshImages" class="animate-spin">⟳</span>
+                        Làm mới
+                    </button>
+                    <button type="button"
+                            wire:click="closeModal"
+                            class="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-2 focus:ring-primary-500">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
             </div>
             <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex gap-2">
                 <button type="button"

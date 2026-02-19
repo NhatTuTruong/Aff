@@ -6,8 +6,10 @@ use App\Models\Brand;
 use App\Models\Campaign;
 use App\Models\Click;
 use App\Models\PageView;
+use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Database\Eloquent\Builder;
 
 class StatsOverviewWidget extends BaseWidget
 {
@@ -15,16 +17,23 @@ class StatsOverviewWidget extends BaseWidget
 
     protected function getStats(): array
     {
-        $activeCampaigns = Campaign::where('status', 'active')->count();
-        $totalBrands = Brand::count();
-        
-        $totalClicks = Click::count();
-        $totalViews = PageView::count();
-        
+        $userId = Filament::auth()->id();
+        $userScope = fn (Builder $q) => $q->where('user_id', $userId);
+        $clickScope = fn (Builder $q) => $q->whereHas('campaign.brand', $userScope);
+        $viewScope = fn (Builder $q) => $q->whereHas('campaign.brand', $userScope);
+
+        $activeCampaigns = Campaign::where('status', 'active')
+            ->whereHas('brand', $userScope)
+            ->count();
+        $totalBrands = Brand::when($userId, fn ($q) => $q->where('user_id', $userId))->count();
+
+        $totalClicks = Click::when($userId, $clickScope)->count();
+        $totalViews = PageView::when($userId, $viewScope)->count();
+
         // Clicks và Views hôm nay
-        $clicksToday = Click::whereDate('created_at', today())->count();
-        $viewsToday = PageView::whereDate('created_at', today())->count();
-        
+        $clicksToday = Click::when($userId, $clickScope)->whereDate('created_at', today())->count();
+        $viewsToday = PageView::when($userId, $viewScope)->whereDate('created_at', today())->count();
+
         // Tính CTR
         $ctr = $totalViews > 0 ? round(($totalClicks / $totalViews) * 100, 2) : 0;
 
@@ -61,10 +70,13 @@ class StatsOverviewWidget extends BaseWidget
 
     protected function getActiveCampaignsChart(): array
     {
+        $userId = Filament::auth()->id();
+        $userScope = fn (Builder $q) => $q->where('user_id', $userId);
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
             $data[] = Campaign::where('status', 'active')
+                ->whereHas('brand', $userScope)
                 ->whereDate('created_at', '<=', $date)
                 ->count();
         }
@@ -73,20 +85,24 @@ class StatsOverviewWidget extends BaseWidget
 
     protected function getClicksChart(): array
     {
+        $userId = Filament::auth()->id();
+        $clickScope = fn (Builder $q) => $q->whereHas('campaign.brand', fn ($b) => $b->where('user_id', $userId));
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
-            $data[] = Click::whereDate('created_at', $date)->count();
+            $data[] = Click::when($userId, $clickScope)->whereDate('created_at', $date)->count();
         }
         return $data;
     }
 
     protected function getViewsChart(): array
     {
+        $userId = Filament::auth()->id();
+        $viewScope = fn (Builder $q) => $q->whereHas('campaign.brand', fn ($b) => $b->where('user_id', $userId));
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
-            $data[] = PageView::whereDate('created_at', $date)->count();
+            $data[] = PageView::when($userId, $viewScope)->whereDate('created_at', $date)->count();
         }
         return $data;
     }

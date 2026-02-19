@@ -7,6 +7,7 @@ use App\Filament\Admin\Resources\ClickResource\RelationManagers;
 use App\Filament\Exports\ClickExporter;
 use App\Models\BlockedIp;
 use App\Models\Click;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -125,7 +126,16 @@ class ClickResource extends Resource
                 Tables\Filters\SelectFilter::make('country')
                     ->label('Quốc gia')
                     ->options(function () {
+                        $userId = Filament::auth()->id();
+
                         return Click::query()
+                            ->whereHas(
+                                'campaign.brand',
+                                fn (Builder $brandQuery) => $brandQuery->when(
+                                    $userId,
+                                    fn (Builder $q) => $q->where('user_id', $userId),
+                                ),
+                            )
                             ->whereNotNull('country')
                             ->where('country', '!=', '')
                             ->distinct()
@@ -149,7 +159,16 @@ class ClickResource extends Resource
                 Tables\Filters\SelectFilter::make('browser')
                     ->label('Trình duyệt')
                     ->options(function () {
+                        $userId = Filament::auth()->id();
+
                         return Click::query()
+                            ->whereHas(
+                                'campaign.brand',
+                                fn (Builder $brandQuery) => $brandQuery->when(
+                                    $userId,
+                                    fn (Builder $q) => $q->where('user_id', $userId),
+                                ),
+                            )
                             ->whereNotNull('browser')
                             ->distinct()
                             ->pluck('browser', 'browser')
@@ -275,7 +294,16 @@ class ClickResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
+        $userId = Filament::auth()->id();
+
         return parent::getEloquentQuery()
-            ->withoutGlobalScope(SoftDeletingScope::class);
+            ->withoutGlobalScope(SoftDeletingScope::class)
+            ->when(
+                $userId,
+                fn (Builder $query) => $query->whereHas(
+                    'campaign.brand',
+                    fn (Builder $brandQuery) => $brandQuery->where('user_id', $userId),
+                ),
+            );
     }
 }

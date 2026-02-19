@@ -110,7 +110,12 @@
         <div class="container">
             @if($posts->count() > 0)
                 @foreach($posts as $post)
-                    <a href="{{ route('landing.show', $post->slug) }}" class="post-card">
+                    @php
+                        $slugParts = explode('/', $post->slug, 2);
+                        $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
+                        $slugPart = count($slugParts) === 2 ? $slugParts[1] : $post->slug;
+                    @endphp
+                    <a href="{{ route('landing.show', ['userCode' => $userCode, 'slug' => $slugPart]) }}" class="post-card">
                         @if($post->brand?->image)
                             <img src="{{ asset('storage/' . $post->brand->image) }}" alt="" class="thumb">
                         @else

@@ -3,7 +3,9 @@
 namespace App\Filament\Admin\Widgets;
 
 use App\Models\Campaign;
+use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 class CampaignsChartWidget extends ChartWidget
@@ -20,18 +22,22 @@ class CampaignsChartWidget extends ChartWidget
 
     protected function getData(): array
     {
+        $userId = Filament::auth()->id();
+        $userScope = fn (Builder $q) => $q->where('user_id', $userId);
+
         $months = [];
         $data = [];
-        
+
         // Lấy dữ liệu 12 tháng gần nhất
         for ($i = 11; $i >= 0; $i--) {
             $month = now()->subMonths($i);
             $months[] = $month->format('M Y');
-            
+
             $count = Campaign::whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
+                ->when($userId, fn ($q) => $q->whereHas('brand', $userScope))
                 ->count();
-            
+
             $data[] = $count;
         }
 

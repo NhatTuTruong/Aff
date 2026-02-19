@@ -7,6 +7,7 @@ use App\Filament\Admin\Resources\CampaignResource\RelationManagers;
 use App\Filament\Imports\CampaignImporter;
 use App\Models\Campaign;
 use App\Models\Brand;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -55,7 +56,10 @@ class CampaignResource extends Resource
                                         }
                                         // Tự động điền slug nếu đang trống
                                         if (empty($get('slug'))) {
-                                            $set('slug', \Illuminate\Support\Str::slug($brand->name));
+                                            $user = Filament::auth()->user();
+                                            $userCode = $user?->code ?? '00000';
+                                            $baseSlug = \Illuminate\Support\Str::slug($brand->name);
+                                            $set('slug', "{$userCode}/{$baseSlug}");
                                         }
                                     }
                                 }
@@ -77,10 +81,12 @@ class CampaignResource extends Resource
                             ->label('Tiêu đề')
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, Forms\Set $set) => $set(
-                                'slug',
-                                \Illuminate\Support\Str::slug($state)
-                            )),
+                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                $user = Filament::auth()->user();
+                                $userCode = $user?->code ?? '00000';
+                                $baseSlug = \Illuminate\Support\Str::slug($state);
+                                $set('slug', "{$userCode}/{$baseSlug}");
+                            }),
                         Forms\Components\TextInput::make('slug')
                             ->label('Slug')
                             ->required()
@@ -88,7 +94,7 @@ class CampaignResource extends Resource
                                 ignoreRecord: true,
                                 modifyRuleUsing: fn (\Illuminate\Validation\Rules\Unique $rule) => $rule->whereNull('deleted_at')
                             )
-                            ->helperText('Tự động tạo từ tiêu đề. URL: /review/{slug}'),
+                            ->helperText('Tự động tạo từ tiêu đề. Format: {user_code}/{slug}. URL: /review/{user_code}/{slug}'),
                         Forms\Components\TextInput::make('affiliate_url')
                             ->label('URL Affiliate')
                             ->required()
@@ -292,7 +298,14 @@ class CampaignResource extends Resource
                     ->wrap(),
                 Tables\Columns\TextColumn::make('landing_url')
                     ->label('URL')
-                    ->state(fn ($record) => url(route('landing.show', ['slug' => $record->slug])))
+                    ->state(function ($record) {
+                        if (!$record->slug) return '';
+                        $parts = explode('/', $record->slug, 2);
+                        if (count($parts) === 2) {
+                            return url(route('landing.show', ['userCode' => $parts[0], 'slug' => $parts[1]]));
+                        }
+                        return url(route('landing.show', ['userCode' => '00000', 'slug' => $record->slug]));
+                    })
                     ->copyable()
                     ->copyMessage('Đã copy URL')
                     ->copyMessageDuration(1500)
@@ -386,13 +399,21 @@ class CampaignResource extends Resource
                     ->mutateRecordDataUsing(function (array $data, Campaign $record): array {
                         $baseTitle = $record->title;
                         $baseSlug = $record->slug;
+                        
+                        // Tách user_code và slug
+                        $parts = explode('/', $baseSlug, 2);
+                        $userCode = count($parts) === 2 ? $parts[0] : (Filament::auth()->user()?->code ?? '00000');
+                        $slugPart = count($parts) === 2 ? $parts[1] : $baseSlug;
+                        
                         $title = $baseTitle . '-copy';
-                        $slug = $baseSlug . '-copy';
+                        $newSlugPart = $slugPart . '-copy';
+                        $slug = "{$userCode}/{$newSlugPart}";
                         $n = 0;
                         while (Campaign::where('title', $title)->exists() || Campaign::where('slug', $slug)->exists()) {
                             $n++;
                             $title = $baseTitle . '-copy' . $n;
-                            $slug = $baseSlug . '-copy' . $n;
+                            $newSlugPart = $slugPart . '-copy' . $n;
+                            $slug = "{$userCode}/{$newSlugPart}";
                         }
                         $data['title'] = $title;
                         $data['slug'] = $slug;
@@ -400,7 +421,14 @@ class CampaignResource extends Resource
                     }),
                 Tables\Actions\Action::make('view_landing')
                     ->label('')
-                    ->url(fn ($record) => route('landing.show', $record->slug))
+                    ->url(function ($record) {
+                        if (!$record->slug) return '#';
+                        $parts = explode('/', $record->slug, 2);
+                        if (count($parts) === 2) {
+                            return route('landing.show', ['userCode' => $parts[0], 'slug' => $parts[1]]);
+                        }
+                        return route('landing.show', ['userCode' => '00000', 'slug' => $record->slug]);
+                    })
                     ->openUrlInNewTab()
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->color('success')
@@ -431,8 +459,17 @@ class CampaignResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
+        $userId = Filament::auth()->id();
+
         return parent::getEloquentQuery()
-            ->withoutGlobalScope(SoftDeletingScope::class);
+            ->withoutGlobalScope(SoftDeletingScope::class)
+            ->when(
+                $userId,
+                fn (Builder $query) => $query->whereHas(
+                    'brand',
+                    fn (Builder $brandQuery) => $brandQuery->where('user_id', $userId),
+                ),
+            );
     }
 
     public static function getRelations(): array

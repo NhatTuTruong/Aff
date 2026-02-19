@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\BrandResource\Pages;
 use App\Filament\Admin\Resources\BrandResource\RelationManagers;
 use App\Models\Brand;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -46,10 +47,12 @@ class BrandResource extends Resource
                                     ->label('Tên danh mục')
                                     ->required()
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn ($state, Forms\Set $set) => $set(
-                                        'slug',
-                                        \Illuminate\Support\Str::slug($state)
-                                    )),
+                                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                        $user = \Filament\Facades\Filament::auth()->user();
+                                        $userCode = $user?->code ?? '00000';
+                                        $baseSlug = \Illuminate\Support\Str::slug($state);
+                                        $set('slug', "{$userCode}/{$baseSlug}");
+                                    }),
                                 Forms\Components\TextInput::make('slug')
                                     ->required(),
                             ])
@@ -155,9 +158,18 @@ class BrandResource extends Resource
                                                 
                                                 if ($imageInfo !== false && is_array($imageInfo) && isset($imageInfo[2])) {
                                                     // Valid image
+                                                    $user = Filament::auth()->user();
+                                                    $userCode = $user?->code ?? '00000';
+                                                    $directory = "users/{$userCode}/brands";
+                                                    
+                                                    // Tạo thư mục nếu chưa tồn tại
+                                                    if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($directory)) {
+                                                        \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory($directory, 0755, true);
+                                                    }
+                                                    
                                                     $extension = image_type_to_extension($imageInfo[2], false) ?: 'png';
                                                     $filename = \Illuminate\Support\Str::slug($domain) . '_' . time() . '.' . $extension;
-                                                    $path = 'brands/' . $filename;
+                                                    $path = $directory . '/' . $filename;
                                                     
                                                     try {
                                                         \Illuminate\Support\Facades\Storage::disk('public')->put($path, $imageContent);
@@ -214,17 +226,21 @@ class BrandResource extends Resource
                                         ->label('Logo / Hình ảnh')
                                         ->image()
                                         ->disk('public')
-                                        ->directory('brands')
+                                        ->directory(fn () => 'users/' . (Filament::auth()->user()?->code ?? '00000') . '/brands')
                                         ->maxSize(2048)
                                         ->default(null)
                                         ->helperText('Tải lên file (tối đa 2MB), dùng "Lấy logo" từ domain, hoặc "Chọn từ ảnh đã có" bên dưới để thay/thêm ảnh.')
                                         ->saveUploadedFileUsing(function (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string {
-                                            $path = $file->storeAs(
-                                                'brands',
+                                            $userCode = Filament::auth()->user()?->code ?? '00000';
+                                            $dir = "users/{$userCode}/brands";
+                                            if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($dir)) {
+                                                \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory($dir, 0755, true);
+                                            }
+                                            return $file->storeAs(
+                                                $dir,
                                                 $file->getClientOriginalName() ?: \Illuminate\Support\Str::ulid() . '.' . $file->getClientOriginalExtension(),
                                                 'public'
                                             );
-                                            return $path;
                                         }),
                                     Forms\Components\View::make('filament.admin.components.brand-logo-picker-livewire'),
                                 ]),
@@ -346,13 +362,21 @@ class BrandResource extends Resource
                     ->mutateRecordDataUsing(function (array $data, Brand $record): array {
                         $baseName = $record->name;
                         $baseSlug = $record->slug;
+                        
+                        // Tách user_code và slug
+                        $parts = explode('/', $baseSlug, 2);
+                        $userCode = count($parts) === 2 ? $parts[0] : (\Filament\Facades\Filament::auth()->user()?->code ?? '00000');
+                        $slugPart = count($parts) === 2 ? $parts[1] : $baseSlug;
+                        
                         $name = $baseName . '-copy';
-                        $slug = $baseSlug . '-copy';
+                        $newSlugPart = $slugPart . '-copy';
+                        $slug = "{$userCode}/{$newSlugPart}";
                         $n = 0;
-                        while (Brand::where('name', $name)->exists() || Brand::where('slug', $slug)->exists()) {
+                        while (Brand::where('name', $name)->where('user_id', $record->user_id)->exists() || Brand::where('slug', $slug)->exists()) {
                             $n++;
                             $name = $baseName . '-copy' . $n;
-                            $slug = $baseSlug . '-copy' . $n;
+                            $newSlugPart = $slugPart . '-copy' . $n;
+                            $slug = "{$userCode}/{$newSlugPart}";
                         }
                         $data['name'] = $name;
                         $data['slug'] = $slug;
@@ -384,8 +408,14 @@ class BrandResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
+        $userId = Filament::auth()->id();
+
         return parent::getEloquentQuery()
-            ->withoutGlobalScope(SoftDeletingScope::class);
+            ->withoutGlobalScope(SoftDeletingScope::class)
+            ->when(
+                $userId,
+                fn (Builder $query) => $query->where('user_id', $userId),
+            );
     }
 
     public static function getRelations(): array

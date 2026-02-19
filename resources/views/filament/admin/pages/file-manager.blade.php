@@ -2,14 +2,22 @@
     <div class="space-y-6 w-full max-w-full overflow-x-auto">
         <!-- Breadcrumb -->
         <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <a wire:click="loadDirectory('')" class="cursor-pointer hover:text-gray-900 dark:hover:text-gray-100">
+            <a wire:click="loadDirectory(null)" class="cursor-pointer hover:text-gray-900 dark:hover:text-gray-100">
                 Home
             </a>
             @if($currentDirectory)
-                @foreach(explode('/', $currentDirectory) as $segment)
+                @php
+                    $segments = explode('/', $currentDirectory);
+                    // Bỏ qua segment "users" và hiển thị từ user_code trở đi
+                    $displaySegments = array_slice($segments, 2);
+                @endphp
+                @foreach($displaySegments as $index => $segment)
                     @if($segment)
                         <span>/</span>
-                        <a wire:click="loadDirectory('{{ implode('/', array_slice(explode('/', $currentDirectory), 0, array_search($segment, explode('/', $currentDirectory)) + 1)) }}')" 
+                        @php
+                            $pathUpToHere = 'users/' . implode('/', array_slice($segments, 1, 2 + $index));
+                        @endphp
+                        <a wire:click="loadDirectory('{{ $pathUpToHere }}')" 
                            class="cursor-pointer hover:text-gray-900 dark:hover:text-gray-100">
                             {{ $segment }}
                         </a>

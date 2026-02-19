@@ -12,11 +12,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Bind custom LoginResponse
-        $this->app->singleton(
-            \Filament\Http\Responses\Auth\Contracts\LoginResponse::class,
-            \App\Http\Responses\Auth\LoginResponse::class
-        );
+        // Bind custom LoginResponse - TEMPORARILY DISABLED FOR TESTING
+        // If login works without this, the issue is in our custom LoginResponse
+        // $this->app->singleton(
+        //     \Filament\Http\Responses\Auth\Contracts\LoginResponse::class,
+        //     \App\Http\Responses\Auth\LoginResponse::class
+        // );
     }
 
     /**

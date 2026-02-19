@@ -16,18 +16,20 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/blog', [App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
 
-// Tạm tắt login: /login chuyển thẳng về /admin
+// /login -> trang đăng nhập Filament (v3)
 Route::get('/login', function () {
-    return redirect('/admin');
+    return redirect('/admin/login');
 })->name('login');
 
-// Landing Pages
-Route::get('/review/{slug}', [App\Http\Controllers\LandingPageController::class, 'show'])
-    ->name('landing.show');
+// Landing Pages - Format: /review/{user_code}/{slug}
+Route::get('/review/{userCode}/{slug}', [App\Http\Controllers\LandingPageController::class, 'show'])
+    ->name('landing.show')
+    ->where(['userCode' => '[0-9]{5}', 'slug' => '[a-z0-9-]+']);
 
-// Click Tracking & Redirect
-Route::get('/out/{slug}', [App\Http\Controllers\ClickTrackingController::class, 'redirect'])
-    ->name('click.redirect');
+// Click Tracking & Redirect - Format: /out/{user_code}/{slug}
+Route::get('/out/{userCode}/{slug}', [App\Http\Controllers\ClickTrackingController::class, 'redirect'])
+    ->name('click.redirect')
+    ->where(['userCode' => '[0-9]{5}', 'slug' => '[a-z0-9-]+']);
 
 // Analytics API
 Route::post('/api/track-page-view/{pageView}', [App\Http\Controllers\AnalyticsController::class, 'updatePageView'])
@@ -56,4 +58,9 @@ Route::post('/admin/campaigns/upload-image', [App\Http\Controllers\ImageUploadCo
 Route::get('/admin/imports/{import}/failed-rows/download', [App\Http\Controllers\DownloadImportFailedRowsCsvController::class, '__invoke'])
     ->middleware('web')
     ->name('admin.imports.failed-rows.download');
+
+// Test authentication debug route (temporary)
+Route::get('/test-auth', [App\Http\Controllers\TestAuthController::class, 'testAuth'])
+    ->middleware(['web', 'auth'])
+    ->name('test.auth');
 
