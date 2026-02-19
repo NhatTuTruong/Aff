@@ -18,13 +18,13 @@ class ImportCsvWithNullUser extends BaseImportCsv
     {
         $user = $this->import->user;
 
-        if ($user instanceof Authenticatable) {
-            if (method_exists(auth()->guard(), 'login')) {
-                auth()->login($user);
-            } else {
-                auth()->setUser($user);
-            }
-        }
+        // if ($user instanceof Authenticatable) {
+        //     if (method_exists(auth()->guard(), 'login')) {
+        //         auth()->login($user);
+        //     } else {
+        //         auth()->setUser($user);
+        //     }
+        // }
 
         $exceptions = [];
         $processedRows = 0;
