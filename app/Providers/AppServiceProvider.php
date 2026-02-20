@@ -2,8 +2,18 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\ActivityLog;
+use App\Models\Asset;
+use App\Models\BlockedIp;
+use App\Models\Brand;
+use App\Models\Campaign;
+use App\Models\Category;
+use App\Models\Click;
+use App\Models\Coupon;
+use App\Models\User;
+use App\Observers\ActivityLogObserver;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -12,12 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Bind custom LoginResponse - TEMPORARILY DISABLED FOR TESTING
-        // If login works without this, the issue is in our custom LoginResponse
-        // $this->app->singleton(
-        //     \Filament\Http\Responses\Auth\Contracts\LoginResponse::class,
-        //     \App\Http\Responses\Auth\LoginResponse::class
-        // );
+        //
     }
 
     /**
@@ -26,6 +31,16 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        // Audit log observers
+        Brand::observe(ActivityLogObserver::class);
+        Campaign::observe(ActivityLogObserver::class);
+        Category::observe(ActivityLogObserver::class);
+        User::observe(ActivityLogObserver::class);
+        Coupon::observe(ActivityLogObserver::class);
+        Click::observe(ActivityLogObserver::class);
+        Asset::observe(ActivityLogObserver::class);
+        BlockedIp::observe(ActivityLogObserver::class);
     }
 }
 

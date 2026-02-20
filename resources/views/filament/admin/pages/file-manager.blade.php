@@ -1,29 +1,29 @@
 <x-filament-panels::page>
     <div class="space-y-6 w-full max-w-full overflow-x-auto">
-        <!-- Breadcrumb -->
+        <!-- Breadcrumb (chỉ hiển thị trong phạm vi users/{user_code}/...) -->
         <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <a wire:click="loadDirectory(null)" class="cursor-pointer hover:text-gray-900 dark:hover:text-gray-100">
+            <a wire:click="goHome" class="cursor-pointer hover:text-gray-900 dark:hover:text-gray-100">
                 Home
             </a>
-            @if($currentDirectory)
-                @php
-                    $segments = explode('/', $currentDirectory);
-                    // Bỏ qua segment "users" và hiển thị từ user_code trở đi
-                    $displaySegments = array_slice($segments, 2);
-                @endphp
-                @foreach($displaySegments as $index => $segment)
-                    @if($segment)
-                        <span>/</span>
-                        @php
-                            $pathUpToHere = 'users/' . implode('/', array_slice($segments, 1, 2 + $index));
-                        @endphp
-                        <a wire:click="loadDirectory('{{ $pathUpToHere }}')" 
-                           class="cursor-pointer hover:text-gray-900 dark:hover:text-gray-100">
-                            {{ $segment }}
-                        </a>
-                    @endif
-                @endforeach
-            @endif
+            @php
+                $basePath = $this->getUserBasePath(); // users/12345
+                $relativePath = $currentDirectory && str_starts_with($currentDirectory . '/', $basePath . '/')
+                    ? trim(substr($currentDirectory, strlen($basePath)), '/')
+                    : '';
+                $displaySegments = $relativePath ? explode('/', $relativePath) : [];
+            @endphp
+            @foreach($displaySegments as $index => $segment)
+                @if($segment)
+                    <span>/</span>
+                    @php
+                        $pathUpToHere = $basePath . '/' . implode('/', array_slice($displaySegments, 0, $index + 1));
+                    @endphp
+                    <a wire:click="navigateToDirectory('{{ $pathUpToHere }}')" 
+                       class="cursor-pointer hover:text-gray-900 dark:hover:text-gray-100">
+                        {{ $segment }}
+                    </a>
+                @endif
+            @endforeach
         </div>
 
         <!-- Date filter (when inside folder) -->
@@ -68,15 +68,23 @@
         @endif
 
         <!-- Actions -->
-        <div class="flex items-center justify-between">
-            @if($currentDirectory)
-                <x-filament::button wire:click="goUp" icon="heroicon-o-arrow-left">
-                    Quay lại
-                </x-filament::button>
-            @else
-                <div></div>
-            @endif
-            
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            <div class="flex gap-2">
+                @if($currentDirectory !== $this->getUserBasePath())
+                    <x-filament::button wire:click="goUp" icon="heroicon-o-arrow-left">
+                        Quay lại
+                    </x-filament::button>
+                @endif
+                @if(count($selectedFiles) > 0)
+                    <x-filament::button 
+                        wire:click="deleteSelectedFiles" 
+                        wire:confirm="Bạn có chắc muốn xóa {{ count($selectedFiles) }} tệp tin đã chọn?"
+                        color="danger"
+                        icon="heroicon-o-trash">
+                        Xóa {{ count($selectedFiles) }} tệp đã chọn
+                    </x-filament::button>
+                @endif
+            </div>
             <x-filament::button 
                 x-data=""
                 x-on:click="$dispatch('open-modal', { id: 'upload-files' })"
@@ -111,7 +119,14 @@
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Tệp tin</h3>
                 <div style="display:grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap:0.75rem; width:100%;">
                     @foreach($files as $file)
-                        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-2 hover:shadow-md transition-shadow">
+                        @php $isSelected = in_array($file['path'], $selectedFiles); @endphp
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border p-2 hover:shadow-md transition-shadow relative {{ $isSelected ? 'ring-2 ring-primary-500 border-primary-500 dark:ring-primary-400 dark:border-primary-400' : 'border-gray-200 dark:border-gray-700' }}">
+                            <div class="absolute top-2 left-2 z-10">
+                                <input type="checkbox" 
+                                       {{ $isSelected ? 'checked' : '' }}
+                                       wire:click="toggleSelectFile({{ json_encode($file['path']) }})"
+                                       class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:bg-gray-700">
+                            </div>
                             @if($this->isImage($file['mime']))
                                 <div class="aspect-square mb-2 rounded overflow-hidden bg-gray-100 dark:bg-gray-700">
                                     <img src="{{ $file['url'] }}" alt="{{ $file['name'] }}" class="w-full h-full object-cover" loading="lazy">

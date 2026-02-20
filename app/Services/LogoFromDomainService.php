@@ -2,24 +2,35 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class LogoFromDomainService
 {
-    public static function fetchAndSave(string $domain): ?string
+    /**
+     * Lưu logo vào users/{user_code}/brands/ để hiển thị trong File Manager của user.
+     *
+     * @param  string  $domain  Domain để lấy logo (vd: example.com)
+     * @param  string|null  $userCode  Mã user (5 chữ số). Null thì lấy từ Auth.
+     */
+    public static function fetchAndSave(string $domain, ?string $userCode = null): ?string
     {
         $domain = self::cleanDomain($domain);
         if (empty($domain)) {
             return null;
         }
 
+        $userCode = $userCode ?? (Auth::check() ? (Auth::user()->code ?? '00000') : '00000');
+
         $logoUrls = [
             "https://logo.clearbit.com/{$domain}",
             "https://www.google.com/s2/favicons?domain={$domain}&sz=128",
             "https://icons.duckduckgo.com/ip3/{$domain}.ico",
         ];
+
+        $directory = "users/{$userCode}/brands";
 
         foreach ($logoUrls as $logoUrl) {
             try {
@@ -43,8 +54,11 @@ class LogoFromDomainService
 
                 $extension = image_type_to_extension($imageInfo[2], false) ?: 'png';
                 $filename = Str::slug($domain) . '_' . time() . '.' . $extension;
-                $path = 'brands/' . $filename;
+                $path = $directory . '/' . $filename;
 
+                if (! Storage::disk('public')->exists($directory)) {
+                    Storage::disk('public')->makeDirectory($directory, 0755, true);
+                }
                 Storage::disk('public')->put($path, $imageContent);
 
                 return $path;

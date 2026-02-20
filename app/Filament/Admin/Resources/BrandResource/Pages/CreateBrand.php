@@ -38,14 +38,12 @@ class CreateBrand extends CreateRecord
         return $data;
     }
 
-    /** Chọn ảnh từ popup Livewire "Chọn từ thư viện" → cập nhật Logo / Hình ảnh cùng cơ chế như upload từ máy. */
+    /** Chọn ảnh từ popup Livewire "Chọn từ thư viện" → cập nhật Logo / Hình ảnh (merge, không xóa field khác). */
     #[On('logo-selected')]
     public function selectLogoAndClose(string $path): void
     {
-        $path = str_replace('\\', '/', ltrim($path, '/'));
-        if (!str_starts_with($path, 'brands/')) {
-            $path = 'brands/' . ltrim($path, '/');
-        }
-        $this->data['image'] = [\Illuminate\Support\Str::uuid()->toString() => $path];
+        $path = str_replace('\\', '/', ltrim((string) $path, '/'));
+        $state = array_merge($this->form->getRawState(), ['image' => $path]);
+        $this->form->fill($state);
     }
 }

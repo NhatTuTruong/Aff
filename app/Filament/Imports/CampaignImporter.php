@@ -65,11 +65,19 @@ class CampaignImporter extends Importer
                 ->rules(['required', 'in:draft,active,paused'])
                 ->example('active')
                 ->exampleHeader('Trạng thái'),
+                ImportColumn::make('type')
+                ->label('Loại chiến dịch')
+                ->fillRecordUsing(function (Campaign $record, ?string $state) {
+                    $record->type = $state ?: 'coupon';
+                }),
             ImportColumn::make('template')
                 ->label('Template')
-                ->rules(['required', 'in:template1,template2,template3'])
-                ->example('template1')
-                ->exampleHeader('Template'),
+                ->fillRecordUsing(function (Campaign $record, ?string $state, array $data) {
+                    $type = $data['type'] ?? 'coupon';
+            
+                    $record->template = $state
+                        ?: ($type === 'key' ? 'template_key' : 'template1');
+                }),
             ImportColumn::make('affiliate_url')
                 ->label('URL Affiliate')
                 ->requiredMapping()
@@ -124,6 +132,16 @@ class CampaignImporter extends Importer
     protected function beforeSave(): void
     {
         $this->record->import_id = $this->import->getKey();
+        
+        // Set type mặc định nếu chưa có
+        if (empty($this->record->type)) {
+            $this->record->type = 'coupon';
+        }
+        
+        // Set template dựa trên type nếu chưa có hoặc không hợp lệ
+        if (empty($this->record->template) || !in_array($this->record->template, ['template1', 'template_key'])) {
+            $this->record->template = $this->record->type === 'key' ? 'template_key' : 'template1';
+        }
         
         // Lấy user_code từ brand
         $user = $this->record->brand?->user ?? \App\Models\User::find($this->record->brand?->user_id);
@@ -263,7 +281,7 @@ class CampaignImporter extends Importer
         if ($brand) {
             if (! $brand->image && ! empty($domain)) {
                 try {
-                    $logoPath = LogoFromDomainService::fetchAndSave($domain);
+                    $logoPath = LogoFromDomainService::fetchAndSave($domain, $userCode);
                     if ($logoPath) {
                         $brand->update(['image' => $logoPath]);
                     }
@@ -277,7 +295,7 @@ class CampaignImporter extends Importer
         $imagePath = null;
         if (! empty($domain)) {
             try {
-                $imagePath = LogoFromDomainService::fetchAndSave($domain);
+                $imagePath = LogoFromDomainService::fetchAndSave($domain, $userCode);
             } catch (\Throwable) {
                 // Bỏ qua lỗi logo
             }

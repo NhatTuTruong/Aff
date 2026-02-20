@@ -10,7 +10,7 @@ class SendImportCompletedNotificationWhenNoUser
 {
     public function handle(ImportCompleted $event): void
     {
-        $import = $event->import;
+        $import = $event->getImport();
 
         if ($import->user_id !== null) {
             return;

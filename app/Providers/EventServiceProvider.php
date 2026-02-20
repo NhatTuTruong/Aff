@@ -20,6 +20,11 @@ class EventServiceProvider extends ServiceProvider
         ],
         ImportCompleted::class => [
             \App\Listeners\SendImportCompletedNotificationWhenNoUser::class,
+            \App\Listeners\SendImportCompletedDatabaseNotification::class,
+            \App\Listeners\LogImportActivity::class,
+        ],
+        \Illuminate\Auth\Events\Login::class => [
+            \App\Listeners\LogUserLogin::class,
         ],
     ];
 

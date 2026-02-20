@@ -64,3 +64,20 @@ Route::get('/test-auth', [App\Http\Controllers\TestAuthController::class, 'testA
     ->middleware(['web', 'auth'])
     ->name('test.auth');
 
+// Test notification - gửi thông báo vào chuông (cần đăng nhập admin)
+Route::get('/test-notification', function () {
+    $user = auth()->user();
+    if (! $user) {
+        return redirect('/admin/login')->with('error', 'Vui lòng đăng nhập trước.');
+    }
+
+    \Filament\Notifications\Notification::make()
+        ->title('Test thông báo thành công')
+        ->body('Chuông thông báo đang hoạt động! Nếu bạn thấy thông báo này thì mọi thứ ổn.')
+        ->success()
+        ->icon('heroicon-o-bell')
+        ->sendToDatabase($user);
+
+    return redirect('/admin')->with('status', 'Đã gửi thông báo test. Kiểm tra icon chuông góc trên bên phải.');
+})->middleware(['web', 'auth'])->name('test.notification');
+

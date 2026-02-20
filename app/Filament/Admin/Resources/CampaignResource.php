@@ -133,17 +133,35 @@ class CampaignResource extends Resource
                             ])
                             ->required()
                             ->default('active'),
-                        Forms\Components\Select::make('template')
-                            ->label('Giao diện (Template)')
+                        Forms\Components\Select::make('type')
+                            ->label('Loại chiến dịch')
                             ->options([
-                                'template1' => 'Template 1',
-                                'template2' => 'Template 2',
-                                'template3' => 'Template 3',
+                                'coupon' => 'Coupon',
+                                'key' => 'Key',
                             ])
                             ->required()
-                            ->default('template1')
+                            ->default('coupon')
+                            ->live()
+                            ->helperText('Coupon: hiển thị mã giảm giá. Key: landing page hiện đại với ảnh sản phẩm'),
+                        Forms\Components\Select::make('template')
+                            ->label('Giao diện (Template)')
+                            ->options(function (Forms\Get $get) {
+                                $type = $get('type') ?? 'coupon';
+                                if ($type === 'key') {
+                                    return [
+                                        'template_key' => 'Template 2 (Key)',
+                                    ];
+                                }
+                                return [
+                                    'template1' => 'Template 1 (Coupon)',
+                                ];
+                            })
+                            ->required()
+                            ->default(function (Forms\Get $get) {
+                                return $get('type') === 'key' ? 'template_key' : 'template1';
+                            })
                             ->helperText('Chọn template landing page'),
-                    ])->columns(2),
+                    ])->columns(3),
                 
                 Forms\Components\Section::make('Hình ảnh')
                     ->schema([
@@ -158,7 +176,8 @@ class CampaignResource extends Resource
                             ->image()
                             ->directory('campaigns/cover')
                             ->maxSize(5120)
-                            ->helperText('Ảnh bìa chính của chiến dịch'),
+                            ->helperText('Ảnh bìa chính của chiến dịch')
+                            ->visible(fn (Forms\Get $get) => ($get('type') ?? 'coupon') === 'coupon'),
                         Forms\Components\FileUpload::make('product_images')
                             ->label('Ảnh sản phẩm')
                             ->image()
@@ -166,17 +185,36 @@ class CampaignResource extends Resource
                             ->maxSize(5120)
                             ->multiple()
                             ->maxFiles(10)
-                            ->helperText('Có thể upload nhiều ảnh sản phẩm (tối đa 10 ảnh)'),
+                            ->helperText('Có thể upload nhiều ảnh sản phẩm (tối đa 10 ảnh)')
+                            ->visible(fn (Forms\Get $get) => ($get('type') ?? 'coupon') === 'coupon'),
+                        Forms\Components\FileUpload::make('background_image')
+                            ->label('Ảnh nền (Key)')
+                            ->image()
+                            ->directory('campaigns/background')
+                            ->maxSize(10240)
+                            ->helperText('Ảnh nền cho landing page Key (chỉ dành cho chiến dịch Key)')
+                            ->visible(fn (Forms\Get $get) => ($get('type') ?? 'coupon') === 'key'),
+                        Forms\Components\FileUpload::make('key_product_images')
+                            ->label('Ảnh sản phẩm (Key)')
+                            ->image()
+                            ->directory('campaigns/key-products')
+                            ->maxSize(5120)
+                            ->multiple()
+                            ->maxFiles(10)
+                            ->helperText('Ảnh sản phẩm cho landing page Key (tối đa 10 ảnh)')
+                            ->visible(fn (Forms\Get $get) => ($get('type') ?? 'coupon') === 'key'),
                     ])
                     ->collapsible()
                     ->collapsed(),
                 
                 
                 Forms\Components\Section::make('Mã giảm giá')
+                    ->visible(fn (Forms\Get $get) => ($get('type') ?? 'coupon') === 'coupon')
                     ->schema([
                         Forms\Components\Repeater::make('couponItems')
                             ->relationship('couponItems')
                             ->label('Danh sách mã giảm giá')
+                            ->visible(fn (Forms\Get $get) => ($get('type') ?? 'coupon') === 'coupon')
                             ->schema(function () {
                                 $descriptionTemplates = [
                                     'Get up to an additional :offer off the entire website when you check out.',

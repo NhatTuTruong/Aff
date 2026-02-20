@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Pages;
 
+use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Storage;
 use Livewire\WithFileUploads;
@@ -11,15 +12,15 @@ class FileManager extends Page
     use WithFileUploads;
 
     protected static ?string $navigationIcon = 'heroicon-o-folder';
-    
+
     protected static string $view = 'filament.admin.pages.file-manager';
-    
+
     protected static ?string $navigationLabel = 'Quản lý tệp tin tải lên';
-    
+
     protected static ?string $navigationGroup = 'Quản lý';
-    
+
     protected static ?int $navigationSort = 5;
-    
+
     public $currentDirectory = '';
 
     public $directories = [];
@@ -28,6 +29,7 @@ class FileManager extends Page
 
     public $allFiles = [];
 
+    /** @var array<string> */
     public $selectedFiles = [];
 
     public $uploadedFiles = [];
@@ -38,28 +40,58 @@ class FileManager extends Page
 
     public ?string $dateTo = null;
 
+    protected function getUserBasePath(): string
+    {
+        $userCode = Filament::auth()->user()?->code ?? '00000';
+
+        return 'users/' . $userCode;
+    }
+
+    protected function isPathAllowed(string $path): bool
+    {
+        $base = $this->getUserBasePath();
+
+        return $path === $base || str_starts_with($path . '/', $base . '/');
+    }
+
     public function mount(): void
     {
-        $this->loadDirectory();
+        $this->loadDirectory($this->getUserBasePath());
     }
 
     public function loadDirectory(?string $directory = null): void
     {
-        $this->currentDirectory = $directory ?? '';
+        $basePath = $this->getUserBasePath();
+
+        // Chỉ cho phép xem thư mục trong users/{user_code}/...
+        if ($directory === null || $directory === '') {
+            $directory = $basePath;
+        }
+        if (! $this->isPathAllowed($directory)) {
+            $directory = $basePath;
+        }
+
+        $this->currentDirectory = $directory;
+        $this->selectedFiles = [];
         $disk = Storage::disk('public');
-        
-        $path = $this->currentDirectory ?: '';
-        
-        // Get directories
+        $path = $this->currentDirectory;
+
+        if (! $disk->exists($path)) {
+            $disk->makeDirectory($path, 0755, true);
+        }
+
+        // Get directories (chỉ trong phạm vi user)
         $this->directories = collect($disk->directories($path))
+            ->filter(fn (string $dir) => $this->isPathAllowed($dir))
             ->map(function ($dir) {
                 return [
                     'name' => basename($dir),
                     'path' => $dir,
                 ];
             })
+            ->values()
             ->toArray();
-        
+
         // Get files
         $this->allFiles = collect($disk->files($path))
             ->map(function ($file) use ($disk) {
@@ -131,23 +163,76 @@ class FileManager extends Page
 
     public function navigateToDirectory(string $directory): void
     {
-        $this->loadDirectory($directory);
+        if ($this->isPathAllowed($directory)) {
+            $this->loadDirectory($directory);
+        }
+    }
+
+    public function goHome(): void
+    {
+        $this->loadDirectory($this->getUserBasePath());
     }
 
     public function goUp(): void
     {
-        if (empty($this->currentDirectory)) {
+        $basePath = $this->getUserBasePath();
+        if ($this->currentDirectory === $basePath) {
             return;
         }
-        
         $parent = dirname($this->currentDirectory);
-        $this->loadDirectory($parent === '.' ? '' : $parent);
+        $this->loadDirectory($parent === '.' ? $basePath : $parent);
     }
 
     public function deleteFile(string $filePath): void
     {
+        if (! $this->isPathAllowed($filePath)) {
+            return;
+        }
         Storage::disk('public')->delete($filePath);
         $this->loadDirectory($this->currentDirectory);
+    }
+
+    public function deleteSelectedFiles(): void
+    {
+        if (empty($this->selectedFiles)) {
+            \Filament\Notifications\Notification::make()
+                ->warning()
+                ->title('Chưa chọn tệp')
+                ->body('Vui lòng chọn ít nhất một tệp tin để xóa.')
+                ->send();
+
+            return;
+        }
+        $disk = Storage::disk('public');
+        $deleted = 0;
+        foreach ($this->selectedFiles as $filePath) {
+            if ($this->isPathAllowed($filePath) && $disk->exists($filePath)) {
+                $disk->delete($filePath);
+                $deleted++;
+            }
+        }
+        $this->selectedFiles = [];
+        $this->loadDirectory($this->currentDirectory);
+
+        \Filament\Notifications\Notification::make()
+            ->success()
+            ->title('Đã xóa')
+            ->body("Đã xóa {$deleted} tệp tin.")
+            ->send();
+    }
+
+    public function toggleSelectFile(string $filePath): void
+    {
+        if (! $this->isPathAllowed($filePath)) {
+            return;
+        }
+        $key = array_search($filePath, $this->selectedFiles, true);
+        if ($key !== false) {
+            unset($this->selectedFiles[$key]);
+            $this->selectedFiles = array_values($this->selectedFiles);
+        } else {
+            $this->selectedFiles[] = $filePath;
+        }
     }
 
     public function deleteDirectory(string $directoryPath): void

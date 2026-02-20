@@ -19,6 +19,7 @@ class Campaign extends Model
         'import_id',
         'slug',
         'status',
+        'type',
         'title',
         'subtitle',
         'intro',
@@ -31,12 +32,15 @@ class Campaign extends Model
         'logo',
         'cover_image',
         'product_images',
+        'background_image',
+        'key_product_images',
     ];
 
     protected $casts = [
         'benefits' => 'array',
         'coupon_enabled' => 'boolean',
         'product_images' => 'array',
+        'key_product_images' => 'array',
     ];
 
     public function brand(): BelongsTo

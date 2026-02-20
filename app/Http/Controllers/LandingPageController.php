@@ -38,11 +38,25 @@ class LandingPageController extends Controller
         // Track page view
         $pageView = $this->analyticsService->trackPageView($campaign, $request);
 
-        $template = $campaign->template ?? 'default';
+        // Xác định template dựa trên type và template field
+        $template = $campaign->template ?? 'template1';
+        
+        // Nếu type = key nhưng template chưa được set, dùng template_key
+        if ($campaign->type === 'key' && !str_starts_with($template, 'template_key')) {
+            $template = 'template_key';
+        }
+        
+        // Nếu type = coupon nhưng template không phải template1, dùng template1
+        if (($campaign->type ?? 'coupon') === 'coupon' && $template !== 'template1') {
+            $template = 'template1';
+        }
         
         // Check if template exists, fallback to default
         if (!view()->exists("landing.{$template}")) {
-            $template = 'default';
+            $template = ($campaign->type ?? 'coupon') === 'key' ? 'template_key' : 'template1';
+            if (!view()->exists("landing.{$template}")) {
+                $template = 'template1';
+            }
         }
         
         return view("landing.{$template}", compact('campaign', 'pageView'));
