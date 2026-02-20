@@ -74,10 +74,10 @@ class CategoryResource extends Resource
                     ->label('Tên danh mục')
                     ->searchable()
                     ->sortable()
-                    ->limit(15),
+                    ->limit(20),
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable()
-                    ->limit(15),
+                    ->limit(20),
                 Tables\Columns\TextColumn::make('description')
                     ->label('Mô tả')
                     ->limit(50)
@@ -92,8 +92,7 @@ class CategoryResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Ngày tạo')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Ngày cập nhật')
                     ->dateTime()

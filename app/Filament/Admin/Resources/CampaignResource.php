@@ -76,7 +76,7 @@ class CampaignResource extends Resource
                                 Forms\Components\TextInput::make('slug')
                                     ->required(),
                             ])
-                            ->helperText('Chọn brand hoặc tạo mới'),
+                            ->helperText('Chọn cửa hàng hoặc tạo mới'),
                         Forms\Components\TextInput::make('title')
                             ->label('Tiêu đề')
                             ->required()
@@ -94,7 +94,7 @@ class CampaignResource extends Resource
                                 ignoreRecord: true,
                                 modifyRuleUsing: fn (\Illuminate\Validation\Rules\Unique $rule) => $rule->whereNull('deleted_at')
                             )
-                            ->helperText('Tự động tạo từ tiêu đề. Format: {user_code}/{slug}. URL: /review/{user_code}/{slug}'),
+                            ->helperText('Tự động tạo từ tiêu đề. Format: {user_code}/{slug}. URL: /visit/{user_code}/{slug}'),
                         Forms\Components\TextInput::make('affiliate_url')
                             ->label('URL Affiliate')
                             ->required()
@@ -141,8 +141,7 @@ class CampaignResource extends Resource
                             ])
                             ->required()
                             ->default('coupon')
-                            ->live()
-                            ->helperText('Coupon: hiển thị mã giảm giá. Key: landing page hiện đại với ảnh sản phẩm'),
+                            ->live(),
                         Forms\Components\Select::make('template')
                             ->label('Giao diện (Template)')
                             ->options(function (Forms\Get $get) {
@@ -332,7 +331,7 @@ class CampaignResource extends Resource
                     ->label('Tên chiến dịch')
                     ->searchable()
                     ->sortable()
-                    ->limit(15)
+                    ->limit(20)
                     ->wrap(),
                 Tables\Columns\TextColumn::make('landing_url')
                     ->label('URL')
@@ -353,11 +352,11 @@ class CampaignResource extends Resource
                     ->label('Cửa hàng')
                     ->searchable()
                     ->sortable()
-                    ->limit(15),
+                    ->limit(20),
                 Tables\Columns\TextColumn::make('slug')
                     ->label('Slug')
                     ->searchable()
-                    ->limit(15),
+                    ->limit(20),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Trạng thái')
                     ->badge()

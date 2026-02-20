@@ -18,7 +18,8 @@ class EditCampaign extends EditRecord
                 ->label('Lưu')
                 ->formId('form'),
             Actions\Action::make('view_landing')
-                ->label('')
+                ->label('Xem')
+                ->color('success')
                 ->icon('heroicon-o-eye')
                 ->tooltip('Xem trang landing page')
                 ->url(function () {

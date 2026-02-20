@@ -25,9 +25,77 @@
 
 @section('content')
 <div class="legal-container">
-    <h1 class="font-heading">About Us</h1>
-    <p>We are dedicated to providing you with the best deals and offers available online.</p>
-    <p>Our mission is to help you save money while discovering great products and services.</p>
-    <p>We carefully review and curate all offers to ensure quality and value for our visitors.</p>
+  <h1 class="font-heading" >About ReviewHays</h1>
+
+  <p>
+    <strong>ReviewHays</strong> is an independent review and deal discovery platform designed to help consumers make
+    smarter purchasing decisions online.
+  </p>
+
+  <p>
+    In a digital landscape crowded with promotions, discount codes, and sponsored content, our goal is simple:
+    to provide clear, honest, and well-researched reviews alongside verified offers that genuinely add value.
+  </p>
+
+  <h2 class="font-heading" >Our Mission</h2>
+  <p>At ReviewHays, our mission is to:</p>
+  <ul>
+    <li>Deliver transparent and unbiased product reviews</li>
+    <li>Compare products, services, and brands based on real value, not hype</li>
+    <li>Curate up-to-date deals, coupons, and promotions from trusted merchants</li>
+    <li>Help readers save time and money while shopping online</li>
+  </ul>
+
+  <h2 class="font-heading" >How We Create Our Content</h2>
+  <p>
+    Our editorial process focuses on accuracy, relevance, and usefulness.
+  </p>
+  <p>
+    We research and evaluate products and services using official brand information,
+    market comparisons, user feedback, and real-world use cases.
+  </p>
+
+  <p>Each review clearly outlines:</p>
+  <ul>
+    <li>Key features and benefits</li>
+    <li>Pros and cons</li>
+    <li>Who the product or service is best suited for</li>
+    <li>Overall value for money</li>
+  </ul>
+
+  <h2 class="font-heading">Affiliate Disclosure & Transparency</h2>
+  <p>
+    ReviewHays participates in various affiliate marketing programs.
+    This means some links on our website may be affiliate links.
+  </p>
+
+  <p>
+    If you make a purchase through these links, we may earn a small commission at no additional cost to you.
+    Affiliate relationships do not influence our editorial decisions.
+  </p>
+
+  <p>
+    We prioritize accuracy, transparency, and user trust above all else.
+  </p>
+
+  <h2 class="font-heading">Why Trust ReviewHays?</h2>
+  <ul>
+    <li>Independent and research-driven content</li>
+    <li>Regularly updated reviews and deals</li>
+    <li>Clear affiliate disclosure and transparency</li>
+    <li>No misleading claims or exaggerated promotions</li>
+    <li>Focused on long-term user value</li>
+  </ul>
+
+  <h2 class="font-heading">Get in Touch</h2>
+  <p>
+    We welcome feedback, questions, and collaboration inquiries.
+    Please visit our Contact page to reach out to us.
+  </p>
+
+  <p>
+    Thank you for choosing <strong>ReviewHays</strong> as your trusted source for reviews, comparisons, and savings.
+  </p>
+</section>
 </div>
 @endsection

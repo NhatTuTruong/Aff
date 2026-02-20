@@ -75,9 +75,9 @@ class ClickResource extends Resource
                     ->label('Chiến dịch')
                     ->searchable()
                     ->sortable()
-                    ->limit(15),
+                    ->limit(20),
                 Tables\Columns\TextColumn::make('campaign.brand.name')
-                    ->limit(15)
+                    ->limit(20)
                     ->label('Cửa hàng')
                     ->searchable()
                     ->sortable(),

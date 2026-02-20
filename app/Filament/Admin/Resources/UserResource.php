@@ -63,13 +63,6 @@ class UserResource extends Resource
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->helperText(fn ($record) => $record ? 'Để trống nếu không muốn thay đổi mật khẩu' : 'Nhập mật khẩu cho user mới')
                     ->maxLength(255),
-                Forms\Components\TextInput::make('password_hash')
-                    ->label('Password Hash (chỉ đọc)')
-                    ->default(fn ($record) => $record?->password ?? '')
-                    ->disabled()
-                    ->dehydrated(false)
-                    ->visible(fn ($record) => $record !== null)
-                    ->helperText('Hash của mật khẩu hiện tại (không thể decrypt)'),
             ]);
     }
 
@@ -86,23 +79,18 @@ class UserResource extends Resource
                 Tables\Columns\IconColumn::make('is_admin')
                     ->label('Admin')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('password')
-                    ->label('Password Hash')
-                    ->limit(30)
-                    ->copyable()
-                    ->copyMessage('Đã sao chép password hash')
-                    ->tooltip('Click để sao chép')
-                    ->searchable(false),
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->dateTime()
+                    ->label('Ngày xác minh')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Ngày tạo'),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
+                    ->label('Ngày cập nhật')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([

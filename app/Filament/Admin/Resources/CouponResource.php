@@ -61,12 +61,12 @@ class CouponResource extends Resource
                     ->label('Chiến dịch')
                     ->searchable()
                     ->sortable()
-                    ->limit(15),
+                    ->limit(25),
                 Tables\Columns\TextColumn::make('campaign.brand.name')
                     ->label('Cửa hàng')
                     ->searchable()
                     ->sortable()
-                    ->limit(15),
+                    ->limit(20),
                 Tables\Columns\TextColumn::make('code')
                     ->label('Mã giảm giá')
                     ->searchable(),
@@ -75,7 +75,7 @@ class CouponResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('description')
                     ->label('Mô tả')
-                    ->limit(60)
+                    ->limit(25)
                     ->wrap(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Ngày tạo')

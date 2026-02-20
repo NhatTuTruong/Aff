@@ -21,8 +21,8 @@ Route::get('/login', function () {
     return redirect('/admin/login');
 })->name('login');
 
-// Landing Pages - Format: /review/{user_code}/{slug}
-Route::get('/review/{userCode}/{slug}', [App\Http\Controllers\LandingPageController::class, 'show'])
+// Landing Pages - Format: /visit/{user_code}/{slug}
+Route::get('/visit/{userCode}/{slug}', [App\Http\Controllers\LandingPageController::class, 'show'])
     ->name('landing.show')
     ->where(['userCode' => '[0-9]{5}', 'slug' => '[a-z0-9-]+']);
 

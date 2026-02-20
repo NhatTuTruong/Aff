@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('campaigns_brands_categories_tables', function (Blueprint $table) {
-            //
+            $table->foreignId('user_id')->nullable()->after('id')->constrained()->onDelete('set null');
         });
     }
 

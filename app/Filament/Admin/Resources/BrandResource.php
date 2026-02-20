@@ -292,15 +292,15 @@ class BrandResource extends Resource
                     ->label('Tên cửa hàng')
                     ->searchable()
                     ->sortable()
-                    ->limit(15),
+                    ->limit(20),
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable()
-                    ->limit(15),
+                    ->limit(20),
                 Tables\Columns\TextColumn::make('category.name')
                     ->label('Danh mục')
                     ->searchable()
                     ->sortable()
-                    ->limit(15),
+                    ->limit(20),
                 Tables\Columns\TextColumn::make('events')
                     ->searchable(),
                 Tables\Columns\IconColumn::make('approved')
@@ -309,8 +309,7 @@ class BrandResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Ngày tạo')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Ngày cập nhật')
                     ->dateTime()
