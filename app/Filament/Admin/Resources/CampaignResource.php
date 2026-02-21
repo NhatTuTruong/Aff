@@ -42,7 +42,14 @@ class CampaignResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('brand_id')
                             ->label('Cửa hàng')
-                            ->relationship('brand', 'name')
+                            ->relationship(
+                                'brand',
+                                'name',
+                                modifyQueryUsing: function ($query) {
+                                    $userId = Filament::auth()->id();
+                                    return $userId ? $query->where('brands.user_id', $userId) : $query;
+                                }
+                            )
                             ->searchable()
                             ->preload()
                             ->live()

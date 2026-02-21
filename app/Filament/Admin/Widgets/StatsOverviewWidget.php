@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Widgets;
 
+use App\Models\Blog;
 use App\Models\Brand;
 use App\Models\Campaign;
 use App\Models\Click;
@@ -14,6 +15,12 @@ use Illuminate\Database\Eloquent\Builder;
 class StatsOverviewWidget extends BaseWidget
 {
     protected static ?int $sort = 1;
+
+    /** 6 block → 2 hàng x 3 cột, không thừa chỗ trống */
+    protected function getColumns(): int
+    {
+        return 3;
+    }
 
     protected function getStats(): array
     {
@@ -65,6 +72,11 @@ class StatsOverviewWidget extends BaseWidget
                 ->description('Click Through Rate')
                 ->descriptionIcon('heroicon-m-chart-bar')
                 ->color($ctr >= 5 ? 'success' : ($ctr >= 2 ? 'warning' : 'danger')),
+
+            Stat::make('Số bài blog', Blog::count())
+                ->description('Bài viết blog')
+                ->descriptionIcon('heroicon-m-document-text')
+                ->color('gray'),
         ];
     }
 

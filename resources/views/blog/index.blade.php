@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Review Blog - ' . config('app.name'))
-@section('description', 'Latest store reviews, evaluations and coupon updates.')
+@section('title', 'Blog - ' . config('app.name'))
+@section('description', 'Latest articles, coupon updates and deals.')
 
 @push('styles')
 <style>
@@ -50,12 +50,6 @@
         font-size: 0.75rem;
     }
     .post-card .content { flex: 1; min-width: 0; }
-    .post-card .brand {
-        font-size: 0.8rem;
-        color: var(--accent);
-        font-weight: 500;
-        margin-bottom: 0.25rem;
-    }
     .post-card h2 {
         font-family: 'Space Grotesk', sans-serif;
         font-size: 1.15rem;
@@ -101,8 +95,8 @@
 @section('content')
     <header class="page-header">
         <div class="container">
-            <h1 class="font-heading">Review Blog</h1>
-            <p>Store reviews, coupon codes and the latest articles.</p>
+            <h1 class="font-heading">Blog</h1>
+            <p>Latest articles, coupon updates and deals.</p>
         </div>
     </header>
 
@@ -110,22 +104,17 @@
         <div class="container">
             @if($posts->count() > 0)
                 @foreach($posts as $post)
-                    @php
-                        $slugParts = explode('/', $post->slug, 2);
-                        $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
-                        $slugPart = count($slugParts) === 2 ? $slugParts[1] : $post->slug;
-                    @endphp
-                    <a href="{{ route('landing.show', ['userCode' => $userCode, 'slug' => $slugPart]) }}" class="post-card">
-                        @if($post->brand?->image)
-                            <img src="{{ asset('storage/' . $post->brand->image) }}" alt="" class="thumb">
+                    <a href="{{ route('blog.show', $post->slug) }}" class="post-card">
+                        @if($post->featured_image)
+                            <img src="{{ asset('storage/' . $post->featured_image) }}" alt="" class="thumb" loading="lazy">
                         @else
-                            <div class="thumb-placeholder">Review</div>
+                            <div class="thumb-placeholder">Blog</div>
                         @endif
                         <div class="content">
-                            @if($post->brand)<span class="brand">{{ $post->brand->name }}</span>@endif
-                            <h2>{{ $post->title ?: 'Review ' . ($post->brand?->name ?? $post->slug) }}</h2>
-                            @if($post->subtitle)<p class="excerpt">{{ Str::limit(strip_tags($post->subtitle), 120) }}</p>@endif
-                            @if($post->intro)<p class="excerpt">{{ Str::limit(strip_tags($post->intro), 120) }}</p>@endif
+                            <h2>{{ $post->title }}</h2>
+                            @if($post->content)
+                                <p class="excerpt">{{ Str::limit(strip_tags($post->content), 120) }}</p>
+                            @endif
                             <p class="meta">{{ $post->created_at?->format('d/m/Y') }}</p>
                         </div>
                     </a>
@@ -135,7 +124,7 @@
                 </div>
             @else
                 <div class="empty-state">
-                    No review articles available yet. Please check back later!
+                    No blog posts available yet. Please check back later!
                 </div>
             @endif
         </div>

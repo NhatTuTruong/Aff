@@ -188,7 +188,40 @@
     }
     #coupons { scroll-margin-top: 5rem; }
     #stores { scroll-margin-top: 5rem; }
+    #blog { scroll-margin-top: 5rem; }
+    #categories { scroll-margin-top: 5rem; }
 
+    /* Popular Categories - dark section, pill tags */
+    .popular-categories {
+        padding: 4rem 0;
+        background: #0a0a0a;
+        color: #fff;
+    }
+    .popular-categories .section-title { color: #fff; }
+    .popular-categories .section-title::before { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+    .categories-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem 1.25rem;
+    }
+    .category-pill {
+        display: inline-block;
+        padding: 0.6rem 1.25rem;
+        border: 1px solid rgba(255,255,255,0.6);
+        border-radius: 9999px;
+        color: #fff;
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: border-color 0.2s, background 0.2s;
+    }
+    .category-pill:hover {
+        border-color: #22c55e;
+        background: rgba(34, 197, 94, 0.1);
+    }
+
+    /* Featured Stores - carousel 1 row, only image rounded, name below */
     .stores-carousel-wrap {
         overflow: hidden;
         margin: 0 -1.5rem;
@@ -197,7 +230,7 @@
     .stores-carousel-track {
         display: flex;
         width: max-content;
-        animation: storesScroll 30s linear infinite;
+        animation: storesScroll 40s linear infinite;
     }
     .stores-carousel-track:hover {
         animation-play-state: paused;
@@ -208,201 +241,258 @@
     }
     .stores-carousel {
         display: flex;
-        gap: 1rem;
-        padding: 0.5rem 0;
+        align-items: flex-start;
+        gap: 2rem;
+        padding: 0.5rem 1rem 0.5rem 0;
     }
-    .store-card {
-        background: white;
-        border: 2px solid var(--border);
-        border-radius: 16px;
-        padding: 1.5rem;
-        text-align: center;
-        text-decoration: none;
-        color: inherit;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    .store-carousel-item {
+        flex-shrink: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
-        flex-shrink: 0;
-        width: 160px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        position: relative;
-        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        width: 90px;
+        transition: transform 0.2s ease;
     }
-    .store-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, var(--accent), var(--accent-hover));
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
+    .store-carousel-item:hover {
+        transform: translateY(-2px);
     }
-    .store-card:hover::before {
-        transform: scaleX(1);
-    }
-    .store-card:hover {
-        border-color: var(--accent);
-        background: white;
-        transform: translateY(-4px) scale(1.02);
-        box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.15), 0 4px 6px -2px rgba(34, 197, 94, 0.1);
-    }
-    .store-card img {
+    .store-carousel-img-wrap {
         width: 72px;
         height: 72px;
-        object-fit: contain;
-        border-radius: 12px;
-        margin-bottom: 1rem;
+        border-radius: 50%;
+        overflow: hidden;
         background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-        padding: 0.5rem;
-        transition: transform 0.3s ease;
         border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+        flex-shrink: 0;
     }
-    .store-card:hover img {
-        transform: scale(1.1);
+    .store-carousel-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 6px;
     }
-    .store-card .name {
-        font-weight: 600;
-        font-size: 1rem;
-        margin-bottom: 0.35rem;
-        color: var(--text-dark);
-    }
-    .store-card .category {
-        font-size: 0.85rem;
+    .store-carousel-placeholder {
+        font-size: 1.25rem;
+        font-weight: 700;
         color: var(--text-muted);
-        padding: 0.25rem 0.75rem;
-        background: var(--surface);
-        border-radius: 20px;
-        display: inline-block;
+    }
+    .store-carousel-name {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        text-align: center;
+        line-height: 1.25;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
     }
 
-    .coupons-grid {
+    /* Latest Blog Posts - home grid */
+    .posts-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 1.5rem;
     }
-    .coupon-card {
-        background: white;
-        border: 2px solid var(--border);
-        border-radius: 16px;
-        padding: 1.5rem;
+    .post-card-home {
         display: flex;
-        align-items: flex-start;
-        gap: 1.25rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        gap: 1rem;
+        padding: 1rem;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .post-card-home:hover {
+        border-color: var(--accent);
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
+    }
+    .post-card-home-thumb {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 10px;
+        flex-shrink: 0;
+        background: var(--surface);
+    }
+    .post-card-home-thumb-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+    }
+    .post-card-home-content { flex: 1; min-width: 0; }
+    .post-card-home-brand {
+        font-size: 0.8rem;
+        color: var(--accent);
+        font-weight: 500;
+    }
+    .post-card-home-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0.25rem 0 0.35rem;
+        line-height: 1.35;
+        color: var(--text-dark);
+    }
+    .post-card-home-meta {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    /* Hot Coupons - compact professional cards */
+    .coupons-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+    .coupon-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
         position: relative;
         overflow: hidden;
     }
-    .coupon-card::after {
+    .coupon-card::before {
         content: '';
         position: absolute;
+        left: 0;
         top: 0;
-        right: 0;
-        width: 60px;
-        height: 60px;
-        background: radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
-        border-radius: 0 16px 0 100%;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, var(--accent), var(--accent-hover));
+        border-radius: 4px 0 0 4px;
         opacity: 0;
-        transition: opacity 0.3s ease;
+        transition: opacity 0.2s;
     }
-    .coupon-card:hover::after {
+    .coupon-card:hover {
+        border-color: var(--accent);
+        box-shadow: 0 4px 16px rgba(34, 197, 94, 0.08);
+    }
+    .coupon-card:hover::before {
         opacity: 1;
     }
-    .coupon-card:hover { 
-        border-color: var(--accent); 
-        background: white;
-        transform: translateY(-4px);
-        box-shadow: 0 12px 30px -8px rgba(34, 197, 94, 0.2), 0 4px 6px -2px rgba(34, 197, 94, 0.1);
-    }
-    .coupon-card .brand-logo {
-        width: 56px;
-        height: 56px;
-        object-fit: contain;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-        flex-shrink: 0;
-        padding: 0.5rem;
-        border: 1px solid var(--border);
-        transition: transform 0.3s ease;
-    }
-    .coupon-card:hover .brand-logo {
-        transform: scale(1.1);
-    }
-    .coupon-card .body { 
-        flex: 1; 
-        min-width: 0;
-        position: relative;
-        z-index: 1;
-    }
-    .coupon-card .brand-name {
-        font-weight: 600;
-        font-size: 1.05rem;
-        margin-bottom: 0.5rem;
-        color: var(--text-dark);
-    }
-    .coupon-card .code {
-        display: inline-flex;
+    .coupon-card-header {
+        display: flex;
         align-items: center;
-        gap: 0.5rem;
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border: 2px dashed var(--accent);
-        color: var(--accent);
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        margin-top: 0.75rem;
-        font-family: 'Space Grotesk', monospace;
-        letter-spacing: 0.05em;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        position: relative;
-    }
-    .coupon-card .code:hover {
-        background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
-        transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-    }
-    .coupon-card .code::after {
-        content: '📋';
-        font-size: 0.85rem;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-    .coupon-card .code:hover::after {
-        opacity: 1;
-    }
-    .coupon-card .offer {
-        font-size: 0.95rem;
-        color: var(--text-muted);
-        margin-top: 0.5rem;
-        font-weight: 500;
-    }
-    .coupon-card .link {
-        color: var(--accent);
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-decoration: none;
-        margin-top: 0.75rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        padding: 0.5rem 0;
-    }
-    .coupon-card .link:hover { 
-        color: var(--accent-hover);
         gap: 0.75rem;
+        margin-bottom: 0.5rem;
     }
-    .coupon-card .link::after {
-        content: '→';
-        transition: transform 0.3s ease;
+    .coupon-card-logo {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+        border-radius: 10px;
+        background: var(--surface);
+        padding: 4px;
+        border: 1px solid var(--border);
+        flex-shrink: 0;
     }
-    .coupon-card .link:hover::after {
-        transform: translateX(4px);
+    .coupon-card-logo-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-muted);
+    }
+    .coupon-card-brand {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text-dark);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .coupon-card-offer {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin: 0 0 0.75rem;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .coupon-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .coupon-card-code {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.65rem;
+        background: #fefce8;
+        border: 1px dashed #ca8a04;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #a16207;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+        font-family: ui-monospace, monospace;
+    }
+    .coupon-card-code:hover {
+        background: #fef9c3;
+        border-color: var(--accent);
+        color: #854d0e;
+    }
+    .coupon-card-code.copied {
+        background: #dcfce7;
+        border-color: var(--accent);
+        color: #166534;
+    }
+    .coupon-card-code-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        opacity: 0.9;
+    }
+    .coupon-card-code-value {
+        letter-spacing: 0.02em;
+    }
+    .coupon-card-code-copy {
+        font-size: 0.7rem;
+        opacity: 0.8;
+    }
+    .coupon-card-code.copied .coupon-card-code-copy {
+        display: none;
+    }
+    .coupon-card-code.copied::after {
+        content: '✓';
+        margin-left: 0.25rem;
+        color: var(--accent);
+    }
+    .coupon-card-cta {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.4rem 0.85rem;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+        color: #fff;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: opacity 0.2s, transform 0.2s;
+    }
+    .coupon-card-cta:hover {
+        opacity: 0.95;
+        transform: translateY(-1px);
     }
 
     .pagination-wrap {
@@ -462,11 +552,24 @@
             border-radius: 0 0 12px 12px;
         }
         .stores-carousel {
+            gap: 1.25rem;
+        }
+        .store-carousel-item {
+            width: 76px;
+        }
+        .store-carousel-img-wrap {
+            width: 60px;
+            height: 60px;
+        }
+        .store-carousel-name {
+            font-size: 0.75rem;
+        }
+        .categories-wrap {
             gap: 0.75rem;
         }
-        .store-card {
-            width: 140px;
-            padding: 1.25rem;
+        .category-pill {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
         }
         .coupons-grid {
             grid-template-columns: 1fr;
@@ -488,16 +591,12 @@
             transform: translateY(0);
         }
     }
-    .store-card, .coupon-card {
+    .coupon-card {
         animation: fadeInUp 0.5s ease-out backwards;
     }
-    .store-card:nth-child(1) { animation-delay: 0.05s; }
-    .store-card:nth-child(2) { animation-delay: 0.1s; }
-    .store-card:nth-child(3) { animation-delay: 0.15s; }
-    .store-card:nth-child(4) { animation-delay: 0.2s; }
-    .coupon-card:nth-child(1) { animation-delay: 0.1s; }
-    .coupon-card:nth-child(2) { animation-delay: 0.15s; }
-    .coupon-card:nth-child(3) { animation-delay: 0.2s; }
+    .coupon-card:nth-child(1) { animation-delay: 0.05s; }
+    .coupon-card:nth-child(2) { animation-delay: 0.1s; }
+    .coupon-card:nth-child(3) { animation-delay: 0.15s; }
 </style>
 @endpush
 
@@ -550,7 +649,8 @@
                         <div class="stores-carousel">
                             @foreach($brands as $brand)
                                 @php 
-                                    $reviewSlug = $brand->campaigns->first()?->slug;
+                                    $campaign = $brand->campaigns->first();
+                                    $reviewSlug = $campaign?->slug;
                                     if ($reviewSlug) {
                                         $slugParts = explode('/', $reviewSlug, 2);
                                         $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
@@ -560,26 +660,23 @@
                                         $reviewUrl = url('/') . '?q=' . urlencode($brand->name);
                                     }
                                 @endphp
-                                <a href="{{ $reviewUrl }}" class="store-card">
-                                    @if($brand->image)
-                                        <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" loading="lazy">
-                                    @else
-                                        <div style="width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:1.25rem;font-weight:700;margin-bottom:1rem;border:1px solid var(--border);">{{ Str::limit($brand->name, 2) }}</div>
-                                    @endif
-                                    <span class="name">{{ $brand->name }}</span>
-                                    @if($brand->category)
-                                        <span class="category">{{ $brand->category->name }}</span>
-                                    @endif
-                                    @if($reviewSlug)
-                                        <span style="margin-top:0.5rem;font-size:0.75rem;color:var(--accent);font-weight:600;">View Deal →</span>
-                                    @endif
+                                <a href="{{ $reviewUrl }}" class="store-carousel-item" title="{{ $brand->name }}">
+                                    <span class="store-carousel-img-wrap">
+                                        @if($brand->image)
+                                            <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" loading="lazy">
+                                        @else
+                                            <span class="store-carousel-placeholder">{{ Str::limit($brand->name, 2) }}</span>
+                                        @endif
+                                    </span>
+                                    <span class="store-carousel-name">{{ $brand->name }}</span>
                                 </a>
                             @endforeach
                         </div>
                         <div class="stores-carousel">
                             @foreach($brands as $brand)
                                 @php 
-                                    $reviewSlug = $brand->campaigns->first()?->slug;
+                                    $campaign = $brand->campaigns->first();
+                                    $reviewSlug = $campaign?->slug;
                                     if ($reviewSlug) {
                                         $slugParts = explode('/', $reviewSlug, 2);
                                         $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
@@ -589,19 +686,15 @@
                                         $reviewUrl = url('/') . '?q=' . urlencode($brand->name);
                                     }
                                 @endphp
-                                <a href="{{ $reviewUrl }}" class="store-card">
-                                    @if($brand->image)
-                                        <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" loading="lazy">
-                                    @else
-                                        <div style="width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:1.25rem;font-weight:700;margin-bottom:1rem;border:1px solid var(--border);">{{ Str::limit($brand->name, 2) }}</div>
-                                    @endif
-                                    <span class="name">{{ $brand->name }}</span>
-                                    @if($brand->category)
-                                        <span class="category">{{ $brand->category->name }}</span>
-                                    @endif
-                                    @if($reviewSlug)
-                                        <span style="margin-top:0.5rem;font-size:0.75rem;color:var(--accent);font-weight:600;">View Deal →</span>
-                                    @endif
+                                <a href="{{ $reviewUrl }}" class="store-carousel-item" title="{{ $brand->name }}">
+                                    <span class="store-carousel-img-wrap">
+                                        @if($brand->image)
+                                            <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" loading="lazy">
+                                        @else
+                                            <span class="store-carousel-placeholder">{{ Str::limit($brand->name, 2) }}</span>
+                                        @endif
+                                    </span>
+                                    <span class="store-carousel-name">{{ $brand->name }}</span>
                                 </a>
                             @endforeach
                         </div>
@@ -631,6 +724,33 @@
         </div>
     </section>
 
+    @if(isset($latestPosts) && $latestPosts->isNotEmpty())
+    <section class="section" id="blog">
+        <div class="container">
+            <h2 class="section-title">Latest Blog Posts</h2>
+            <p class="section-subtitle">Recent articles and updates</p>
+            <div class="posts-grid">
+                @foreach($latestPosts as $post)
+                    <a href="{{ route('blog.show', $post->slug) }}" class="post-card-home">
+                        @if($post->featured_image)
+                            <img src="{{ asset('storage/' . $post->featured_image) }}" alt="" class="post-card-home-thumb" loading="lazy">
+                        @else
+                            <div class="post-card-home-thumb post-card-home-thumb-placeholder">Blog</div>
+                        @endif
+                        <div class="post-card-home-content">
+                            <h3 class="post-card-home-title">{{ $post->title }}</h3>
+                            <p class="post-card-home-meta">{{ $post->created_at?->format('d M Y') }}</p>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+            <p class="section-subtitle" style="margin-top:1.5rem;">
+                <a href="{{ route('blog.index') }}" style="color:var(--accent);font-weight:600;">View all posts →</a>
+            </p>
+        </div>
+    </section>
+    @endif
+
     @if($hotCoupons->isNotEmpty())
     <section class="section" id="coupons">
         <div class="container">
@@ -640,21 +760,25 @@
                 @foreach($hotCoupons as $coupon)
                     @php $campaign = $coupon->campaign; $brand = $campaign?->brand; @endphp
                     @if($brand)
-                    <div class="coupon-card">
-                        @if($brand->image)
-                            <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" class="brand-logo" loading="lazy">
-                        @else
-                            <div class="brand-logo" style="display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.875rem;font-weight:600;">{{ Str::limit($brand->name, 2) }}</div>
-                        @endif
-                        <div class="body">
-                            <div class="brand-name">{{ $brand->name }}</div>
-                            @if($coupon->code)
-                                <code class="code" onclick="navigator.clipboard.writeText('{{ $coupon->code }}'); this.style.background='linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)'; setTimeout(() => this.style.background='', 1000);" title="Click to copy">
-                                    {{ $coupon->code }}
-                                </code>
+                    <article class="coupon-card">
+                        <div class="coupon-card-header">
+                            @if($brand->image)
+                                <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" class="coupon-card-logo" loading="lazy">
+                            @else
+                                <div class="coupon-card-logo coupon-card-logo-placeholder">{{ Str::limit($brand->name, 2) }}</div>
                             @endif
-                            @if($coupon->offer)
-                                <div class="offer">🎁 {{ $coupon->offer }}</div>
+                            <div class="coupon-card-brand">{{ $brand->name }}</div>
+                        </div>
+                        @if($coupon->offer)
+                            <p class="coupon-card-offer">{{ $coupon->offer }}</p>
+                        @endif
+                        <div class="coupon-card-actions">
+                            @if($coupon->code)
+                                <button type="button" class="coupon-card-code" onclick="navigator.clipboard.writeText('{{ $coupon->code }}'); this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 1200);" title="Click to copy">
+                                    <span class="coupon-card-code-label">Code</span>
+                                    <span class="coupon-card-code-value">{{ $coupon->code }}</span>
+                                    <span class="coupon-card-code-copy">Copy</span>
+                                </button>
                             @endif
                             @if($campaign && $campaign->affiliate_url)
                                 @php
@@ -662,11 +786,29 @@
                                     $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
                                     $slugPart = count($slugParts) === 2 ? $slugParts[1] : $campaign->slug;
                                 @endphp
-                                <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}" class="link" target="_blank" rel="noopener">Get Deal</a>
+                                <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}" class="coupon-card-cta" target="_blank" rel="noopener">Get Deal</a>
                             @endif
                         </div>
-                    </div>
+                    </article>
                     @endif
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
+    @if(isset($popularCategories) && $popularCategories->isNotEmpty())
+    <section class="popular-categories" id="categories">
+        <div class="container">
+            <h2 class="section-title">Popular Categories</h2>
+            <div class="categories-wrap">
+                @foreach($popularCategories as $cat)
+                    @php
+                        $catName = is_object($cat) ? $cat->name : $cat['name'];
+                        $catSlug = is_object($cat) ? ($cat->slug ?? '') : ($cat['slug'] ?? '');
+                        $url = $catSlug ? url('/?cat=' . $catSlug) . '#stores' : url('/') . '#stores';
+                    @endphp
+                    <a href="{{ $url }}" class="category-pill">{{ $catName }}</a>
                 @endforeach
             </div>
         </div>

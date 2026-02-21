@@ -19,7 +19,7 @@ class BlockedIpResource extends Resource
     protected static ?string $navigationLabel = 'IP bị chặn';
     protected static ?string $modelLabel = 'IP bị chặn';
     protected static ?string $pluralModelLabel = 'IP bị chặn';
-    protected static ?string $navigationGroup = 'Clicks';
+    protected static ?string $navigationGroup = 'Thống Kê';
     protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form

@@ -31,7 +31,7 @@ class ClickResource extends Resource
     
     protected static ?string $pluralModelLabel = 'Clicks';
     
-    protected static ?string $navigationGroup = 'Clicks';
+    protected static ?string $navigationGroup = 'Thống Kê';
     
     protected static ?int $navigationSort = 1;
 

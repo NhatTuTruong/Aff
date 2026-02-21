@@ -14,7 +14,8 @@ class CampaignsChartWidget extends ChartWidget
     
     protected static ?string $description = 'Biểu đồ thể hiện số lượng chiến dịch được tạo theo từng tháng';
     
-    protected int | string | array $columnSpan = 'full';
+    /** Cùng hàng với chart khác trên xl để không thừa chỗ trống */
+protected int | string | array $columnSpan = ['default' => 'full', 'xl' => 6];
     
     protected static ?int $sort = 2;
     

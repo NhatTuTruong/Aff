@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Category;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,6 +12,18 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements FilamentUser
 {
+    /** Danh mục mặc định cho user mới (affiliate) */
+    public static function defaultCategoryNames(): array
+    {
+        return config('default_categories.names', [
+            'Webhosting', 'Travel & Hotel', 'Shoes', 'Sports', 'Stationery', 'Skin Care', 'Pets',
+            'Jewelry & Watches', 'Garden', 'Health & Beauty', 'Toys', 'Gifts & Flowers', 'Food & Beverages',
+            'Event Planners', 'Electronics', 'Departmental', 'Car', 'Business', 'Books', 'Kids',
+            'Accessories', 'Automotive', 'Aviation Assistance', 'Art & Crafts', 'Apparel & Clothing',
+            'Tech', 'Home Accessories', 'Fitness',
+        ]);
+    }
+
     use HasFactory, Notifiable;
     
     public function canAccessPanel(Panel $panel): bool
@@ -73,6 +86,23 @@ class User extends Authenticatable implements FilamentUser
                 } catch (\Exception $e) {
                     // Nếu column chưa tồn tại, bỏ qua (migration sẽ xử lý)
                 }
+            }
+        });
+
+        static::created(function (User $user) {
+            try {
+                $names = self::defaultCategoryNames();
+                $userCode = $user->code ?? '00000';
+                foreach ($names as $name) {
+                    Category::create([
+                        'user_id' => $user->id,
+                        'name' => $name,
+                        'slug' => $userCode . '/' . \Illuminate\Support\Str::slug($name),
+                        'is_active' => true,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                report($e);
             }
         });
     }

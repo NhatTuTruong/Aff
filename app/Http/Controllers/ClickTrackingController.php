@@ -18,15 +18,10 @@ class ClickTrackingController extends Controller
 
     public function redirect($userCode, $slug, Request $request)
     {
-        // Tìm user theo code
-        $user = \App\Models\User::where('code', $userCode)->firstOrFail();
-        
-        // Tìm campaign theo slug đầy đủ (user_code/slug)
+        // Tìm campaign theo slug đầy đủ (user_code/slug) - không phụ thuộc user để tránh 404 khi user bị xóa
         $fullSlug = "{$userCode}/{$slug}";
         $campaign = Campaign::where('slug', $fullSlug)
-            ->whereHas('brand', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
+            ->whereHas('brand')
             ->firstOrFail();
         
         // Only restrict to active in production

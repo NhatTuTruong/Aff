@@ -25,7 +25,7 @@ class CampaignStats extends Page implements HasTable
 
     protected static ?string $title = 'Thống kê Chiến dịch theo Clicks';
 
-    protected static ?string $navigationGroup = 'Clicks';
+    protected static ?string $navigationGroup = 'Thống Kê';
 
     protected static ?int $navigationSort = 2;
 

@@ -21,9 +21,10 @@
 
 @section('content')
 <div class="legal-container">
-    <h1 class="font-heading">Contact Us</h1>
-    <p>If you have any questions or concerns, please feel free to reach out to us.</p>
-    <p>Email: {{ config('mail.from.address', 'contact@reviewshays.com') }}</p>
-    <p>We aim to respond to all inquiries within 24-48 hours.</p>
+    @php
+        $content = \App\Models\SiteContent::get('page_contact', \App\Models\SiteContent::defaultPageContact());
+        $content = str_replace('[SITE_EMAIL]', config('mail.from.address', 'contact@reviewshays.com'), $content);
+    @endphp
+    {!! $content !!}
 </div>
 @endsection

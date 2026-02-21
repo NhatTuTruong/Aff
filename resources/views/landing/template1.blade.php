@@ -158,58 +158,64 @@
             justify-content:center;
             margin-bottom:10px;font-size:0.8rem;
         }
-        .stars { color:#fde047; }
+        .stars { color:#fde047; font-size:25px; }
         .brand-meta { font-size:0.75rem;opacity:0.9;text-align:center;margin-bottom:4px; }
-        .stats-list {
-            border-top:1px solid #e5e7eb;
-            margin-top:10px;
-            padding-top:10px;
-            font-size:0.8rem;
+        /* Stats card (Working Codes, Success Rate, Total Saved) */
+        .stats-card {
+            background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-top: 12px;
+            border: 1px solid #e5e7eb;
         }
+        .stats-list { font-size: 0.8rem; }
         .stats-row {
-            display:flex;
-            justify-content:space-between;
-            padding:4px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            gap: 10px;
+            border-bottom: 1px solid #e5e7eb;
         }
-        .stats-label { color:var(--text-light); }
-        .stats-value { font-weight:600; }
-        .sidebar-actions {
-            margin-top:14px;
-            display:flex;
-            gap:8px;
-        }
-        .btn-outline,
-        .btn-solid {
-            flex:1;
-            border-radius:999px;
-            padding:10px 14px;
-            font-size:0.9rem;
-            font-weight:700;
-            cursor:pointer;
-            border:1px solid transparent;
-            text-align:center;
-            transition: all 0.2s ease;
-        }
-        .btn-outline {
-            border-color:#d1d5db;
-            background:#fff;
+        .stats-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .stats-row:first-child { padding-top: 0; }
+        .stats-label { color: var(--text-light); display: flex; align-items: center; gap: 8px; }
+        .stats-label .stats-icon { font-size: 1rem; opacity: 0.9; }
+        .stats-value { font-weight: 700; font-size: 1rem; color: var(--text-dark); }
+        /* Quick Menu */
+        .quick-menu { margin-top: 20px; }
+        .quick-menu-title { font-size: 0.95rem; font-weight: 700; color: var(--text-dark); margin-bottom: 12px; }
+        .quick-menu-list { list-style: none; padding: 0; margin: 0; }
+        .quick-menu-list li { margin-bottom: 6px; }
+        .quick-menu-list a {
             color: var(--text-dark);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: block;
+            padding: 6px 0;
+            transition: color 0.2s;
         }
-        .btn-outline:hover {
-            background:#f9fafb;
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-        .btn-solid {
-            background:var(--primary);
-            color:#fff;
+        .quick-menu-list a:hover { color: var(--primary); }
+        .quick-menu-shop-now {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 14px;
+            padding: 12px 18px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.2s;
             box-shadow: 0 4px 12px rgba(34,197,94,0.3);
         }
-        .btn-solid:hover { 
-            background:var(--primary-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(34,197,94,0.4);
-        }
+        .quick-menu-shop-now:hover { background: var(--primary-dark); color: #fff; transform: translateY(-1px); }
 
         .right-column { display:flex;flex-direction:column;gap:18px; }
 
@@ -268,7 +274,7 @@
             box-shadow: 0 2px 8px rgba(34,197,94,0.3);
         }
 
-        .coupon-list { display:flex;flex-direction:column;gap:16px;margin-top:6px; }
+        .coupon-list { display:flex;flex-direction:column;gap:16px;margin-top:6px;margin-bottom:16px; }
         .coupon-row {
             background:#fff;border-radius:20px;
             box-shadow:0 4px 16px rgba(15,23,42,0.08);
@@ -388,6 +394,20 @@
             content: '↗';
             font-size: 0.85rem;
         }
+        .coupon-revealed-code {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: ui-monospace, monospace;
+            letter-spacing: 0.05em;
+            background: #f0fdf4;
+            color: var(--primary-dark);
+            border: 1px dashed var(--primary);
+            border-radius: 8px;
+            white-space: nowrap;
+        }
         .staff-pick-badge {
             display: inline-flex;
             align-items: center;
@@ -441,27 +461,6 @@
         .coupon-desc .show-more:hover {
             text-decoration: underline;
         }
-        .coupon-verification {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.75rem;
-            color: #9ca3af;
-            margin-top: auto;
-            padding-top: 6px;
-            border-top: 1px solid #f3f4f6;
-        }
-        .coupon-verification::before {
-            content: '👤';
-            font-size: 0.85rem;
-        }
-        .coupon-verification::after {
-            content: '▼';
-            font-size: 0.65rem;
-            margin-left: auto;
-            cursor: pointer;
-        }
-        
         .coupon-actions {
             display:none;
         }
@@ -874,6 +873,7 @@
     .coupon-btn.store {
         background: var(--primary);
         color: #ffffff;
+        text-align: center;
     }
 
     .coupon-btn.store:hover {
@@ -1145,33 +1145,74 @@
                 font-size: 1.6rem;
             }
         }
+        /* Mobile: shop + logo trên cùng, danh sách coupon tiếp theo, các block khác đẩy xuống cuối */
         @media(max-width:768px){
+            .page {
+                display: flex;
+                flex-direction: column;
+            }
+            .left-card {
+                display: contents;
+            }
+            .right-column {
+                display: contents;
+            }
+            .left-card-header {
+                order: 1;
+                background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+                border-radius: 20px;
+                padding: 24px 20px;
+                box-shadow: 0 4px 16px rgba(15,23,42,0.08);
+                border: 1px solid rgba(229, 231, 235, 0.8);
+            }
+            .right-column-coupon-section {
+                order: 2;
+            }
+            .coupon-list {
+                order: 3;
+            }
+            .left-card-footer {
+                order: 4;
+                background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+                border-radius: 20px;
+                padding: 24px 20px;
+                box-shadow: 0 4px 16px rgba(15,23,42,0.08);
+                border: 1px solid rgba(229, 231, 235, 0.8);
+                margin-top: 8px;
+            }
+            #about-us { order: 5; }
+            #how-to-use { order: 6; }
+            #qa { order: 7; }
+            #policies { order: 8; }
+            /* Coupon row: giữ layout ngang như PC, không chuyển dọc */
             .coupon-row {
-                grid-template-columns: 1fr;
+                grid-template-columns: 140px 1fr;
             }
             .coupon-discount-visual::after {
                 display: none;
             }
             .coupon-discount-visual {
-                border-bottom: 2px dashed #d1d5db;
-                padding: 16px;
+                border-bottom: none;
+                padding: 14px 10px;
             }
             .coupon-info {
-                padding: 16px 18px;
+                padding: 14px 16px;
             }
             .coupon-header-row {
-                flex-direction: column;
-                gap: 12px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 10px;
             }
             .btn-get-code {
-                width: 100%;
-                padding: 12px 20px;
+                width: auto;
+                min-width: 100px;
+                padding: 10px 16px;
             }
             .coupon-title {
-                font-size: 0.95rem;
+                font-size: 0.9rem;
             }
             .discount-percent {
-                font-size: 2.5rem;
+                font-size: 2.2rem;
             }
             .popup-banner {
                 padding: 24px 20px 32px;
@@ -1266,10 +1307,6 @@
             .coupon-desc {
                 font-size: 0.8rem;
             }
-            .coupon-verification {
-                font-size: 0.7rem;
-                padding-top: 4px;
-            }
             .btn-get-code {
                 font-size: 0.85rem;
                 padding: 10px 16px;
@@ -1350,7 +1387,7 @@
             }
             .qa-answer {
                 font-size: 0.85rem;
-                padding: 0 14px 12px;
+                padding: 0 14px 0px;
             }
         }
         
@@ -1404,6 +1441,7 @@
     <div class="page">
     <!-- LEFT CARD -->
     <aside class="left-card">
+        <div class="left-card-header">
         @if($campaign->brand && $campaign->brand->image)
             <img src="{{ asset('storage/' . $campaign->brand->image) }}"
                 alt="{{ $campaign->brand->name }}"
@@ -1421,37 +1459,44 @@
             <span class="stars">★★★★★</span>
             <span>4.8 rating • 1,200+ reviews</span>
         </div>
-        <div class="stats-list">
-            <div class="stats-row">
-                <span class="stats-label">Working codes</span>
-                <span class="stats-value">{{ ($campaign->couponItems ?? collect())->count() }}</span>
-            </div>
-            <div class="stats-row">
-                <span class="stats-label">Success rate</span>
-                <span class="stats-value">94%</span>
-            </div>
-            <div class="stats-row">
-                <span class="stats-label">Total saved</span>
-                <span class="stats-value">$7,229</span>
+        </div>
+        @php
+            $workingCount = ($campaign->couponItems ?? collect())->count();
+            $successRate = $workingCount > 0 ? min(99, 80 + (int)round($workingCount * 1.5)) : 89;
+        @endphp
+        <div class="left-card-footer">
+        <div class="stats-card">
+            <div class="stats-list">
+                <div class="stats-row">
+                    <span class="stats-label"><span class="stats-icon" aria-hidden="true">🏷</span> Working Codes</span>
+                    <span class="stats-value">{{ $workingCount }}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label"><span class="stats-icon" aria-hidden="true">✓</span> Success Rate</span>
+                    <span class="stats-value">{{ $successRate }}%</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label"><span class="stats-icon" aria-hidden="true">💰</span> Total Saved</span>
+                    <span class="stats-value">${{ number_format(min(99999, 7229 + $workingCount * 80), 0, '.', ',') }}</span>
+                </div>
             </div>
         </div>
-        <div class="sidebar-actions">
-            <button class="btn-outline" type="button">
-                Reviews &amp; Info
-            </button>
-            <button class="btn-solid" type="button"
-                onclick="window.location.href='{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}'">
-                Shop Now
-            </button>
+        <nav class="quick-menu" aria-label="Quick menu">
+            <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}" class="quick-menu-shop-now" target="_blank" rel="noopener">Shop Now</a>
+            <h3 class="quick-menu-title">Quick Menu</h3>
+            <ul class="quick-menu-list">
+                <li><a href="#about-us">About us</a></li>
+                <li><a href="#how-to-use">How to use a coupon code</a></li>
+                <li><a href="#qa">Questions &amp; Answers</a></li>
+                <li><a href="#policies">Policies &amp; notes</a></li>
+            </ul>
+        </nav>
         </div>
     </aside>
 
     <!-- RIGHT COLUMN -->
     <main class="right-column">
-        <section>
-            <div class="note-bar">
-                Purchases through our links may earn us a commission, which helps us keep finding the best deals for you.
-            </div>
+        <section class="right-column-coupon-section">
             <div class="coupon-header">
                 <div class="coupon-header-title">
                     Active {{ $campaign->brand->name ?? $campaign->title }} coupons
@@ -1468,7 +1513,7 @@
                 </div>
             </div>
 
-        <section class="coupon-list">
+        <section class="coupon-list" id="coupon-list">
             @forelse($coupons as $coupon)
             @php
                 $hasCode = !empty($coupon->code);
@@ -1560,7 +1605,7 @@
                 </div>
                 
                 <!-- Right: Coupon Details -->
-                <div class="coupon-info">
+                <div class="coupon-info" data-coupon-id="{{ $coupon->id }}" data-code="{{ $coupon->code }}" onclick="return handleCouponClick(this)">
                     <div class="coupon-header-row">
                         <div style="flex: 1;">
                             <div class="coupon-title">
@@ -1591,7 +1636,7 @@
                             data-coupon-id="{{ $coupon->id }}"
                             data-url="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}"
                             onclick="return handleCouponClick(this)">
-                            GET CODE
+                            {{ $hasCode ? 'GET CODE' : 'GET DEAL' }}
                         </button>
                     </div>
                     
@@ -1606,9 +1651,6 @@
                         @endif
                     </div>
                     
-                    <div class="coupon-verification">
-                        Worked {{ $hoursAgo }} hours ago for {{ rand(1, 10) }} shoppers
-                    </div>
                 </div>
             </article>
             @empty
@@ -1621,9 +1663,9 @@
             @endforelse
         </section>
 
-        <!-- ABOUT -->
-        <section class="section">
-            <h2 class="section-title">About this campaign</h2>
+        <!-- ABOUT US -->
+        <section class="section" id="about-us">
+            <h2 class="section-title">About us</h2>
             <div class="section-body intro-content">
                 @if($campaign->intro)
                     {!! $campaign->intro !!}
@@ -1637,22 +1679,21 @@
         </section>
 
         <!-- HOW TO USE -->
-        <section class="section">
+        <section class="section" id="how-to-use">
             <h2 class="section-title">How to use a coupon code</h2>
             <div class="section-body">
                 <ul>
                     <li>Select a coupon from the list above.</li>
-                    <li>Click <strong>Get Deal</strong> to copy the code and visit the store.</li>
+                    <li>Click <strong>Get Code</strong> to copy the code and visit the store.</li>
                     <li>Add products to your cart as usual.</li>
                     <li>Paste the coupon code at checkout and apply.</li>
                 </ul>
             </div>
         </section>
 
-         <!-- q&A -->
-
-         <section class="section qa-section">
-            <h2 class="section-title">Questions & Answers</h2>
+         <!-- Q&A / FAQ -->
+         <section class="section qa-section" id="qa">
+            <h2 class="section-title">Questions &amp; Answers</h2>
 
             <div class="qa-item">
                 <button class="qa-question" onclick="toggleQA(this)">
@@ -1697,8 +1738,8 @@
 
 
         <!-- POLICY -->
-        <section class="section">
-            <h2 class="section-title">Policies & notes</h2>
+        <section class="section" id="policies">
+            <h2 class="section-title">Policies &amp; notes</h2>
             <div class="section-body">
                 <ul>
                     <li>Some coupons may require a minimum order value.</li>
@@ -1786,7 +1827,7 @@
                 target="_blank"
                 class="coupon-btn store go-to-store-btn"
                 onclick="event.preventDefault(); const url = this.getAttribute('data-url'); if(url) { window.open(url, '_blank'); } return false;">
-                    Go to Store
+                Go to the store to apply the discount code now
                 </a>
             </div>
             
@@ -1844,27 +1885,17 @@ function handleCouponClick(btn){
     currentCouponId = couponId;
     currentCouponRow = btn.closest('.coupon-row');
 
-    const codeBox = document.getElementById('modalCode');
-    if (codeBox) {
-        codeBox.innerText = code;
-    }
+    // 1. Mở new tab = trang coupon với param để tự mở popup + code tương ứng
+    const couponPageUrl = new URL(window.location.href);
+    couponPageUrl.searchParams.set('show_coupon', couponId);
+    couponPageUrl.searchParams.set('code', encodeURIComponent(code));
+    window.open(couponPageUrl.toString(), '_blank');
 
-    const modal = document.getElementById('couponModal');
-    if (modal) {
-        modal.classList.add('active');
-    }
-
-    const goBtn = document.querySelector('.go-to-store-btn');
-    if (goBtn && url) {
-        goBtn.setAttribute('data-url', url);
-        goBtn.href = url;
-    }
-
-    // Mở tab mới với affiliate link nhưng vẫn ở lại trang coupon
+    // 2. Redirect tab hiện tại đến trang aff
     if (url) {
-        window.open(url, '_blank');
+        window.location.href = url;
     }
-    
+
     return false;
 }
 
@@ -1920,16 +1951,17 @@ function copyCoupon(btn){
             goBtn.classList.add('go-store-attention');
         }
 
-        // mở mã coupon đúng block dựa trên coupon ID
-        if(currentCouponRow && currentCouponId){
-            // Tìm coupon row có cùng ID
-            const targetRow = document.querySelector(`[data-coupon-id="${currentCouponId}"]`);
-            if(targetRow){
-                targetRow.classList.add('revealed');
-                // Reveal code trong row đó
-                const codeElement = targetRow.querySelector('.coupon-code.peek');
-                if(codeElement){
-                    codeElement.classList.remove('peek');
+        // Ẩn nút GET CODE và hiển thị mã code trong row tương ứng
+        if (currentCouponId && currentCode) {
+            const targetRow = document.querySelector('[data-coupon-id="' + currentCouponId + '"]');
+            if (targetRow) {
+                const btn = targetRow.querySelector('.btn-get-code');
+                if (btn) {
+                    const codeSpan = document.createElement('span');
+                    codeSpan.className = 'coupon-revealed-code';
+                    codeSpan.textContent = currentCode;
+                    codeSpan.title = 'Code copied';
+                    btn.parentNode.replaceChild(codeSpan, btn);
                 }
             }
         }
@@ -1942,6 +1974,34 @@ function toggleQA(el){
 
 // Tabs filter
 document.addEventListener('DOMContentLoaded', function () {
+    // Tab mới mở từ "Get Code": có show_coupon + code trong URL → mở popup và xóa params
+    const urlParams = new URLSearchParams(window.location.search);
+    const showCouponId = urlParams.get('show_coupon');
+    const codeFromUrl = urlParams.get('code');
+    if (showCouponId && codeFromUrl) {
+        try {
+            currentCode = decodeURIComponent(codeFromUrl);
+            currentCouponId = showCouponId;
+            currentCouponRow = document.querySelector('[data-coupon-id="' + showCouponId + '"]');
+            const codeBox = document.getElementById('modalCode');
+            if (codeBox) codeBox.innerText = currentCode;
+            const modal = document.getElementById('couponModal');
+            if (modal) modal.classList.add('active');
+            const goBtn = document.querySelector('.go-to-store-btn');
+            if (goBtn) {
+                let affUrl = document.querySelector('[data-coupon-id="' + showCouponId + '"] .btn-get-code');
+                if (!affUrl || !affUrl.dataset.url) {
+                    affUrl = document.querySelector('.btn-get-code[data-url]');
+                }
+                if (affUrl && affUrl.dataset.url) {
+                    goBtn.setAttribute('data-url', affUrl.dataset.url);
+                    goBtn.href = affUrl.dataset.url;
+                }
+            }
+            // Không xóa params khỏi URL để khi reload trang popup vẫn mở lại
+        } catch (e) {}
+    }
+
     const tabs = document.querySelectorAll('.filter-pill');
     const rows = document.querySelectorAll('.coupon-row');
 

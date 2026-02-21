@@ -39,7 +39,14 @@ class BrandResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('category_id')
                             ->label('Danh mục')
-                            ->relationship('category', 'name')
+                            ->relationship(
+                                'category',
+                                'name',
+                                modifyQueryUsing: function ($query) {
+                                    $userId = Filament::auth()->id();
+                                    return $userId ? $query->where('categories.user_id', $userId) : $query;
+                                }
+                            )
                             ->searchable()
                             ->preload()
                             ->createOptionForm([

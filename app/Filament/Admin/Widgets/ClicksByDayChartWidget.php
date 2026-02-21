@@ -13,7 +13,8 @@ class ClicksByDayChartWidget extends ChartWidget
 
     protected static ?string $description = 'Biểu đồ lượt click theo từng ngày';
 
-    protected int | string | array $columnSpan = 'full';
+    /** Cùng hàng với chart khác trên xl để không thừa chỗ trống */
+protected int | string | array $columnSpan = ['default' => 'full', 'xl' => 6];
 
     protected static ?int $sort = 4;
 
