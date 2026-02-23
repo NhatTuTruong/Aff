@@ -108,11 +108,13 @@ class ClickResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('country')
                     ->label('Quốc gia')
-                    ->searchable(),
+                    ->searchable()
+                    ->placeholder('—'),
                 Tables\Columns\TextColumn::make('sub_id')
                     ->label('Sub ID')
                     ->searchable()
-                    ->toggleable(),
+                    ->placeholder('—')
+                    ->copyable(),
                 Tables\Columns\TextColumn::make('referer')
                     ->label('Referer')
                     ->limit(30)
@@ -236,9 +238,10 @@ class ClickResource extends Resource
                     ->modalHeading('Chặn IP này?')
                     ->modalDescription(fn (Click $record): string => "IP {$record->ip} sẽ bị chặn. Các click/view từ IP này sẽ không được thống kê.")
                     ->action(function (Click $record): void {
+                        $userId = $record->campaign?->brand?->user_id ?? auth()->id();
                         BlockedIp::firstOrCreate(
-                            ['ip' => $record->ip],
-                            ['reason' => 'Chặn từ danh sách Clicks']
+                            ['ip' => $record->ip, 'user_id' => $userId],
+                            ['reason' => 'Chặn từ danh sách Clicks', 'block_public' => false]
                         );
                         Notification::make()
                             ->title("Đã chặn IP {$record->ip}")

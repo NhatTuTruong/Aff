@@ -11,7 +11,14 @@ use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Get;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use League\Csv\Info;
+use League\Csv\Reader as CsvReader;
+use League\Csv\Statement;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class CampaignImporter extends Importer
 {
@@ -59,7 +66,11 @@ class CampaignImporter extends Importer
                 ->guess(['Giới thiệu'])
                 ->rules(['nullable', 'max:65535'])
                 ->example('<p>Giới thiệu chiến dịch</p>')
-                ->exampleHeader('Giới thiệu'),
+                ->exampleHeader('Giới thiệu')
+                ->helperText('Lưu file CSV UTF-8 để giữ nguyên ngôn ngữ, xuống hàng, dấu câu, danh sách.')
+                ->fillRecordUsing(function (Campaign $record, ?string $state) {
+                    $record->intro = $state !== null ? (string) $state : null;
+                }),
             ImportColumn::make('status')
                 ->label('Trạng thái')
                 ->rules(['required', 'in:draft,active,paused'])
@@ -85,24 +96,24 @@ class CampaignImporter extends Importer
                 ->example('https://example.com/?ref=xxx')
                 ->exampleHeader('URL Affiliate'),
             ImportColumn::make('coupon_codes')
-                ->label('Mã giảm giá (phân cách bằng ,)')
+                ->label('Mã giảm giá (phân cách bằng xuống hàng)')
                 ->guess(['Mã giảm giá'])
-                ->rules(['nullable', 'max:500'])
-                ->example('SAVE10, SAVE20')
+                ->rules(['nullable', 'max:2000'])
+                ->example("SAVE10\nSAVE20")
                 ->exampleHeader('Mã giảm giá')
                 ->fillRecordUsing(fn () => null),
             ImportColumn::make('coupon_offers')
-                ->label('Offer (phân cách bằng ,)')
+                ->label('Offer (phân cách bằng xuống hàng)')
                 ->guess(['Offer'])
-                ->rules(['nullable', 'max:500'])
-                ->example('10%, 20$')
+                ->rules(['nullable', 'max:2000'])
+                ->example("10%\n20$")
                 ->exampleHeader('Offer')
                 ->fillRecordUsing(fn () => null),
             ImportColumn::make('coupon_descriptions')
-                ->label('Mô tả mã giảm giá (phân cách bằng ;)')
+                ->label('Mô tả mã giảm giá (phân cách bằng xuống hàng)')
                 ->guess(['Mô tả'])
-                ->rules(['nullable', 'max:2000'])
-                ->example('Giảm 10%; Giảm 20$')
+                ->rules(['nullable', 'max:5000'])
+                ->example("Giảm 10%\nGiảm 20$")
                 ->exampleHeader('Mô tả')
                 ->fillRecordUsing(fn () => null),
         ];
@@ -183,9 +194,9 @@ class CampaignImporter extends Importer
 
     protected function createCoupons(): void
     {
-        $codes = $this->parseList($this->data['coupon_codes'] ?? '', ',');
-        $offers = $this->parseList($this->data['coupon_offers'] ?? '', ',');
-        $descriptions = $this->parseList($this->data['coupon_descriptions'] ?? '', ';');
+        $codes = $this->parseListByNewline($this->data['coupon_codes'] ?? '');
+        $offers = $this->parseListByNewline($this->data['coupon_offers'] ?? '');
+        $descriptions = $this->parseListByNewline($this->data['coupon_descriptions'] ?? '');
 
         $count = max(count($codes), count($offers), count($descriptions));
         if ($count === 0) {
@@ -193,22 +204,27 @@ class CampaignImporter extends Importer
         }
 
         for ($i = 0; $i < $count; $i++) {
+            $code = $codes[$i] ?? '';
+            if (strtolower(trim($code)) === 'no') {
+                $code = '';
+            }
             Coupon::create([
                 'campaign_id' => $this->record->id,
-                'code' => $codes[$i] ?? '',
+                'code' => $code,
                 'offer' => $offers[$i] ?? '',
                 'description' => $descriptions[$i] ?? '',
             ]);
         }
     }
 
-    protected function parseList(?string $value, string $separator = ','): array
+    /** Phân cách bằng xuống hàng (\\n) thay vì , hoặc ; */
+    protected function parseListByNewline(?string $value): array
     {
-        if (empty(trim((string) $value))) {
+        if ($value === null || trim((string) $value) === '') {
             return [];
         }
-        $sep = preg_quote($separator, '/');
-        return array_filter(array_map('trim', preg_split("/{$sep}/", (string) $value)));
+        $lines = preg_split('/\r\n|\r|\n/', (string) $value);
+        return array_values(array_filter(array_map('trim', $lines)));
     }
 
     public static function resolveOrCreateCategory(string $name): Category
@@ -350,5 +366,41 @@ class CampaignImporter extends Importer
         return $failed > 0
             ? "Import: {$success} thành công, {$failed} thất bại"
             : "Import hoàn tất: {$success} chiến dịch";
+    }
+
+    public static function getOptionsFormComponents(): array
+    {
+        return [
+            Placeholder::make('import_preview')
+                ->label('')
+                ->content(function (Get $get): string {
+                    $file = Arr::first((array) ($get('file') ?? []));
+                    if (! $file instanceof TemporaryUploadedFile) {
+                        return 'Chọn file CSV để xem trước số lượng record chuẩn bị import.';
+                    }
+                    $path = $file->getRealPath();
+                    if (! $path || ! is_readable($path)) {
+                        return 'Không thể đọc file.';
+                    }
+                    try {
+                        $reader = CsvReader::createFromPath($path);
+                        $delimiterStats = Info::getDelimiterStats($reader, [',', ';', '|', "\t"], 10);
+                        $delimiter = ',';
+                        if (is_array($delimiterStats) && $delimiterStats !== []) {
+                            $best = array_key_first($delimiterStats);
+                            if ($best !== null && $best !== '') {
+                                $delimiter = $best;
+                            }
+                        }
+                        $reader2 = CsvReader::createFromPath($path)->setDelimiter($delimiter)->setHeaderOffset(0);
+                        $count = (new Statement)->process($reader2)->count();
+
+                        return 'Số chiến dịch chuẩn bị import: ' . number_format($count);
+                    } catch (\Throwable) {
+                        return 'Không thể đọc file CSV.';
+                    }
+                })
+                ->visible(fn (Get $get): bool => Arr::first((array) ($get('file') ?? [])) instanceof TemporaryUploadedFile),
+        ];
     }
 }

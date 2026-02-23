@@ -26,6 +26,13 @@
                 </div>
             @endforeach
         </div>
+        <div class="footer-disclosure">
+            <p class="footer-disclosure-text">
+                We may earn a commission when you use our links, at no extra cost to you. See our
+                <a href="{{ url('/affiliate-disclosure') }}">Affiliate Disclosure</a> and
+                <a href="{{ url('/privacy') }}">Privacy Policy</a>.
+            </p>
+        </div>
         <div class="footer-bottom">
             <p>{!! nl2br(e($copyright)) !!}</p>
         </div>

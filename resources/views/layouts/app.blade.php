@@ -130,6 +130,17 @@
             transition: color 0.2s;
         }
         .footer-col a:hover { color: var(--accent); }
+        .footer-disclosure {
+            padding: 1rem 0;
+            border-top: 1px solid var(--border);
+        }
+        .footer-disclosure-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .footer-disclosure-text a { color: var(--accent); text-decoration: underline; }
+        .footer-disclosure-text a:hover { color: var(--accent-hover); }
         .footer-bottom {
             padding-top: 1.5rem;
             border-top: 1px solid var(--border);
@@ -193,6 +204,42 @@
             font-size: 0.9rem;
             color: var(--text-muted);
         }
+
+        /* Cookie consent bar */
+        .cookie-consent {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--text);
+            color: #fff;
+            padding: 1rem 1.5rem;
+            z-index: 999;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+        }
+        .cookie-consent[hidden] { display: none; }
+        .cookie-consent-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .cookie-consent p { margin: 0; font-size: 0.9rem; flex: 1; min-width: 200px; }
+        .cookie-consent a { color: #93c5fd; text-decoration: underline; }
+        .cookie-consent-btn {
+            padding: 0.5rem 1.25rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .cookie-consent-btn:hover { background: var(--accent-hover); }
     </style>
     @stack('styles')
 </head>
@@ -204,6 +251,25 @@
     </main>
 
     @include('partials.site-footer')
+
+    <div id="cookie-consent" class="cookie-consent" role="dialog" aria-label="Cookie notice" hidden>
+        <div class="cookie-consent-inner">
+            <p>We use cookies to improve your experience and analyze site traffic. By continuing you agree to our <a href="{{ url('/privacy') }}">Privacy Policy</a>.</p>
+            <button type="button" class="cookie-consent-btn" data-dismiss>OK</button>
+        </div>
+    </div>
+    <script>
+        (function() {
+            if (localStorage.getItem('cookie-consent-accepted')) return;
+            var bar = document.getElementById('cookie-consent');
+            if (!bar) return;
+            bar.removeAttribute('hidden');
+            bar.querySelector('[data-dismiss]')?.addEventListener('click', function() {
+                localStorage.setItem('cookie-consent-accepted', '1');
+                bar.setAttribute('hidden', '');
+            });
+        })();
+    </script>
 
     @stack('scripts')
 </body>

@@ -63,6 +63,14 @@
         margin-right: auto;
         line-height: 1.7;
     }
+    .hero-trust-line {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-top: -1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .hero-trust-line a { color: var(--accent); text-decoration: underline; }
+    .hero-trust-line a:hover { color: var(--accent-hover); }
     
     /* Enhanced Search Box */
     .search-box {
@@ -186,6 +194,15 @@
         margin-bottom: 2rem;
         max-width: 600px;
     }
+    .deals-disclaimer {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: -1rem;
+        margin-bottom: 1.5rem;
+        max-width: 720px;
+    }
+    .deals-disclaimer a { color: var(--accent); text-decoration: underline; }
+    .deals-disclaimer a:hover { color: var(--accent-hover); }
     #coupons { scroll-margin-top: 5rem; }
     #stores { scroll-margin-top: 5rem; }
     #blog { scroll-margin-top: 5rem; }
@@ -226,18 +243,19 @@
         overflow: hidden;
         margin: 0 -1.5rem;
         padding: 0 1.5rem;
+        cursor: grab;
+        user-select: none;
+    }
+    .stores-carousel-wrap:active {
+        cursor: grabbing;
     }
     .stores-carousel-track {
         display: flex;
         width: max-content;
-        animation: storesScroll 40s linear infinite;
+        transition: transform 0.1s ease-out;
     }
-    .stores-carousel-track:hover {
-        animation-play-state: paused;
-    }
-    @keyframes storesScroll {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-50%); }
+    .stores-carousel-wrap.dragging .stores-carousel-track {
+        transition: none;
     }
     .stores-carousel {
         display: flex;
@@ -263,7 +281,7 @@
         height: 72px;
         border-radius: 50%;
         overflow: hidden;
-        background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+        background: #ffffff;
         border: 1px solid var(--border);
         display: flex;
         align-items: center;
@@ -281,6 +299,7 @@
         font-size: 1.25rem;
         font-weight: 700;
         color: var(--text-muted);
+        background: #ffffff;
     }
     .store-carousel-name {
         font-size: 0.8rem;
@@ -605,6 +624,7 @@
         <div class="container">
             <h1 class="font-heading">Discover Amazing Deals & Store Reviews</h1>
             <p>Find the best coupon codes, exclusive promotions, and trusted store reviews. Save more with verified deals updated daily.</p>
+            <p class="hero-trust-line">Independent deal finder. We may earn from qualifying purchases. <a href="{{ url('/affiliate-disclosure') }}">Learn more</a>.</p>
             <form action="{{ url('/') }}" method="get" class="search-box">
                 <input type="search" name="q" value="{{ $searchQuery ?? '' }}" placeholder="Search stores, brands, or deals..." autocomplete="off">
                 <button type="submit">
@@ -614,16 +634,18 @@
         </div>
     </section>
 
-    @if($brands->count() > 0 || $hotCoupons->isNotEmpty())
+    @if(($verifiedBrandsCount ?? 0) > 0 || $hotCoupons->isNotEmpty())
     <section class="stats-section">
         <div class="container">
             <div class="stats-grid">
                 <div class="stat-item">
-                    <div class="stat-number">{{ $brands->count() }}+</div>
-                    <div class="stat-label">Verified Stores</div>
+                    <div class="stat-number">
+                        {{ $verifiedBrandsCount ?? 0 }}+
+                    </div>
+                    <div class="stat-label">Verified Brands</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number">{{ $hotCoupons->count() }}+</div>
+                    <div class="stat-number">{{ $activeCouponsCount ?? $hotCoupons->count() }}+</div>
                     <div class="stat-label">Active Coupons</div>
                 </div>
                 <div class="stat-item">
@@ -638,91 +660,6 @@
         </div>
     </section>
     @endif
-
-    <section class="section" id="stores">
-        <div class="container">
-            <h2 class="section-title">Featured Stores</h2>
-            <p class="section-subtitle">Browse through our curated collection of trusted stores and discover exclusive deals</p>
-            @if($brands->count() > 0)
-                <div class="stores-carousel-wrap">
-                    <div class="stores-carousel-track">
-                        <div class="stores-carousel">
-                            @foreach($brands as $brand)
-                                @php 
-                                    $campaign = $brand->campaigns->first();
-                                    $reviewSlug = $campaign?->slug;
-                                    if ($reviewSlug) {
-                                        $slugParts = explode('/', $reviewSlug, 2);
-                                        $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
-                                        $slugPart = count($slugParts) === 2 ? $slugParts[1] : $reviewSlug;
-                                        $reviewUrl = route('landing.show', ['userCode' => $userCode, 'slug' => $slugPart]);
-                                    } else {
-                                        $reviewUrl = url('/') . '?q=' . urlencode($brand->name);
-                                    }
-                                @endphp
-                                <a href="{{ $reviewUrl }}" class="store-carousel-item" title="{{ $brand->name }}">
-                                    <span class="store-carousel-img-wrap">
-                                        @if($brand->image)
-                                            <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" loading="lazy">
-                                        @else
-                                            <span class="store-carousel-placeholder">{{ Str::limit($brand->name, 2) }}</span>
-                                        @endif
-                                    </span>
-                                    <span class="store-carousel-name">{{ $brand->name }}</span>
-                                </a>
-                            @endforeach
-                        </div>
-                        <div class="stores-carousel">
-                            @foreach($brands as $brand)
-                                @php 
-                                    $campaign = $brand->campaigns->first();
-                                    $reviewSlug = $campaign?->slug;
-                                    if ($reviewSlug) {
-                                        $slugParts = explode('/', $reviewSlug, 2);
-                                        $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
-                                        $slugPart = count($slugParts) === 2 ? $slugParts[1] : $reviewSlug;
-                                        $reviewUrl = route('landing.show', ['userCode' => $userCode, 'slug' => $slugPart]);
-                                    } else {
-                                        $reviewUrl = url('/') . '?q=' . urlencode($brand->name);
-                                    }
-                                @endphp
-                                <a href="{{ $reviewUrl }}" class="store-carousel-item" title="{{ $brand->name }}">
-                                    <span class="store-carousel-img-wrap">
-                                        @if($brand->image)
-                                            <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" loading="lazy">
-                                        @else
-                                            <span class="store-carousel-placeholder">{{ Str::limit($brand->name, 2) }}</span>
-                                        @endif
-                                    </span>
-                                    <span class="store-carousel-name">{{ $brand->name }}</span>
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            @else
-                <div class="empty-state">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                    <h3>
-                        @if($searchQuery)
-                            No stores found for "{{ $searchQuery }}"
-                        @else
-                            No stores available yet
-                        @endif
-                    </h3>
-                    <p>
-                        @if($searchQuery)
-                            Try searching with a different keyword or browse all stores.
-                        @else
-                            Check back soon for amazing deals and store reviews!
-                        @endif
-                    </p>
-                </div>
-            @endif
-        </div>
-    </section>
 
     @if(isset($latestPosts) && $latestPosts->isNotEmpty())
     <section class="section" id="blog">
@@ -751,11 +688,91 @@
     </section>
     @endif
 
+    <section class="section" id="stores">
+        <div class="container">
+            <h2 class="section-title">Featured Stores</h2>
+            <p class="section-subtitle">Click a campaign to go straight to its coupon page</p>
+            @if(isset($featuredCampaigns) && $featuredCampaigns->count() > 0)
+                <div class="stores-carousel-wrap">
+                    <div class="stores-carousel-track">
+                        <div class="stores-carousel">
+                            @foreach($featuredCampaigns as $campaign)
+                                @php 
+                                    $brand = $campaign->brand;
+                                    $reviewSlug = $campaign->slug;
+                                    if ($reviewSlug) {
+                                        $slugParts = explode('/', $reviewSlug, 2);
+                                        $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
+                                        $slugPart = count($slugParts) === 2 ? $slugParts[1] : $reviewSlug;
+                                        $reviewUrl = route('landing.show', ['userCode' => $userCode, 'slug' => $slugPart]);
+                                    } else {
+                                        $reviewUrl = url('/') . '?q=' . urlencode($brand?->name ?? $campaign->title);
+                                    }
+                                @endphp
+                                <a href="{{ $reviewUrl }}" class="store-carousel-item" title="{{ $campaign->title }}">
+                                    <span class="store-carousel-img-wrap">
+                                        @if($brand && $brand->image)
+                                            <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" loading="lazy">
+                                        @else
+                                            <img src="{{ asset('images/placeholder.svg') }}" alt="{{ $brand?->name ?? $campaign->title }}" loading="lazy">
+                                        @endif
+                                    </span>
+                                    <span class="store-carousel-name">
+                                        {{ $brand?->name ?? $campaign->title }}
+                                    </span>
+                                </a>
+                            @endforeach
+                        </div>
+                        <div class="stores-carousel">
+                            @foreach($featuredCampaigns as $campaign)
+                                @php 
+                                    $brand = $campaign->brand;
+                                    $reviewSlug = $campaign->slug;
+                                    if ($reviewSlug) {
+                                        $slugParts = explode('/', $reviewSlug, 2);
+                                        $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
+                                        $slugPart = count($slugParts) === 2 ? $slugParts[1] : $reviewSlug;
+                                        $reviewUrl = route('landing.show', ['userCode' => $userCode, 'slug' => $slugPart]);
+                                    } else {
+                                        $reviewUrl = url('/') . '?q=' . urlencode($brand?->name ?? $campaign->title);
+                                    }
+                                @endphp
+                                <a href="{{ $reviewUrl }}" class="store-carousel-item" title="{{ $campaign->title }}">
+                                    <span class="store-carousel-img-wrap">
+                                        @if($brand && $brand->image)
+                                            <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" loading="lazy">
+                                        @else
+                                            <img src="{{ asset('images/placeholder.svg') }}" alt="{{ $brand?->name ?? $campaign->title }}" loading="lazy">
+                                        @endif
+                                    </span>
+                                    <span class="store-carousel-name">
+                                        {{ $brand?->name ?? $campaign->title }}
+                                    </span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @else
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                    <h3>No campaigns available yet</h3>
+                    <p>
+                        Check back soon for new campaigns and deals!
+                    </p>
+                </div>
+            @endif
+        </div>
+    </section>
+
     @if($hotCoupons->isNotEmpty())
     <section class="section" id="coupons">
         <div class="container">
             <h2 class="section-title">🔥 Hot Coupons & Deals</h2>
             <p class="section-subtitle">Don't miss out on these exclusive offers and limited-time promotions</p>
+            <p class="deals-disclaimer">Offers may expire or change. Verify discount at the store checkout. We may earn a commission when you use our links — <a href="{{ url('/affiliate-disclosure') }}">see disclosure</a>.</p>
             <div class="coupons-grid">
                 @foreach($hotCoupons as $coupon)
                     @php $campaign = $coupon->campaign; $brand = $campaign?->brand; @endphp
@@ -765,7 +782,7 @@
                             @if($brand->image)
                                 <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" class="coupon-card-logo" loading="lazy">
                             @else
-                                <div class="coupon-card-logo coupon-card-logo-placeholder">{{ Str::limit($brand->name, 2) }}</div>
+                                <img src="{{ asset('images/placeholder.svg') }}" alt="{{ $brand->name }}" class="coupon-card-logo" loading="lazy">
                             @endif
                             <div class="coupon-card-brand">{{ $brand->name }}</div>
                         </div>
@@ -813,5 +830,58 @@
             </div>
         </div>
     </section>
+    @endif
+
+    @if(isset($featuredCampaigns) && $featuredCampaigns->count() > 0)
+    @push('scripts')
+    <script>
+    (function() {
+        var wrap = document.querySelector('.stores-carousel-wrap');
+        var track = document.querySelector('.stores-carousel-track');
+        if (!wrap || !track) return;
+        var currentTx = 0;
+        var startX = 0;
+        var startTx = 0;
+        var dragging = false;
+        var didDrag = false;
+
+        function clamp(x, min, max) { return Math.min(Math.max(x, min), max); }
+
+        wrap.addEventListener('pointerdown', function(e) {
+            dragging = true;
+            didDrag = false;
+            startX = e.clientX;
+            startTx = currentTx;
+            wrap.classList.add('dragging');
+        });
+        document.addEventListener('pointermove', function(e) {
+            if (!dragging) return;
+            var dx = e.clientX - startX;
+            if (Math.abs(dx) > 4) didDrag = true;
+            e.preventDefault();
+            var maxTx = 0;
+            var minTx = -(track.offsetWidth - wrap.offsetWidth);
+            if (minTx > 0) minTx = 0;
+            currentTx = clamp(startTx + dx, minTx, maxTx);
+            track.style.transform = 'translateX(' + currentTx + 'px)';
+        });
+        document.addEventListener('pointerup', function() {
+            dragging = false;
+            wrap.classList.remove('dragging');
+        });
+        document.addEventListener('pointercancel', function() {
+            dragging = false;
+            wrap.classList.remove('dragging');
+        });
+        wrap.addEventListener('click', function(e) {
+            if (didDrag) {
+                e.preventDefault();
+                e.stopPropagation();
+                didDrag = false;
+            }
+        }, true);
+    })();
+    </script>
+    @endpush
     @endif
 @endsection

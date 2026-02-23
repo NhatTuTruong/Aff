@@ -46,9 +46,24 @@
         font-size: 1.05rem;
         line-height: 1.75;
     }
-    .blog-content :deep(img) { max-width: 100%; height: auto; border-radius: 8px; }
-    .blog-content :deep(video) { max-width: 100%; border-radius: 8px; }
-    .blog-content :deep(blockquote) {
+    .prose h2, .prose h3, .prose h4 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin: 1.5rem 0 0.75rem;
+        line-height: 1.3;
+    }
+    .prose h2 { font-size: 1.35rem; }
+    .prose h3 { font-size: 1.15rem; }
+    .prose p { margin: 0.85rem 0; }
+    .prose ul, .prose ol { margin: 0.75rem 0 1rem; padding-left: 1.25rem; }
+    .prose li { margin: 0.35rem 0; }
+    .prose a { color: var(--accent); text-decoration: underline; }
+    .prose a:hover { color: var(--accent-hover); }
+    .prose img { max-width: 100%; height: auto; border-radius: 10px; }
+    .prose video { max-width: 100%; border-radius: 10px; }
+    .prose hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    .prose blockquote {
         border-left: 4px solid var(--accent);
         padding-left: 1rem;
         margin: 1.5rem 0;
@@ -64,6 +79,46 @@
         font-weight: 500;
     }
     .blog-back:hover { color: var(--accent-hover); }
+
+    .blog-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+    .blog-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--text);
+        font-size: 0.85rem;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .blog-chip-accent {
+        background: rgba(34,197,94,0.10);
+        border-color: rgba(34,197,94,0.30);
+        color: #166534;
+    }
+    .blog-share {
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        cursor: pointer;
+        font-weight: 700;
+        color: var(--text);
+    }
+    .blog-share:hover { border-color: var(--accent); color: var(--accent); }
+    @media (max-width: 900px) { .blog-share { margin-left: 0; } }
 
     .blog-sidebar {
         position: sticky;
@@ -297,9 +352,18 @@
     <div class="blog-layout">
         <article class="blog-main">
             <a href="{{ route('blog.index') }}" class="blog-back">← List of articles</a>
+            <div class="blog-actions">
+                @if(!empty($post->category))
+                    <span class="blog-chip blog-chip-accent">{{ $post->category }}</span>
+                @endif
+                <span class="blog-chip">{{ $post->created_at?->format('d/m/Y') }}</span>
+                <button type="button" class="blog-share" onclick="navigator.clipboard.writeText(window.location.href); this.textContent='Copied link'; setTimeout(() => this.textContent='Copy link', 1200);">Copy link</button>
+            </div>
             <header class="blog-header">
                 <h1 class="blog-title">{{ $post->title }}</h1>
-                <p class="blog-meta">{{ $post->created_at?->format('d/m/Y') }}</p>
+                <p class="blog-meta">
+                    Offers may expire. We may earn a commission when you use our links — <a href="{{ url('/affiliate-disclosure') }}">see disclosure</a>.
+                </p>
             </header>
             @if($post->featured_image)
                 <div class="blog-featured">
@@ -353,7 +417,7 @@
                                     @if($brand->image)
                                         <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" class="blog-deal-card-logo">
                                     @else
-                                        <span class="blog-deal-card-logo-placeholder">{{ Str::limit($brand->name, 2) }}</span>
+                                        <img src="{{ asset('images/placeholder.svg') }}" alt="{{ $brand->name }}" class="blog-deal-card-logo">
                                     @endif
                                     <span class="blog-deal-card-brand">{{ $brand->name }}</span>
                                 </div>

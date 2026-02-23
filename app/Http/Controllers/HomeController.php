@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
-use App\Models\Brand;
 use App\Models\Coupon;
+use App\Models\Brand;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -19,39 +20,79 @@ class HomeController extends Controller
         $names = config('default_categories.names', \App\Models\User::defaultCategoryNames());
         $popularCategories = collect($names)->map(fn ($name) => (object)['name' => $name, 'slug' => \Illuminate\Support\Str::slug($name)]);
 
-        // Featured Stores: brand approved, có campaign (active trên production), sắp xếp theo lượt tương tác,
-        // chỉ hiển thị top stores có tương tác cao nhất, tên trùng thì chỉ hiển thị 1 (đã xóa mềm tự loại)
-        $brands = Brand::query()
-            ->selectRaw('brands.*, (
-                (SELECT COUNT(*) FROM clicks WHERE campaign_id IN (SELECT id FROM campaigns WHERE brand_id = brands.id AND campaigns.deleted_at IS NULL) AND (clicks.deleted_at IS NULL)) +
-                (SELECT COUNT(*) FROM page_views WHERE campaign_id IN (SELECT id FROM campaigns WHERE brand_id = brands.id AND campaigns.deleted_at IS NULL))
-            ) as total_interactions')
-            ->where('approved', true)
-            ->whereHas('campaigns', fn ($q) => $q->when(app()->environment('production'), fn ($q2) => $q2->where('status', 'active')))
-            ->when($query, fn ($q) => $q->where(function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                    ->orWhere('slug', 'like', "%{$query}%");
-            }))
-            ->when($categorySlug, fn ($q) => $q->whereHas('category', fn ($c) => $c->where('slug', $categorySlug)->orWhere('slug', 'like', "%/{$categorySlug}")))
-            ->with(['category', 'campaigns' => fn ($q) => $q->when(app()->environment('production'), fn ($q2) => $q2->where('status', 'active'))->orderByDesc('created_at')->limit(1)])
-            ->orderByDesc('total_interactions')
-            ->orderBy('name')
+        // Featured Campaigns (thay cho Featured Stores):
+        // - Chiến dịch active (production), brand được duyệt, user của brand chưa bị xóa
+        // - Sắp xếp theo tổng lượt click + page view cao nhất
+        // - Không lấy dữ liệu đã xóa mềm (SoftDeletes)
+        $featuredCampaigns = \App\Models\Campaign::query()
+            ->with(['brand'])
+            ->whereHas('brand', function ($q) use ($categorySlug) {
+                $q->where('approved', true)
+                    ->whereNull('deleted_at')
+                    ->whereExists(function ($sub) {
+                        $sub->selectRaw(1)
+                            ->from('users')
+                            ->whereColumn('users.id', 'brands.user_id');
+                    })
+                    ->when($categorySlug, fn ($q2) => $q2->whereHas('category', fn ($c) => $c
+                        ->where('slug', $categorySlug)
+                        ->orWhere('slug', 'like', "%/{$categorySlug}")
+                    ));
+            })
+            ->when($query, function ($q) use ($query) {
+                $q->where(function ($qq) use ($query) {
+                    $qq->where('title', 'like', "%{$query}%")
+                        ->orWhereHas('brand', fn ($b) => $b
+                            ->where('name', 'like', "%{$query}%")
+                            ->orWhere('slug', 'like', "%{$query}%")
+                        );
+                });
+            })
+            ->when(app()->environment('production'), fn ($q) => $q->where('status', 'active'))
+            ->whereNotNull('slug')
+            ->orderByRaw('
+                (SELECT COUNT(*) FROM clicks WHERE clicks.campaign_id = campaigns.id AND clicks.deleted_at IS NULL) +
+                (SELECT COUNT(*) FROM page_views WHERE page_views.campaign_id = campaigns.id)
+            DESC')
             ->limit(80)
             ->get()
-            ->unique('name')
-            ->take(32)
+            ->unique(fn ($c) => $c->brand?->name ?? $c->title)
             ->values();
 
-        // Hot Coupons: chỉ deal còn hiện hữu (campaign + brand chưa xóa mềm, active trên production), sắp xếp theo lượt tương tác
+        // Hot Coupons: chỉ deal còn hiện hữu (campaign + brand chưa xóa mềm, active trên production, user chưa xóa),
+        // sắp xếp theo lượt tương tác
         $hotCoupons = Coupon::query()
             ->with(['campaign.brand'])
-            ->whereHas('campaign', fn ($q) => $q->when(app()->environment('production'), fn ($q2) => $q2->where('status', 'active')))
-            ->whereHas('campaign.brand', fn ($q) => $q->where('approved', true))
+            ->whereNull('deleted_at')
+            ->whereHas('campaign', fn ($q) => $q
+                ->when(app()->environment('production'), fn ($q2) => $q2->where('status', 'active'))
+            )
+            ->whereHas('campaign.brand', function ($q) use ($categorySlug) {
+                $q->where('approved', true)
+                    ->whereNull('deleted_at')
+                    ->whereExists(function ($sub) {
+                        $sub->selectRaw(1)
+                            ->from('users')
+                            ->whereColumn('users.id', 'brands.user_id');
+                    })
+                    ->when($categorySlug, fn ($q2) => $q2->whereHas('category', fn ($c) => $c
+                        ->where('slug', $categorySlug)
+                        ->orWhere('slug', 'like', "%/{$categorySlug}")
+                    ));
+            })
             ->where(function ($q) {
                 $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
             })
             ->where(function ($q) {
                 $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+            })
+            ->when($query, function ($q) use ($query) {
+                $q->where(function ($qq) use ($query) {
+                    $qq->where('offer', 'like', "%{$query}%")
+                        ->orWhere('description', 'like', "%{$query}%")
+                        ->orWhereHas('campaign', fn ($c) => $c->where('title', 'like', "%{$query}%"))
+                        ->orWhereHas('campaign.brand', fn ($b) => $b->where('name', 'like', "%{$query}%"));
+                });
             })
             ->orderByRaw('
                 (SELECT COUNT(*) FROM clicks WHERE clicks.campaign_id = coupons.campaign_id AND clicks.deleted_at IS NULL) +
@@ -59,6 +100,39 @@ class HomeController extends Controller
             ')
             ->limit(12)
             ->get();
+
+        // Global stats cho trang chủ
+        $verifiedBrandsCount = Brand::query()
+            ->where('approved', true)
+            ->whereNull('deleted_at')
+            ->whereExists(function ($sub) {
+                $sub->selectRaw(1)
+                    ->from('users')
+                    ->whereColumn('users.id', 'brands.user_id');
+            })
+            ->count();
+
+        $activeCouponsCount = Coupon::query()
+            ->whereNull('deleted_at')
+            ->whereHas('campaign', fn ($q) => $q
+                ->when(app()->environment('production'), fn ($q2) => $q2->where('status', 'active'))
+            )
+            ->whereHas('campaign.brand', function ($q) {
+                $q->where('approved', true)
+                    ->whereNull('deleted_at')
+                    ->whereExists(function ($sub) {
+                        $sub->selectRaw(1)
+                            ->from('users')
+                            ->whereColumn('users.id', 'brands.user_id');
+                    });
+            })
+            ->where(function ($q) {
+                $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+            })
+            ->count();
 
         // Latest Blog Posts - từ Blog do admin tạo, chỉ bài đã xuất bản
         $latestPosts = Blog::query()
@@ -68,12 +142,14 @@ class HomeController extends Controller
             ->get();
 
         return view('home', [
-            'brands' => $brands,
+            'featuredCampaigns' => $featuredCampaigns,
             'hotCoupons' => $hotCoupons,
             'latestPosts' => $latestPosts,
             'popularCategories' => $popularCategories,
             'searchQuery' => $query,
             'categorySlug' => $categorySlug,
+            'verifiedBrandsCount' => $verifiedBrandsCount,
+            'activeCouponsCount' => $activeCouponsCount,
         ]);
     }
 }

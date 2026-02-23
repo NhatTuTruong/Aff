@@ -25,11 +25,11 @@ class SiteContentPage extends Page implements HasForms
 
     protected static string $view = 'filament.admin.pages.site-content';
 
-    protected static ?string $navigationLabel = 'Nội dung Header, Footer & Các trang';
+    protected static ?string $navigationLabel = 'Nội dung trang';
 
-    protected static ?string $title = 'Chỉnh sửa nội dung Header, Footer, trang lỗi và các trang About, Contact, Policy';
+    protected static ?string $title = 'Chỉnh sửa nội dung trang';
 
-    protected static ?string $navigationGroup = 'Quản lý';
+    protected static ?string $navigationGroup = 'Admin';
 
     protected static ?int $navigationSort = 2;
 
@@ -60,6 +60,7 @@ class SiteContentPage extends Page implements HasForms
             'page_about_us' => SiteContent::get('page_about_us', SiteContent::defaultPageAboutUs()),
             'page_contact' => SiteContent::get('page_contact', SiteContent::defaultPageContact()),
             'page_privacy' => SiteContent::get('page_privacy', SiteContent::defaultPagePrivacy()),
+            'page_affiliate' => SiteContent::get('page_affiliate', SiteContent::defaultPageAffiliateDisclosure()),
         ]);
     }
 
@@ -186,6 +187,18 @@ class SiteContentPage extends Page implements HasForms
                                             ->columnSpanFull()
                                             ->extraInputAttributes(['style' => 'min-height: 320px;']),
                                     ]),
+                                Section::make('Affiliate Disclosure')
+                                    ->description('Nội dung trang /affiliate-disclosure. Dùng [SITE_NAME] để hiển thị tên site.')
+                                    ->schema([
+                                        RichEditor::make('page_affiliate')
+                                            ->label('Nội dung Affiliate Disclosure')
+                                            ->toolbarButtons([
+                                                'bold', 'italic', 'underline', 'strikeThrough', 'link', 'image',
+                                                'orderedList', 'bulletList', 'blockquote', 'codeBlock', 'undo', 'redo',
+                                            ])
+                                            ->columnSpanFull()
+                                            ->extraInputAttributes(['style' => 'min-height: 220px;']),
+                                    ]),
                             ]),
                     ])
                     ->columnSpanFull(),
@@ -198,7 +211,7 @@ class SiteContentPage extends Page implements HasForms
         return [
             Action::make('save')
                 ->label('Lưu thay đổi')
-                ->submit('save'),
+                ->action('save'),
         ];
     }
 
@@ -216,6 +229,7 @@ class SiteContentPage extends Page implements HasForms
         SiteContent::set('page_about_us', $data['page_about_us'] ?? '');
         SiteContent::set('page_contact', $data['page_contact'] ?? '');
         SiteContent::set('page_privacy', $data['page_privacy'] ?? '');
+        SiteContent::set('page_affiliate', $data['page_affiliate'] ?? '');
 
         Notification::make()
             ->title('Đã lưu nội dung Header, Footer, trang lỗi và các trang.')

@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -43,6 +44,19 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (Throwable $e, Request $request) {
+            // Production safety: never leak exception details in admin panel responses.
+            if (app()->environment('production') && $request->is('admin/*')) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => 'Server error. Please try again.',
+                    ], 500);
+                }
+            }
+
+            return null;
         });
     }
 }

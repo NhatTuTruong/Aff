@@ -13,6 +13,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('notifications:check-alerts')->everyThirtyMinutes();
+        $schedule->command('health:check-landing --only-errors')->hourly();
     }
 
     /**

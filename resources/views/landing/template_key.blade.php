@@ -9,7 +9,7 @@
         $slugPart = count($slugParts) === 2 ? $slugParts[1] : $campaign->slug;
         $backgroundImage = $campaign->background_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->background_image) : null;
         $productImages = $campaign->key_product_images ?? [];
-        $logoUrl = $campaign->logo ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->logo) : ($campaign->brand?->image ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->brand->image) : null);
+        $logoUrl = $campaign->logo ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->logo) : ($campaign->brand?->image ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->brand->image) : asset('images/placeholder.svg'));
     @endphp
     <title>{{ $campaign->title }}</title>
     <meta name="description" content="{{ $campaign->subtitle ?? strip_tags($campaign->intro ?? '') }}">
@@ -221,9 +221,7 @@
     <div class="page-wrapper">
         <div class="container">
             <header class="header">
-                @if($logoUrl)
                 <img src="{{ $logoUrl }}" alt="{{ $campaign->brand?->name ?? $campaign->title }}" class="logo">
-                @endif
                 <h1 class="title">{{ $campaign->title }}</h1>
                 @if($campaign->subtitle)
                 <p class="subtitle">{{ $campaign->subtitle }}</p>
@@ -232,9 +230,17 @@
 
             <div class="content-section">
                 @if($campaign->intro)
-                <div class="intro">
-                    {!! $campaign->intro !!}
-                </div>
+                    @php
+                        $intro = (string) $campaign->intro;
+                        $hasHtml = $intro !== strip_tags($intro);
+                    @endphp
+                    <div class="intro">
+                        @if($hasHtml)
+                            {!! $intro !!}
+                        @else
+                            {!! nl2br(e($intro)) !!}
+                        @endif
+                    </div>
                 @endif
 
                 @if(count($productImages) > 0)

@@ -15,10 +15,7 @@ class TopCampaignsByClicksWidget extends Widget
 
     protected static ?string $description = 'Các chiến dịch có lượt click cao nhất';
 
-    protected int | string | array $columnSpan = [
-        'md' => 1,
-        'xl' => 1,
-    ];
+    protected int | string | array $columnSpan = ['default' => 'full', 'xl' => 6];
 
     protected static ?int $sort = 3;
 
@@ -26,12 +23,14 @@ class TopCampaignsByClicksWidget extends Widget
 
     protected function getViewData(): array
     {
-        $userId = Filament::auth()->id();
+        $user = Filament::auth()->user();
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+        $userId = $isAdmin ? null : Filament::auth()->id();
         $userScope = fn (Builder $q) => $q->where('user_id', $userId);
 
         $campaigns = Campaign::query()
             ->withCount('clicks')
-            ->whereHas('brand', $userScope)
+            ->when($userId, fn ($q) => $q->whereHas('brand', $userScope))
             ->orderByDesc('clicks_count')
             ->take(10)
             ->get()

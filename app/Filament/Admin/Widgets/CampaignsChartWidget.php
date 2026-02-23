@@ -14,16 +14,18 @@ class CampaignsChartWidget extends ChartWidget
     
     protected static ?string $description = 'Biểu đồ thể hiện số lượng chiến dịch được tạo theo từng tháng';
     
-    /** Cùng hàng với chart khác trên xl để không thừa chỗ trống */
-protected int | string | array $columnSpan = ['default' => 'full', 'xl' => 6];
+    /** Nằm bên phải block Top chiến dịch trên xl */
+    protected int | string | array $columnSpan = ['default' => 'full', 'xl' => 6];
     
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 4;
     
     protected static bool $isDiscovered = true;
 
     protected function getData(): array
     {
-        $userId = Filament::auth()->id();
+        $user = Filament::auth()->user();
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+        $userId = $isAdmin ? null : Filament::auth()->id();
         $userScope = fn (Builder $q) => $q->where('user_id', $userId);
 
         $months = [];

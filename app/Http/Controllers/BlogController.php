@@ -4,18 +4,44 @@ namespace App\Http\Controllers;
 
 use App\Models\Blog;
 use App\Models\Coupon;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class BlogController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $query = $request->string('q')->toString();
+        $category = $request->string('category')->toString();
+
         $posts = Blog::query()
             ->where('is_published', true)
+            ->when($query, function ($q) use ($query) {
+                $q->where(function ($qq) use ($query) {
+                    $qq->where('title', 'like', "%{$query}%")
+                        ->orWhere('content', 'like', "%{$query}%");
+                });
+            })
+            ->when($category, fn ($q) => $q->where('category', $category))
             ->orderByDesc('created_at')
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
 
-        return view('blog.index', ['posts' => $posts]);
+        $categories = Blog::query()
+            ->where('is_published', true)
+            ->whereNotNull('category')
+            ->where('category', '!=', '')
+            ->select('category')
+            ->distinct()
+            ->orderBy('category')
+            ->pluck('category');
+
+        return view('blog.index', [
+            'posts' => $posts,
+            'searchQuery' => $query,
+            'selectedCategory' => $category,
+            'categories' => $categories,
+        ]);
     }
 
     public function show(string $slug): View

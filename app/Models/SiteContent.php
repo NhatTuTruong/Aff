@@ -71,13 +71,15 @@ class SiteContent extends Model
                     ['label' => 'About Us', 'url' => '/about'],
                     ['label' => 'Contact', 'url' => '/contact'],
                     ['label' => 'Privacy Policy', 'url' => '/privacy'],
+                    ['label' => 'Terms of Use', 'url' => '/terms'],
                 ],
             ],
             [
                 'title' => 'Links',
                 'links' => [
                     ['label' => 'Feedback', 'url' => '/contact'],
-                    ['label' => 'Terms & Conditions', 'url' => '/privacy'],
+                    ['label' => 'Deals', 'url' => '/deals'],
+                    ['label' => 'Affiliate Disclosure', 'url' => '/affiliate-disclosure'],
                 ],
             ],
         ];
@@ -217,6 +219,31 @@ HTML;
 
 <h2>Contact Us</h2>
 <p>If you have any questions about this Privacy Policy or how we handle your data, please visit our Contact page to get in touch.</p>
+HTML;
+    }
+
+    /** Nội dung mặc định trang Affiliate Disclosure (tiếng Anh) */
+    public static function defaultPageAffiliateDisclosure(): string
+    {
+        return <<<'HTML'
+<h1 class="font-heading">Affiliate Disclosure</h1>
+
+<p><strong>[SITE_NAME]</strong> participates in affiliate marketing programs. This means that some of the links on this website are affiliate links, which may earn us a commission when you click or make a purchase, at no additional cost to you.</p>
+
+<h2>Why we use affiliate links</h2>
+<p>Affiliate partnerships allow us to keep the website running, maintain our tools, and continue researching and curating the best deals, coupons, and reviews for you without charging a subscription fee.</p>
+
+<h2>How affiliate links affect you</h2>
+<ul>
+<li>The price you pay is the same whether you use our links or go directly to the merchant.</li>
+<li>We only promote brands, stores, and offers that we believe provide real value.</li>
+<li>Affiliate relationships do not influence our editorial opinions or review content.</li>
+</ul>
+
+<h2>Transparency &amp; trust</h2>
+<p>We aim to be fully transparent about how we monetize this website. If you ever have questions about a specific recommendation, partnership, or how we earn commissions, please contact us via the Contact page.</p>
+
+<p>Thank you for supporting <strong>[SITE_NAME]</strong>. Your support helps us continue finding and sharing great deals.</p>
 HTML;
     }
 }

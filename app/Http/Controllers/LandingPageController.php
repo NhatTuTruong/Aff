@@ -30,8 +30,12 @@ class LandingPageController extends Controller
             abort(404);
         }
 
-        // Track page view
-        $pageView = $this->analyticsService->trackPageView($campaign, $request);
+        // Track page view (skip when running internal health checks)
+        $pageView = null;
+        $isHealthCheck = $request->headers->has('X-Health-Check') || $request->boolean('health_check');
+        if (! $isHealthCheck) {
+            $pageView = $this->analyticsService->trackPageView($campaign, $request);
+        }
 
         // Xác định template dựa trên type và template field
         $template = $campaign->template ?? 'template1';

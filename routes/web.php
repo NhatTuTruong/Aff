@@ -50,6 +50,16 @@ Route::get('/privacy', function () {
     return view('legal.privacy');
 })->name('legal.privacy');
 
+Route::get('/affiliate-disclosure', function () {
+    return view('legal.affiliate');
+})->name('legal.affiliate');
+
+Route::get('/terms', function () {
+    return view('legal.terms');
+})->name('legal.terms');
+
+Route::get('/deals', [App\Http\Controllers\DealsController::class, 'index'])->name('deals.index');
+
 // Image upload for RichEditor paste
 Route::post('/admin/campaigns/upload-image', [App\Http\Controllers\ImageUploadController::class, 'upload'])
     ->middleware('web')

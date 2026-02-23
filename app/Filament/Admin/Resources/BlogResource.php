@@ -24,7 +24,7 @@ class BlogResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Blog';
 
-    protected static ?string $navigationGroup = 'Quản lý';
+    protected static ?string $navigationGroup = 'Admin';
 
     protected static ?int $navigationSort = 5;
 
@@ -138,7 +138,7 @@ class BlogResource extends Resource
                     ->label('Ảnh')
                     ->disk('public')
                     ->size(60)
-                    ->defaultImageUrl(fn () => url('/images/placeholder.png'))
+                    ->defaultImageUrl(fn () => url('/images/placeholder.svg'))
                     ->circular(false),
                 Tables\Columns\TextColumn::make('title')
                     ->label('Tiêu đề')

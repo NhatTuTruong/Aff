@@ -65,6 +65,10 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::SCRIPTS_BEFORE,
                 fn () => view('components.chart-js-script')
+            )
+            ->renderHook(
+                PanelsRenderHook::SCRIPTS_AFTER,
+                fn () => view('components.admin-error-toast')
             );
     }
 }

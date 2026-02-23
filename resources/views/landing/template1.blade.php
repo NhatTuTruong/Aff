@@ -407,6 +407,12 @@
             border: 1px dashed var(--primary);
             border-radius: 8px;
             white-space: nowrap;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .coupon-revealed-code:hover {
+            background: #dcfce7;
+            border-color: var(--primary-dark);
         }
         .staff-pick-badge {
             display: inline-flex;
@@ -1210,6 +1216,11 @@
             }
             .coupon-title {
                 font-size: 0.9rem;
+                line-height: 1.3;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
             }
             .discount-percent {
                 font-size: 2.2rem;
@@ -1295,17 +1306,21 @@
             .coupon-title {
                 font-size: 0.9rem;
                 line-height: 1.3;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
             }
             .staff-pick-badge {
-                font-size: 0.65rem;
-                padding: 2px 6px;
+                display: none;
             }
             .coupon-meta-info {
-                font-size: 0.75rem;
-                gap: 10px;
+                font-size: 0.6rem;
+                gap: 8px;
             }
             .coupon-desc {
-                font-size: 0.8rem;
+                overflow: hidden;
+                display: none;
             }
             .btn-get-code {
                 font-size: 0.85rem;
@@ -1419,6 +1434,29 @@
             .popup-body {
                 padding: 18px 14px 20px;
             }
+            /* Mobile-only Shop Now dưới danh sách coupon */
+            .mobile-shop-now-bottom {
+                display: block;
+                margin: 16px auto;
+                max-width: 320px;
+                padding: 12px 18px;
+                text-align: center;
+                border-radius: 999px;
+                background: var(--primary);
+                color: #fff;
+                font-weight: 600;
+                font-size: 0.95rem;
+                text-decoration: none;
+                box-shadow: 0 4px 12px rgba(34,197,94,0.3);
+            }
+            .mobile-shop-now-bottom:hover {
+                background: var(--primary-dark);
+                color: #fff;
+            }
+            /* Ẩn nút Shop Now trong quick menu trên mobile để tránh trùng lặp */
+            .quick-menu-shop-now {
+                display: none;
+            }
         }
 
 
@@ -1436,6 +1474,9 @@
         <p class="hero-sub">
             Save up to <strong>{{ $maxPercent }}% off</strong> with verified discount codes &amp; exclusive deals.
         </p>
+        <p class="hero-sub" style="margin-top: 6px; font-size: 0.9rem; color: #9ca3af;">
+            We may earn a commission when you shop through our links, at no extra cost to you.
+        </p>
     </header>
 
     <div class="page">
@@ -1450,6 +1491,10 @@
             <img src="{{ asset('storage/' . $campaign->logo) }}"
                 alt="{{ $campaign->title }}"
                 class="brand-logo">
+        @else
+            <img src="{{ asset('images/placeholder.svg') }}"
+                alt="{{ $campaign->brand->name ?? $campaign->title }}"
+                class="brand-logo">
         @endif
 
         <div class="brand-name">
@@ -1457,7 +1502,7 @@
         </div>
         <div class="brand-rating">
             <span class="stars">★★★★★</span>
-            <span>4.8 rating • 1,200+ reviews</span>
+            <span>Popular choice with our visitors</span>
         </div>
         </div>
         @php
@@ -1468,15 +1513,15 @@
         <div class="stats-card">
             <div class="stats-list">
                 <div class="stats-row">
-                    <span class="stats-label"><span class="stats-icon" aria-hidden="true">🏷</span> Working Codes</span>
+                    <span class="stats-label"><span class="stats-icon" aria-hidden="true">🏷</span> Available codes</span>
                     <span class="stats-value">{{ $workingCount }}</span>
                 </div>
                 <div class="stats-row">
-                    <span class="stats-label"><span class="stats-icon" aria-hidden="true">✓</span> Success Rate</span>
+                    <span class="stats-label"><span class="stats-icon" aria-hidden="true">✓</span> Estimated success rate</span>
                     <span class="stats-value">{{ $successRate }}%</span>
                 </div>
                 <div class="stats-row">
-                    <span class="stats-label"><span class="stats-icon" aria-hidden="true">💰</span> Total Saved</span>
+                    <span class="stats-label"><span class="stats-icon" aria-hidden="true">💰</span> Estimated total saved</span>
                     <span class="stats-value">${{ number_format(min(99999, 7229 + $workingCount * 80), 0, '.', ',') }}</span>
                 </div>
             </div>
@@ -1591,7 +1636,7 @@
                 <div class="coupon-discount-visual">
                     @if($offerType === 'text' && $offerValue === 'FREE')
                         <div class="discount-up-to" style="font-size: 0.7rem; margin-bottom: 6px; color: #f97316;">FREE</div>
-                        <div class="discount-percent" style="font-size: 2.2rem; margin-bottom: 8px; color: #111827;">SHIPPING</div>
+                        <div class="discount-percent" style="font-size: 2rem; margin-bottom: 8px; color: #111827;">SHIPPING</div>
                         <div class="discount-off-badge" style="display: none;"></div>
                     @elseif($offerType === 'currency')
                         <div class="discount-up-to">UP TO</div>
@@ -1663,12 +1708,28 @@
             @endforelse
         </section>
 
+        {{-- Mobile-only Shop Now dưới danh sách coupon --}}
+        <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}"
+           class="mobile-shop-now-bottom"
+           target="_blank"
+           rel="nofollow sponsored noopener">
+            Shop Now
+        </a>
+
         <!-- ABOUT US -->
         <section class="section" id="about-us">
             <h2 class="section-title">About us</h2>
             <div class="section-body intro-content">
                 @if($campaign->intro)
-                    {!! $campaign->intro !!}
+                    @php
+                        $intro = (string) $campaign->intro;
+                        $hasHtml = $intro !== strip_tags($intro);
+                    @endphp
+                    @if($hasHtml)
+                        {!! $intro !!}
+                    @else
+                        {!! nl2br(e($intro)) !!}
+                    @endif
                 @else
                     <p>
                         Exclusive deals from {{ $campaign->brand->name ?? $campaign->title }}
@@ -1784,9 +1845,9 @@
                         alt="{{ $campaign->title }}"
                         class="popup-logo">
                 @else
-                    <div class="popup-logo" style="display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: #111827;">
-                        {{ substr(($campaign->brand->name ?? $campaign->title), 0, 1) }}
-                    </div>
+                    <img src="{{ asset('images/placeholder.svg') }}"
+                        alt="{{ $campaign->brand->name ?? $campaign->title }}"
+                        class="popup-logo">
                 @endif
 
                 <h3 class="popup-title">
@@ -1815,19 +1876,20 @@
             
             <div class="popup-verification">
                 <div class="verification-item">
-                    Verified <span id="verifiedDays">{{ rand(1, 30) }}</span> days ago
+                    Recently checked and still active for most shoppers.
                 </div>
                 <div class="verification-item success">
-                    <span id="successRate">{{ rand(85, 98) }}%</span> success
+                    We can’t guarantee every order, but many visitors report this code still works.
                 </div>
             </div>
 
             <div class="coupon-modal-actions">
                 <a href="#"
                 target="_blank"
+                rel="nofollow sponsored noopener"
                 class="coupon-btn store go-to-store-btn"
                 onclick="event.preventDefault(); const url = this.getAttribute('data-url'); if(url) { window.open(url, '_blank'); } return false;">
-                Go to the store to apply the discount code now
+                Go To The Store
                 </a>
             </div>
             
@@ -1854,48 +1916,99 @@
 let currentCode = '';
 let currentCouponRow = null;
 let currentCouponId = null;
+const STORAGE_KEY = 'revealed_coupons_' + window.location.pathname;
+
+function getStoredRevealed() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+}
+function saveRevealed(couponId, code) {
+    const obj = getStoredRevealed();
+    obj[couponId] = code;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+}
+
+function revealCodeInRow(couponId, code, affUrl) {
+    const row = document.querySelector('.coupon-row[data-coupon-id="' + couponId + '"]');
+    if (!row) return;
+    const btn = row.querySelector('.btn-get-code');
+    if (!btn) return;
+    const codeSpan = document.createElement('span');
+    codeSpan.className = 'coupon-revealed-code';
+    codeSpan.textContent = code;
+    codeSpan.title = 'Click để copy lại';
+    if (affUrl) codeSpan.dataset.url = affUrl;
+    codeSpan.onclick = function(e) {
+        e.stopPropagation();
+        copyCodeToClipboard(code);
+        const t = this.textContent;
+        this.textContent = 'Copied ✓';
+        this.style.background = '#22c55e';
+        this.style.color = '#fff';
+        setTimeout(() => { this.textContent = t; this.style.background = ''; this.style.color = ''; }, 1500);
+    };
+    btn.parentNode.replaceChild(codeSpan, btn);
+    saveRevealed(couponId, code);
+}
+function copyCodeToClipboard(text) {
+    navigator.clipboard.writeText(text);
+}
+
+function openModalForCoupon(couponId, code, affUrl) {
+    currentCode = code;
+    currentCouponId = couponId;
+    const codeBox = document.getElementById('modalCode');
+    if (codeBox) codeBox.innerText = code;
+    const modal = document.getElementById('couponModal');
+    if (modal) modal.classList.add('active');
+    const goBtn = document.querySelector('.go-to-store-btn');
+    if (goBtn && affUrl) {
+        goBtn.setAttribute('data-url', affUrl);
+        goBtn.href = affUrl;
+    }
+}
 
 function handleCouponClick(btn){
-    const type = btn.dataset.type;
-    const code = btn.dataset.code || '';
-    const url = btn.dataset.url;
-    const couponId = btn.dataset.couponId;
+    const actualBtn = btn.classList && btn.classList.contains('btn-get-code') ? btn : btn.querySelector('.btn-get-code');
+    if (!actualBtn) return false;
+    const type = actualBtn.dataset.type;
+    const code = actualBtn.dataset.code || '';
+    const url = actualBtn.dataset.url;
+    const couponId = actualBtn.dataset.couponId;
 
     const activeTabBtn = document.querySelector('.filter-pill.active');
     const activeTab = activeTabBtn ? (activeTabBtn.dataset.tab || 'all') : 'all';
 
-    // Nếu là deal (không có code) hoặc đang ở tab Deals → đi thẳng tới link aff
+    // Deal hoặc tab Deals: luôn mở link aff
     if (type === 'deal' || activeTab === 'deals') {
-        if (url) {
-            window.open(url, '_blank');
-        }
+        if (url) window.open(url, '_blank');
         return false;
     }
 
-    // Codes: mở modal + chuẩn bị copy + mở tab aff (không redirect trang hiện tại)
     if (!code) {
-        // Nếu không có code, đi thẳng tới store
-        if (url) {
-            window.open(url, '_blank');
-        }
+        if (url) window.open(url, '_blank');
         return false;
     }
 
     currentCode = code;
     currentCouponId = couponId;
-    currentCouponRow = btn.closest('.coupon-row');
+    currentCouponRow = actualBtn.closest('.coupon-row');
 
-    // 1. Mở new tab = trang coupon với param để tự mở popup + code tương ứng
+    const affAlreadyOpened = sessionStorage.getItem('affOpened') === '1';
+
+    if (affAlreadyOpened) {
+        openModalForCoupon(couponId, code, url);
+        return false;
+    }
+
+    sessionStorage.setItem('affOpened', '1');
     const couponPageUrl = new URL(window.location.href);
     couponPageUrl.searchParams.set('show_coupon', couponId);
     couponPageUrl.searchParams.set('code', encodeURIComponent(code));
     window.open(couponPageUrl.toString(), '_blank');
-
-    // 2. Redirect tab hiện tại đến trang aff
-    if (url) {
-        window.location.href = url;
-    }
-
+    if (url) window.location.href = url;
     return false;
 }
 
@@ -1930,75 +2043,54 @@ function handleFeedback(btn, worked){
 function copyCoupon(btn){
     if(!currentCode) return;
 
-    navigator.clipboard.writeText(currentCode).then(()=>{
-        const originalText = btn.innerText;
-        btn.innerText = 'Copied ✓';
-        btn.disabled = true;
-        btn.style.background = '#22c55e';
-        
-        // Reset button sau 2 giây
-        setTimeout(() => {
-            btn.innerText = originalText;
-            btn.disabled = false;
-            btn.style.background = '';
-        }, 2000);
-        
-        // 👉 highlight nút Go to Store
-        const goBtn = document.querySelector('.go-to-store-btn');
-        if(goBtn){
-            goBtn.classList.remove('go-store-attention');
-            void goBtn.offsetWidth; // force reflow
-            goBtn.classList.add('go-store-attention');
-        }
-
-        // Ẩn nút GET CODE và hiển thị mã code trong row tương ứng
-        if (currentCouponId && currentCode) {
-            const targetRow = document.querySelector('[data-coupon-id="' + currentCouponId + '"]');
-            if (targetRow) {
-                const btn = targetRow.querySelector('.btn-get-code');
-                if (btn) {
-                    const codeSpan = document.createElement('span');
-                    codeSpan.className = 'coupon-revealed-code';
-                    codeSpan.textContent = currentCode;
-                    codeSpan.title = 'Code copied';
-                    btn.parentNode.replaceChild(codeSpan, btn);
-                }
-            }
-        }
-    });
+    copyCodeToClipboard(currentCode);
+    const originalText = btn.innerText;
+    btn.innerText = 'Copied ✓';
+    btn.disabled = true;
+    btn.style.background = '#22c55e';
+    setTimeout(() => {
+        btn.innerText = originalText;
+        btn.disabled = false;
+        btn.style.background = '';
+    }, 2000);
+    
+    const goBtn = document.querySelector('.go-to-store-btn');
+    if(goBtn){
+        goBtn.classList.remove('go-store-attention');
+        void goBtn.offsetWidth;
+        goBtn.classList.add('go-store-attention');
+    }
+    const affUrl = goBtn ? goBtn.getAttribute('data-url') : null;
+    if (currentCouponId && currentCode) {
+        revealCodeInRow(currentCouponId, currentCode, affUrl);
+    }
 }
 function toggleQA(el){
     const item = el.closest('.qa-item');
     item.classList.toggle('active');
 }
 
-// Tabs filter
 document.addEventListener('DOMContentLoaded', function () {
-    // Tab mới mở từ "Get Code": có show_coupon + code trong URL → mở popup và xóa params
+    const affUrl = (function() {
+        const b = document.querySelector('.btn-get-code[data-url]');
+        return b ? b.dataset.url : null;
+    })();
+    const stored = getStoredRevealed();
+    Object.keys(stored).forEach(function(cid) {
+        revealCodeInRow(cid, stored[cid], affUrl);
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
     const showCouponId = urlParams.get('show_coupon');
     const codeFromUrl = urlParams.get('code');
     if (showCouponId && codeFromUrl) {
         try {
-            currentCode = decodeURIComponent(codeFromUrl);
+            const decoded = decodeURIComponent(codeFromUrl);
+            currentCode = decoded;
             currentCouponId = showCouponId;
-            currentCouponRow = document.querySelector('[data-coupon-id="' + showCouponId + '"]');
-            const codeBox = document.getElementById('modalCode');
-            if (codeBox) codeBox.innerText = currentCode;
-            const modal = document.getElementById('couponModal');
-            if (modal) modal.classList.add('active');
-            const goBtn = document.querySelector('.go-to-store-btn');
-            if (goBtn) {
-                let affUrl = document.querySelector('[data-coupon-id="' + showCouponId + '"] .btn-get-code');
-                if (!affUrl || !affUrl.dataset.url) {
-                    affUrl = document.querySelector('.btn-get-code[data-url]');
-                }
-                if (affUrl && affUrl.dataset.url) {
-                    goBtn.setAttribute('data-url', affUrl.dataset.url);
-                    goBtn.href = affUrl.dataset.url;
-                }
-            }
-            // Không xóa params khỏi URL để khi reload trang popup vẫn mở lại
+            currentCouponRow = document.querySelector('.coupon-row[data-coupon-id="' + showCouponId + '"]');
+            revealCodeInRow(showCouponId, decoded, affUrl);
+            openModalForCoupon(showCouponId, decoded, affUrl);
         } catch (e) {}
     }
 

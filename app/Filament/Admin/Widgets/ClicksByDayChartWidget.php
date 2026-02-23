@@ -13,10 +13,10 @@ class ClicksByDayChartWidget extends ChartWidget
 
     protected static ?string $description = 'Biểu đồ lượt click theo từng ngày';
 
-    /** Cùng hàng với chart khác trên xl để không thừa chỗ trống */
-protected int | string | array $columnSpan = ['default' => 'full', 'xl' => 6];
+    /** Hiển thị full width để nằm trên các block khác */
+    protected int | string | array $columnSpan = ['default' => 'full'];
 
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 2;
 
     protected static bool $isDiscovered = true;
 
@@ -40,7 +40,9 @@ protected int | string | array $columnSpan = ['default' => 'full', 'xl' => 6];
         $days = (int) ($this->filter ?? 7);
         $days = in_array($days, [7, 30]) ? $days : 7;
 
-        $userId = Filament::auth()->id();
+        $user = Filament::auth()->user();
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+        $userId = $isAdmin ? null : Filament::auth()->id();
         $clickScope = fn (Builder $q) => $q->whereHas('campaign.brand', fn ($b) => $b->where('user_id', $userId));
 
         $labels = [];

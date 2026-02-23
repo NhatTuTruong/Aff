@@ -17,7 +17,8 @@ class AnalyticsService
     public function trackPageView(Campaign $campaign, Request $request): ?PageView
     {
         $ip = $request->ip();
-        if (BlockedIp::isBlocked($ip)) {
+        $userId = $campaign->brand?->user_id;
+        if (BlockedIp::isBlocked($ip, $userId)) {
             return null;
         }
 
@@ -54,7 +55,8 @@ class AnalyticsService
     public function trackClick(Campaign $campaign, Request $request): ?Click
     {
         $ip = $request->ip();
-        if (BlockedIp::isBlocked($ip)) {
+        $userId = $campaign->brand?->user_id;
+        if (BlockedIp::isBlocked($ip, $userId)) {
             return null;
         }
 
@@ -83,19 +85,9 @@ class AnalyticsService
         ]);
     }
 
-    /**
-     * Get country from IP (simplified - in production use a proper geolocation service)
-     */
     private function getCountryFromIP(string $ip): ?string
     {
-        // For localhost/testing
-        if ($ip === '127.0.0.1' || $ip === '::1') {
-            return 'Local';
-        }
-        
-        // In production, use a service like ipapi.co, ip-api.com, or MaxMind GeoIP2
-        // For now, return null
-        return null;
+        return app(GeoIpService::class)->getCountry($ip);
     }
 
     /**
