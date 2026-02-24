@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\CategoryResource\Pages;
 use App\Filament\Admin\Resources\CategoryResource\RelationManagers;
 use App\Models\Category;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -100,6 +101,11 @@ class CategoryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('user_id')
+                    ->label('User')
+                    ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->toArray())
+                    ->searchable()
+                    ->visible(fn (): bool => (bool) (Filament::auth()->user()?->isAdmin())),
                 Tables\Filters\SelectFilter::make('is_active')
                     ->label('Trạng thái')
                     ->options([
@@ -201,7 +207,9 @@ class CategoryResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $userId = Filament::auth()->id();
+        $user = Filament::auth()->user();
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+        $userId = $isAdmin ? null : ($user?->id);
 
         return parent::getEloquentQuery()
             ->withoutGlobalScope(SoftDeletingScope::class)

@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\BrandResource\Pages;
 use App\Filament\Admin\Resources\BrandResource\RelationManagers;
 use App\Models\Brand;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -43,8 +44,14 @@ class BrandResource extends Resource
                                 'category',
                                 'name',
                                 modifyQueryUsing: function ($query) {
-                                    $userId = Filament::auth()->id();
-                                    return $userId ? $query->where('categories.user_id', $userId) : $query;
+                                    $user = Filament::auth()->user();
+                                    $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+                                    $userId = $isAdmin ? null : ($user?->id);
+
+                                    return $query->when(
+                                        $userId,
+                                        fn (Builder $q) => $q->where('categories.user_id', $userId),
+                                    );
                                 }
                             )
                             ->searchable()
@@ -324,6 +331,11 @@ class BrandResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('user_id')
+                    ->label('User')
+                    ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->toArray())
+                    ->searchable()
+                    ->visible(fn (): bool => (bool) (Filament::auth()->user()?->isAdmin())),
                 Tables\Filters\SelectFilter::make('approved')
                     ->label('Duyệt bài')
                     ->options([
@@ -332,7 +344,20 @@ class BrandResource extends Resource
                     ]),
                 Tables\Filters\SelectFilter::make('category_id')
                     ->label('Danh mục')
-                    ->relationship('category', 'name')
+                    ->relationship(
+                        'category',
+                        'name',
+                        modifyQueryUsing: function (Builder $query) {
+                            $user = Filament::auth()->user();
+                            $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+                            $userId = $isAdmin ? null : ($user?->id);
+
+                            return $query->when(
+                                $userId,
+                                fn (Builder $q) => $q->where('categories.user_id', $userId),
+                            );
+                        }
+                    )
                     ->searchable()
                     ->preload(),
                 Tables\Filters\Filter::make('created_at_range')
@@ -414,7 +439,9 @@ class BrandResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $userId = Filament::auth()->id();
+        $user = Filament::auth()->user();
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+        $userId = $isAdmin ? null : ($user?->id);
 
         return parent::getEloquentQuery()
             ->withoutGlobalScope(SoftDeletingScope::class)

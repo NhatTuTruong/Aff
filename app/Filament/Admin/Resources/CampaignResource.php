@@ -7,6 +7,7 @@ use App\Filament\Admin\Resources\CampaignResource\RelationManagers;
 use App\Filament\Imports\CampaignImporter;
 use App\Models\Campaign;
 use App\Models\Brand;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -46,8 +47,14 @@ class CampaignResource extends Resource
                                 'brand',
                                 'name',
                                 modifyQueryUsing: function ($query) {
-                                    $userId = Filament::auth()->id();
-                                    return $userId ? $query->where('brands.user_id', $userId) : $query;
+                                    $user = Filament::auth()->user();
+                                    $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+                                    $userId = $isAdmin ? null : ($user?->id);
+
+                                    return $query->when(
+                                        $userId,
+                                        fn (Builder $q) => $q->where('brands.user_id', $userId),
+                                    );
                                 }
                             )
                             ->searchable()
@@ -393,9 +400,33 @@ class CampaignResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('user_id')
+                    ->label('User')
+                    ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->toArray())
+                    ->searchable()
+                    ->visible(fn (): bool => (bool) (Filament::auth()->user()?->isAdmin()))
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn (Builder $q, $userId): Builder => $q->whereHas('brand', fn (Builder $b) => $b->where('user_id', $userId)),
+                        );
+                    }),
                 Tables\Filters\SelectFilter::make('brand')
                     ->label('Lọc theo cửa hàng')
-                    ->relationship('brand', 'name'),
+                    ->relationship(
+                        'brand',
+                        'name',
+                        modifyQueryUsing: function (Builder $query) {
+                            $user = Filament::auth()->user();
+                            $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+                            $userId = $isAdmin ? null : ($user?->id);
+
+                            return $query->when(
+                                $userId,
+                                fn (Builder $q) => $q->where('brands.user_id', $userId),
+                            );
+                        }
+                    ),
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Trạng thái')
                     ->options([
@@ -503,7 +534,9 @@ class CampaignResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $userId = Filament::auth()->id();
+        $user = Filament::auth()->user();
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+        $userId = $isAdmin ? null : ($user?->id);
 
         return parent::getEloquentQuery()
             ->withoutGlobalScope(SoftDeletingScope::class)

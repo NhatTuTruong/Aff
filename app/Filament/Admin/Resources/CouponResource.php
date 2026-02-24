@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\CouponResource\Pages;
 use App\Models\Coupon;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -34,7 +35,20 @@ class CouponResource extends Resource
             ->schema([
                 Forms\Components\Select::make('campaign_id')
                     ->label('Chiến dịch')
-                    ->relationship('campaign', 'title')
+                    ->relationship(
+                        'campaign',
+                        'title',
+                        modifyQueryUsing: function (Builder $query) {
+                            $user = Filament::auth()->user();
+                            $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+                            $userId = $isAdmin ? null : ($user?->id);
+
+                            return $query->when(
+                                $userId,
+                                fn (Builder $q) => $q->whereHas('brand', fn (Builder $b) => $b->where('user_id', $userId)),
+                            );
+                        }
+                    )
                     ->searchable()
                     ->preload()
                     ->required(),
@@ -84,9 +98,33 @@ class CouponResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
+                Tables\Filters\SelectFilter::make('user_id')
+                    ->label('User')
+                    ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->toArray())
+                    ->searchable()
+                    ->visible(fn (): bool => (bool) (Filament::auth()->user()?->isAdmin()))
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn (Builder $q, $userId): Builder => $q->whereHas('campaign.brand', fn (Builder $b) => $b->where('user_id', $userId)),
+                        );
+                    }),
                 Tables\Filters\SelectFilter::make('campaign_id')
                     ->label('Chiến dịch')
-                    ->relationship('campaign', 'title')
+                    ->relationship(
+                        'campaign',
+                        'title',
+                        modifyQueryUsing: function (Builder $query) {
+                            $user = Filament::auth()->user();
+                            $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+                            $userId = $isAdmin ? null : ($user?->id);
+
+                            return $query->when(
+                                $userId,
+                                fn (Builder $q) => $q->whereHas('brand', fn (Builder $b) => $b->where('user_id', $userId)),
+                            );
+                        }
+                    )
                     ->searchable()
                     ->preload(),
                 Tables\Filters\Filter::make('created_at_range')
@@ -147,7 +185,9 @@ class CouponResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $userId = Filament::auth()->id();
+        $user = Filament::auth()->user();
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+        $userId = $isAdmin ? null : ($user?->id);
 
         return parent::getEloquentQuery()
             ->withoutGlobalScope(SoftDeletingScope::class)

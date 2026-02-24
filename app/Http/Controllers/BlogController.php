@@ -51,6 +51,8 @@ class BlogController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
+        $post->increment('views_count');
+
         // Deal bên phải: từ brand thuộc cùng danh mục bài viết (tất cả user), hot và mới
         $sidebarDeals = Coupon::query()
             ->with(['campaign.brand'])

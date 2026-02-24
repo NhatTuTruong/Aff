@@ -1405,9 +1405,6 @@
                 padding: 0 14px 0px;
             }
         }
-        .mobile-shop-now-bottom {
-            display: none;
-        }
         
         @media(max-width:480px){
             .hero-title {

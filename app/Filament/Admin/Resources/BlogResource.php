@@ -154,6 +154,13 @@ class BlogResource extends Resource
                 Tables\Columns\IconColumn::make('is_published')
                     ->label('Xuất bản')
                     ->boolean(),
+                Tables\Columns\TextColumn::make('views_count')
+                    ->label('Lượt xem')
+                    ->numeric()
+                    ->sortable()
+                    ->badge()
+                    ->color('info')
+                    ->default(0),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Ngày tạo')
                     ->dateTime('d/m/Y H:i')

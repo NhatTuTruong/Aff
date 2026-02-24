@@ -22,12 +22,14 @@ class Blog extends Model
         'images',
         'videos',
         'is_published',
+        'views_count',
     ];
 
     protected $casts = [
         'images' => 'array',
         'videos' => 'array',
         'is_published' => 'boolean',
+        'views_count' => 'integer',
     ];
 
     public function user(): BelongsTo

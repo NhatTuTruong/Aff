@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Pages;
 
+use App\Filament\Admin\Resources\CampaignResource;
 use App\Models\LandingPageCheck;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -75,6 +76,12 @@ class LandingHealth extends Page implements HasTable
                     ->orderByDesc('checked_at')
             )
             ->defaultPaginationPageOption(25)
+            ->recordUrl(fn (LandingPageCheck $record): ?string => $record->campaign_id
+                ? CampaignResource::getUrl('edit', ['record' => $record->campaign_id])
+                : null)
+            ->emptyStateHeading('Không có lỗi landing/coupon trong lần quét gần nhất')
+            ->emptyStateDescription('Tất cả URL landing/coupon đang trả về HTTP 200 ở lần kiểm tra mới nhất.')
+            ->emptyStateIcon('heroicon-o-check-circle')
             ->columns([
                 TextColumn::make('checked_at')
                     ->label('Lần check')
@@ -118,9 +125,10 @@ class LandingHealth extends Page implements HasTable
                     ]),
             ])
             ->actions([
-                TableAction::make('open')
-                    ->label('Mở')
+                TableAction::make('openLanding')
+                    ->label('')
                     ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->tooltip('Mở landing')
                     ->url(fn (LandingPageCheck $record) => url($record->url_path))
                     ->openUrlInNewTab(),
             ]);
