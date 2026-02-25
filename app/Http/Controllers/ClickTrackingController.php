@@ -29,6 +29,12 @@ class ClickTrackingController extends Controller
             abort(404);
         }
 
+        // Nếu không có affiliate_url thì không nên redirect mù mờ
+        if (empty($campaign->affiliate_url)) {
+            // Không lộ chi tiết lý do ra ngoài
+            abort(404);
+        }
+
         // Track the click with analytics
         $this->analyticsService->trackClick($campaign, $request);
 

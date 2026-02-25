@@ -1,6 +1,7 @@
 <?php
-
+ 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,6 +13,23 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+// Simple health check endpoint (no tracking)
+Route::get('/health', function () {
+    $status = [
+        'app' => 'ok',
+        'timestamp' => now()->toIso8601String(),
+    ];
+
+    try {
+        DB::connection()->getPdo();
+        $status['db'] = 'ok';
+    } catch (\Throwable $e) {
+        $status['db'] = 'fail';
+    }
+
+    return response()->json($status, $status['db'] === 'ok' ? 200 : 500);
+})->name('health');
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/blog', [App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');

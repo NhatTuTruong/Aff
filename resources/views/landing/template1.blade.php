@@ -23,10 +23,38 @@
         $slugParts = explode('/', $campaign->slug, 2);
         $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
         $slugPart = count($slugParts) === 2 ? $slugParts[1] : $campaign->slug;
+
+        $brandName = $campaign->brand->name ?? $campaign->title;
+        $rawIntro = (string) ($campaign->subtitle ?? $campaign->intro ?? '');
+        $metaTitle = $brandName . ' Coupons & Promo Codes';
+        $metaDescription = \Illuminate\Support\Str::limit(strip_tags($rawIntro), 160);
+
+        if (empty($metaDescription)) {
+            $metaDescription = 'Save more with the latest ' . $brandName . ' coupon codes, deals and promotions.';
+        }
+
+        if ($campaign->brand && $campaign->brand->image) {
+            $ogImage = asset('storage/' . $campaign->brand->image);
+        } elseif ($campaign->cover_image) {
+            $ogImage = asset('storage/' . $campaign->cover_image);
+        } elseif ($campaign->logo) {
+            $ogImage = asset('storage/' . $campaign->logo);
+        } else {
+            $ogImage = asset('images/placeholder.svg');
+        }
     @endphp
-    <title>{{ $campaign->title }} - Exclusive Deals & Coupons</title>
-    <meta name="description" content="{{ $campaign->subtitle ?? $campaign->intro }}">
+    <title>{{ $metaTitle }}</title>
+    <meta name="description" content="{{ $metaDescription }}">
     <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ $metaTitle }}">
+    <meta property="og:description" content="{{ $metaDescription }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ $ogImage }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $metaTitle }}">
+    <meta name="twitter:description" content="{{ $metaDescription }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -457,6 +485,27 @@
             color:#6b7280;
             line-height: 1.5;
             margin-bottom: 6px;
+        }
+        .coupon-verified {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+            color: #16a34a;
+        }
+        .coupon-verified-badge {
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .coupon-verified-badge img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
         }
         .coupon-desc .show-more {
             color: var(--primary);
@@ -1146,6 +1195,8 @@
             }
             .page-panel {
                 padding: 24px 20px 32px;
+                box-shadow: var(--shadow-md);
+                border-radius: 20px;
             }
             .hero-title {
                 font-size: 1.6rem;
@@ -1190,7 +1241,7 @@
             #how-to-use { order: 6; }
             #qa { order: 7; }
             #policies { order: 8; }
-            /* Coupon row: giữ layout ngang như PC, không chuyển dọc */
+            /* Coupon row: giữ layout ngang trên tablet */
             .coupon-row {
                 grid-template-columns: 140px 1fr;
             }
@@ -1253,6 +1304,17 @@
             }
             .feedback-btn {
                 max-width: 100%;
+            }
+        }
+
+        /* Very small screens: stack coupon content in one column for readability */
+        @media(max-width:480px){
+            .coupon-row {
+                grid-template-columns: 1fr;
+            }
+            .coupon-discount-visual {
+                border-right: none;
+                border-bottom: 1px solid rgba(229, 231, 235, 0.5);
             }
         }
         
@@ -1406,6 +1468,10 @@
             }
         }
         
+        .mobile-shop-now-bottom {
+            display: none;
+        }
+
         @media(max-width:480px){
             .hero-title {
                 font-size: 1.25rem;
@@ -1486,15 +1552,18 @@
         @if($campaign->brand && $campaign->brand->image)
             <img src="{{ asset('storage/' . $campaign->brand->image) }}"
                 alt="{{ $campaign->brand->name }}"
-                class="brand-logo">
+                class="brand-logo"
+                loading="lazy">
         @elseif($campaign->logo)
             <img src="{{ asset('storage/' . $campaign->logo) }}"
                 alt="{{ $campaign->title }}"
-                class="brand-logo">
+                class="brand-logo"
+                loading="lazy">
         @else
             <img src="{{ asset('images/placeholder.svg') }}"
                 alt="{{ $campaign->brand->name ?? $campaign->title }}"
-                class="brand-logo">
+                class="brand-logo"
+                loading="lazy">
         @endif
 
         <div class="brand-name">
@@ -1550,11 +1619,11 @@
                     Last checked: 18 hours ago • Tracking coupons in the last 7 days.
                 </div>
                 <div class="filter-tabs">
-                    <button class="filter-pill active" type="button">All Deals</button>
-                    <button class="filter-pill" type="button">Codes</button>
-                    <button class="filter-pill" type="button">Deals</button>
-                    <button class="filter-pill" type="button">Free Shipping</button>
-                    <button class="filter-pill" type="button">First Order</button>
+                    <button class="filter-pill active" type="button" aria-pressed="true" aria-label="Show all deals">All Deals</button>
+                    <button class="filter-pill" type="button" aria-pressed="false" aria-label="Show coupon codes only">Codes</button>
+                    <button class="filter-pill" type="button" aria-pressed="false" aria-label="Show deals without codes">Deals</button>
+                    <button class="filter-pill" type="button" aria-pressed="false" aria-label="Show free shipping offers">Free Shipping</button>
+                    <button class="filter-pill" type="button" aria-pressed="false" aria-label="Show first order offers">First Order</button>
                 </div>
             </div>
 
@@ -1680,20 +1749,17 @@
                             data-code="{{ $coupon->code }}"
                             data-coupon-id="{{ $coupon->id }}"
                             data-url="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}"
+                            aria-label="{{ $hasCode ? 'Get coupon code and go to store' : 'Open deal and go to store' }}"
                             onclick="return handleCouponClick(this)">
                             {{ $hasCode ? 'GET CODE' : 'GET DEAL' }}
                         </button>
                     </div>
                     
-                    <div class="coupon-desc">
-                        @php
-                            $fullDesc = $coupon->description ?: 'Exclusive deal from '.($campaign->brand->name ?? $campaign->title).' to help you save more when shopping online.';
-                            $shortDesc = \Illuminate\Support\Str::limit($fullDesc, 120);
-                        @endphp
-                        {{ $shortDesc }}
-                        @if(strlen($fullDesc) > 120)
-                            <a href="#" class="show-more" onclick="event.preventDefault(); this.parentElement.innerHTML='{{ addslashes($fullDesc) }}'; return false;">Show more</a>
-                        @endif
+                    <div class="coupon-desc coupon-verified" aria-label="Verified coupon">
+                        <span class="coupon-verified-badge" aria-hidden="true">
+                            <img src="{{ asset('images/verified-badge.png') }}" alt="">
+                        </span>
+                        <span class="coupon-verified-text">Verified</span>
                     </div>
                     
                 </div>
@@ -1818,9 +1884,9 @@
 
 @include('partials.site-footer')
 
-<div id="couponModal" class="coupon-modal">
+<div id="couponModal" class="coupon-modal" role="dialog" aria-modal="true" aria-labelledby="coupon-modal-title">
     <div class="coupon-modal-content">
-        <div class="coupon-modal-close" onclick="closeCouponPopup()">✕</div>
+        <button type="button" class="coupon-modal-close" aria-label="Close coupon popup" onclick="closeCouponPopup()">✕</button>
         
         <!-- Banner Section -->
         <div class="popup-banner">
@@ -1839,18 +1905,21 @@
                 @if($campaign->brand && $campaign->brand->image)
                     <img src="{{ asset('storage/' . $campaign->brand->image) }}"
                         alt="{{ $campaign->brand->name }}"
-                        class="popup-logo">
+                        class="popup-logo"
+                        loading="lazy">
                 @elseif($campaign->logo)
                     <img src="{{ asset('storage/' . $campaign->logo) }}"
                         alt="{{ $campaign->title }}"
-                        class="popup-logo">
+                        class="popup-logo"
+                        loading="lazy">
                 @else
                     <img src="{{ asset('images/placeholder.svg') }}"
                         alt="{{ $campaign->brand->name ?? $campaign->title }}"
-                        class="popup-logo">
+                        class="popup-logo"
+                        loading="lazy">
                 @endif
 
-                <h3 class="popup-title">
+                <h3 class="popup-title" id="coupon-modal-title">
                     {{ $campaign->brand->name ?? $campaign->title }} Promotion
                 </h3>
 
@@ -1869,7 +1938,7 @@
                         CODE123
                     </div>
                 </div>
-                <button class="btn-copy-code-modal" id="copyCouponBtn" onclick="copyCoupon(this)">
+                <button class="btn-copy-code-modal" id="copyCouponBtn" onclick="copyCoupon(this)" aria-label="Copy coupon code">
                     COPY CODE
                 </button>
             </div>
@@ -1888,6 +1957,7 @@
                 target="_blank"
                 rel="nofollow sponsored noopener"
                 class="coupon-btn store go-to-store-btn"
+                aria-label="Open store in new tab"
                 onclick="event.preventDefault(); const url = this.getAttribute('data-url'); if(url) { window.open(url, '_blank'); } return false;">
                 Go To The Store
                 </a>
@@ -2103,12 +2173,19 @@ document.addEventListener('DOMContentLoaded', function () {
         if (label === 'codes') tab.dataset.tab = 'codes';
         if (label === 'deals') tab.dataset.tab = 'deals';
         if (label === 'free shipping') tab.dataset.tab = 'free-shipping';
+        if (!tab.hasAttribute('aria-pressed')) {
+            tab.setAttribute('aria-pressed', tab.classList.contains('active') ? 'true' : 'false');
+        }
     });
 
     tabs.forEach((tab) => {
         tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
+            tabs.forEach(t => {
+                t.classList.remove('active');
+                t.setAttribute('aria-pressed', 'false');
+            });
             tab.classList.add('active');
+            tab.setAttribute('aria-pressed', 'true');
 
             const current = tab.dataset.tab || 'all';
 

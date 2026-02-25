@@ -45,37 +45,39 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
 
-        $this->renderable(function (Throwable $e, Request $request) {
-            // Production safety: never leak exception details in admin panel responses.
-            if (app()->environment('production') && ($request->is('admin') || $request->is('admin/*'))) {
-                $message = 'Đang có lỗi hệ thống. Vui lòng thử lại.';
+    /**
+     * Render an exception into an HTTP response.
+     */
+    public function render($request, Throwable $e)
+    {
+        // Không bao giờ dùng error views cho khu vực admin trên production.
+        if (app()->environment('production') && ($request->is('admin') || $request->is('admin/*'))) {
+            $message = 'Đang có lỗi hệ thống. Vui lòng thử lại.';
 
-                $isLivewire = (bool) $request->headers->get('X-Livewire');
-                if ($request->expectsJson() || $request->ajax() || $isLivewire) {
-                    return response()->json([
-                        'message' => $message,
-                    ], 500);
-                }
-
-                // For full-page (HTML) admin requests, redirect with a flash toast message
-                // so the admin UI never shows a stacktrace/error page.
-                $fallback = auth()->check() ? url('/admin') : url('/admin/login');
-                $previous = $request->headers->get('referer');
-                $target = ($previous && $previous !== $request->fullUrl()) ? $previous : $fallback;
-
-                if (strtoupper($request->getMethod()) === 'GET') {
-                    return redirect()->to($target)->with('admin_error_toast', $message);
-                }
-
-                return redirect()
-                    ->to($target)
-                    ->withInput($request->except(['password', 'current_password', 'password_confirmation']))
-                    ->with('admin_error_toast', $message);
+            $isLivewire = (bool) $request->headers->get('X-Livewire');
+            if ($request->expectsJson() || $request->ajax() || $isLivewire) {
+                return response()->json([
+                    'message' => $message,
+                ], 500);
             }
 
-            return null;
-        });
+            $fallback = auth()->check() ? url('/admin') : url('/admin/login');
+            $previous = $request->headers->get('referer');
+            $target = ($previous && $previous !== $request->fullUrl()) ? $previous : $fallback;
+
+            if (strtoupper($request->getMethod()) === 'GET') {
+                return redirect()->to($target)->with('admin_error_toast', $message);
+            }
+
+            return redirect()
+                ->to($target)
+                ->withInput($request->except(['password', 'current_password', 'password_confirmation']))
+                ->with('admin_error_toast', $message);
+        }
+
+        return parent::render($request, $e);
     }
 }
 
