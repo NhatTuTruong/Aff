@@ -1,6 +1,9 @@
 @if(app()->environment('production'))
     <script>
         (function () {
+            if (window.__adminErrorToastInstalled) return;
+            window.__adminErrorToastInstalled = true;
+
             function ensureToast() {
                 var el = document.getElementById('admin-error-toast');
                 if (el) return el;
@@ -9,7 +12,7 @@
                 el.id = 'admin-error-toast';
                 el.style.position = 'fixed';
                 el.style.right = '16px';
-                el.style.bottom = '16px';
+                el.style.top = '16px';
                 el.style.zIndex = '99999';
                 el.style.maxWidth = '420px';
                 el.style.padding = '12px 14px';
@@ -63,6 +66,29 @@
                     });
                 };
             }
+
+            if (window.XMLHttpRequest && window.XMLHttpRequest.prototype) {
+                var _open = window.XMLHttpRequest.prototype.open;
+                var _send = window.XMLHttpRequest.prototype.send;
+                window.XMLHttpRequest.prototype.open = function () {
+                    this.__adminToastTrack = true;
+                    return _open.apply(this, arguments);
+                };
+                window.XMLHttpRequest.prototype.send = function () {
+                    if (this.__adminToastTrack) {
+                        this.addEventListener('load', function () {
+                            if (this.status >= 500) showToast();
+                        });
+                        this.addEventListener('error', function () {
+                            showToast();
+                        });
+                    }
+                    return _send.apply(this, arguments);
+                };
+            }
+
+            var initialMessage = @json(session('admin_error_toast'));
+            if (initialMessage) showToast(initialMessage);
         })();
     </script>
 @endif

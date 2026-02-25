@@ -844,8 +844,45 @@
         var startTx = 0;
         var dragging = false;
         var didDrag = false;
+        var direction = -1; // -1: scroll left, 1: scroll right
+        var step = 0.6; // pixels per tick
+        var autoPlayTimer = null;
 
         function clamp(x, min, max) { return Math.min(Math.max(x, min), max); }
+
+        function getBounds() {
+            var maxTx = 0;
+            var minTx = -(track.offsetWidth - wrap.offsetWidth);
+            if (minTx > 0) minTx = 0;
+            return { minTx: minTx, maxTx: maxTx };
+        }
+
+        function applyTransform() {
+            track.style.transform = 'translateX(' + currentTx + 'px)';
+        }
+
+        function startAutoPlay() {
+            if (autoPlayTimer) return;
+            autoPlayTimer = setInterval(function() {
+                if (dragging) return;
+                if (wrap.matches(':hover')) return;
+                if (document.hidden) return;
+
+                var bounds = getBounds();
+                currentTx += direction * step;
+                if (currentTx <= bounds.minTx || currentTx >= bounds.maxTx) {
+                    direction *= -1;
+                    currentTx = clamp(currentTx, bounds.minTx, bounds.maxTx);
+                }
+                applyTransform();
+            }, 20);
+        }
+
+        function stopAutoPlay() {
+            if (!autoPlayTimer) return;
+            clearInterval(autoPlayTimer);
+            autoPlayTimer = null;
+        }
 
         wrap.addEventListener('pointerdown', function(e) {
             dragging = true;
@@ -853,25 +890,26 @@
             startX = e.clientX;
             startTx = currentTx;
             wrap.classList.add('dragging');
+            stopAutoPlay();
         });
         document.addEventListener('pointermove', function(e) {
             if (!dragging) return;
             var dx = e.clientX - startX;
             if (Math.abs(dx) > 4) didDrag = true;
             e.preventDefault();
-            var maxTx = 0;
-            var minTx = -(track.offsetWidth - wrap.offsetWidth);
-            if (minTx > 0) minTx = 0;
-            currentTx = clamp(startTx + dx, minTx, maxTx);
-            track.style.transform = 'translateX(' + currentTx + 'px)';
+            var bounds = getBounds();
+            currentTx = clamp(startTx + dx, bounds.minTx, bounds.maxTx);
+            applyTransform();
         });
         document.addEventListener('pointerup', function() {
             dragging = false;
             wrap.classList.remove('dragging');
+            startAutoPlay();
         });
         document.addEventListener('pointercancel', function() {
             dragging = false;
             wrap.classList.remove('dragging');
+            startAutoPlay();
         });
         wrap.addEventListener('click', function(e) {
             if (didDrag) {
@@ -880,6 +918,8 @@
                 didDrag = false;
             }
         }, true);
+
+        startAutoPlay();
     })();
     </script>
     @endpush
