@@ -11,8 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (! Schema::hasTable('campaigns_brands_categories_tables')) {
+            return;
+        }
+
         Schema::table('campaigns_brands_categories_tables', function (Blueprint $table) {
-            $table->foreignId('user_id')->nullable()->after('id')->constrained()->onDelete('set null');
+            if (! Schema::hasColumn('campaigns_brands_categories_tables', 'user_id')) {
+                $table->foreignId('user_id')->nullable()->after('id')->constrained()->onDelete('set null');
+            }
         });
     }
 
@@ -21,8 +27,14 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (! Schema::hasTable('campaigns_brands_categories_tables')) {
+            return;
+        }
+
         Schema::table('campaigns_brands_categories_tables', function (Blueprint $table) {
-            //
+            if (Schema::hasColumn('campaigns_brands_categories_tables', 'user_id')) {
+                $table->dropConstrainedForeignId('user_id');
+            }
         });
     }
 };
