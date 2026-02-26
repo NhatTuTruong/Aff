@@ -208,10 +208,34 @@
             <div class="cs-card cs-summary-card">
                 <div class="text-xs font-medium text-gray-500 dark:text-gray-400">Cảnh báo</div>
                 <ul class="mt-1 space-y-1 text-xs text-gray-600 dark:text-gray-300">
-                    <li>Thiếu logo: <strong>{{ $stats['alerts']['missing_logo'] ?? 0 }}</strong></li>
-                    <li>Thiếu giới thiệu: <strong>{{ $stats['alerts']['missing_intro'] ?? 0 }}</strong></li>
-                    <li>Thiếu danh mục: <strong>{{ $stats['alerts']['missing_category'] ?? 0 }}</strong></li>
-                    <li>Thiếu affiliate URL: <strong>{{ $stats['alerts']['missing_affiliate'] ?? 0 }}</strong></li>
+                    <li>
+                        <a href="{{ \App\Filament\Admin\Resources\CampaignResource::getUrl('index', ['alert' => 'missing_logo']) }}"
+                           class="inline-flex items-center gap-1 text-gray-700 hover:text-amber-600 dark:text-gray-200 dark:hover:text-amber-400">
+                            <span>Thiếu logo:</span>
+                            <strong>{{ $stats['alerts']['missing_logo'] ?? 0 }}</strong>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ \App\Filament\Admin\Resources\CampaignResource::getUrl('index', ['alert' => 'missing_intro']) }}"
+                           class="inline-flex items-center gap-1 text-gray-700 hover:text-amber-600 dark:text-gray-200 dark:hover:text-amber-400">
+                            <span>Thiếu giới thiệu:</span>
+                            <strong>{{ $stats['alerts']['missing_intro'] ?? 0 }}</strong>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ \App\Filament\Admin\Resources\CampaignResource::getUrl('index', ['alert' => 'missing_category']) }}"
+                           class="inline-flex items-center gap-1 text-gray-700 hover:text-amber-600 dark:text-gray-200 dark:hover:text-amber-400">
+                            <span>Thiếu danh mục:</span>
+                            <strong>{{ $stats['alerts']['missing_category'] ?? 0 }}</strong>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ \App\Filament\Admin\Resources\CampaignResource::getUrl('index', ['alert' => 'missing_affiliate']) }}"
+                           class="inline-flex items-center gap-1 text-gray-700 hover:text-amber-600 dark:text-gray-200 dark:hover:text-amber-400">
+                            <span>Thiếu affiliate URL:</span>
+                            <strong>{{ $stats['alerts']['missing_affiliate'] ?? 0 }}</strong>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>

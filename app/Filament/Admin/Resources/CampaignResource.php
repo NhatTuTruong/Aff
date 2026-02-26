@@ -538,6 +538,8 @@ class CampaignResource extends Resource
         $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
         $userId = $isAdmin ? null : ($user?->id);
 
+        $alert = request()->query('alert');
+
         return parent::getEloquentQuery()
             ->withoutGlobalScope(SoftDeletingScope::class)
             ->when(
@@ -546,7 +548,30 @@ class CampaignResource extends Resource
                     'brand',
                     fn (Builder $brandQuery) => $brandQuery->where('user_id', $userId),
                 ),
-            );
+            )
+            ->when($alert === 'missing_logo', function (Builder $query) {
+                $query->whereHas('brand', function (Builder $b) {
+                    $b->whereNull('image')
+                        ->orWhere('image', '');
+                });
+            })
+            ->when($alert === 'missing_intro', function (Builder $query) {
+                $query->where(function (Builder $q) {
+                    $q->whereNull('intro')
+                        ->orWhere('intro', '');
+                });
+            })
+            ->when($alert === 'missing_category', function (Builder $query) {
+                $query->whereHas('brand', function (Builder $b) {
+                    $b->whereNull('category_id');
+                });
+            })
+            ->when($alert === 'missing_affiliate', function (Builder $query) {
+                $query->where(function (Builder $q) {
+                    $q->whereNull('affiliate_url')
+                        ->orWhere('affiliate_url', '');
+                });
+            });
     }
 
     public static function getRelations(): array

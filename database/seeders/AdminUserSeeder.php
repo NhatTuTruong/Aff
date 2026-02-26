@@ -14,11 +14,12 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['email' => 'admin@campaff.com'],
+            ['email' => 'admin@gmail.com.com'],
             [
                 'name' => 'Administrator',
-                'password' => 'password', // Sẽ tự hash qua cast (tránh double hash)
+                'password' => '12345678', // Sẽ tự hash qua cast (tránh double hash)
                 'email_verified_at' => now(),
+                'is_admin' => 1,
             ]
         );
     }

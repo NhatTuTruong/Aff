@@ -571,7 +571,6 @@
                         <span><span>🗂</span><span>{{ $post->category }}</span></span>
                     @endif
                     <span><span>📅</span><span>{{ $post->created_at?->format('d/m/Y') }}</span></span>
-                    <span><span>👁</span><span>{{ number_format($post->views_count ?? 0) }} views</span></span>
                     <span><span>⏱</span><span>{{ $readingMinutes }} min read</span></span>
                 </div>
                 <h1 class="blog-title">{{ $post->title }}</h1>
@@ -606,7 +605,6 @@
                         <span class="blog-chip blog-chip-accent">{{ $post->category }}</span>
                     @endif
                     <span class="blog-chip">{{ $post->created_at?->format('d/m/Y') }}</span>
-                    <span class="blog-chip">{{ number_format($post->views_count ?? 0) }} views</span>
                     <span class="blog-chip">{{ $readingMinutes }} min read</span>
                     <button type="button" class="blog-share-button"
                         onclick="navigator.clipboard.writeText(window.location.href); this.textContent='Link copied'; setTimeout(() => this.textContent='Copy link', 1200);">

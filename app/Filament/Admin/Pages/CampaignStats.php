@@ -343,12 +343,16 @@ class CampaignStats extends Page implements HasTable
             ->mapWithKeys(fn ($row) => [$row->device_type => (int) $row->total])
             ->toArray();
 
-        // Top referrers
+        // Top referrers (exclude internal admin pages like /admin/*)
         $referrers = PageView::query()
             ->whereIn('campaign_id', $campaignIds)
             ->when($range, fn (Builder $q) => $q->whereBetween('created_at', $range))
             ->whereNotNull('referer')
             ->where('referer', '!=', '')
+            ->where(function (Builder $q) {
+                $q->where('referer', 'not like', '%/admin/%')
+                  ->where('referer', 'not like', '%/admin');
+            })
             ->selectRaw('referer, COUNT(*) as total')
             ->groupBy('referer')
             ->orderByDesc('total')
