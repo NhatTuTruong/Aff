@@ -18,6 +18,37 @@
         if ($maxPercent <= 0) {
             $maxPercent = 75;
         }
+
+        // Max currency (for default coupon display)
+        $maxCurrencyValue = 0;
+        $maxCurrencySymbol = '$';
+        foreach ($coupons as $c) {
+            $offerText = (string) ($c->offer ?? '');
+            if (preg_match('/([€$£¥₹])\s*(\d+(?:[.,]\d+)?)/i', $offerText, $m)) {
+                $val = (float) str_replace([',', ' '], ['', ''], $m[2]);
+                if ($val > $maxCurrencyValue) {
+                    $maxCurrencyValue = $val;
+                    $maxCurrencySymbol = $m[1];
+                }
+            } elseif (preg_match('/(\d+(?:[.,]\d+)?)\s*([€$£¥₹])/i', $offerText, $m)) {
+                $val = (float) str_replace([',', ' '], ['', ''], $m[1]);
+                if ($val > $maxCurrencyValue) {
+                    $maxCurrencyValue = $val;
+                    $maxCurrencySymbol = $m[2];
+                }
+            }
+        }
+
+        // Default coupon: use max % or max currency (prioritize percent, else currency)
+        $defaultCouponOfferType = $maxPercent > 0 ? 'percent' : 'currency';
+        $defaultCouponOfferValue = $maxPercent > 0 ? $maxPercent : $maxCurrencyValue;
+        $defaultCouponCurrencySymbol = $maxPercent > 0 ? '' : $maxCurrencySymbol;
+        if ($defaultCouponOfferValue <= 0) {
+            $defaultCouponOfferType = 'percent';
+            $defaultCouponOfferValue = 20;
+        }
+
+        $couponsWithCodes = $coupons->filter(fn ($c) => !empty($c->code))->values();
         
         // Parse slug để lấy userCode và slugPart
         $slugParts = explode('/', $campaign->slug, 2);
@@ -998,6 +1029,32 @@
         font-size: 1.1rem;
     }
 
+    /* All Codes Modal */
+    .all-codes-modal-content {
+        max-width: 520px;
+    }
+    .all-codes-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .all-codes-item {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .all-codes-item .coupon-code-container {
+        margin-bottom: 0;
+    }
+    .all-codes-item-desc {
+        padding: 8px 16px 12px;
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+    .btn-copy-all-codes:active,
+    .btn-copy-all-codes.copied {
+        background: #65a30d !important;
+    }
 
     /* Q&A Section */
     .qa-section {
@@ -1403,7 +1460,33 @@
             }
             .coupon-modal-content {
                 max-width: 95%;
-                margin: 20px;
+                margin: 12px;
+                max-height: calc(100vh - 24px);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                align-self: flex-start;
+                margin-top: 12px;
+            }
+            .coupon-modal.active {
+                align-items: flex-start;
+                padding: 12px 0;
+            }
+            .coupon-modal-content .popup-banner {
+                flex-shrink: 0;
+            }
+            .coupon-modal-content .popup-body {
+                flex: 1;
+                overflow-y: auto;
+                min-height: 0;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior: contain;
+            }
+            .coupon-modal-close {
+                min-width: 44px;
+                min-height: 44px;
+                top: 12px;
+                right: 12px;
             }
             .popup-banner {
                 padding: 20px 16px 28px;
@@ -1772,6 +1855,60 @@
                 </div>
             </article>
             @endforelse
+
+            @if($couponsWithCodes->isNotEmpty())
+            {{-- Default coupon: giao diện giống 100% các coupon được tạo, % hoặc tiền cao nhất --}}
+            <article class="coupon-row coupon-row-default"
+                data-type="code"
+                data-all-codes="1"
+                data-coupon-id="all-codes"
+            >
+                <div class="coupon-discount-visual">
+                    @if($defaultCouponOfferType === 'currency')
+                        <div class="discount-up-to">UP TO</div>
+                        <div class="discount-percent" style="font-size: 2.5rem;">{{ $defaultCouponCurrencySymbol }}{{ number_format($defaultCouponOfferValue, 0, '.', '') }}</div>
+                        <div class="discount-off-badge">OFF</div>
+                    @else
+                        <div class="discount-up-to">UP TO</div>
+                        <div class="discount-percent">{{ $defaultCouponOfferValue }}%</div>
+                        <div class="discount-off-badge">OFF</div>
+                    @endif
+                </div>
+                <div class="coupon-info" data-coupon-id="all-codes" data-all-codes="1" onclick="return handleCouponClick(this)">
+                    <div class="coupon-header-row">
+                        <div style="flex: 1;">
+                            <div class="coupon-title">
+                                @if($defaultCouponOfferType === 'currency')
+                                    Save {{ $defaultCouponCurrencySymbol }}{{ number_format($defaultCouponOfferValue, 0, '.', '') }} on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                                @else
+                                    Save {{ $defaultCouponOfferValue }}% on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                                @endif
+                            </div>
+                            <div class="coupon-meta-info">
+                                <div class="meta-item">18 hours ago</div>
+                                <div class="meta-item uses">{{ number_format(rand(100, 5000)) }} Uses</div>
+                            </div>
+                        </div>
+                        <button class="btn-get-code"
+                            type="button"
+                            data-type="code"
+                            data-all-codes="1"
+                            data-coupon-id="all-codes"
+                            data-url="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}"
+                            aria-label="View all coupon codes"
+                            onclick="return handleCouponClick(this)">
+                            GET CODE
+                        </button>
+                    </div>
+                    <div class="coupon-desc coupon-verified" aria-label="Verified coupon">
+                        <span class="coupon-verified-badge" aria-hidden="true">
+                            <img src="{{ asset('images/verified-badge.png') }}" alt="">
+                        </span>
+                        <span class="coupon-verified-text">Verified</span>
+                    </div>
+                </div>
+            </article>
+            @endif
         </section>
 
         {{-- Mobile-only Shop Now dưới danh sách coupon --}}
@@ -1981,6 +2118,53 @@
     </div>
 </div>
 
+{{-- Modal: tất cả codes của các coupon --}}
+<div id="allCodesModal" class="coupon-modal all-codes-modal" role="dialog" aria-modal="true" aria-labelledby="all-codes-modal-title">
+    <div class="coupon-modal-content all-codes-modal-content">
+        <button type="button" class="coupon-modal-close" aria-label="Close" onclick="closeAllCodesModal()">✕</button>
+        <div class="popup-banner">
+            <div class="popup-header">
+                @if($campaign->brand && $campaign->brand->image)
+                    <img src="{{ asset('storage/' . $campaign->brand->image) }}" alt="{{ $campaign->brand->name }}" class="popup-logo" loading="lazy">
+                @elseif($campaign->logo)
+                    <img src="{{ asset('storage/' . $campaign->logo) }}" alt="{{ $campaign->title }}" class="popup-logo" loading="lazy">
+                @else
+                    <img src="{{ asset('images/placeholder.svg') }}" alt="{{ $campaign->brand->name ?? $campaign->title }}" class="popup-logo" loading="lazy">
+                @endif
+                <h3 class="popup-title" id="all-codes-modal-title">All {{ $campaign->brand->name ?? $campaign->title }} Coupon Codes</h3>
+                <p class="popup-subtitle">Copy any code below and apply at checkout.</p>
+            </div>
+        </div>
+        <div class="popup-body">
+            <div class="all-codes-list">
+                @foreach($couponsWithCodes as $coupon)
+                <div class="all-codes-item">
+                    <div class="coupon-code-container">
+                        <div class="coupon-code-left">
+                            <div class="coupon-code-icon">🏷</div>
+                            <div class="coupon-code-box">{{ $coupon->code }}</div>
+                        </div>
+                        <button class="btn-copy-code-modal btn-copy-all-codes" type="button" data-code="{{ e($coupon->code) }}" aria-label="Copy code">
+                            COPY
+                        </button>
+                    </div>
+                    @if($coupon->description)
+                    <div class="all-codes-item-desc">{{ Str::limit($coupon->description, 80) }}</div>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+            <div class="coupon-modal-actions" style="margin-top: 20px;">
+                <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}"
+                   target="_blank" rel="nofollow sponsored noopener"
+                   class="coupon-btn store">
+                    Go To The Store
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
 let currentCode = '';
@@ -2042,6 +2226,27 @@ function openModalForCoupon(couponId, code, affUrl) {
 
 function handleCouponClick(btn){
     const actualBtn = btn.classList && btn.classList.contains('btn-get-code') ? btn : btn.querySelector('.btn-get-code');
+    const row = btn.closest('.coupon-row');
+    if (!actualBtn && !row) return false;
+    const target = actualBtn || row;
+    const isAllCodes = target.dataset.allCodes === '1' || target.dataset.allCodes === 'true';
+
+    if (isAllCodes) {
+        document.getElementById('allCodesModal').classList.add('active');
+        document.querySelectorAll('.btn-copy-all-codes').forEach(function(bt) {
+            bt.onclick = function() {
+                const code = this.dataset.code;
+                if (!code) return;
+                copyCodeToClipboard(code);
+                const txt = this.textContent;
+                this.textContent = 'COPIED ✓';
+                this.classList.add('copied');
+                setTimeout(function() { bt.textContent = txt; bt.classList.remove('copied'); }, 1500);
+            };
+        });
+        return false;
+    }
+
     if (!actualBtn) return false;
     const type = actualBtn.dataset.type;
     const code = actualBtn.dataset.code || '';
@@ -2084,6 +2289,9 @@ function handleCouponClick(btn){
 
 function closeCouponPopup(){
     document.getElementById('couponModal').classList.remove('active');
+}
+function closeAllCodesModal(){
+    document.getElementById('allCodesModal').classList.remove('active');
 }
 
 function handleFeedback(btn, worked){

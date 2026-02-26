@@ -71,6 +71,7 @@ class SiteContent extends Model
                     ['label' => 'About Us', 'url' => '/about'],
                     ['label' => 'Contact', 'url' => '/contact'],
                     ['label' => 'Privacy Policy', 'url' => '/privacy'],
+                    ['label' => 'Cookie Policy', 'url' => '/cookie-policy'],
                     ['label' => 'Terms of Use', 'url' => '/terms'],
                 ],
             ],
@@ -244,6 +245,40 @@ HTML;
 <p>We aim to be fully transparent about how we monetize this website. If you ever have questions about a specific recommendation, partnership, or how we earn commissions, please contact us via the Contact page.</p>
 
 <p>Thank you for supporting <strong>[SITE_NAME]</strong>. Your support helps us continue finding and sharing great deals.</p>
+HTML;
+    }
+
+    /** Nội dung mặc định trang Cookie Policy (tiếng Anh) */
+    public static function defaultPageCookiePolicy(): string
+    {
+        return <<<'HTML'
+<h1 class="font-heading">Cookie Policy</h1>
+<p class="updated">Last updated: [COOKIE_DATE]</p>
+
+<p>This Cookie Policy explains how <strong>[SITE_NAME]</strong> uses cookies and similar technologies when you visit our website. For general data handling, see our <a href="/privacy">Privacy Policy</a>.</p>
+
+<h2>What Are Cookies</h2>
+<p>Cookies are small text files stored on your device when you visit a website. They help the site remember your preferences, improve performance, and analyze how the site is used.</p>
+
+<h2>How We Use Cookies</h2>
+<ul>
+<li><strong>Essential:</strong> Required for the site to function (e.g. security, session).</li>
+<li><strong>Analytics:</strong> To understand how visitors use our site (e.g. page views, traffic sources).</li>
+<li><strong>Preferences:</strong> To remember settings such as cookie consent or language.</li>
+<li><strong>Affiliate / referral:</strong> Third-party services may set cookies when you click our affiliate links to track referrals and commissions.</li>
+</ul>
+
+<h2>Third-Party Cookies</h2>
+<p>We may use third-party services (e.g. Google Analytics, affiliate networks) that set their own cookies. We do not control these cookies. Please check the privacy and cookie policies of those providers.</p>
+
+<h2>Managing Cookies</h2>
+<p>You can control or delete cookies via your browser settings. Disabling cookies may affect site functionality and your experience. You can also use our cookie consent banner (if shown) to record your preferences.</p>
+
+<h2>Updates</h2>
+<p>We may update this Cookie Policy from time to time. The "Last updated" date at the top will reflect the latest version.</p>
+
+<h2>Contact</h2>
+<p>For questions about cookies or privacy, please see our <a href="/contact">Contact</a> page.</p>
 HTML;
     }
 }

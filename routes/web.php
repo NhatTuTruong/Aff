@@ -14,6 +14,16 @@ use Illuminate\Support\Facades\DB;
 |
 */
 
+// SEO: robots.txt (dynamic so Sitemap URL matches app.url)
+Route::get('/robots.txt', function () {
+    $sitemap = url('/sitemap.xml');
+    $body = "User-agent: *\nAllow: /\n\nSitemap: {$sitemap}\n";
+    return response($body, 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
+})->name('robots');
+
+// SEO: sitemap.xml
+Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+
 // Simple health check endpoint (no tracking)
 Route::get('/health', function () {
     $status = [
@@ -75,6 +85,10 @@ Route::get('/affiliate-disclosure', function () {
 Route::get('/terms', function () {
     return view('legal.terms');
 })->name('legal.terms');
+
+Route::get('/cookie-policy', function () {
+    return view('legal.cookie');
+})->name('legal.cookie');
 
 Route::get('/deals', [App\Http\Controllers\DealsController::class, 'index'])->name('deals.index');
 

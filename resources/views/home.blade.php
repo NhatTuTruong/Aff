@@ -691,7 +691,7 @@
     <section class="section" id="stores">
         <div class="container">
             <h2 class="section-title">Featured Stores</h2>
-            <p class="section-subtitle">Click a campaign to go straight to its coupon page</p>
+            <p class="section-subtitle">Click a store to go straight to its coupon page</p>
             @if(isset($featuredCampaigns) && $featuredCampaigns->count() > 0)
                 <div class="stores-carousel-wrap">
                     <div class="stores-carousel-track">

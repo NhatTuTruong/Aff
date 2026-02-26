@@ -6,6 +6,38 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name'))</title>
     <meta name="description" content="@yield('description', 'Best coupons, deals and store reviews.')">
+    @hasSection('og_image')
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:title" content="@yield('og_title', config('app.name'))">
+    <meta property="og:description" content="@yield('og_description', 'Best coupons, deals and store reviews.')">
+    <meta property="og:url" content="@yield('og_url', url()->current())">
+    <meta property="og:image" content="@yield('og_image')">
+    <meta property="og:site_name" content="{{ config('app.name') }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('og_title', config('app.name'))">
+    <meta name="twitter:description" content="@yield('og_description', 'Best coupons, deals and store reviews.')">
+    <meta name="twitter:image" content="@yield('og_image')">
+    @else
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="@yield('title', config('app.name'))">
+    <meta property="og:description" content="@yield('description', 'Best coupons, deals and store reviews.')">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:site_name" content="{{ config('app.name') }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="@yield('title', config('app.name'))">
+    <meta name="twitter:description" content="@yield('description', 'Best coupons, deals and store reviews.')">
+    @endif
+    @php
+        $organizationSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            'name' => config('app.name'),
+            'url' => config('app.url'),
+            'description' => 'Best coupons, deals and store reviews.',
+        ];
+    @endphp
+    <script type="application/ld+json">{{ json_encode($organizationSchema) }}</script>
+    @stack('head')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -112,6 +144,14 @@
             font-size: 0.9rem;
             max-width: 260px;
         }
+        .footer-social-link {
+            display: inline-flex;
+            margin-top: 0.75rem;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+        .footer-social-link:hover { color: var(--accent); }
+        .footer-social-icon { display: block; }
         .footer-col h4 {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 0.8rem;
@@ -254,7 +294,7 @@
 
     <div id="cookie-consent" class="cookie-consent" role="dialog" aria-label="Cookie notice" hidden>
         <div class="cookie-consent-inner">
-            <p>We use cookies to improve your experience and analyze site traffic. By continuing you agree to our <a href="{{ url('/privacy') }}">Privacy Policy</a>.</p>
+            <p>We use cookies to improve your experience and analyze site traffic. See our <a href="{{ url('/cookie-policy') }}">Cookie Policy</a> and <a href="{{ url('/privacy') }}">Privacy Policy</a>. By continuing you agree to their use.</p>
             <button type="button" class="cookie-consent-btn" data-dismiss>OK</button>
         </div>
     </div>

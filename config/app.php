@@ -58,6 +58,8 @@ return [
 
     'asset_url' => env('ASSET_URL', '/'),
 
+    'instagram_url' => env('INSTAGRAM_URL', 'https://instagram.com'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

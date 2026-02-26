@@ -111,6 +111,18 @@
             margin: 0 auto;
             text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
         }
+        .disclosure-line {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 16px;
+            max-width: 560px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .disclosure-line a {
+            color: #93c5fd;
+            text-decoration: underline;
+        }
 
         /* Content Section */
         .content-section {
@@ -226,6 +238,7 @@
                 @if($campaign->subtitle)
                 <p class="subtitle">{{ $campaign->subtitle }}</p>
                 @endif
+                <p class="disclosure-line">We may earn a commission when you use our links, at no extra cost to you. <a href="{{ url('/affiliate-disclosure') }}" target="_blank" rel="noopener">See our disclosure</a>.</p>
             </header>
 
             <div class="content-section">
@@ -259,7 +272,7 @@
                 @endif
 
                 <div class="cta-section">
-                    <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}" class="cta-button">
+                    <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}" class="cta-button" target="_blank" rel="nofollow sponsored noopener">
                         {{ $campaign->cta_text ?? 'Nhận ngay' }}
                     </a>
                 </div>
