@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name'))</title>
     <meta name="description" content="@yield('description', 'Best coupons, deals and store reviews.')">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     @hasSection('og_image')
     <meta property="og:type" content="@yield('og_type', 'website')">
     <meta property="og:title" content="@yield('og_title', config('app.name'))">

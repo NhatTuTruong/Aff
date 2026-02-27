@@ -141,6 +141,21 @@
                         <option value="all">Tất cả</option>
                     </select>
                 </div>
+                @php
+                    $currentUser = \Filament\Facades\Filament::auth()->user();
+                    $isAdmin = $currentUser && method_exists($currentUser, 'isAdmin') && $currentUser->isAdmin();
+                @endphp
+                @if($isAdmin)
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">User</label>
+                        <select wire:model="filterUserIdInput" class="mt-1 block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+                            <option value="">Tất cả</option>
+                            @foreach($this->userOptions as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
                 <div>
                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">Cửa hàng</label>
                     <select wire:model="filterBrandIdInput" class="mt-1 block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">

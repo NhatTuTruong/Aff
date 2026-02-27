@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <div class="space-y-6 w-full max-w-full overflow-x-auto">
+    <div class="space-y-6 w-full max-w-6xl mx-auto">
         <!-- Breadcrumb (chỉ hiển thị trong phạm vi users/{user_code}/...) -->
         <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <a wire:click="goHome" class="cursor-pointer hover:text-gray-900 dark:hover:text-gray-100">
@@ -28,8 +28,8 @@
 
         <!-- Date filter (when inside folder) -->
         @if($currentDirectory)
-            <div class="flex flex-wrap items-center gap-3">
-                <div class="flex gap-2">
+            <div class="flex flex-wrap items-center gap-3 px-3 py-2 bg-white/60 dark:bg-gray-900/60 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="flex gap-2 flex-wrap">
                     <x-filament::button
                         wire:click="setDateFilter('all')"
                         size="sm"
@@ -68,7 +68,7 @@
         @endif
 
         <!-- Actions -->
-        <div class="flex items-center justify-between flex-wrap gap-3">
+            <div class="flex items-center justify-between flex-wrap gap-3">
             <div class="flex gap-2">
                 @if($currentDirectory !== $this->getUserBasePath())
                     <x-filament::button wire:click="goUp" icon="heroicon-o-arrow-left">
@@ -97,16 +97,16 @@
         @if(count($directories) > 0)
             <div>
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Thư mục</h3>
-                <div style="display:grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap:0.75rem; width:100%;">
+                <div class="grid grid-cols-2 layouts md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                     @foreach($directories as $directory)
-                        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-2 hover:shadow-md transition-shadow cursor-pointer flex flex-col items-center text-center"
+                        <div class="bg-white/80 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md hover:border-primary-500 dark:hover:border-primary-400 transition-all cursor-pointer flex flex-col items-center text-center group"
                              wire:click="navigateToDirectory('{{ $directory['path'] }}')">
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-2 flex-shrink-0">
-                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
                                 </svg>
                             </div>
-                            <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate w-full">{{ $directory['name'] }}</p>
+                            <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate w-full" title="{{ $directory['name'] }}">{{ $directory['name'] }}</p>
                         </div>
                     @endforeach
                 </div>
@@ -117,10 +117,10 @@
         @if(count($files) > 0)
             <div>
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Tệp tin</h3>
-                <div style="display:grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap:0.75rem; width:100%;">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                     @foreach($files as $file)
                         @php $isSelected = in_array($file['path'], $selectedFiles); @endphp
-                        <div class="bg-white dark:bg-gray-800 rounded-lg border p-2 hover:shadow-md transition-shadow relative {{ $isSelected ? 'ring-2 ring-primary-500 border-primary-500 dark:ring-primary-400 dark:border-primary-400' : 'border-gray-200 dark:border-gray-700' }}">
+                        <div class="bg-white/80 dark:bg-gray-900 rounded-lg border p-2.5 hover:shadow-md transition-all relative {{ $isSelected ? 'ring-2 ring-primary-500 border-primary-500 dark:ring-primary-400 dark:border-primary-400' : 'border-gray-200 dark:border-gray-700' }}">
                             <div class="absolute top-2 left-2 z-10">
                                 <input type="checkbox" 
                                        {{ $isSelected ? 'checked' : '' }}
@@ -128,12 +128,12 @@
                                        class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:bg-gray-700">
                             </div>
                             @if($this->isImage($file['mime']))
-                                <div class="aspect-square mb-2 rounded overflow-hidden bg-gray-100 dark:bg-gray-700">
+                                <div class="aspect-square mb-2 rounded overflow-hidden bg-gray-100 dark:bg-gray-800">
                                     <img src="{{ $file['url'] }}" alt="{{ $file['name'] }}" class="w-full h-full object-cover" loading="lazy">
                                 </div>
                             @else
-                                <div class="aspect-square mb-2 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="aspect-square mb-2 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
                                 </div>

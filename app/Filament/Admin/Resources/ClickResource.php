@@ -7,6 +7,7 @@ use App\Filament\Admin\Resources\ClickResource\RelationManagers;
 use App\Filament\Exports\ClickExporter;
 use App\Models\BlockedIp;
 use App\Models\Click;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -125,6 +126,20 @@ class ClickResource extends Resource
                     ->sortable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('user_id')
+                    ->label('User')
+                    ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->toArray())
+                    ->searchable()
+                    ->visible(fn (): bool => (bool) (Filament::auth()->user()?->isAdmin()))
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn (Builder $q, $userId): Builder => $q->whereHas(
+                                'campaign.brand',
+                                fn (Builder $b) => $b->where('user_id', $userId),
+                            ),
+                        );
+                    }),
                 Tables\Filters\SelectFilter::make('country')
                     ->label('Quốc gia')
                     ->options(function () {
@@ -297,7 +312,9 @@ class ClickResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $userId = Filament::auth()->id();
+        $user = Filament::auth()->user();
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+        $userId = $isAdmin ? null : ($user?->id);
 
         return parent::getEloquentQuery()
             ->withoutGlobalScope(SoftDeletingScope::class)

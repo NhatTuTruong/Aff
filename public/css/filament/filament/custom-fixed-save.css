@@ -30,4 +30,15 @@
     border-color: rgba(var(--gray-200), 1) !important;
     border-width: 1.5px;
 }
- 
+
+/* Điều chỉnh chiều rộng sidebar cho desktop/laptop (>= 1024px, không áp dụng cho tablet/mobile) */
+@media (min-width: 1024px) {
+    [data-fi-theme] .fi-sidebar {
+        width: 2rem !important; /* ~208px, nhỏ hơn mặc định */
+    }
+
+    [data-fi-theme] .fi-main {
+        margin-left: 2rem !important;
+    }
+}
+

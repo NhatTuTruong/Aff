@@ -6,6 +6,7 @@ use App\Models\Campaign;
 use App\Models\Click;
 use App\Models\Coupon;
 use App\Models\PageView;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Filament\Tables\Actions\Action;
@@ -54,23 +55,29 @@ class CampaignStats extends Page implements HasTable
 
     public ?int $filterCategoryIdInput = null;
 
+    public ?int $filterUserId = null;
+
+    public ?int $filterUserIdInput = null;
+
     public function mount(): void
     {
         $this->periodInput = $this->period;
         $this->filterStatusInput = $this->filterStatus;
         $this->filterBrandIdInput = $this->filterBrandId;
         $this->filterCategoryIdInput = $this->filterCategoryId;
+        $this->filterUserIdInput = $this->filterUserId;
     }
 
     public function table(Table $table): Table
     {
         $user = Filament::auth()->user();
         $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
-        $userId = $isAdmin ? null : ($user?->id);
+        $baseUserId = $isAdmin ? null : ($user?->id);
+        $ownerId = $isAdmin && $this->filterUserId ? $this->filterUserId : $baseUserId;
 
         return $table
             ->query(
-                $this->baseCampaignQuery($userId)
+                $this->baseCampaignQuery($ownerId)
                     ->withCount('clicks')
                     ->orderByDesc('clicks_count')
             )
@@ -171,9 +178,10 @@ class CampaignStats extends Page implements HasTable
     {
         $user = Filament::auth()->user();
         $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
-        $userId = $isAdmin ? null : ($user?->id);
+        $baseUserId = $isAdmin ? null : ($user?->id);
+        $ownerId = $isAdmin && $this->filterUserId ? $this->filterUserId : $baseUserId;
 
-        $campaignIds = $this->baseCampaignQuery($userId)->pluck('id');
+        $campaignIds = $this->baseCampaignQuery($ownerId)->pluck('id');
         if ($campaignIds->isEmpty()) {
             return [
                 'totals' => [
@@ -315,18 +323,18 @@ class CampaignStats extends Page implements HasTable
             ->count();
 
         // Alerts
-        $alertsMissingLogo = (clone $this->baseCampaignQuery($userId))
+        $alertsMissingLogo = (clone $this->baseCampaignQuery($ownerId))
             ->whereHas('brand', fn (Builder $b) => $b->whereNull('image')->orWhere('image', ''))
             ->count();
-        $alertsMissingIntro = (clone $this->baseCampaignQuery($userId))
+        $alertsMissingIntro = (clone $this->baseCampaignQuery($ownerId))
             ->where(function (Builder $q) {
                 $q->whereNull('intro')->orWhere('intro', '');
             })
             ->count();
-        $alertsMissingCategory = (clone $this->baseCampaignQuery($userId))
+        $alertsMissingCategory = (clone $this->baseCampaignQuery($ownerId))
             ->whereHas('brand', fn (Builder $b) => $b->whereNull('category_id'))
             ->count();
-        $alertsMissingAffiliate = (clone $this->baseCampaignQuery($userId))
+        $alertsMissingAffiliate = (clone $this->baseCampaignQuery($ownerId))
             ->where(function (Builder $q) {
                 $q->whereNull('affiliate_url')->orWhere('affiliate_url', '');
             })
@@ -422,6 +430,14 @@ class CampaignStats extends Page implements HasTable
         return $query->pluck('name', 'id')->toArray();
     }
 
+    public function getUserOptionsProperty(): array
+    {
+        return User::query()
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->toArray();
+    }
+
     protected function getChartData(int $campaignId): array
     {
         $range = $this->getPeriodRange();
@@ -468,6 +484,7 @@ class CampaignStats extends Page implements HasTable
         $this->filterStatus = $this->filterStatusInput;
         $this->filterBrandId = $this->filterBrandIdInput ?: null;
         $this->filterCategoryId = $this->filterCategoryIdInput ?: null;
+        $this->filterUserId = $this->filterUserIdInput ?: null;
 
         $this->resetPage($this->getTablePaginationPageName());
     }

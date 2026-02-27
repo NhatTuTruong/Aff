@@ -187,11 +187,7 @@
             position:relative;
             display:flex;
             flex-direction:column;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .left-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            transition: none;
         }
         .brand-logo {
             max-width:200px;height:auto;object-fit:contain;
@@ -200,10 +196,7 @@
             background:#fff;
             padding: 12px;
             box-shadow:0 10px 30px rgba(0,0,0,0.12);
-            transition: transform 0.3s ease;
-        }
-        .brand-logo:hover {
-            transform: scale(1.05);
+            transition: none;
         }
         .brand-name {
             font-size:1.25rem;
@@ -341,15 +334,12 @@
             display:grid;grid-template-columns:180px 1fr;
             gap:0;
             align-items:stretch;
-            transition: all 0.3s ease;
+            transition: none;
             border: 1px solid rgba(229, 231, 235, 0.5);
             overflow: hidden;
             position: relative;
         }
-        .coupon-row:hover {
-            box-shadow:0 8px 24px rgba(15,23,42,0.12);
-            transform: translateY(-2px);
-        }
+        .coupon-row:hover { box-shadow:0 4px 16px rgba(15,23,42,0.08); transform: none; }
         
         /* Left section - Discount Visual */
         .coupon-discount-visual {
@@ -467,11 +457,7 @@
             border-radius: 8px;
             white-space: nowrap;
             cursor: pointer;
-            transition: background 0.2s, border-color 0.2s;
-        }
-        .coupon-revealed-code:hover {
-            background: #dcfce7;
-            border-color: var(--primary-dark);
+            transition: none;
         }
         .staff-pick-badge {
             display: inline-flex;
@@ -558,12 +544,10 @@
             background:#fff;border-radius:16px;
             padding:24px 26px 26px;box-shadow:var(--shadow-md);
             border: 1px solid rgba(229, 231, 235, 0.5);
-            transition: all 0.3s ease;
+            transition: none;
             margin-bottom: 10px;
         }
-        .section:hover {
-            box-shadow: var(--shadow-lg);
-        }
+        .section:hover { box-shadow: var(--shadow-md); }
         .section-title { 
             font-size:1.2rem;
             font-weight:800;
