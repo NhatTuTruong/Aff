@@ -18,9 +18,9 @@ class BlockedIpResource extends Resource
     protected static ?string $model = BlockedIp::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-exclamation';
-    protected static ?string $navigationLabel = 'IP bị chặn';
-    protected static ?string $modelLabel = 'IP bị chặn';
-    protected static ?string $pluralModelLabel = 'IP bị chặn';
+    protected static ?string $navigationLabel = 'Chặn IP truy cập';
+    protected static ?string $modelLabel = 'Chặn IP truy cập';
+    protected static ?string $pluralModelLabel = 'Chặn IP truy cập';
     protected static ?string $navigationGroup = 'Thống Kê';
     protected static ?int $navigationSort = 3;
 

@@ -22,7 +22,7 @@ class BlockedIp extends Model
         return $this->belongsTo(User::class);
     }
 
-    /** IP bị chặn thống kê (click/view) - theo user sở hữu brand/campaign */
+    /** Chặn IP truy cập thống kê (click/view) - theo user sở hữu brand/campaign */
     public static function isBlocked(string $ip, ?int $userId): bool
     {
         $query = static::where('ip', $ip);
@@ -35,7 +35,7 @@ class BlockedIp extends Model
         return $query->exists();
     }
 
-    /** IP bị chặn truy cập trang public (chỉ còn truy cập /admin) - chỉ admin set */
+    /** Chặn IP truy cập truy cập trang public (chỉ còn truy cập /admin) - chỉ admin set */
     public static function isBlockedFromPublic(string $ip): bool
     {
         return static::where('ip', $ip)->where('block_public', true)->exists();

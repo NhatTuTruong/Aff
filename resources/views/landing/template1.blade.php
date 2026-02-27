@@ -1786,7 +1786,7 @@
                 </div>
                 
                 <!-- Right: Coupon Details -->
-                <div class="coupon-info" data-coupon-id="{{ $coupon->id }}" data-code="{{ $coupon->code }}" onclick="return handleCouponClick(this)">
+                <div class="coupon-info" data-coupon-id="{{ $coupon->id }}" data-code="{{ $coupon->code }}">
                     <div class="coupon-header-row">
                         <div style="flex: 1;">
                             <div class="coupon-title">
@@ -1822,11 +1822,11 @@
                         </button>
                     </div>
                     
-                    <div class="coupon-desc coupon-verified" aria-label="Verified coupon">
+                    <div class="coupon-desc coupon-verified" aria-label="Coupon status">
                         <span class="coupon-verified-badge" aria-hidden="true">
                             <img src="{{ asset('images/verified-badge.png') }}" alt="">
                         </span>
-                        <span class="coupon-verified-text">Verified</span>
+                        <span class="coupon-verified-text">Verified recently</span>
                     </div>
                     
                 </div>
@@ -1858,7 +1858,7 @@
                         <div class="discount-off-badge">OFF</div>
                     @endif
                 </div>
-                <div class="coupon-info" data-coupon-id="all-codes" data-all-codes="1" onclick="return handleCouponClick(this)">
+                <div class="coupon-info" data-coupon-id="all-codes" data-all-codes="1">
                     <div class="coupon-header-row">
                         <div style="flex: 1;">
                             <div class="coupon-title">
@@ -1884,11 +1884,11 @@
                             GET CODE
                         </button>
                     </div>
-                    <div class="coupon-desc coupon-verified" aria-label="Verified coupon">
+                    <div class="coupon-desc coupon-verified" aria-label="Coupon status">
                         <span class="coupon-verified-badge" aria-hidden="true">
                             <img src="{{ asset('images/verified-badge.png') }}" alt="">
                         </span>
-                        <span class="coupon-verified-text">Verified</span>
+                        <span class="coupon-verified-text">Verified recently</span>
                     </div>
                 </div>
             </article>

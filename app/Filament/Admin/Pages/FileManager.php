@@ -42,13 +42,32 @@ class FileManager extends Page
 
     protected function getUserBasePath(): string
     {
-        $userCode = Filament::auth()->user()?->code ?? '00000';
+        $user = Filament::auth()->user();
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+
+        // Admin: gốc là thư mục "users", có thể quản lý tất cả user
+        if ($isAdmin) {
+            return 'users';
+        }
+
+        // User thường: chỉ thấy thư mục của riêng mình
+        $userCode = $user?->code ?? '00000';
 
         return 'users/' . $userCode;
     }
 
     protected function isPathAllowed(string $path): bool
     {
+        $user = Filament::auth()->user();
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+
+        // Admin: cho phép mọi thư mục bên trong "users/..."
+        if ($isAdmin) {
+            $base = 'users';
+
+            return $path === $base || str_starts_with($path . '/', $base . '/');
+        }
+
         $base = $this->getUserBasePath();
 
         return $path === $base || str_starts_with($path . '/', $base . '/');

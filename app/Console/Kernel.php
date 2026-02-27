@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -14,6 +15,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('notifications:check-alerts')->everyThirtyMinutes();
         $schedule->command('health:check-landing --only-errors')->hourly();
+        $schedule->command('landing:send-issues')->hourly()->withoutOverlapping();
         // Báo cáo hiệu suất chiến dịch cho từng user (2 lần/ngày: 8h sáng, 8h tối)
         $schedule->command('reports:send-campaign-daily')->twiceDaily(8, 20);
     }

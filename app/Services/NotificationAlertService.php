@@ -196,6 +196,21 @@ class NotificationAlertService
                 ->danger()
                 ->icon('heroicon-o-exclamation-triangle')
                 ->sendToDatabase($user);
+
+            if ($user->email) {
+                try {
+                    \Illuminate\Support\Facades\Mail::to($user->email)->send(
+                        new \App\Mail\SystemAlertMail(
+                            'Sự cố hệ thống: Website có thể đang ngưng hoạt động',
+                            "Hệ thống không thể truy cập {$baseUrl} trong lần kiểm tra gần nhất.\n\n" .
+                            "Bạn nên kiểm tra lại server, domain hoặc cấu hình hosting để đảm bảo landing/coupon vẫn hoạt động bình thường."
+                        )
+                    );
+                } catch (\Throwable $e) {
+                    // Tránh làm hỏng job do lỗi gửi mail
+                    report($e);
+                }
+            }
         }
 
         Cache::put($cacheKey, true, now()->addHour());

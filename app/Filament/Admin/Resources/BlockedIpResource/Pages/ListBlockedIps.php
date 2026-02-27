@@ -18,7 +18,7 @@ class ListBlockedIps extends ListRecords
         $count = BlockedIp::query()->forUser($user?->id, $isAdmin)->count();
         $max = config('blocked_ips.max_count', 500);
 
-        return "Đã chặn {$count} / {$max} IP. " . ($isAdmin ? 'Chặn public: không cho truy cập trang public, chỉ còn /admin.' : '');
+        return "";
     }
 
     protected function getHeaderActions(): array
