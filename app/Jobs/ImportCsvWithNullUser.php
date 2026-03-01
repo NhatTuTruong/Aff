@@ -16,6 +16,11 @@ class ImportCsvWithNullUser extends BaseImportCsv
 {
     public function handle(): void
     {
+        $this->import->refresh();
+        if ($this->import->cancelled_at ?? false) {
+            return;
+        }
+
         $user = $this->import->user;
 
         // if ($user instanceof Authenticatable) {
@@ -37,6 +42,11 @@ class ImportCsvWithNullUser extends BaseImportCsv
         }
 
         foreach ($rows as $row) {
+            $this->import->refresh();
+            if ($this->import->cancelled_at ?? false) {
+                return;
+            }
+
             $row = $this->utf8Encode($row);
 
             try {

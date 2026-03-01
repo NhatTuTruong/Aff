@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\BrandResource\Pages;
 use App\Filament\Admin\Resources\BrandResource\RelationManagers;
 use App\Models\Brand;
+use App\Services\LogoFromDomainService;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms;
@@ -109,13 +110,7 @@ class BrandResource extends Resource
                                             ->send();
                                         return;
                                     }
-                                    
-                                    // Clean domain
-                                    $domain = preg_replace('/^https?:\/\//', '', $domain);
-                                    $domain = preg_replace('/^www\./', '', $domain);
-                                    $domain = explode('/', $domain)[0];
-                                    $domain = trim($domain);
-                                    
+                                    $domain = LogoFromDomainService::cleanDomain($domain);
                                     if (empty($domain)) {
                                         \Filament\Notifications\Notification::make()
                                             ->title('Domain không hợp lệ')
@@ -123,94 +118,15 @@ class BrandResource extends Resource
                                             ->send();
                                         return;
                                     }
-                                    
                                     try {
-                                        // Try multiple free logo APIs
-                                        $logoUrls = [
-                                            "https://logo.clearbit.com/{$domain}",
-                                            "https://www.google.com/s2/favicons?domain={$domain}&sz=128",
-                                            "https://icons.duckduckgo.com/ip3/{$domain}.ico",
-                                        ];
-                                        
-                                        // Ensure $logoUrls is an array
-                                        if (!is_array($logoUrls)) {
-                                            $logoUrls = [];
-                                        }
-                                        
-                                        $logoDownloaded = false;
-                                        
-                                        foreach ($logoUrls as $logoUrl) {
-                                            if (!is_string($logoUrl) || empty($logoUrl)) {
-                                                continue;
-                                            }
-                                            
-                                            try {
-                                                $httpResponse = \Illuminate\Support\Facades\Http::timeout(5)
-                                                    ->withOptions([
-                                                        'verify' => false,
-                                                        'http_errors' => false,
-                                                    ])
-                                                    ->get($logoUrl);
-                                                
-                                                // Ensure we have a valid response object
-                                                if (!is_object($httpResponse) || !method_exists($httpResponse, 'successful')) {
-                                                    continue;
-                                                }
-                                                
-                                                if (!$httpResponse->successful()) {
-                                                    continue;
-                                                }
-                                                
-                                                $imageContent = $httpResponse->body();
-                                                
-                                                // Ensure imageContent is a string
-                                                if (!is_string($imageContent) || empty($imageContent)) {
-                                                    continue;
-                                                }
-                                                
-                                                $imageInfo = @getimagesizefromstring($imageContent);
-                                                
-                                                if ($imageInfo !== false && is_array($imageInfo) && isset($imageInfo[2])) {
-                                                    // Valid image
-                                                    $user = Filament::auth()->user();
-                                                    $userCode = $user?->code ?? '00000';
-                                                    $directory = "users/{$userCode}/brands";
-                                                    
-                                                    // Tạo thư mục nếu chưa tồn tại
-                                                    if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($directory)) {
-                                                        \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory($directory, 0755, true);
-                                                    }
-                                                    
-                                                    $extension = image_type_to_extension($imageInfo[2], false) ?: 'png';
-                                                    $filename = \Illuminate\Support\Str::slug($domain) . '_' . time() . '.' . $extension;
-                                                    $path = $directory . '/' . $filename;
-                                                    
-                                                    try {
-                                                        \Illuminate\Support\Facades\Storage::disk('public')->put($path, $imageContent);
-                                                        
-                                                        $set('logo_preview_path', $path);
-                                                        $logoDownloaded = true;
-                                                        
-                                                        \Filament\Notifications\Notification::make()
-                                                            ->title('Đã tải logo vào thư viện!')
-                                                            ->success()
-                                                            ->send();
-                                                        break;
-                                                    } catch (\Exception $storageError) {
-                                                        // Continue to next URL if storage fails
-                                                        continue;
-                                                    }
-                                                }
-                                            } catch (\Exception $e) {
-                                                // Try next URL
-                                                continue;
-                                            } catch (\Throwable $e) {
-                                                // Try next URL
-                                                continue;
-                                            }
-                                        }
-                                        
-                                        if (!$logoDownloaded) {
+                                        $path = LogoFromDomainService::fetchAndSave($domain, Filament::auth()->user()?->code);
+                                        if ($path !== null) {
+                                            $set('logo_preview_path', $path);
+                                            \Filament\Notifications\Notification::make()
+                                                ->title('Đã tải logo vào thư viện!')
+                                                ->success()
+                                                ->send();
+                                        } else {
                                             \Filament\Notifications\Notification::make()
                                                 ->title('Không tìm thấy logo')
                                                 ->body('Không thể tải logo từ domain này. Vui lòng upload thủ công.')

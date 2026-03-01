@@ -25,6 +25,32 @@ class ImportStatus extends Page implements HasTable
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
 
+    public function mount(): void
+    {
+        $this->notifyStuckImportsIfAny();
+    }
+
+    /** Gửi thông báo nếu có import bị kẹt (hàng đợi chưa xử lý). */
+    protected function notifyStuckImportsIfAny(): void
+    {
+        $stuck = Import::query()
+            ->where('importer', \App\Filament\Imports\CampaignImporter::class)
+            ->whereNull('completed_at')
+            ->whereNull('cancelled_at')
+            ->where('processed_rows', 0)
+            ->where('created_at', '<=', now()->subMinutes(5))
+            ->exists();
+
+        if ($stuck) {
+            Notification::make()
+                ->title('Có import đang chờ xử lý')
+                ->body('Một hoặc vài file import đã tải lên nhưng chưa được xử lý (đứng hàng đợi). Hãy kiểm tra queue worker đang chạy: php artisan queue:work.')
+                ->warning()
+                ->persistent()
+                ->send();
+        }
+    }
+
     protected static string $view = 'filament.admin.pages.import-status';
 
     protected static ?string $navigationLabel = 'Trạng thái Import';
@@ -90,7 +116,7 @@ class ImportStatus extends Page implements HasTable
                     ->color('success'),
                 TextColumn::make('failed_rows_count')
                     ->label('Thất bại')
-                    ->getStateUsing(fn (Import $record): int => $record->getFailedRowsCount())
+                    ->getStateUsing(fn (Import $record): int => $record->failedRows()->count())
                     ->numeric()
                     ->color('danger'),
                 TextColumn::make('progress')
@@ -99,15 +125,23 @@ class ImportStatus extends Page implements HasTable
                         if ($record->total_rows <= 0) {
                             return '0%';
                         }
-                        $pct = round(($record->processed_rows / $record->total_rows) * 100);
+                        $pct = min(100, round((int) $record->processed_rows / (int) $record->total_rows * 100));
 
                         return "{$pct}%";
                     }),
                 TextColumn::make('status')
                     ->label('Trạng thái')
                     ->badge()
-                    ->getStateUsing(fn (Import $record): string => $record->completed_at ? 'Hoàn thành' : 'Đang xử lý')
-                    ->color(fn (Import $record): string => $record->completed_at ? 'success' : 'warning'),
+                    ->getStateUsing(function (Import $record): string {
+                        if ($record->cancelled_at ?? false) {
+                            return 'Đã hủy';
+                        }
+                        if ($record->completed_at) {
+                            return 'Hoàn thành';
+                        }
+                        return 'Đang xử lý';
+                    })
+                    ->color(fn (Import $record): string => ($record->cancelled_at ?? false) ? 'gray' : (($record->completed_at) ? 'success' : 'warning')),
                 TextColumn::make('created_at')
                     ->label('Bắt đầu')
                     ->dateTime()
@@ -138,7 +172,7 @@ class ImportStatus extends Page implements HasTable
                     ->label('Xem lỗi')
                     ->icon('heroicon-o-exclamation-triangle')
                     ->color('danger')
-                    ->visible(fn (Import $record): bool => $record->getFailedRowsCount() > 0)
+                    ->visible(fn (Import $record): bool => $record->failedRows()->count() > 0)
                     ->slideOver()
                     ->modalHeading(fn (Import $record): string => 'Dòng lỗi: ' . \Illuminate\Support\Str::limit($record->file_name, 40))
                     ->modalContent(fn (Import $record) => view('filament.admin.pages.import-failed-rows', ['failedRows' => $record->failedRows()->orderBy('id')->get()])),
@@ -146,14 +180,24 @@ class ImportStatus extends Page implements HasTable
                     ->label('Tải CSV lỗi')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('gray')
-                    ->visible(fn (Import $record): bool => $record->getFailedRowsCount() > 0)
+                    ->visible(fn (Import $record): bool => $record->failedRows()->count() > 0)
                     ->url(fn (Import $record): string => route('admin.imports.failed-rows.download', ['import' => $record]))
                     ->openUrlInNewTab(),
+                Action::make('cancel')
+                    ->label('Hủy tiến trình')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->visible(fn (Import $record): bool => ! $record->completed_at && ! ($record->cancelled_at ?? false))
+                    ->requiresConfirmation()
+                    ->modalHeading('Xác nhận hủy import')
+                    ->modalDescription('Hủy sẽ dừng tiến trình và xóa toàn bộ dữ liệu đã tạo trong lần import này (chiến dịch, cửa hàng, danh mục). Bạn có chắc?')
+                    ->modalSubmitActionLabel('Hủy tiến trình')
+                    ->action(fn (Import $record) => static::cancelImport($record)),
                 Action::make('rollback')
                     ->label(fn (Import $record): string => $record->rollback_at ? 'Đã khôi phục' : 'Khôi phục')
                     ->icon('heroicon-o-arrow-uturn-left')
                     ->color(fn (Import $record): string => $record->rollback_at ? 'gray' : 'danger')
-                    ->visible(fn (Import $record): bool => (bool) $record->completed_at)
+                    ->visible(fn (Import $record): bool => (bool) $record->completed_at && ! ($record->cancelled_at ?? false))
                     ->disabled(fn (Import $record): bool => (bool) $record->rollback_at)
                     ->requiresConfirmation()
                     ->modalHeading('Xác nhận khôi phục')
@@ -194,18 +238,35 @@ class ImportStatus extends Page implements HasTable
             'Hành động không thể hoàn tác. Bạn có chắc chắn?';
     }
 
-    protected static function rollbackImport(Import $import): void
+    protected static function deleteImportData(Import $import): void
     {
         $importId = $import->getKey();
+        $campaignIds = Campaign::where('import_id', $importId)->pluck('id');
+        Coupon::whereIn('campaign_id', $campaignIds)->forceDelete();
+        Campaign::where('import_id', $importId)->forceDelete();
+        Brand::where('import_id', $importId)->forceDelete();
+        Category::where('import_id', $importId)->forceDelete();
+    }
 
-        DB::transaction(function () use ($import, $importId): void {
-            $campaignIds = Campaign::where('import_id', $importId)->pluck('id');
+    protected static function cancelImport(Import $import): void
+    {
+        DB::transaction(function () use ($import): void {
+            $import->update(['cancelled_at' => now()]);
+            static::deleteImportData($import);
+            $import->update(['rollback_at' => now()]);
+        });
 
-            Coupon::whereIn('campaign_id', $campaignIds)->forceDelete();
-            Campaign::where('import_id', $importId)->forceDelete();
-            Brand::where('import_id', $importId)->forceDelete();
-            Category::where('import_id', $importId)->forceDelete();
+        Notification::make()
+            ->title('Đã hủy tiến trình import')
+            ->body('Tiến trình đã dừng và dữ liệu đã tạo trong lần import này đã bị xóa.')
+            ->success()
+            ->send();
+    }
 
+    protected static function rollbackImport(Import $import): void
+    {
+        DB::transaction(function () use ($import): void {
+            static::deleteImportData($import);
             $import->update(['rollback_at' => now()]);
         });
 

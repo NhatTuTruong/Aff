@@ -32,7 +32,40 @@ class AuditService
     {
         $subjectName = class_basename($model);
         $id = $model->getKey();
-        $changes = array_diff_assoc($new, $old);
+
+        $changes = [];
+
+        foreach ($new as $key => $newValue) {
+            if (!array_key_exists($key, $old)) {
+                continue;
+            }
+
+            $oldValue = $old[$key];
+
+            // Bỏ qua timestamp
+            if (in_array($key, ['updated_at', 'created_at'])) {
+                continue;
+            }
+
+            // Nếu là array / json
+            if (is_array($newValue) || is_array($oldValue)) {
+                if (json_encode($newValue) !== json_encode($oldValue)) {
+                    $changes[$key] = [
+                        'old' => $oldValue,
+                        'new' => $newValue,
+                    ];
+                }
+                continue;
+            }
+
+            // So sánh kiểu thường
+            if ((string) $newValue !== (string) $oldValue) {
+                $changes[$key] = [
+                    'old' => $oldValue,
+                    'new' => $newValue,
+                ];
+            }
+        }
 
         if (empty($changes)) {
             return;
@@ -41,7 +74,11 @@ class AuditService
         self::log(
             "Cập nhật {$subjectName} #{$id}",
             $model,
-            ['old' => $old, 'new' => $new, 'changes' => $changes],
+            [
+                'old'     => $old,
+                'new'     => $new,
+                'changes' => $changes,
+            ],
             'updated'
         );
     }

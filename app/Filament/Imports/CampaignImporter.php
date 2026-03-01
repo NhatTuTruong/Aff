@@ -69,7 +69,16 @@ class CampaignImporter extends Importer
                 ->exampleHeader('Giới thiệu')
                 ->helperText('Lưu file CSV UTF-8 để giữ nguyên ngôn ngữ, xuống hàng, dấu câu, danh sách.')
                 ->fillRecordUsing(function (Campaign $record, ?string $state) {
-                    $record->intro = $state !== null ? (string) $state : null;
+                    if ($state === null || trim($state) === '') {
+                        $record->intro = null;
+                        return;
+                    }
+                    $raw = preg_replace('/\r\n|\r/', "\n", (string) $state);
+                    // Nếu là plain text (có xuống dòng trong CSV): chuyển thành <br> để form Giới thiệu hiển thị đúng
+                    if (! preg_match('/<[a-z][a-z0-9]*\b/i', $raw)) {
+                        $raw = nl2br(e($raw));
+                    }
+                    $record->intro = $raw;
                 }),
             ImportColumn::make('status')
                 ->label('Trạng thái')
@@ -294,17 +303,8 @@ class CampaignImporter extends Importer
               });
         })->first();
 
+        // Brand đã tồn tại: dùng nguyên trạng, không sửa (tránh ảnh hưởng dữ liệu cũ)
         if ($brand) {
-            if (! $brand->image && ! empty($domain)) {
-                try {
-                    $logoPath = LogoFromDomainService::fetchAndSave($domain, $userCode);
-                    if ($logoPath) {
-                        $brand->update(['image' => $logoPath]);
-                    }
-                } catch (\Throwable) {
-                    // Bỏ qua lỗi logo, không làm dừng import
-                }
-            }
             return $brand;
         }
 

@@ -68,6 +68,15 @@ class Campaign extends Model
         return $this->hasMany(PageView::class);
     }
 
+    /** Tránh lỗi Array to string khi slug trong DB bị lưu sai hoặc form gửi array. */
+    public function getSlugAttribute($value): ?string
+    {
+        if (is_array($value)) {
+            return implode('/', $value);
+        }
+        return $value === null ? null : (string) $value;
+    }
+
     public function getHeroImageAttribute()
     {
         return $this->assets()->where('type', 'hero')->first();
@@ -88,65 +97,61 @@ class Campaign extends Model
         parent::boot();
 
         static::creating(function ($campaign) {
-            $userCode = '00000';
-            if ($campaign->brand_id) {
-                try {
-                    $brand = $campaign->brand ?? \App\Models\Brand::withoutEvents(function () use ($campaign) {
-                        return \App\Models\Brand::find($campaign->brand_id);
-                    });
-                    if ($brand && $brand->user_id) {
-                        $user = \App\Models\User::withoutEvents(function () use ($brand) {
-                            return \App\Models\User::find($brand->user_id);
-                        });
-                        $userCode = $user?->code ?? '00000';
-                    }
-                } catch (\Exception $e) {
-                    $userCode = '00000';
-                }
-            }
-            
-            if (empty($campaign->slug)) {
-                $baseSlug = Str::slug($campaign->title);
-                $campaign->slug = "{$userCode}/{$baseSlug}";
-            } elseif (!str_starts_with($campaign->slug, $userCode . '/')) {
-                // Nếu slug đã có nhưng không có user_code prefix, thêm vào
-                $campaign->slug = "{$userCode}/{$campaign->slug}";
-            }
+            $campaign->slug = static::normalizeCampaignSlug(
+                $campaign->slug,
+                $campaign->title ?? '',
+                $campaign->brand_id
+            );
         });
 
         static::updating(function ($campaign) {
-            $userCode = '00000';
-            if ($campaign->brand_id) {
-                try {
-                    $brand = $campaign->brand ?? \App\Models\Brand::withoutEvents(function () use ($campaign) {
-                        return \App\Models\Brand::find($campaign->brand_id);
-                    });
-                    if ($brand && $brand->user_id) {
-                        $user = \App\Models\User::withoutEvents(function () use ($brand) {
-                            return \App\Models\User::find($brand->user_id);
-                        });
-                        $userCode = $user?->code ?? '00000';
-                    }
-                } catch (\Exception $e) {
-                    $userCode = '00000';
-                }
-            }
-            
-            // Đảm bảo slug luôn có user_code prefix
-            if ($campaign->isDirty('slug') && !str_starts_with($campaign->slug, $userCode . '/')) {
-                $campaign->slug = "{$userCode}/{$campaign->slug}";
-            }
-            
-            // Nếu title thay đổi và slug chưa có user_code prefix, cập nhật lại
-            if ($campaign->isDirty('title') && !$campaign->isDirty('slug')) {
-                $baseSlug = Str::slug($campaign->title);
-                if (!str_starts_with($campaign->slug, $userCode . '/')) {
-                    $campaign->slug = "{$userCode}/{$baseSlug}";
-                } else {
-                    // Giữ user_code, chỉ cập nhật phần sau
-                    $campaign->slug = "{$userCode}/{$baseSlug}";
-                }
+            $slug = $campaign->slug;
+            $segments = array_filter(explode('/', is_array($slug) ? implode('/', $slug) : (string) $slug));
+            if ($campaign->isDirty('slug') || $campaign->isDirty('title') || count($segments) > 2) {
+                $campaign->slug = static::normalizeCampaignSlug(
+                    $campaign->slug,
+                    $campaign->title ?? '',
+                    $campaign->brand_id
+                );
             }
         });
+    }
+
+    /**
+     * Slug luôn đúng format: {userCode}/{slugPart} (đúng 2 phần, slugPart không chứa /).
+     * Tránh slug dạng 21419/55628/black-friday gây 404 và lỗi khi edit.
+     *
+     * @param  string|array|null  $slug
+     */
+    public static function normalizeCampaignSlug(mixed $slug, string $title, $brandId): string
+    {
+        $userCode = '00000';
+        if ($brandId) {
+            try {
+                $brand = \App\Models\Brand::withoutEvents(fn () => \App\Models\Brand::find($brandId));
+                if ($brand && $brand->user_id) {
+                    $user = \App\Models\User::withoutEvents(fn () => \App\Models\User::find($brand->user_id));
+                    $userCode = $user?->code ?? '00000';
+                }
+            } catch (\Throwable $e) {
+                // keep 00000
+            }
+        }
+
+        if (is_array($slug)) {
+            $slug = implode('/', $slug);
+        }
+        $slug = trim((string) $slug);
+        $segments = array_values(array_filter(explode('/', $slug)));
+
+        if (count($segments) === 0) {
+            return $userCode . '/' . Str::slug($title ?: 'campaign');
+        }
+        if (count($segments) === 1) {
+            return $userCode . '/' . Str::slug($segments[0]);
+        }
+        // 2+ segments: luôn dùng userCode của brand và phần slug là 1 segment (phần cuối)
+        $slugPart = Str::slug(end($segments)) ?: Str::slug($title ?: 'campaign');
+        return $userCode . '/' . $slugPart;
     }
 }

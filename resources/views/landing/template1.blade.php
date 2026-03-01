@@ -4,10 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     @php
+        // Đảm bảo chuỗi offer luôn UTF-8 để €, £, ¥, ₹ hiển thị đúng (tránh lỗi "UP TO10")
+        $ensureOfferUtf8 = function ($text) {
+            $text = (string) $text;
+            if ($text === '') return $text;
+            if (mb_check_encoding($text, 'UTF-8') && mb_strpos($text, "\xEF\xBF\xBD") === false) {
+                return $text;
+            }
+            $decoded = @mb_convert_encoding($text, 'UTF-8', 'Windows-1252');
+            return $decoded !== false ? $decoded : $text;
+        };
+
         $coupons = $campaign->couponItems ?? collect();
         $maxPercent = 0;
         foreach ($coupons as $c) {
-            $offerText = (string) ($c->offer ?? '');
+            $offerText = $ensureOfferUtf8($c->offer ?? '');
             if (preg_match('/(\d+)\s*%/i', $offerText, $m)) {
                 $val = (int) $m[1];
                 if ($val > $maxPercent) {
@@ -23,18 +34,32 @@
         $maxCurrencyValue = 0;
         $maxCurrencySymbol = '$';
         foreach ($coupons as $c) {
-            $offerText = (string) ($c->offer ?? '');
-            if (preg_match('/([€$£¥₹])\s*(\d+(?:[.,]\d+)?)/i', $offerText, $m)) {
+            $offerText = $ensureOfferUtf8($c->offer ?? '');
+            if (preg_match('/([€$£¥₹])\s*(\d+(?:[.,]\d+)?)/u', $offerText, $m)) {
                 $val = (float) str_replace([',', ' '], ['', ''], $m[2]);
                 if ($val > $maxCurrencyValue) {
                     $maxCurrencyValue = $val;
                     $maxCurrencySymbol = $m[1];
                 }
-            } elseif (preg_match('/(\d+(?:[.,]\d+)?)\s*([€$£¥₹])/i', $offerText, $m)) {
+            } elseif (preg_match('/(\d+(?:[.,]\d+)?)\s*([€$£¥₹])/u', $offerText, $m)) {
                 $val = (float) str_replace([',', ' '], ['', ''], $m[1]);
                 if ($val > $maxCurrencyValue) {
                     $maxCurrencyValue = $val;
                     $maxCurrencySymbol = $m[2];
+                }
+            } elseif (preg_match('/(USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY)\s*(\d+(?:[.,]\d+)?)/i', $offerText, $m)) {
+                $val = (float) str_replace([',', ' '], ['', ''], $m[2]);
+                if ($val > $maxCurrencyValue) {
+                    $maxCurrencyValue = $val;
+                    $codeToSymbol = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'JPY' => '¥', 'INR' => '₹', 'CAD' => 'C$', 'AUD' => 'A$', 'CHF' => 'CHF', 'CNY' => '¥'];
+                    $maxCurrencySymbol = $codeToSymbol[strtoupper($m[1])] ?? $m[1];
+                }
+            } elseif (preg_match('/(\d+(?:[.,]\d+)?)\s*(USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY)/i', $offerText, $m)) {
+                $val = (float) str_replace([',', ' '], ['', ''], $m[1]);
+                if ($val > $maxCurrencyValue) {
+                    $maxCurrencyValue = $val;
+                    $codeToSymbol = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'JPY' => '¥', 'INR' => '₹', 'CAD' => 'C$', 'AUD' => 'A$', 'CHF' => 'CHF', 'CNY' => '¥'];
+                    $maxCurrencySymbol = $codeToSymbol[strtoupper($m[2])] ?? $m[2];
                 }
             }
         }
@@ -557,7 +582,7 @@
         }
         .section-body { 
             font-size:0.95rem;
-            color:var(--text-dark);
+            color: #5c5c5c !important;;
             line-height: 1.75;
         }
         .section-body ul { padding-left:18px;margin:6px 0; }
@@ -566,6 +591,7 @@
         /* Intro content styling */
         .intro-content {
             line-height: 1.75;
+            color: #5c5c5c !important;
         }
         .intro-content p {
             margin-bottom: 1rem;
@@ -1644,6 +1670,8 @@
         @php
             $workingCount = ($campaign->couponItems ?? collect())->count();
             $successRate = $workingCount > 0 ? min(99, 80 + (int)round($workingCount * 1.5)) : 89;
+            $campaignSeed = (int) ($campaign->id ?? 0);
+            $estimatedTotalSaved = min(99999, 7229 + $workingCount * 80 + ($campaignSeed % 5000));
         @endphp
         <div class="left-card-footer">
         <div class="stats-card">
@@ -1658,7 +1686,7 @@
                 </div>
                 <div class="stats-row">
                     <span class="stats-label"><span class="stats-icon" aria-hidden="true">💰</span> Estimated total saved</span>
-                    <span class="stats-value">${{ number_format(min(99999, 7229 + $workingCount * 80), 0, '.', ',') }}</span>
+                    <span class="stats-value">${{ number_format($estimatedTotalSaved, 0, '.', ',') }}</span>
                 </div>
             </div>
         </div>
@@ -1698,7 +1726,7 @@
             @forelse($coupons as $coupon)
             @php
                 $hasCode = !empty($coupon->code);
-                $offerText = (string) ($coupon->offer ?? '');
+                $offerText = $ensureOfferUtf8($coupon->offer ?? '');
                 $descriptionText = (string) ($coupon->description ?? '');
                 
                 // Check for Free Shipping in both offer and description
@@ -1710,39 +1738,45 @@
                 }
                 $tagAttr = implode(',', $tags);
                 
-                // Extract offer value (percentage or currency)
+                // Extract offer value (percentage or currency) - regex /u cho ký hiệu €£¥₹
                 $offerValue = null;
                 $offerType = 'percent'; // 'percent', 'currency', or 'text'
                 $currencySymbol = '';
+                $currencyMap = [
+                    'USD' => '$', 'EUR' => '€', 'GBP' => '£', 'JPY' => '¥',
+                    'INR' => '₹', 'CAD' => 'C$', 'AUD' => 'A$',
+                    'CHF' => 'CHF', 'CNY' => '¥',
+                ];
                 
-                if ($offerText) {
+                if ($offerText !== '') {
                     // Check for percentage first
                     if (preg_match('/(\d+)\s*%/i', $offerText, $matches)) {
                         $offerValue = (int)$matches[1];
                         $offerType = 'percent';
                     }
-                    // Check for currency symbols before number: $100, €200, £50
-                    elseif (preg_match('/([€$£¥₹])\s*(\d+(?:[.,]\d+)?)/i', $offerText, $matches)) {
+                    // Check for currency symbols before number: $100, €200, £50 (u = Unicode)
+                    elseif (preg_match('/([€$£¥₹])\s*(\d+(?:[.,]\d+)?)/u', $offerText, $matches)) {
                         $currencySymbol = $matches[1];
                         $offerValue = $matches[2];
                         $offerType = 'currency';
                     }
                     // Check for currency symbols after number: 100$, 200€
-                    elseif (preg_match('/(\d+(?:[.,]\d+)?)\s*([€$£¥₹])/i', $offerText, $matches)) {
+                    elseif (preg_match('/(\d+(?:[.,]\d+)?)\s*([€$£¥₹])/u', $offerText, $matches)) {
                         $currencySymbol = $matches[2];
                         $offerValue = $matches[1];
                         $offerType = 'currency';
                     }
-                    // Check for currency codes: USD, EUR, GBP, etc. followed by number
+                    // Check for currency codes: USD, EUR, GBP, etc. before or after number
                     elseif (preg_match('/(USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY)\s*(\d+(?:[.,]\d+)?)/i', $offerText, $matches)) {
                         $currencyCode = strtoupper($matches[1]);
-                        $currencyMap = [
-                            'USD' => '$', 'EUR' => '€', 'GBP' => '£', 'JPY' => '¥', 
-                            'INR' => '₹', 'CAD' => 'C$', 'AUD' => 'A$', 
-                            'CHF' => 'CHF', 'CNY' => '¥'
-                        ];
                         $currencySymbol = $currencyMap[$currencyCode] ?? $currencyCode;
                         $offerValue = $matches[2];
+                        $offerType = 'currency';
+                    }
+                    elseif (preg_match('/(\d+(?:[.,]\d+)?)\s*(USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY)/i', $offerText, $matches)) {
+                        $currencyCode = strtoupper($matches[2]);
+                        $currencySymbol = $currencyMap[$currencyCode] ?? $currencyCode;
+                        $offerValue = $matches[1];
                         $offerType = 'currency';
                     }
                     // If Free Shipping, set as text type
@@ -1758,9 +1792,9 @@
                     $offerType = 'percent';
                 }
                 
-                // Generate random usage stats
-                $hoursAgo = rand(1, 48);
-                $uses = rand(100, 5000);
+                // Số liệu ổn định theo campaign + coupon (reload cùng trang không đổi, sang trang khác thì khác)
+                $hoursAgo = (($campaign->id ?? 0) * 7 + ($coupon->id ?? 0)) % 48 + 1;
+                $uses = (($campaign->id ?? 0) * 11 + ($coupon->id ?? 0)) % 4900 + 100;
             @endphp
             <article
                 class="coupon-row"
@@ -1870,7 +1904,7 @@
                             </div>
                             <div class="coupon-meta-info">
                                 <div class="meta-item">18 hours ago</div>
-                                <div class="meta-item uses">{{ number_format(rand(100, 5000)) }} Uses</div>
+                                <div class="meta-item uses">{{ number_format(($campaignSeed * 13 + 999) % 4900 + 100) }} Uses</div>
                             </div>
                         </div>
                         <button class="btn-get-code"

@@ -68,10 +68,9 @@ class CampaignResource extends Resource
                                         if (empty($get('title'))) {
                                             $set('title', $brand->name);
                                         }
-                                        // Tự động điền slug nếu đang trống
+                                        // Slug dùng user_code của cửa hàng (brand), tránh slug 3 phần 21419/55628/...
                                         if (empty($get('slug'))) {
-                                            $user = Filament::auth()->user();
-                                            $userCode = $user?->code ?? '00000';
+                                            $userCode = $brand->user?->code ?? Filament::auth()->user()?->code ?? '00000';
                                             $baseSlug = \Illuminate\Support\Str::slug($brand->name);
                                             $set('slug', "{$userCode}/{$baseSlug}");
                                         }
@@ -95,9 +94,10 @@ class CampaignResource extends Resource
                             ->label('Tiêu đề')
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(function ($state, Forms\Set $set) {
-                                $user = Filament::auth()->user();
-                                $userCode = $user?->code ?? '00000';
+                            ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                                $brandId = $get('brand_id');
+                                $brand = $brandId ? Brand::find($brandId) : null;
+                                $userCode = $brand?->user?->code ?? Filament::auth()->user()?->code ?? '00000';
                                 $baseSlug = \Illuminate\Support\Str::slug($state);
                                 $set('slug', "{$userCode}/{$baseSlug}");
                             }),
