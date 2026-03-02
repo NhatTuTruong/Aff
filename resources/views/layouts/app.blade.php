@@ -7,6 +7,17 @@
     <title>@yield('title', config('app.name'))</title>
     <meta name="description" content="@yield('description', 'Best coupons, deals and store reviews.')">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FF4K1DWWT7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FF4K1DWWT7');
+    </script>
+
+    @yield('head')
     @hasSection('og_image')
     <meta property="og:type" content="@yield('og_type', 'website')">
     <meta property="og:title" content="@yield('og_title', config('app.name'))">
