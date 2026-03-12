@@ -7,6 +7,7 @@ use App\Models\Campaign;
 use App\Models\Category;
 use App\Models\Coupon;
 use App\Services\LogoFromDomainService;
+use App\Services\GeminiCampaignReviewService;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -183,6 +184,31 @@ class CampaignImporter extends Importer
         }
         
         $this->record->slug = $fullSlug;
+
+        // Auto-generate intro (English HTML review) when empty
+        if (empty($this->record->intro) || trim(strip_tags((string) $this->record->intro)) === '') {
+            if (! filter_var(env('GEMINI_ENABLE_IMPORT', true), FILTER_VALIDATE_BOOL)) {
+                return;
+            }
+
+            $brandName = (string) ($this->record->brand?->name ?? $this->record->title ?? '');
+            $campaignTitle = (string) ($this->record->title ?? '');
+            $domain = (string) ($this->data['domain'] ?? '');
+            if (trim($domain) === '') {
+                $domain = (string) ($this->record->brand?->domain ?? '');
+            }
+            if (trim($domain) === '') {
+                $domain = (string) (parse_url((string) ($this->record->affiliate_url ?? ''), PHP_URL_HOST) ?? '');
+            }
+
+            $error = null;
+            $html = app(GeminiCampaignReviewService::class)->generateIntroHtml($brandName, $domain, $campaignTitle, $error);
+            if (! empty($html)) {
+                $this->record->intro = $html;
+            }
+            // Nếu lỗi (bao gồm 429/quota), không throw để tránh làm fail cả dòng import.
+            // Khi đó intro sẽ để trống và bạn có thể generate sau trong màn Edit Campaign.
+        }
     }
 
     protected function afterSave(): void
@@ -305,6 +331,15 @@ class CampaignImporter extends Importer
 
         // Brand đã tồn tại: dùng nguyên trạng, không sửa (tránh ảnh hưởng dữ liệu cũ)
         if ($brand) {
+            // Chỉ bổ sung domain nếu đang trống và import có cung cấp domain
+            $cleanDomain = \App\Services\LogoFromDomainService::cleanDomain($domain);
+            if (empty($brand->domain) && ! empty($cleanDomain)) {
+                try {
+                    $brand->forceFill(['domain' => $cleanDomain])->saveQuietly();
+                } catch (\Throwable) {
+                    // ignore
+                }
+            }
             return $brand;
         }
 
@@ -329,9 +364,12 @@ class CampaignImporter extends Importer
 
         $importId = app()->bound('current_import_id') ? app('current_import_id') : null;
 
+        $cleanDomain = \App\Services\LogoFromDomainService::cleanDomain($domain);
+
         return Brand::create([
             'name' => $name,
             'slug' => $fullSlug,
+            'domain' => $cleanDomain,
             'category_id' => $category->id,
             'image' => $imagePath,
             'approved' => true,

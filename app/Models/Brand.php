@@ -21,6 +21,7 @@ class Brand extends Model
         'category_id',
         'name',
         'slug',
+        'domain',
         'category', // Keep for backward compatibility
         'events',
         'image',

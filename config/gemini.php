@@ -1,0 +1,8 @@
+<?php
+
+return [
+    'api_key' => env('GEMINI_API_KEY'),
+    'model' => env('GEMINI_MODEL', 'gemini-flash-latest'),
+    'timeout_seconds' => env('GEMINI_TIMEOUT_SECONDS', 25),
+];
+
