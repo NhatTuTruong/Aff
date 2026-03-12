@@ -22,10 +22,12 @@ class DeviceAnalyticsWidget extends ChartWidget
 
     protected function getData(): array
     {
-        $desktop = Click::where('device_type', 'desktop')->count();
-        $mobile = Click::where('device_type', 'mobile')->count();
-        $tablet = Click::where('device_type', 'tablet')->count();
-        $other = Click::whereNotIn('device_type', ['desktop', 'mobile', 'tablet'])->count();
+        $baseQuery = Click::query()->where('is_bot', false);
+
+        $desktop = (clone $baseQuery)->where('device_type', 'desktop')->count();
+        $mobile = (clone $baseQuery)->where('device_type', 'mobile')->count();
+        $tablet = (clone $baseQuery)->where('device_type', 'tablet')->count();
+        $other = (clone $baseQuery)->whereNotIn('device_type', ['desktop', 'mobile', 'tablet'])->count();
 
         return [
             'datasets' => [

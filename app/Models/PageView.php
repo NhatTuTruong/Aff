@@ -23,10 +23,12 @@ class PageView extends Model
         'city',
         'time_on_page',
         'is_bounce',
+        'is_bot',
     ];
 
     protected $casts = [
         'is_bounce' => 'boolean',
+        'is_bot' => 'boolean',
         'time_on_page' => 'integer',
     ];
 
@@ -115,5 +117,57 @@ class PageView extends Model
         }
         
         return 'Other';
+    }
+
+    /**
+     * Detect whether a request comes from a bot/crawler (including Google, etc.).
+     */
+    public static function isBot(?string $userAgent): bool
+    {
+        if (empty($userAgent)) {
+            return false;
+        }
+
+        $ua = strtolower($userAgent);
+
+        // Common bot indicators
+        $botKeywords = [
+            'bot',
+            'crawl',
+            'spider',
+            'slurp',
+            'crawler',
+            'preview',
+            'python-requests',
+            'curl',
+            'wget',
+            'httpclient',
+            'headless',
+            'phantomjs',
+            'selenium',
+            'facebookexternalhit',
+            'monitor',
+            'pingdom',
+            'uptime',
+            'validator',
+            // major search engines
+            'googlebot',
+            'bingbot',
+            'yandex',
+            'duckduckbot',
+            'baiduspider',
+            'sogou',
+            'exabot',
+            'ahrefsbot',
+            'semrush',
+        ];
+
+        foreach ($botKeywords as $keyword) {
+            if (str_contains($ua, $keyword)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

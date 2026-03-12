@@ -78,7 +78,9 @@ class CampaignStats extends Page implements HasTable
         return $table
             ->query(
                 $this->baseCampaignQuery($ownerId)
-                    ->withCount('clicks')
+                    ->withCount([
+                        'clicks as clicks_count' => fn (Builder $q) => $q->where('is_bot', false),
+                    ])
                     ->orderByDesc('clicks_count')
             )
             ->columns([
@@ -98,7 +100,7 @@ class CampaignStats extends Page implements HasTable
                     ->color('success'),
                 TextColumn::make('views_count_lifetime')
                     ->label('Số Views (tổng)')
-                    ->getStateUsing(fn (Campaign $record): int => $record->pageViews()->count())
+                    ->getStateUsing(fn (Campaign $record): int => $record->pageViews()->where('is_bot', false)->count())
                     ->numeric()
                     ->badge()
                     ->color('info'),
@@ -204,8 +206,12 @@ class CampaignStats extends Page implements HasTable
         $range = $this->getPeriodRange();
         $prevRange = $this->getPreviousPeriodRange();
 
-        $clickQuery = Click::query()->whereIn('campaign_id', $campaignIds);
-        $viewQuery = PageView::query()->whereIn('campaign_id', $campaignIds);
+        $clickQuery = Click::query()
+            ->whereIn('campaign_id', $campaignIds)
+            ->where('is_bot', false);
+        $viewQuery = PageView::query()
+            ->whereIn('campaign_id', $campaignIds)
+            ->where('is_bot', false);
 
         if ($range) {
             [$from, $to] = $range;
@@ -225,10 +231,12 @@ class CampaignStats extends Page implements HasTable
             [$pFrom, $pTo] = $prevRange;
             $prevClicks = (int) Click::query()
                 ->whereIn('campaign_id', $campaignIds)
+                ->where('is_bot', false)
                 ->whereBetween('created_at', [$pFrom, $pTo])
                 ->count();
             $prevViews = (int) PageView::query()
                 ->whereIn('campaign_id', $campaignIds)
+                ->where('is_bot', false)
                 ->whereBetween('created_at', [$pFrom, $pTo])
                 ->count();
 
@@ -239,6 +247,7 @@ class CampaignStats extends Page implements HasTable
         // Top campaigns by clicks & CTR trong giai đoạn hiện tại
         $clicksByCampaign = Click::query()
             ->whereIn('campaign_id', $campaignIds)
+            ->where('is_bot', false)
             ->when($range, fn (Builder $q) => $q->whereBetween('created_at', $range))
             ->selectRaw('campaign_id, COUNT(*) as clicks')
             ->groupBy('campaign_id')
@@ -249,6 +258,7 @@ class CampaignStats extends Page implements HasTable
 
         $viewsByCampaign = PageView::query()
             ->whereIn('campaign_id', $campaignIds)
+            ->where('is_bot', false)
             ->when($range, fn (Builder $q) => $q->whereBetween('created_at', $range))
             ->selectRaw('campaign_id, COUNT(*) as views')
             ->groupBy('campaign_id')
@@ -284,6 +294,7 @@ class CampaignStats extends Page implements HasTable
             ->join('campaigns', 'clicks.campaign_id', '=', 'campaigns.id')
             ->join('brands', 'campaigns.brand_id', '=', 'brands.id')
             ->whereIn('campaigns.id', $campaignIds)
+            ->where('clicks.is_bot', false)
             ->when($range, fn (Builder $q) => $q->whereBetween('clicks.created_at', $range))
             ->selectRaw('brands.id as brand_id, brands.name as brand_name, COUNT(*) as clicks')
             ->groupBy('brands.id', 'brands.name')
@@ -343,6 +354,7 @@ class CampaignStats extends Page implements HasTable
         // Device stats (Page views)
         $deviceStats = PageView::query()
             ->whereIn('campaign_id', $campaignIds)
+            ->where('is_bot', false)
             ->when($range, fn (Builder $q) => $q->whereBetween('created_at', $range))
             ->selectRaw("COALESCE(device_type, 'unknown') as device_type, COUNT(*) as total")
             ->groupBy('device_type')
@@ -354,6 +366,7 @@ class CampaignStats extends Page implements HasTable
         // Top referrers (exclude internal admin pages like /admin/*)
         $referrers = PageView::query()
             ->whereIn('campaign_id', $campaignIds)
+            ->where('is_bot', false)
             ->when($range, fn (Builder $q) => $q->whereBetween('created_at', $range))
             ->whereNotNull('referer')
             ->where('referer', '!=', '')
@@ -443,9 +456,11 @@ class CampaignStats extends Page implements HasTable
         $range = $this->getPeriodRange();
 
         $clicksQuery = Click::query()
-            ->where('campaign_id', $campaignId);
+            ->where('campaign_id', $campaignId)
+            ->where('is_bot', false);
         $viewsQuery = PageView::query()
-            ->where('campaign_id', $campaignId);
+            ->where('campaign_id', $campaignId)
+            ->where('is_bot', false);
 
         if ($range) {
             [$from, $to] = $range;

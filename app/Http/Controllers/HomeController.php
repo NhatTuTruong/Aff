@@ -51,8 +51,8 @@ class HomeController extends Controller
             ->when(app()->environment('production'), fn ($q) => $q->where('status', 'active'))
             ->whereNotNull('slug')
             ->orderByRaw('
-                (SELECT COUNT(*) FROM clicks WHERE clicks.campaign_id = campaigns.id AND clicks.deleted_at IS NULL) +
-                (SELECT COUNT(*) FROM page_views WHERE page_views.campaign_id = campaigns.id)
+                (SELECT COUNT(*) FROM clicks WHERE clicks.campaign_id = campaigns.id AND clicks.deleted_at IS NULL AND clicks.is_bot = 0) +
+                (SELECT COUNT(*) FROM page_views WHERE page_views.campaign_id = campaigns.id AND page_views.is_bot = 0)
             DESC')
             ->limit(80)
             ->get()
@@ -95,8 +95,8 @@ class HomeController extends Controller
                 });
             })
             ->orderByRaw('
-                (SELECT COUNT(*) FROM clicks WHERE clicks.campaign_id = coupons.campaign_id AND clicks.deleted_at IS NULL) +
-                (SELECT COUNT(*) FROM page_views WHERE page_views.campaign_id = coupons.campaign_id) DESC
+                (SELECT COUNT(*) FROM clicks WHERE clicks.campaign_id = coupons.campaign_id AND clicks.deleted_at IS NULL AND clicks.is_bot = 0) +
+                (SELECT COUNT(*) FROM page_views WHERE page_views.campaign_id = coupons.campaign_id AND page_views.is_bot = 0) DESC
             ')
             ->limit(12)
             ->get();

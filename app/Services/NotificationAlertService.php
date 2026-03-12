@@ -32,6 +32,7 @@ class NotificationAlertService
         $campaignIds = Click::query()
             ->select('campaign_id')
             ->selectRaw('COUNT(*) as total_clicks')
+            ->where('is_bot', false)
             ->groupBy('campaign_id')
             ->havingRaw('COUNT(*) >= 100')
             ->pluck('total_clicks', 'campaign_id');
@@ -78,9 +79,11 @@ class NotificationAlertService
             $campaignIds = Campaign::whereIn('brand_id', $brandIds)->pluck('id');
 
             $todayCount = Click::whereIn('campaign_id', $campaignIds)
+                ->where('is_bot', false)
                 ->whereBetween('created_at', [$todayStart, $todayEnd])
                 ->count();
             $yesterdayCount = Click::whereIn('campaign_id', $campaignIds)
+                ->where('is_bot', false)
                 ->whereBetween('created_at', [$yesterdayStart, $yesterdayEnd])
                 ->count();
 
@@ -128,6 +131,7 @@ class NotificationAlertService
         $suspicious = Click::query()
             ->select('ip', DB::raw('COUNT(*) as cnt'))
             ->where('created_at', '>=', $recent)
+            ->where('is_bot', false)
             ->groupBy('ip')
             ->having('cnt', '>=', 20)
             ->get();

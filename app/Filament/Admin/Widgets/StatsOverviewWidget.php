@@ -34,12 +34,22 @@ class StatsOverviewWidget extends BaseWidget
             ->count();
         $totalBrands = Brand::when($userId, fn ($q) => $q->where('user_id', $userId))->count();
 
-        $totalClicks = Click::when($userId, $clickScope)->count();
-        $totalViews = PageView::when($userId, $viewScope)->count();
+        $totalClicks = Click::when($userId, $clickScope)
+            ->where('is_bot', false)
+            ->count();
+        $totalViews = PageView::when($userId, $viewScope)
+            ->where('is_bot', false)
+            ->count();
 
         // Clicks và Views hôm nay
-        $clicksToday = Click::when($userId, $clickScope)->whereDate('created_at', today())->count();
-        $viewsToday = PageView::when($userId, $viewScope)->whereDate('created_at', today())->count();
+        $clicksToday = Click::when($userId, $clickScope)
+            ->where('is_bot', false)
+            ->whereDate('created_at', today())
+            ->count();
+        $viewsToday = PageView::when($userId, $viewScope)
+            ->where('is_bot', false)
+            ->whereDate('created_at', today())
+            ->count();
 
         // Tính CTR
         $ctr = $totalViews > 0 ? round(($totalClicks / $totalViews) * 100, 2) : 0;
@@ -102,7 +112,10 @@ class StatsOverviewWidget extends BaseWidget
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
-            $data[] = Click::when($userId, $clickScope)->whereDate('created_at', $date)->count();
+            $data[] = Click::when($userId, $clickScope)
+                ->where('is_bot', false)
+                ->whereDate('created_at', $date)
+                ->count();
         }
         return $data;
     }
@@ -114,7 +127,10 @@ class StatsOverviewWidget extends BaseWidget
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
-            $data[] = PageView::when($userId, $viewScope)->whereDate('created_at', $date)->count();
+            $data[] = PageView::when($userId, $viewScope)
+                ->where('is_bot', false)
+                ->whereDate('created_at', $date)
+                ->count();
         }
         return $data;
     }

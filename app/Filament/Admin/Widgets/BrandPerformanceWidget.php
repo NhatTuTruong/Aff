@@ -31,11 +31,11 @@ class BrandPerformanceWidget extends Widget
             ->get()
             ->map(function ($brand) use ($analyticsService) {
                 $totalClicks = $brand->campaigns->sum(function ($campaign) {
-                    return $campaign->clicks->count();
+                    return $campaign->clicks->where('is_bot', false)->count();
                 });
                 
                 $totalViews = $brand->campaigns->sum(function ($campaign) {
-                    return $campaign->pageViews->count();
+                    return $campaign->pageViews->where('is_bot', false)->count();
                 });
                 
                 $ctr = $totalViews > 0 ? round(($totalClicks / $totalViews) * 100, 2) : 0;
