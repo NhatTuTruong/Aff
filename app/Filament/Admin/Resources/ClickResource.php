@@ -26,11 +26,11 @@ class ClickResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-cursor-arrow-rays';
     
-    protected static ?string $navigationLabel = 'Chi tiết Clicks';
+    protected static ?string $navigationLabel = 'Thống kê tương tác';
     
-    protected static ?string $modelLabel = 'Click';
+    protected static ?string $modelLabel = 'Thống kê tương tác';
     
-    protected static ?string $pluralModelLabel = 'Clicks';
+    protected static ?string $pluralModelLabel = 'Thống kê tương tác';
     
     protected static ?string $navigationGroup = 'Thống Kê';
     
@@ -120,6 +120,12 @@ class ClickResource extends Resource
                     ->label('Referer')
                     ->limit(30)
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('is_bot')
+                    ->label('Loại')
+                    ->badge()
+                    ->formatStateUsing(fn ($state): string => $state ? 'Bot' : 'Người dùng')
+                    ->color(fn ($state): string => $state ? 'warning' : 'success')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Thời gian')
                     ->dateTime('d/m/Y H:i')
@@ -166,6 +172,20 @@ class ClickResource extends Resource
                     ->relationship('campaign', 'title')
                     ->searchable()
                     ->preload(),
+                Tables\Filters\TernaryFilter::make('is_bot')
+                    ->label('Click từ bot')
+                    ->placeholder('Tất cả')
+                    ->trueLabel('Chỉ bot')
+                    ->falseLabel('Chỉ người')
+                    ->default(0) // mặc định: Chỉ người
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->where('is_bot', true),
+                        false: fn (Builder $query): Builder => $query
+                            ->where(function (Builder $q) {
+                                $q->whereNull('is_bot')->orWhere('is_bot', false);
+                            }),
+                        blank: fn (Builder $query): Builder => $query,
+                    ),
                 Tables\Filters\SelectFilter::make('device_type')
                     ->label('Thiết bị')
                     ->options([

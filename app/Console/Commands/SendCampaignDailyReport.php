@@ -60,6 +60,7 @@ class SendCampaignDailyReport extends Command
 
         $clicksByCampaign = Click::query()
             ->whereIn('campaign_id', $campaignIds)
+            ->where('is_bot', false)
             ->whereBetween('created_at', [$from, $to])
             ->selectRaw('campaign_id, COUNT(*) as clicks')
             ->groupBy('campaign_id')
@@ -68,6 +69,7 @@ class SendCampaignDailyReport extends Command
 
         $viewsByCampaign = PageView::query()
             ->whereIn('campaign_id', $campaignIds)
+            ->where('is_bot', false)
             ->whereBetween('created_at', [$from, $to])
             ->selectRaw('campaign_id, COUNT(*) as views')
             ->groupBy('campaign_id')

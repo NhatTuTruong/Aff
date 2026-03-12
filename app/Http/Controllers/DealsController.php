@@ -42,8 +42,8 @@ class DealsController extends Controller
                 });
             })
             ->orderByRaw('
-                (SELECT COUNT(*) FROM clicks WHERE clicks.campaign_id = coupons.campaign_id AND clicks.deleted_at IS NULL) +
-                (SELECT COUNT(*) FROM page_views WHERE page_views.campaign_id = coupons.campaign_id) DESC,
+                (SELECT COUNT(*) FROM clicks WHERE clicks.campaign_id = coupons.campaign_id AND clicks.deleted_at IS NULL AND clicks.is_bot = 0) +
+                (SELECT COUNT(*) FROM page_views WHERE page_views.campaign_id = coupons.campaign_id AND page_views.is_bot = 0) DESC,
                 coupons.created_at DESC
             ')
             ->paginate(12);

@@ -24,6 +24,7 @@ class AnalyticsService
 
         $sessionId = Session::getId();
         $userAgent = $request->userAgent();
+        $isBot = PageView::isBot($userAgent);
         
         // Get device info
         $deviceType = PageView::getDeviceType($userAgent);
@@ -46,6 +47,7 @@ class AnalyticsService
             'country' => $country,
             'city' => $city,
             'is_bounce' => true, // Will be updated if user stays
+            'is_bot' => $isBot,
         ]);
     }
 
@@ -61,6 +63,7 @@ class AnalyticsService
         }
 
         $userAgent = $request->userAgent();
+        $isBot = PageView::isBot($userAgent);
         
         // Get device info
         $deviceType = PageView::getDeviceType($userAgent);
@@ -82,6 +85,7 @@ class AnalyticsService
             'os' => $os,
             'country' => $country,
             'city' => $city,
+            'is_bot' => $isBot,
         ]);
     }
 
@@ -95,8 +99,8 @@ class AnalyticsService
      */
     public function calculateCTR(Campaign $campaign, $startDate = null, $endDate = null): float
     {
-        $viewsQuery = $campaign->pageViews();
-        $clicksQuery = $campaign->clicks();
+        $viewsQuery = $campaign->pageViews()->where('is_bot', false);
+        $clicksQuery = $campaign->clicks()->where('is_bot', false);
         
         if ($startDate) {
             $viewsQuery->whereDate('created_at', '>=', $startDate);
@@ -124,6 +128,7 @@ class AnalyticsService
     public function getUniqueVisitors(Campaign $campaign, $startDate = null, $endDate = null): int
     {
         $query = $campaign->pageViews()
+            ->where('is_bot', false)
             ->selectRaw('COUNT(DISTINCT CONCAT(ip, "-", COALESCE(session_id, ""))) as unique_visitors');
         
         if ($startDate) {
@@ -142,7 +147,7 @@ class AnalyticsService
      */
     public function calculateBounceRate(Campaign $campaign, $startDate = null, $endDate = null): float
     {
-        $query = $campaign->pageViews();
+        $query = $campaign->pageViews()->where('is_bot', false);
         
         if ($startDate) {
             $query->whereDate('created_at', '>=', $startDate);
@@ -168,6 +173,7 @@ class AnalyticsService
     public function getAverageTimeOnPage(Campaign $campaign, $startDate = null, $endDate = null): float
     {
         $query = $campaign->pageViews()
+            ->where('is_bot', false)
             ->whereNotNull('time_on_page');
         
         if ($startDate) {

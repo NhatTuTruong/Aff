@@ -126,6 +126,8 @@
                 <div>
                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">Thời gian</label>
                     <select wire:model="periodInput" class="mt-1 block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+                        <option value="today">Hôm nay</option>
+                        <option value="yesterday">Hôm qua</option>
                         <option value="7">7 ngày</option>
                         <option value="30">30 ngày</option>
                         <option value="90">90 ngày</option>

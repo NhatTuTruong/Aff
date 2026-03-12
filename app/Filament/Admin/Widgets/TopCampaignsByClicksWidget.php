@@ -29,7 +29,9 @@ class TopCampaignsByClicksWidget extends Widget
         $userScope = fn (Builder $q) => $q->where('user_id', $userId);
 
         $campaigns = Campaign::query()
-            ->withCount('clicks')
+            ->withCount([
+                'clicks as clicks_count' => fn (Builder $q) => $q->where('is_bot', false),
+            ])
             ->when($userId, fn ($q) => $q->whereHas('brand', $userScope))
             ->orderByDesc('clicks_count')
             ->take(10)

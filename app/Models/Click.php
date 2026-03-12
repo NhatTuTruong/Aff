@@ -23,6 +23,11 @@ class Click extends Model
         'os',
         'country',
         'city',
+        'is_bot',
+    ];
+
+    protected $casts = [
+        'is_bot' => 'boolean',
     ];
 
     public function campaign(): BelongsTo
