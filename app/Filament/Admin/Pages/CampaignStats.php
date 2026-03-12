@@ -35,10 +35,10 @@ class CampaignStats extends Page implements HasTable
 
     public ?int $selectedCampaignId = null;
 
-    /** 7 / 30 / 90 / all (ngày) - giá trị đang áp dụng */
+    /** today / yesterday / 7 / 30 / 90 / all - giá trị đang áp dụng */
     public string $period = '7';
 
-    /** 7 / 30 / 90 / all (ngày) - giá trị chọn trên form (chỉ áp dụng khi bấm Lọc) */
+    /** today / yesterday / 7 / 30 / 90 / all - giá trị chọn trên form (chỉ áp dụng khi bấm Lọc) */
     public string $periodInput = '7';
 
     /** Lọc theo trạng thái chiến dịch: active / draft / paused / all - đang áp dụng */
@@ -149,13 +149,21 @@ class CampaignStats extends Page implements HasTable
             return null;
         }
 
-        $days = (int) $this->period;
-        if ($days <= 0) {
-            return null;
-        }
-
         $to = Carbon::now();
-        $from = $to->copy()->subDays($days);
+
+        if ($this->period === 'today') {
+            $from = $to->copy()->startOfDay();
+        } elseif ($this->period === 'yesterday') {
+            $from = $to->copy()->subDay()->startOfDay();
+            $to = $from->copy()->endOfDay();
+        } else {
+            $days = (int) $this->period;
+            if ($days <= 0) {
+                return null;
+            }
+
+            $from = $to->copy()->subDays($days);
+        }
 
         return [$from, $to];
     }

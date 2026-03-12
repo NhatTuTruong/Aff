@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\CampaignResource\Pages;
 use App\Filament\Admin\Resources\CampaignResource\RelationManagers;
 use App\Filament\Imports\CampaignImporter;
+use App\Filament\Exports\CampaignExporter;
 use App\Models\Campaign;
 use App\Models\Brand;
 use App\Models\User;
@@ -527,6 +528,10 @@ class CampaignResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
+                    Tables\Actions\ExportBulkAction::make()
+                        ->exporter(CampaignExporter::class)
+                        ->label('Xuất dữ liệu')
+                        ->icon('heroicon-o-document-arrow-down'),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');

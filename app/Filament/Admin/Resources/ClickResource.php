@@ -26,11 +26,11 @@ class ClickResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-cursor-arrow-rays';
     
-    protected static ?string $navigationLabel = 'Chi tiết Clicks';
+    protected static ?string $navigationLabel = 'Thống kê tương tác';
     
-    protected static ?string $modelLabel = 'Click';
+    protected static ?string $modelLabel = 'Thống kê tương tác';
     
-    protected static ?string $pluralModelLabel = 'Clicks';
+    protected static ?string $pluralModelLabel = 'Thống kê tương tác';
     
     protected static ?string $navigationGroup = 'Thống Kê';
     

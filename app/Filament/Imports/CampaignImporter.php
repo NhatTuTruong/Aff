@@ -45,9 +45,10 @@ class CampaignImporter extends Importer
                 }),
             ImportColumn::make('domain')
                 ->label('Domain (lấy logo)')
+                ->guess(['Domain', 'Domain (lấy logo)'])
                 ->rules(['nullable', 'max:255'])
                 ->example('nexalabs.com')
-                ->exampleHeader('Domain')
+                ->exampleHeader('Domain (lấy logo)')
                 ->fillRecordUsing(fn () => null),
             ImportColumn::make('title')
                 ->label('Tiêu đề')
@@ -283,6 +284,12 @@ class CampaignImporter extends Importer
         if (is_numeric($name)) {
             $brand = Brand::find((int) $name);
             if ($brand) {
+                // Cập nhật domain nếu được truyền vào và brand chưa có domain
+                $cleanDomain = LogoFromDomainService::cleanDomain($domain);
+                if ($cleanDomain && empty($brand->domain)) {
+                    $brand->domain = $cleanDomain;
+                    $brand->save();
+                }
                 return $brand;
             }
             throw new RowImportFailedException("Không tìm thấy cửa hàng với ID: {$name}");
@@ -309,6 +316,7 @@ class CampaignImporter extends Importer
         }
 
         $imagePath = null;
+        $cleanDomain = LogoFromDomainService::cleanDomain($domain);
         if (! empty($domain)) {
             try {
                 $imagePath = LogoFromDomainService::fetchAndSave($domain, $userCode);
@@ -332,6 +340,7 @@ class CampaignImporter extends Importer
         return Brand::create([
             'name' => $name,
             'slug' => $fullSlug,
+            'domain' => $cleanDomain,
             'category_id' => $category->id,
             'image' => $imagePath,
             'approved' => true,
