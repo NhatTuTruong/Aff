@@ -90,13 +90,13 @@
         }
 
         if ($campaign->brand && $campaign->brand->image) {
-            $ogImage = asset('storage/' . $campaign->brand->image);
+            $ogImage = $campaign->brand->image_url;
         } elseif ($campaign->cover_image) {
             $ogImage = asset('storage/' . $campaign->cover_image);
         } elseif ($campaign->logo) {
             $ogImage = asset('storage/' . $campaign->logo);
         } else {
-            $ogImage = asset('images/placeholder.svg');
+            $ogImage = asset('images/default-brand.svg');
         }
     @endphp
     <title>{{ $metaTitle }}</title>
@@ -1642,8 +1642,8 @@
     <!-- LEFT CARD -->
     <aside class="left-card">
         <div class="left-card-header">
-        @if($campaign->brand && $campaign->brand->image)
-            <img src="{{ asset('storage/' . $campaign->brand->image) }}"
+        @if($campaign->brand)
+            <img src="{{ $campaign->brand->image_url }}"
                 alt="{{ $campaign->brand->name }}"
                 class="brand-logo"
                 loading="lazy">
@@ -1653,7 +1653,7 @@
                 class="brand-logo"
                 loading="lazy">
         @else
-            <img src="{{ asset('images/placeholder.svg') }}"
+            <img src="{{ asset('images/default-brand.svg') }}"
                 alt="{{ $campaign->brand->name ?? $campaign->title }}"
                 class="brand-logo"
                 loading="lazy">
@@ -2057,8 +2057,8 @@
                 <div class="confetti-piece"></div>
             </div>
             <div class="popup-header">
-                @if($campaign->brand && $campaign->brand->image)
-                    <img src="{{ asset('storage/' . $campaign->brand->image) }}"
+                @if($campaign->brand)
+                    <img src="{{ $campaign->brand->image_url }}"
                         alt="{{ $campaign->brand->name }}"
                         class="popup-logo"
                         loading="lazy">
@@ -2068,7 +2068,7 @@
                         class="popup-logo"
                         loading="lazy">
                 @else
-                    <img src="{{ asset('images/placeholder.svg') }}"
+                    <img src="{{ asset('images/default-brand.svg') }}"
                         alt="{{ $campaign->brand->name ?? $campaign->title }}"
                         class="popup-logo"
                         loading="lazy">
@@ -2142,12 +2142,12 @@
         <button type="button" class="coupon-modal-close" aria-label="Close" onclick="closeAllCodesModal()">✕</button>
         <div class="popup-banner">
             <div class="popup-header">
-                @if($campaign->brand && $campaign->brand->image)
-                    <img src="{{ asset('storage/' . $campaign->brand->image) }}" alt="{{ $campaign->brand->name }}" class="popup-logo" loading="lazy">
+                @if($campaign->brand)
+                    <img src="{{ $campaign->brand->image_url }}" alt="{{ $campaign->brand->name }}" class="popup-logo" loading="lazy">
                 @elseif($campaign->logo)
                     <img src="{{ asset('storage/' . $campaign->logo) }}" alt="{{ $campaign->title }}" class="popup-logo" loading="lazy">
                 @else
-                    <img src="{{ asset('images/placeholder.svg') }}" alt="{{ $campaign->brand->name ?? $campaign->title }}" class="popup-logo" loading="lazy">
+                    <img src="{{ asset('images/default-brand.svg') }}" alt="{{ $campaign->brand->name ?? $campaign->title }}" class="popup-logo" loading="lazy">
                 @endif
                 <h3 class="popup-title" id="all-codes-modal-title">All {{ $campaign->brand->name ?? $campaign->title }} Coupon Codes</h3>
                 <p class="popup-subtitle">Copy any code below and apply at checkout.</p>

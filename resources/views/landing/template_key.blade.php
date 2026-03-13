@@ -9,7 +9,7 @@
         $slugPart = count($slugParts) === 2 ? $slugParts[1] : $campaign->slug;
         $backgroundImage = $campaign->background_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->background_image) : null;
         $productImages = $campaign->key_product_images ?? [];
-        $logoUrl = $campaign->logo ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->logo) : ($campaign->brand?->image ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->brand->image) : asset('images/placeholder.svg'));
+        $logoUrl = $campaign->logo ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->logo) : ($campaign->brand?->image_url ?? asset('images/default-brand.svg'));
     @endphp
     <title>{{ $campaign->title }}</title>
     <meta name="description" content="{{ $campaign->subtitle ?? strip_tags($campaign->intro ?? '') }}">

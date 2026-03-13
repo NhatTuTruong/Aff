@@ -25,14 +25,21 @@
     border-width: 1.5px;
 }
 
-/* Cho phép bôi đen, copy dữ liệu trong bảng */
-[data-fi-theme] .fi-ta-table td,
-[data-fi-theme] .fi-ta-table th,
+/* Cho phép bôi đen, copy dữ liệu trong tất cả bảng trong admin (kể cả bảng tự custom) */
+[data-fi-theme] table,
+[data-fi-theme] th,
+[data-fi-theme] td,
 [data-fi-theme] .fi-ta-record {
     -webkit-user-select: text !important;
     -moz-user-select: text !important;
     -ms-user-select: text !important;
     user-select: text !important;
+}
+
+/* Hiển thị con trỏ dạng text (I-beam) trên các ô dữ liệu, trừ cột hành động */
+[data-fi-theme] .fi-ta-table tbody tr td:not(.fi-ta-column-actions),
+[data-fi-theme] .fi-ta-table tbody tr th:not(.fi-ta-column-actions) {
+    cursor: text !important;
 }
 
 

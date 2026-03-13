@@ -216,7 +216,7 @@ class BrandResource extends Resource
                 Tables\Columns\ImageColumn::make('image')
                     ->circular()
                     ->size(30)
-                    ->defaultImageUrl(url('/images/placeholder.svg'))
+                    ->defaultImageUrl(url('/images/default-brand.svg'))
                     ->extraImgAttributes(['loading' => 'lazy']),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Tên cửa hàng')

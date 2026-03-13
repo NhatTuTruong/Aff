@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -32,6 +33,16 @@ class Brand extends Model
     protected $casts = [
         'approved' => 'boolean',
     ];
+
+    /** URL ảnh đại diện; dùng default nếu chưa có ảnh. */
+    public function getImageUrlAttribute(): string
+    {
+        if ($this->image && Storage::disk('public')->exists($this->image)) {
+            return Storage::disk('public')->url($this->image);
+        }
+
+        return asset('images/default-brand.svg');
+    }
 
     /** Chuẩn hóa path: form/Livewire có thể gửi array [uuid => path] hoặc [0 => path], DB lưu string. */
     public function setImageAttribute($value): void
