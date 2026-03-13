@@ -18,6 +18,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('landing:send-issues')->hourly()->withoutOverlapping();
         // Báo cáo hiệu suất chiến dịch cho từng user (2 lần/ngày: 8h sáng, 8h tối)
         $schedule->command('reports:send-campaign-daily')->twiceDaily(8, 20);
+
+        // Tự động tạo blog hàng ngày (chạy lúc 6h sáng, tạo 1 bài)
+        $schedule->command('blogs:generate-daily --count=1')->dailyAt('06:00')->withoutOverlapping();
     }
 
     /**
