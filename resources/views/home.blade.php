@@ -669,11 +669,7 @@
             <div class="posts-grid">
                 @foreach($latestPosts as $post)
                     <a href="{{ route('blog.show', $post->slug) }}" class="post-card-home">
-                        @if($post->featured_image)
-                            <img src="{{ asset('storage/' . $post->featured_image) }}" alt="" class="post-card-home-thumb" loading="lazy">
-                        @else
-                            <div class="post-card-home-thumb post-card-home-thumb-placeholder">Blog</div>
-                        @endif
+                        <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" class="post-card-home-thumb" loading="lazy">
                         <div class="post-card-home-content">
                             <h3 class="post-card-home-title">{{ $post->title }}</h3>
                             <p class="post-card-home-meta">{{ $post->created_at?->format('d M Y') }}</p>
@@ -711,10 +707,10 @@
                                 @endphp
                                 <a href="{{ $reviewUrl }}" class="store-carousel-item" title="{{ $campaign->title }}">
                                     <span class="store-carousel-img-wrap">
-                                        @if($brand && $brand->image)
-                                            <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" loading="lazy">
+                                        @if($brand)
+                                            <img src="{{ $brand->image_url }}" alt="{{ $brand->name }}" loading="lazy">
                                         @else
-                                            <img src="{{ asset('images/placeholder.svg') }}" alt="{{ $brand?->name ?? $campaign->title }}" loading="lazy">
+                                            <img src="{{ asset('images/default-brand.svg') }}" alt="{{ $campaign->title }}" loading="lazy">
                                         @endif
                                     </span>
                                     <span class="store-carousel-name">
@@ -739,10 +735,10 @@
                                 @endphp
                                 <a href="{{ $reviewUrl }}" class="store-carousel-item" title="{{ $campaign->title }}">
                                     <span class="store-carousel-img-wrap">
-                                        @if($brand && $brand->image)
-                                            <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" loading="lazy">
+                                        @if($brand)
+                                            <img src="{{ $brand->image_url }}" alt="{{ $brand->name }}" loading="lazy">
                                         @else
-                                            <img src="{{ asset('images/placeholder.svg') }}" alt="{{ $brand?->name ?? $campaign->title }}" loading="lazy">
+                                            <img src="{{ asset('images/default-brand.svg') }}" alt="{{ $campaign->title }}" loading="lazy">
                                         @endif
                                     </span>
                                     <span class="store-carousel-name">
@@ -779,11 +775,7 @@
                     @if($brand)
                     <article class="coupon-card">
                         <div class="coupon-card-header">
-                            @if($brand->image)
-                                <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" class="coupon-card-logo" loading="lazy">
-                            @else
-                                <img src="{{ asset('images/placeholder.svg') }}" alt="{{ $brand->name }}" class="coupon-card-logo" loading="lazy">
-                            @endif
+                            <img src="{{ $brand->image_url }}" alt="{{ $brand->name }}" class="coupon-card-logo" loading="lazy">
                             <div class="coupon-card-brand">{{ $brand->name }}</div>
                         </div>
                         @if($coupon->offer)

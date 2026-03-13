@@ -254,11 +254,7 @@
                                 <div class="deal-topline">
                                     <div class="deal-brand">
                                         <div class="deal-logo">
-                                            @if($brand->image)
-                                                <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" loading="lazy">
-                                            @else
-                                                <img src="{{ asset('images/placeholder.svg') }}" alt="{{ $brand->name }}" loading="lazy">
-                                            @endif
+                                            <img src="{{ $brand->image_url }}" alt="{{ $brand->name }}" loading="lazy">
                                         </div>
                                         <span class="deal-brand-name">{{ $brand->name }}</span>
                                     </div>

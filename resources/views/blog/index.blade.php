@@ -255,11 +255,7 @@
                 <div class="posts-grid">
                     @foreach($posts as $post)
                         <a href="{{ route('blog.show', $post->slug) }}" class="post-card">
-                            @if($post->featured_image)
-                                <img src="{{ asset('storage/' . $post->featured_image) }}" alt="{{ $post->title }}" class="post-thumb" loading="lazy">
-                            @else
-                                <div class="post-thumb-placeholder">ARTICLE</div>
-                            @endif
+                            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" class="post-thumb" loading="lazy">
                             <div class="post-body">
                                 <div class="post-topline">
                                     @if(!empty($post->category))

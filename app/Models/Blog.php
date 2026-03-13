@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Blog extends Model
@@ -35,6 +36,33 @@ class Blog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** URL ảnh featured; ưu tiên featured_image, fallback ảnh mặc định theo category. */
+    public function getFeaturedImageUrlAttribute(): string
+    {
+        if ($this->featured_image && Storage::disk('public')->exists($this->featured_image)) {
+            return Storage::disk('public')->url($this->featured_image);
+        }
+        $slug = $this->category ? Str::slug($this->category) : 'default';
+        $basePath = public_path('images/categories');
+        $extensions = ['svg', 'png', 'jpg', 'jpeg', 'webp', 'gif'];
+        if ($slug !== 'default') {
+            foreach ($extensions as $ext) {
+                $path = "images/categories/{$slug}.{$ext}";
+                if (file_exists(public_path($path))) {
+                    return asset($path);
+                }
+            }
+        }
+        foreach ($extensions as $ext) {
+            $path = "images/categories/default.{$ext}";
+            if (file_exists(public_path($path))) {
+                return asset($path);
+            }
+        }
+
+        return asset('images/placeholder.svg');
     }
 
     protected static function boot()

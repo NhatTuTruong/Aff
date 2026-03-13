@@ -20,7 +20,7 @@
     }
 
     .blog-shell {
-        max-width: 1120px;
+        max-width: 1440px;
         margin: 0 auto 3.5rem;
         padding: 1.75rem 1.25rem 3rem;
     }
@@ -156,7 +156,7 @@
 
     .blog-main-grid {
         display: grid;
-        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        grid-template-columns: minmax(0, 5fr) minmax(0, 2fr);
         gap: 2.25rem;
         margin-top: 2rem;
     }
@@ -581,13 +581,7 @@
 
             <div class="blog-hero-media">
                 <div class="blog-hero-media-inner">
-                    @if($post->featured_image)
-                        <img src="{{ asset('storage/' . $post->featured_image) }}" alt="{{ $post->title }}" loading="eager">
-                    @else
-                        <div class="blog-hero-media-fallback">
-                            Article · {{ config('app.name') }}
-                        </div>
-                    @endif
+                    <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="eager">
                 </div>
                 <div class="blog-hero-media-overlay"></div>
             </div>
@@ -661,13 +655,7 @@
                                 <article class="blog-deal-card">
                                     <div class="blog-deal-header">
                                         <div class="blog-deal-logo">
-                                            @if($brand->image)
-                                                <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}">
-                                            @else
-                                                <span class="blog-deal-logo-placeholder">
-                                                    {{ Str::upper(Str::substr($brand->name, 0, 2)) }}
-                                                </span>
-                                            @endif
+                                            <img src="{{ $brand->image_url }}" alt="{{ $brand->name }}">
                                         </div>
                                         <div class="blog-deal-brand">{{ $brand->name }}</div>
                                     </div>
@@ -711,11 +699,7 @@
                 <div class="related-blogs-grid">
                     @foreach($relatedBlogs as $related)
                         <a href="{{ route('blog.show', $related->slug) }}" class="related-blog-card">
-                            @if($related->featured_image)
-                                <img src="{{ asset('storage/' . $related->featured_image) }}" alt="{{ $related->title }}" class="related-blog-card-thumb" loading="lazy">
-                            @else
-                                <div class="related-blog-card-thumb-placeholder">Blog</div>
-                            @endif
+                            <img src="{{ $related->featured_image_url }}" alt="{{ $related->title }}" class="related-blog-card-thumb" loading="lazy">
                             <div class="related-blog-card-body">
                                 <h3 class="related-blog-card-title">{{ $related->title }}</h3>
                                 <p class="related-blog-card-meta">{{ $related->created_at?->format('d/m/Y') }}</p>

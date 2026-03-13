@@ -341,7 +341,7 @@ class CampaignResource extends Resource
                     ->label('Logo')
                     ->disk('public')
                     ->circular()
-                    ->defaultImageUrl(url('/images/placeholder.svg')),
+                    ->defaultImageUrl(url('/images/default-brand.svg')),
                 Tables\Columns\TextColumn::make('title')
                     ->label('Tên chiến dịch')
                     ->searchable()
