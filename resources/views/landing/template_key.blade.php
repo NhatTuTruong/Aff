@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     @php
         $slugParts = explode('/', $campaign->slug, 2);
         $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';

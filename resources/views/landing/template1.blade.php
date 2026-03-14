@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     @php
         // Đảm bảo chuỗi offer luôn UTF-8 để €, £, ¥, ₹ hiển thị đúng (tránh lỗi "UP TO10")
         $ensureOfferUtf8 = function ($text) {
@@ -215,7 +216,7 @@
             transition: none;
         }
         .brand-logo {
-            max-width:200px;height:auto;object-fit:contain;
+            max-width:70px;height:auto;object-fit:contain;
             display:block;margin:0 auto 16px;
             border-radius: 16px;
             background:#fff;
