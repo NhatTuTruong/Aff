@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('reports:send-campaign-daily')->twiceDaily(8, 20);
 
         // Tự động tạo blog hàng ngày (chạy lúc 6h sáng, tạo 1 bài)
-        $schedule->command('blogs:generate-daily --count=1')->dailyAt('06:00')->withoutOverlapping();
+        $schedule->command('blogs:generate-daily --count=1')->twiceDaily(6, 18)->withoutOverlapping();
     }
 
     /**

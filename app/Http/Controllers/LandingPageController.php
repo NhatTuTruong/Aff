@@ -45,10 +45,7 @@ class LandingPageController extends Controller
             $template = 'template_key';
         }
         
-        // Nếu type = coupon nhưng template không phải template1, dùng template1
-        if (($campaign->type ?? 'coupon') === 'coupon' && $template !== 'template1') {
-            $template = 'template1';
-        }
+        // Cho phép template1 hoặc template2 với type coupon
         
         // Check if template exists, fallback to default
         if (!view()->exists("landing.{$template}")) {

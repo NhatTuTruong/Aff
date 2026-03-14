@@ -19,7 +19,7 @@
         <h1 class="error-title">{{ $content['title'] ?? 'Lỗi máy chủ' }}</h1>
         <p class="error-message">{{ $content['message'] ?? 'Đã xảy ra lỗi. Chúng tôi đang khắc phục.' }}</p>
         <div class="error-actions">
-            <a href="{{ url('/') }}">Về trang chủ</a>
+            <a href="{{ url('/') }}">Back to home page</a>
         </div>
     </div>
 @endsection
