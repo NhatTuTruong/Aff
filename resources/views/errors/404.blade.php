@@ -19,7 +19,7 @@
         <h1 class="error-title">{{ $content['title'] ?? 'Trang không tồn tại' }}</h1>
         <p class="error-message">{{ $content['message'] ?? 'Trang bạn tìm kiếm không tồn tại hoặc đã bị di chuyển.' }}</p>
         <div class="error-actions">
-            <a href="{{ url('/') }}">Về trang chủ</a>
+            <a href="{{ url('/') }}">Back to home page</a>
         </div>
     </div>
 @endsection

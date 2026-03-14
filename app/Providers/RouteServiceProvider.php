@@ -34,7 +34,7 @@ class RouteServiceProvider extends ServiceProvider
             }
 
             if (file_exists(base_path('routes/web.php'))) {
-                Route::middleware('web')
+                Route::middleware(['web', 'maintenance', 'block-public-ips'])
                     ->group(base_path('routes/web.php'));
             }
         });

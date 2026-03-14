@@ -11,6 +11,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -49,6 +50,7 @@ class SiteContentPage extends Page implements HasForms
     public function mount(): void
     {
         $this->form->fill([
+            'maintenance_enabled' => SiteContent::get('maintenance_enabled', false),
             'header_nav' => SiteContent::get('header_nav', SiteContent::defaultHeaderNav()),
             'footer_brand_description' => SiteContent::get('footer_brand_description', 'Coupons, promotions and trusted store reviews. Updated regularly.'),
             'footer_columns' => SiteContent::get('footer_columns', SiteContent::defaultFooterColumns()),
@@ -70,6 +72,26 @@ class SiteContentPage extends Page implements HasForms
             ->schema([
                 Tabs::make('Tabs')
                     ->tabs([
+                        Tabs\Tab::make('Bảo trì')
+                            ->icon('heroicon-o-wrench-screwdriver')
+                            ->schema([
+                                Section::make('Chế độ bảo trì')
+                                    ->description('Khi bật, toàn bộ trang web (trừ khu vực Admin) sẽ hiển thị trang thông báo bảo trì.')
+                                    ->schema([
+                                        Toggle::make('maintenance_enabled')
+                                            ->label('Bật chế độ bảo trì')
+                                            ->inline(false),
+                                        TextInput::make('error_503.title')
+                                            ->label('Tiêu đề trang bảo trì')
+                                            ->required()
+                                            ->maxLength(100),
+                                        Textarea::make('error_503.message')
+                                            ->label('Nội dung thông báo')
+                                            ->rows(3)
+                                            ->maxLength(500),
+                                    ])
+                                    ->columns(1),
+                            ]),
                         Tabs\Tab::make('Header')
                             ->icon('heroicon-o-bars-3-bottom-left')
                             ->schema([
@@ -218,6 +240,7 @@ class SiteContentPage extends Page implements HasForms
     public function save(): void
     {
         $data = $this->form->getState();
+        SiteContent::set('maintenance_enabled', $data['maintenance_enabled'] ?? false);
         SiteContent::set('header_nav', $data['header_nav'] ?? []);
         SiteContent::set('footer_brand_description', $data['footer_brand_description'] ?? '');
         SiteContent::set('footer_columns', $data['footer_columns'] ?? []);

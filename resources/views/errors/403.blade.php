@@ -19,7 +19,7 @@
         <h1 class="error-title">{{ $content['title'] ?? 'Không có quyền truy cập' }}</h1>
         <p class="error-message">{{ $content['message'] ?? 'Bạn không có quyền truy cập trang này.' }}</p>
         <div class="error-actions">
-            <a href="{{ url('/') }}">Về trang chủ</a>
+            <a href="{{ url('/') }}">Back to home page</a>
         </div>
     </div>
 @endsection
