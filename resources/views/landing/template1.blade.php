@@ -17,6 +17,10 @@
         };
 
         $coupons = $campaign->couponItems ?? collect();
+        // Sắp xếp coupon theo thứ tự tạo (cũ -> mới)
+        $coupons = $coupons
+            ->sortBy(fn ($c) => $c->created_at ?? $c->id ?? 0)
+            ->values();
         $maxPercent = 0;
         foreach ($coupons as $c) {
             $offerText = $ensureOfferUtf8($c->offer ?? '');
@@ -500,6 +504,62 @@
         .staff-pick-badge::before {
             content: '⭐';
             font-size: 0.65rem;
+        }
+        .all-verified-codes-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #9333ea;
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .all-verified-codes-badge::before {
+            content: '✓';
+            font-size: 0.75rem;
+            font-weight: 900;
+        }
+        .badge-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .top-pic-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #111827;
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        .top-pic-badge::before {
+            content: '🔥';
+            font-size: 0.65rem;
+        }
+        .all-verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            margin-top: 10px;
+            border: 1px solid rgba(22, 101, 52, 0.18);
+        }
+        .all-verified-badge::before {
+            content: '✓';
+            font-weight: 900;
         }
         .coupon-meta-info {
             display: flex;
@@ -1838,7 +1898,12 @@
                                 @endif
                             </div>
                             @if($loop->index < 2)
-                            <div class="staff-pick-badge">STAFF PICK</div>
+                                <div class="badge-row">
+                                    <div class="staff-pick-badge">STAFF PICK</div>
+                                    @if($loop->first)
+                                        <div class="top-pic-badge">TOP PICK</div>
+                                    @endif
+                                </div>
                             @endif
                             <div class="coupon-meta-info">
                                 <div class="meta-item">{{ $hoursAgo }} hours ago</div>
@@ -1903,6 +1968,9 @@
                                     Save {{ $defaultCouponOfferValue }}% on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
                                 @endif
                             </div>
+                            <div class="badge-row">
+                                <div class="all-verified-codes-badge">All Verified Codes</div>
+                            </div>
                             <div class="coupon-meta-info">
                                 <div class="meta-item">18 hours ago</div>
                                 <div class="meta-item uses">{{ number_format(($campaignSeed * 13 + 999) % 4900 + 100) }} Uses</div>
@@ -1918,12 +1986,6 @@
                             onclick="return handleCouponClick(this)">
                             GET CODE
                         </button>
-                    </div>
-                    <div class="coupon-desc coupon-verified" aria-label="Coupon status">
-                        <span class="coupon-verified-badge" aria-hidden="true">
-                            <img src="{{ asset('images/verified-badge.png') }}" alt="">
-                        </span>
-                        <span class="coupon-verified-text">Verified recently</span>
                     </div>
                 </div>
             </article>
@@ -2095,7 +2157,7 @@
                     </div>
                 </div>
                 <button class="btn-copy-code-modal" id="copyCouponBtn" onclick="copyCoupon(this)" aria-label="Copy coupon code">
-                    COPY CODE
+                    COPY
                 </button>
             </div>
             
@@ -2115,7 +2177,7 @@
                 class="coupon-btn store go-to-store-btn"
                 aria-label="Open store in new tab"
                 onclick="event.preventDefault(); const url = this.getAttribute('data-url'); if(url) { window.open(url, '_blank'); } return false;">
-                Go To The Store
+                Go To {{ $campaign->brand->name ?? $campaign->title }}
                 </a>
             </div>
             
@@ -2157,6 +2219,48 @@
         <div class="popup-body">
             <div class="all-codes-list">
                 @foreach($couponsWithCodes as $coupon)
+                @php
+                    $offerText = $ensureOfferUtf8($coupon->offer ?? '');
+                    $offerValue = null;
+                    $offerType = 'percent';
+                    $currencySymbol = '';
+                    $isFreeShipping = stripos($offerText, 'free shipping') !== false;
+                    $currencyMap = [
+                        'USD' => '$', 'EUR' => '€', 'GBP' => '£', 'JPY' => '¥',
+                        'INR' => '₹', 'CAD' => 'C$', 'AUD' => 'A$',
+                        'CHF' => 'CHF', 'CNY' => '¥',
+                    ];
+                    if ($offerText !== '') {
+                        if (preg_match('/(\d+)\s*%/i', $offerText, $m)) {
+                            $offerValue = (int) $m[1];
+                            $offerType = 'percent';
+                        } elseif (preg_match('/([€$£¥₹])\s*(\d+(?:[.,]\d+)?)/u', $offerText, $m)) {
+                            $currencySymbol = $m[1];
+                            $offerValue = $m[2];
+                            $offerType = 'currency';
+                        } elseif (preg_match('/(\d+(?:[.,]\d+)?)\s*([€$£¥₹])/u', $offerText, $m)) {
+                            $currencySymbol = $m[2];
+                            $offerValue = $m[1];
+                            $offerType = 'currency';
+                        } elseif (preg_match('/(USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY)\s*(\d+(?:[.,]\d+)?)/i', $offerText, $m)) {
+                            $code = strtoupper($m[1]);
+                            $currencySymbol = $currencyMap[$code] ?? $code;
+                            $offerValue = $m[2];
+                            $offerType = 'currency';
+                        } elseif (preg_match('/(\d+(?:[.,]\d+)?)\s*(USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY)/i', $offerText, $m)) {
+                            $code = strtoupper($m[2]);
+                            $currencySymbol = $currencyMap[$code] ?? $code;
+                            $offerValue = $m[1];
+                            $offerType = 'currency';
+                        } elseif ($isFreeShipping) {
+                            $offerValue = 'FREE';
+                            $offerType = 'text';
+                        }
+                    } elseif ($isFreeShipping) {
+                        $offerValue = 'FREE';
+                        $offerType = 'text';
+                    }
+                @endphp
                 <div class="all-codes-item">
                     <div class="coupon-code-container">
                         <div class="coupon-code-left">
@@ -2167,9 +2271,19 @@
                             COPY
                         </button>
                     </div>
-                    @if($coupon->description)
-                    <div class="all-codes-item-desc">{{ Str::limit($coupon->description, 80) }}</div>
-                    @endif
+                    <div class="all-codes-item-desc">
+                        @if($coupon->description)
+                            {{ Str::limit($coupon->description, 80) }}
+                        @elseif($offerType === 'currency' && $offerValue !== null)
+                            Save {{ $currencySymbol }}{{ number_format((float)str_replace([',', ' '], ['', ''], $offerValue), 0, '.', '') }} on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                        @elseif($offerType === 'text' && $offerValue === 'FREE')
+                            Get Free Shipping on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                        @elseif($offerValue !== null)
+                            Save {{ $offerValue }}% on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                        @else
+                            Save with this coupon code when you shop at {{ $campaign->brand->name ?? $campaign->title }} and apply it at checkout.
+                        @endif
+                    </div>
                 </div>
                 @endforeach
             </div>
@@ -2177,7 +2291,7 @@
                 <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}"
                    target="_blank" rel="nofollow sponsored noopener"
                    class="coupon-btn store">
-                    Go To The Store
+                    Go To {{ $campaign->brand->name ?? $campaign->title }}
                 </a>
             </div>
         </div>
@@ -2189,6 +2303,7 @@
 let currentCode = '';
 let currentCouponRow = null;
 let currentCouponId = null;
+let currentAffUrl = null;
 const STORAGE_KEY = 'revealed_coupons_' + window.location.pathname;
 
 function getStoredRevealed() {
@@ -2224,6 +2339,20 @@ function revealCodeInRow(couponId, code, affUrl) {
     };
     btn.parentNode.replaceChild(codeSpan, btn);
     saveRevealed(couponId, code);
+
+    // Nếu popup all-codes đang mở, hiện luôn code thật cho item tương ứng
+    document
+        .querySelectorAll('#allCodesModal .all-codes-item .btn-copy-all-codes')
+        .forEach(function (bt) {
+            if (bt.dataset.code === code) {
+                const box = bt
+                    .closest('.all-codes-item')
+                    ?.querySelector('.coupon-code-box');
+                if (box && box.dataset.realCode) {
+                    box.textContent = box.dataset.realCode;
+                }
+            }
+        });
 }
 function copyCodeToClipboard(text) {
     navigator.clipboard.writeText(text);
@@ -2232,8 +2361,12 @@ function copyCodeToClipboard(text) {
 function openModalForCoupon(couponId, code, affUrl) {
     currentCode = code;
     currentCouponId = couponId;
+    currentAffUrl = affUrl || null;
     const codeBox = document.getElementById('modalCode');
-    if (codeBox) codeBox.innerText = code;
+    if (codeBox) {
+        // Ẩn code cho tới khi user bấm Copy
+        codeBox.innerText = '••••••••';
+    }
     const modal = document.getElementById('couponModal');
     if (modal) modal.classList.add('active');
     const goBtn = document.querySelector('.go-to-store-btn');
@@ -2251,16 +2384,43 @@ function handleCouponClick(btn){
     const isAllCodes = target.dataset.allCodes === '1' || target.dataset.allCodes === 'true';
 
     if (isAllCodes) {
+        const affUrl =
+            target.dataset.url ||
+            (document.querySelector('.btn-get-code[data-url]')?.dataset.url || null);
+
         document.getElementById('allCodesModal').classList.add('active');
         document.querySelectorAll('.btn-copy-all-codes').forEach(function(bt) {
             bt.onclick = function() {
                 const code = this.dataset.code;
                 if (!code) return;
                 copyCodeToClipboard(code);
-                const txt = this.textContent;
-                this.textContent = 'COPIED ✓';
-                this.classList.add('copied');
-                setTimeout(function() { bt.textContent = txt; bt.classList.remove('copied'); }, 1500);
+                const originalText = this.textContent;
+
+                // Hiện code thật trong list khi user copy
+                const box = this
+                    .closest('.all-codes-item')
+                    ?.querySelector('.coupon-code-box');
+                if (box && box.dataset.realCode) {
+                    box.textContent = box.dataset.realCode;
+                }
+
+                // Báo đã copy, sau đó hiển thị "Opening store..."
+                this.textContent = 'Copied ✓';
+                this.disabled = true;
+
+                setTimeout(() => {
+                    this.textContent = 'Opening store...';
+                }, 600);
+
+                // Sau 2s mở store (affiliate) trong tab mới
+                setTimeout(() => {
+                    if (affUrl) {
+                        window.open(affUrl, '_blank');
+                    }
+                    this.textContent = originalText;
+                    this.disabled = false;
+                    this.classList.remove('copied');
+                }, 2000);
             };
         });
         return false;
@@ -2290,19 +2450,8 @@ function handleCouponClick(btn){
     currentCouponId = couponId;
     currentCouponRow = actualBtn.closest('.coupon-row');
 
-    const affAlreadyOpened = sessionStorage.getItem('affOpened') === '1';
-
-    if (affAlreadyOpened) {
-        openModalForCoupon(couponId, code, url);
-        return false;
-    }
-
-    sessionStorage.setItem('affOpened', '1');
-    const couponPageUrl = new URL(window.location.href);
-    couponPageUrl.searchParams.set('show_coupon', couponId);
-    couponPageUrl.searchParams.set('code', encodeURIComponent(code));
-    window.open(couponPageUrl.toString(), '_blank');
-    if (url) window.location.href = url;
+    // Flow mới cho Get Code: chỉ mở popup, chưa mở store
+    openModalForCoupon(couponId, code, url);
     return false;
 }
 
@@ -2342,25 +2491,41 @@ function copyCoupon(btn){
 
     copyCodeToClipboard(currentCode);
     const originalText = btn.innerText;
+
+    // Hiện code thật trong popup sau khi copy
+    const codeBox = document.getElementById('modalCode');
+    if (codeBox) {
+        codeBox.innerText = currentCode;
+    }
+
+    // Báo đã copy rồi hiển thị "Opening store..."
     btn.innerText = 'Copied ✓';
     btn.disabled = true;
-    btn.style.background = '#22c55e';
+
     setTimeout(() => {
-        btn.innerText = originalText;
-        btn.disabled = false;
-        btn.style.background = '';
-    }, 2000);
-    
+        btn.innerText = 'Opening store...';
+    }, 600);
+
     const goBtn = document.querySelector('.go-to-store-btn');
     if(goBtn){
         goBtn.classList.remove('go-store-attention');
         void goBtn.offsetWidth;
         goBtn.classList.add('go-store-attention');
     }
-    const affUrl = goBtn ? goBtn.getAttribute('data-url') : null;
+
+    const affUrl = currentAffUrl || (goBtn ? goBtn.getAttribute('data-url') : null);
     if (currentCouponId && currentCode) {
         revealCodeInRow(currentCouponId, currentCode, affUrl);
     }
+
+    // Delay 2s rồi mở store
+    setTimeout(() => {
+        if (affUrl) {
+            window.open(affUrl, '_blank');
+        }
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }, 2000);
 }
 function toggleQA(el){
     const item = el.closest('.qa-item');
@@ -2376,6 +2541,15 @@ document.addEventListener('DOMContentLoaded', function () {
     Object.keys(stored).forEach(function(cid) {
         revealCodeInRow(cid, stored[cid], affUrl);
     });
+
+    // Ẩn toàn bộ mã trong popup all-codes cho tới khi user copy
+    document
+        .querySelectorAll('#allCodesModal .all-codes-item .coupon-code-box')
+        .forEach(function (box) {
+            const real = (box.textContent || '').trim();
+            box.dataset.realCode = real;
+            box.textContent = '••••••••';
+        });
 
     const urlParams = new URLSearchParams(window.location.search);
     const showCouponId = urlParams.get('show_coupon');
