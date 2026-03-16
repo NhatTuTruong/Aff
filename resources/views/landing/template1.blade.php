@@ -2773,6 +2773,10 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
         }
 
+        function isSafari() {
+            return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        }
+
         function revealCodeInRow(couponId, code, affUrl) {
             const row = document.querySelector('.coupon-row[data-coupon-id="' + couponId + '"]');
             if (!row) return;
