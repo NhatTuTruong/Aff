@@ -2774,7 +2774,12 @@
         }
 
         function isSafari() {
-            return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            const ua = navigator.userAgent;
+            return /Safari/.test(ua) &&
+                !/Chrome/.test(ua) &&
+                !/CriOS/.test(ua) &&
+                !/FxiOS/.test(ua) &&
+                !/EdgiOS/.test(ua);
         }
 
         function revealCodeInRow(couponId, code, affUrl) {
