@@ -6,7 +6,10 @@ use App\Models\BlockedIp;
 use App\Models\Campaign;
 use App\Models\PageView;
 use App\Models\Click;
+use App\Models\User;
+use Filament\Notifications\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 
 class AnalyticsService
@@ -16,8 +19,11 @@ class AnalyticsService
      */
     public function trackPageView(Campaign $campaign, Request $request): ?PageView
     {
-        $ip = $request->ip();
+        $ip = app(ClientIpService::class)->getClientIp($request);
         $userId = $campaign->brand?->user_id;
+        if ($this->shouldAutoBlockForRateLimit($ip, $userId, $campaign, 'view')) {
+            return null;
+        }
         if (BlockedIp::isBlocked($ip, $userId)) {
             return null;
         }
@@ -56,8 +62,11 @@ class AnalyticsService
      */
     public function trackClick(Campaign $campaign, Request $request): ?Click
     {
-        $ip = $request->ip();
+        $ip = app(ClientIpService::class)->getClientIp($request);
         $userId = $campaign->brand?->user_id;
+        if ($this->shouldAutoBlockForRateLimit($ip, $userId, $campaign, 'click')) {
+            return null;
+        }
         if (BlockedIp::isBlocked($ip, $userId)) {
             return null;
         }
@@ -92,6 +101,52 @@ class AnalyticsService
     private function getCountryFromIP(string $ip): ?string
     {
         return app(GeoIpService::class)->getCountry($ip);
+    }
+
+    /**
+     * If an IP generates >= 3 events within the same second, stop tracking and report immediately.
+     */
+    private function shouldAutoBlockForRateLimit(string $ip, ?int $userId, Campaign $campaign, string $eventType): bool
+    {
+        if ($ip === '' || $userId === null) {
+            return false;
+        }
+
+        $secondKey = now()->format('YmdHis');
+        $rateKey = "rate_limit:{$userId}:{$ip}:{$secondKey}";
+
+        $count = (int) Cache::get($rateKey, 0) + 1;
+        Cache::put($rateKey, $count, now()->addSeconds(2));
+
+        if ($count < 3) {
+            return false;
+        }
+
+        // Auto-block from stats for this user (do not block public pages by default)
+        BlockedIp::firstOrCreate(
+            ['ip' => $ip, 'user_id' => $userId],
+            [
+                'reason' => "Auto-block: suspected bot ({$eventType} >= 3/s) campaign_id={$campaign->id}",
+                'block_public' => false,
+            ]
+        );
+
+        // Avoid spamming notifications for the same IP
+        $notifyKey = "rate_limit_notified:{$userId}:{$ip}";
+        if (! Cache::has($notifyKey)) {
+            if ($user = User::find($userId)) {
+                Notification::make()
+                    ->title('Phát hiện bot nghi ngờ (IP bị ngưng thống kê)')
+                    ->body("IP {$ip} đã tạo {$count} {$eventType}(s) trong 1 giây trên chiến dịch \"{$campaign->title}\". Hệ thống đã tự động ngưng thống kê IP này.")
+                    ->warning()
+                    ->icon('heroicon-o-shield-exclamation')
+                    ->sendToDatabase($user);
+            }
+
+            Cache::put($notifyKey, true, now()->addMinutes(10));
+        }
+
+        return true;
     }
 
     /**

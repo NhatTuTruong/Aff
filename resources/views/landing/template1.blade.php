@@ -2438,8 +2438,7 @@
                                     @endif
                                 @else
                                     <p>
-                                        Exclusive deals from {{ $campaign->brand->name ?? $campaign->title }}
-                                        to help you save more when shopping online.
+                                        Discover exclusive deals from {{ $campaign->brand->name ?? $campaign->title }} designed to help you save more every time you shop online. We carefully curate the latest discounts, special offers, and limited-time promotions so you can enjoy the best value on your favorite products. Whether you're looking for everyday essentials or trending items, {{ $campaign->brand->name ?? $campaign->title }} makes it easier to shop smarter and spend less.
                                     </p>
                                 @endif
                             </div>

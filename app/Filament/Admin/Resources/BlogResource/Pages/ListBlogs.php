@@ -17,6 +17,11 @@ class ListBlogs extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('back')
+                ->label('Quay lại')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url(url()->previous()),
             Actions\Action::make('createWithAi')
                 ->label('Tạo bài viết bằng AI')
                 ->icon('heroicon-o-sparkles')

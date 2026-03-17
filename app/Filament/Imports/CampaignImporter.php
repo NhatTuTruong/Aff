@@ -109,22 +109,23 @@ class CampaignImporter extends Importer
                 ->label('Mã giảm giá (phân cách bằng xuống hàng)')
                 ->guess(['Mã giảm giá'])
                 ->rules(['nullable', 'max:2000'])
-                ->example("SAVE10\nSAVE20")
+                ->example("SAVE10\nNO")
                 ->exampleHeader('Mã giảm giá')
                 ->fillRecordUsing(fn () => null),
             ImportColumn::make('coupon_offers')
                 ->label('Offer (phân cách bằng xuống hàng)')
                 ->guess(['Offer'])
                 ->rules(['nullable', 'max:2000'])
-                ->example("10%\n20$")
+                ->example("10%\nFree Shipping")
                 ->exampleHeader('Offer')
                 ->fillRecordUsing(fn () => null),
             ImportColumn::make('coupon_descriptions')
                 ->label('Mô tả mã giảm giá (phân cách bằng xuống hàng)')
                 ->guess(['Mô tả'])
                 ->rules(['nullable', 'max:5000'])
-                ->example("Giảm 10%\nGiảm 20$")
+                ->example("NO\nNO")
                 ->exampleHeader('Mô tả')
+                ->helperText('Nhập "NO" để tự tạo mô tả ngẫu nhiên theo Offer và loại coupon (Get Code / Get Deal / Free Shipping).')
                 ->fillRecordUsing(fn () => null),
         ];
     }
@@ -218,13 +219,58 @@ class CampaignImporter extends Importer
             if (strtolower(trim($code)) === 'no') {
                 $code = '';
             }
+            $offer = $offers[$i] ?? '';
+            $description = $descriptions[$i] ?? '';
+            if (strtolower(trim($description)) === 'no') {
+                $description = $this->generateCouponDescription($offer, $code !== '');
+            }
+
             Coupon::create([
                 'campaign_id' => $this->record->id,
                 'code' => $code,
-                'offer' => $offers[$i] ?? '',
-                'description' => $descriptions[$i] ?? '',
+                'offer' => $offer,
+                'description' => $description,
             ]);
         }
+    }
+
+    protected function generateCouponDescription(string $offer, bool $hasCode): string
+    {
+        $offerTrim = trim($offer);
+        $offerLower = strtolower($offerTrim);
+
+        $freeShippingTemplates = [
+            'Free Shipping on All Orders',
+            'Enjoy Free Shipping Storewide',
+            'Get Free Delivery on Selected Items',
+        ];
+
+        $codeTemplates = [
+            'Get [offer] OFF on Selected Items',
+            'Enjoy [offer] OFF Storewide Today',
+            'Take Extra 20% OFF Clearance Deals',
+            'Get [offer] OFF Your First Purchase',
+            'Apply Code to Get 10% OFF at Checkout',
+            'Extra [offer] OFF When You Pay Online',
+            'Limited Time: [offer] OFF Sitewide',
+            'Instantly Save [offer] on Your Order',
+        ];
+
+        $dealTemplates = [
+            'Up to [offer] OFF Storewide Offers',
+            'Limited Time Deals – Save Big Today',
+            'Flash Deals – Prices Dropped on Selected Items',
+            'Check Out Today’s Best Deals & Offers',
+            'Enjoy Additional Discounts on Sale Items',
+        ];
+
+        $isFreeShipping = $offerLower === 'free shipping' || str_contains($offerLower, 'free shipping');
+        $templates = $isFreeShipping
+            ? $freeShippingTemplates
+            : ($hasCode ? $codeTemplates : $dealTemplates);
+
+        $template = Arr::random($templates);
+        return str_replace('[offer]', $offerTrim, $template);
     }
 
     /** Phân cách bằng xuống hàng (\\n) thay vì , hoặc ; */

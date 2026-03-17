@@ -13,6 +13,11 @@ class ListAssets extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('back')
+                ->label('Quay lại')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url(url()->previous()),
             Actions\CreateAction::make(),
         ];
     }

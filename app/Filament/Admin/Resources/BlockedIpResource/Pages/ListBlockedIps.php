@@ -30,6 +30,11 @@ class ListBlockedIps extends ListRecords
         $atLimit = $count >= $max;
 
         return [
+            Actions\Action::make('back')
+                ->label('Quay lại')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url(url()->previous()),
             Actions\CreateAction::make()
                 ->disabled($atLimit)
                 ->tooltip($atLimit ? "Đã đạt giới hạn {$max} IP." : null),

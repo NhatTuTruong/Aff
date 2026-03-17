@@ -13,6 +13,11 @@ class ListClicks extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('back')
+                ->label('Quay lại')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url(url()->previous()),
             Actions\Action::make('exportCsv')
                 ->label('Xuất CSV')
                 ->icon('heroicon-o-arrow-down-tray')

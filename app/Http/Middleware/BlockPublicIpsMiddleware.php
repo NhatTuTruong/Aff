@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\BlockedIp;
+use App\Services\ClientIpService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,7 +20,7 @@ class BlockPublicIpsMiddleware
             return $next($request);
         }
 
-        $ip = $request->ip();
+        $ip = app(ClientIpService::class)->getClientIp($request);
         if (BlockedIp::isBlockedFromPublic($ip)) {
             abort(403, 'Quyền truy cập bị từ chối.');
         }
