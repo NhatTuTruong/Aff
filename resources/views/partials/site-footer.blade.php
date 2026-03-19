@@ -5,6 +5,18 @@
     $normalizeUrl = function ($url) {
         if (empty($url)) return url('/');
         if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) return $url;
+        // Ensure hash links always point to homepage sections.
+        $url = (string) $url;
+        if (str_starts_with($url, '#')) {
+            return url('/') . $url;
+        }
+        if (str_contains($url, '#')) {
+            [$path, $hash] = array_pad(explode('#', $url, 2), 2, '');
+            $path = trim((string) $path);
+            $hash = trim((string) $hash);
+            $base = $path === '' ? url('/') : url(ltrim($path, '/'));
+            return $hash !== '' ? ($base . '#' . $hash) : $base;
+        }
         return url(ltrim($url, '/'));
     };
 @endphp

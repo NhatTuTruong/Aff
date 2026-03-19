@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'previous' => '« Trước',
-    'next' => 'Sau »',
+    'previous' => '«',
+    'next' => '»',
 ];
 
