@@ -86,7 +86,7 @@ class TrafficDomainFilter extends Page implements HasForms
                             ->label('Ngưỡng Traffic')
                             ->numeric()
                             ->minValue(0)
-                            ->default(100000)
+                            ->default(20000)
                             ->required(),
                     ]),
             ])
