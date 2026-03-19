@@ -51,7 +51,7 @@ class TrafficDomainFilter extends Page implements HasForms
             'apify_token' => $this->getStoredToken() ? '********' : '',
             'actor_id' => 'aqPbs3KeH9aD8b22w',
             'domains_file' => null,
-            'traffic' => 100000,
+            'traffic' => 20000,
         ]);
 
         $this->logs = [];
