@@ -26,6 +26,8 @@ class Campaign extends Model
         'benefits',
         'cta_text',
         'affiliate_url',
+        'link_network',
+        'email',
         'coupon_code',
         'coupon_enabled',
         'template',

@@ -46,6 +46,10 @@ class CampaignExporter extends Exporter
                 ->label('Template'),
             ExportColumn::make('affiliate_url')
                 ->label('URL Affiliate'),
+            ExportColumn::make('link_network')
+                ->label('Link Network'),
+            ExportColumn::make('email')
+                ->label('Email'),
             ExportColumn::make('coupon_codes')
                 ->label('Mã giảm giá (phân cách bằng xuống hàng)')
                 ->state(function (Campaign $record) {

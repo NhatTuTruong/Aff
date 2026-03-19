@@ -68,7 +68,6 @@ class CampaignImporter extends Importer
                 ->rules(['nullable', 'max:65535'])
                 ->example('<p>Giới thiệu chiến dịch</p>')
                 ->exampleHeader('Giới thiệu')
-                ->helperText('Lưu file CSV UTF-8 để giữ nguyên ngôn ngữ, xuống hàng, dấu câu, danh sách.')
                 ->fillRecordUsing(function (Campaign $record, ?string $state) {
                     if ($state === null || trim($state) === '') {
                         $record->intro = null;
@@ -105,6 +104,18 @@ class CampaignImporter extends Importer
                 ->rules(['required', 'url'])
                 ->example('https://example.com/?ref=xxx')
                 ->exampleHeader('URL Affiliate'),
+            ImportColumn::make('link_network')
+                ->label('Link Network')
+                ->guess(['Link Network'])
+                ->rules(['nullable', 'max:255'])
+                ->example('https://network.example.com/offer')
+                ->exampleHeader('Link Network'),
+            ImportColumn::make('email')
+                ->label('Email')
+                ->guess(['Email'])
+                ->rules(['nullable', 'email', 'max:255'])
+                ->example('contact@example.com')
+                ->exampleHeader('Email'),
             ImportColumn::make('coupon_codes')
                 ->label('Mã giảm giá (phân cách bằng xuống hàng)')
                 ->guess(['Mã giảm giá'])

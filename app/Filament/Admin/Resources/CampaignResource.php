@@ -49,7 +49,7 @@ class CampaignResource extends Resource
                                 'name',
                                 modifyQueryUsing: function ($query) {
                                     $user = Filament::auth()->user();
-                                    $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+                                    $isAdmin = $user && method_exists($user, 'isAdmin') ? (bool) $user->{'isAdmin'}() : false;
                                     $userId = $isAdmin ? null : ($user?->id);
 
                                     return $query->when(
@@ -115,6 +115,13 @@ class CampaignResource extends Resource
                             ->required()
                             ->url()
                             ->helperText('URL affiliate đầy đủ với tham số tracking'),
+                        Forms\Components\TextInput::make('link_network')
+                            ->label('Link Network')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('email')
+                            ->label('Email')
+                            ->email()
+                            ->maxLength(255),
                         Forms\Components\RichEditor::make('intro')
                             ->label('Giới thiệu')
                             ->toolbarButtons([
@@ -407,7 +414,10 @@ class CampaignResource extends Resource
                     ->label('User')
                     ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->toArray())
                     ->searchable()
-                    ->visible(fn (): bool => (bool) (Filament::auth()->user()?->isAdmin()))
+                    ->visible(function (): bool {
+                        $user = Filament::auth()->user();
+                        return $user && method_exists($user, 'isAdmin') ? (bool) $user->{'isAdmin'}() : false;
+                    })
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['value'] ?? null,
@@ -421,7 +431,7 @@ class CampaignResource extends Resource
                         'name',
                         modifyQueryUsing: function (Builder $query) {
                             $user = Filament::auth()->user();
-                            $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+                            $isAdmin = $user && method_exists($user, 'isAdmin') ? (bool) $user->{'isAdmin'}() : false;
                             $userId = $isAdmin ? null : ($user?->id);
 
                             return $query->when(
@@ -542,7 +552,7 @@ class CampaignResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $user = Filament::auth()->user();
-        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+        $isAdmin = $user && method_exists($user, 'isAdmin') ? (bool) $user->{'isAdmin'}() : false;
         $userId = $isAdmin ? null : ($user?->id);
 
         $alert = request()->query('alert');
