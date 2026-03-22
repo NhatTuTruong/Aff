@@ -6,6 +6,7 @@ use App\Filament\Admin\Resources\BlogResource;
 use App\Models\Blog;
 use App\Models\User;
 use App\Services\GeminiBlogService;
+use App\Support\AdminSettings;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -33,10 +34,10 @@ class ListBlogs extends ListRecords
                 ->action(function (): void {
                     $gemini = app(GeminiBlogService::class);
 
-                    if (! config('gemini.api_key')) {
+                    if (! AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'))) {
                         Notification::make()
                             ->title('Lỗi cấu hình')
-                            ->body('GEMINI_API_KEY chưa được cấu hình.')
+                            ->body('Gemini API key chưa được cấu hình trong Cài đặt hệ thống.')
                             ->danger()
                             ->send();
                         return;

@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Pages;
 
 use App\Models\SiteContent;
 use App\Services\ApifyTrafficService;
+use App\Support\AdminSettings;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
@@ -49,9 +50,9 @@ class TrafficDomainFilter extends Page implements HasForms
     {
         $this->form->fill([
             'apify_token' => $this->getStoredToken() ? '********' : '',
-            'actor_id' => 'aqPbs3KeH9aD8b22w',
+            'actor_id' => $this->getStoredActorId(),
             'domains_file' => null,
-            'traffic' => 20000,
+            'traffic' => (int) AdminSettings::get('traffic_threshold_default', 100000),
         ]);
 
         $this->logs = [];
@@ -61,17 +62,17 @@ class TrafficDomainFilter extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Cấu hình API')
+                Section::make('Cấu hình API của bạn')
+                    ->description('Mỗi tài khoản dùng token Apify riêng. Hệ thống sẽ lưu theo user hiện tại.')
                     ->schema([
                         TextInput::make('apify_token')
                             ->label('Apify token')
                             ->password()
                             ->revealable()
-                            ->helperText('Nhập token mới để lưu. Nếu để "********" thì giữ token hiện tại.')
-                            ->maxLength(200),
+                            ->helperText('Nhập token mới để lưu. Nếu để "********" thì giữ token đã lưu.')
+                            ->maxLength(255),
                         TextInput::make('actor_id')
                             ->label('Actor ID')
-                            ->helperText('Mặc định: aqPbs3KeH9aD8b22w')
                             ->required()
                             ->maxLength(100),
                     ])->columns(2),
@@ -80,13 +81,12 @@ class TrafficDomainFilter extends Page implements HasForms
                         FileUpload::make('domains_file')
                             ->label('Upload file .txt (mỗi dòng 1 domain)')
                             ->acceptedFileTypes(['text/plain'])
-                            ->required()
                             ->storeFiles(false),
                         TextInput::make('traffic')
                             ->label('Ngưỡng Traffic')
                             ->numeric()
                             ->minValue(0)
-                            ->default(20000)
+                            ->default(100000)
                             ->required(),
                     ]),
             ])
@@ -96,44 +96,17 @@ class TrafficDomainFilter extends Page implements HasForms
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('saveToken')
-                ->label('Lưu token')
+            Action::make('saveApiConfig')
+                ->label('Lưu cấu hình API')
                 ->icon('heroicon-o-key')
                 ->color('gray')
-                ->action(fn () => $this->saveToken()),
+                ->action(fn () => $this->saveApiConfig()),
             Action::make('run')
                 ->label('Chạy & tải CSV')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('success')
                 ->action(fn () => $this->runAndDownload()),
         ];
-    }
-
-    protected function saveToken(): void
-    {
-        $state = $this->form->getState();
-        $token = trim((string) ($state['apify_token'] ?? ''));
-
-        if ($token === '' || $token === '********') {
-            Notification::make()
-                ->title('Không có thay đổi')
-                ->body('Token không đổi.')
-                ->warning()
-                ->send();
-            return;
-        }
-
-        $this->storeToken($token);
-
-        $this->form->fill([
-            ...$state,
-            'apify_token' => '********',
-        ]);
-
-        Notification::make()
-            ->title('Đã lưu token')
-            ->success()
-            ->send();
     }
 
     protected function runAndDownload()
@@ -146,7 +119,7 @@ class TrafficDomainFilter extends Page implements HasForms
         if ($token === '') {
             Notification::make()
                 ->title('Thiếu token')
-                ->body('Vui lòng nhập Apify token và bấm "Lưu token" hoặc nhập token ngay trước khi chạy.')
+                ->body('Vui lòng nhập Apify token của bạn và bấm "Lưu cấu hình API".')
                 ->danger()
                 ->send();
             $this->appendLog('Thiếu token Apify, dừng tiến trình.');
@@ -155,13 +128,10 @@ class TrafficDomainFilter extends Page implements HasForms
 
         if ($tokenInput !== '' && $tokenInput !== '********') {
             $this->storeToken($tokenInput);
-            $this->form->fill([
-                ...$state,
-                'apify_token' => '********',
-            ]);
         }
 
-        $actorId = trim((string) ($state['actor_id'] ?? 'aqPbs3KeH9aD8b22w'));
+        $actorId = trim((string) ($state['actor_id'] ?? $this->getStoredActorId()));
+        $this->storeActorId($actorId);
         $file = $state['domains_file'] ?? null;
         if (! $file) {
             Notification::make()
@@ -350,6 +320,32 @@ class TrafficDomainFilter extends Page implements HasForms
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
+    protected function saveApiConfig(): void
+    {
+        $state = $this->form->getState();
+        $token = trim((string) ($state['apify_token'] ?? ''));
+        $actorId = trim((string) ($state['actor_id'] ?? ''));
+
+        if ($token !== '' && $token !== '********') {
+            $this->storeToken($token);
+        }
+
+        if ($actorId !== '') {
+            $this->storeActorId($actorId);
+        }
+
+        $this->form->fill([
+            ...$state,
+            'apify_token' => $this->getStoredToken() ? '********' : '',
+            'actor_id' => $this->getStoredActorId(),
+        ]);
+
+        Notification::make()
+            ->title('Đã lưu cấu hình API')
+            ->success()
+            ->send();
+    }
+
     protected function parseVisitsFormatted(string $value): ?int
     {
         $v = strtoupper(trim($value));
@@ -389,7 +385,15 @@ class TrafficDomainFilter extends Page implements HasForms
     protected function tokenKey(): string
     {
         $userId = Filament::auth()->id() ?? '0';
-        return "apify_token.user.{$userId}";
+
+        return 'apify_token.user.' . $userId;
+    }
+
+    protected function actorIdKey(): string
+    {
+        $userId = Filament::auth()->id() ?? '0';
+
+        return 'apify_actor_id.user.' . $userId;
     }
 
     protected function getStoredToken(): ?string
@@ -398,6 +402,7 @@ class TrafficDomainFilter extends Page implements HasForms
         if (! is_string($raw) || trim($raw) === '') {
             return null;
         }
+
         try {
             return Crypt::decryptString($raw);
         } catch (\Throwable) {
@@ -409,5 +414,25 @@ class TrafficDomainFilter extends Page implements HasForms
     {
         SiteContent::set($this->tokenKey(), Crypt::encryptString($token));
     }
+
+    protected function getStoredActorId(): string
+    {
+        $actorId = SiteContent::get($this->actorIdKey());
+        if (is_string($actorId) && trim($actorId) !== '') {
+            return trim($actorId);
+        }
+
+        return (string) AdminSettings::get('apify_actor_id', 'aqPbs3KeH9aD8b22w');
+    }
+
+    protected function storeActorId(string $actorId): void
+    {
+        if (trim($actorId) === '') {
+            return;
+        }
+
+        SiteContent::set($this->actorIdKey(), trim($actorId));
+    }
+
 }
 

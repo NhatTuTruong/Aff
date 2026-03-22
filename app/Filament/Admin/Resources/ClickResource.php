@@ -172,20 +172,27 @@ class ClickResource extends Resource
                     ->relationship('campaign', 'title')
                     ->searchable()
                     ->preload(),
-                Tables\Filters\TernaryFilter::make('is_bot')
+                Tables\Filters\SelectFilter::make('interaction_kind')
                     ->label('Click từ bot')
-                    ->placeholder('Tất cả')
-                    ->trueLabel('Chỉ bot')
-                    ->falseLabel('Chỉ người')
-                    ->default(0) // mặc định: Chỉ người
-                    ->queries(
-                        true: fn (Builder $query): Builder => $query->where('is_bot', true),
-                        false: fn (Builder $query): Builder => $query
-                            ->where(function (Builder $q) {
+                    ->options([
+                        'human' => 'Chỉ người',
+                        'bot' => 'Chỉ bot',
+                        'vietnam' => 'Click từ Việt Nam',
+                        'all' => 'Tất cả',
+                    ])
+                    ->default('human')
+                    ->query(function (Builder $query, array $data): Builder {
+                        $v = $data['value'] ?? 'human';
+
+                        return match ($v) {
+                            'bot' => $query->where('is_bot', true),
+                            'human' => $query->where(function (Builder $q) {
                                 $q->whereNull('is_bot')->orWhere('is_bot', false);
                             }),
-                        blank: fn (Builder $query): Builder => $query,
-                    ),
+                            'vietnam' => $query->fromVietnam(),
+                            default => $query,
+                        };
+                    }),
                 Tables\Filters\SelectFilter::make('device_type')
                     ->label('Thiết bị')
                     ->options([

@@ -87,7 +87,7 @@
 
         $brandName = $campaign->brand->name ?? $campaign->title;
         $rawIntro = (string) ($campaign->subtitle ?? $campaign->intro ?? '');
-        $metaTitle = $brandName . ' Coupons & Promo Codes';
+        $metaTitle = $brandName . ' Coupons & Promo Codes – ' . now()->format('F Y');
         $metaDescription = \Illuminate\Support\Str::limit(strip_tags($rawIntro), 160);
 
         if (empty($metaDescription)) {
@@ -427,7 +427,7 @@
             color: var(--t2-text);
         }
         .section-body {
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             color: var(--t2-text-muted);
             line-height: 1.75;
         }
@@ -486,6 +486,86 @@
             transition: opacity 0.25s ease;
         }
         .coupon-modal.active { opacity: 1; pointer-events: auto; }
+        .coupon-modal-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            max-width: 100%;
+            padding: 0 12px;
+            box-sizing: border-box;
+        }
+        .coupon-copy-toast[hidden] { display: none !important; }
+        .coupon-copy-toast {
+            display: flex;
+            flex-direction: column;
+            background: #2c2c2e;
+            color: #fff;
+            padding: 0;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+            position: relative;
+            overflow: hidden;
+            width: min(420px, calc(100vw - 2rem));
+            max-width: min(420px, calc(100vw - 2rem));
+            min-width: 0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .coupon-copy-toast-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 12px 14px 14px;
+        }
+        .coupon-copy-toast-icon { flex-shrink: 0; font-weight: 700; font-size: 1.05rem; line-height: 1.35; margin-top: 1px; }
+        .coupon-copy-toast-text {
+            flex: 1;
+            margin: 0;
+            text-align: center;
+            line-height: 1.45;
+            min-width: 0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .coupon-copy-toast-text strong { font-weight: 700; color: #fff; }
+        .coupon-copy-toast-close {
+            flex-shrink: 0;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            padding: 6px 8px;
+            margin: -4px -4px 0 0;
+            min-width: 40px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            border-radius: 8px;
+            transition: background 0.15s;
+            touch-action: manipulation;
+        }
+        .coupon-copy-toast-close:hover { background: rgba(255, 255, 255, 0.12); }
+        @media (max-width: 480px) {
+            .coupon-copy-toast { width: calc(100vw - 1.5rem); max-width: calc(100vw - 1.5rem); font-size: 0.88rem; }
+            .coupon-copy-toast-row { padding: 10px 10px 12px 12px; gap: 8px; }
+        }
+        .coupon-copy-toast-progress {
+            width: 100%;
+            height: 3px;
+            background: #22c55e;
+            transform-origin: left center;
+            animation: couponCopyToastProgress 1.5s linear forwards;
+        }
+        @keyframes couponCopyToastProgress {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
         .coupon-modal-content {
             position: relative;
             background: var(--t2-card);
@@ -713,7 +793,7 @@
 <div class="t2-main">
     <header class="t2-hero">
         <h1 class="t2-hero-title">
-            {{ $campaign->brand->name ?? $campaign->title }} Coupons &amp; Promo Codes
+            {{ $campaign->brand->name ?? $campaign->title }} Coupons & Promo Codes – {{ now()->format('F Y') }}
         </h1>
         <p class="t2-hero-sub">
             Save up to <strong>{{ $maxPercent }}% off</strong> with verified discount codes &amp; exclusive deals.
@@ -1008,6 +1088,15 @@
 @include('partials.site-footer')
 
 <div id="couponModal" class="coupon-modal" role="dialog" aria-modal="true" aria-labelledby="coupon-modal-title">
+    <div class="coupon-modal-stack">
+        <div id="couponCopyToast" class="coupon-copy-toast" role="status" aria-live="polite" hidden>
+            <div class="coupon-copy-toast-row">
+                <span class="coupon-copy-toast-icon" aria-hidden="true">✓</span>
+                <p class="coupon-copy-toast-text">Code copied! Redirecting you to <strong>{{ e($brandName) }}</strong></p>
+                <button type="button" class="coupon-copy-toast-close" aria-label="Đóng" onclick="dismissCouponCopyToast()">✕</button>
+            </div>
+            <div class="coupon-copy-toast-progress" aria-hidden="true"></div>
+        </div>
     <div class="coupon-modal-content">
         <button type="button" class="coupon-modal-close" aria-label="Close coupon popup" onclick="closeCouponPopup()">✕</button>
         <div class="t2-popup-banner">
@@ -1061,6 +1150,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 </div>
 
@@ -1161,6 +1251,7 @@
 </div>
 
 <script>
+let couponCopyRedirectTimer = null;
 let currentCode = '';
 let currentCouponRow = null;
 let currentCouponId = null;
@@ -1219,6 +1310,91 @@ function copyCodeToClipboard(text) {
     navigator.clipboard.writeText(text);
 }
 
+function showCouponCopyToast() {
+    const el = document.getElementById('couponCopyToast');
+    if (!el) return;
+    el.hidden = false;
+    const bar = el.querySelector('.coupon-copy-toast-progress');
+    if (bar) {
+        bar.style.animation = 'none';
+        void bar.offsetWidth;
+        bar.style.animation = '';
+    }
+}
+
+function hideCouponCopyToast() {
+    const el = document.getElementById('couponCopyToast');
+    if (el) el.hidden = true;
+}
+
+function dismissCouponCopyToast() {
+    if (couponCopyRedirectTimer) {
+        clearTimeout(couponCopyRedirectTimer);
+        couponCopyRedirectTimer = null;
+    }
+    hideCouponCopyToast();
+    const copyBtn = document.getElementById('copyCouponBtn');
+    if (copyBtn) {
+        copyBtn.disabled = false;
+        if (copyBtn.dataset.copyLabelDefault) {
+            copyBtn.innerText = copyBtn.dataset.copyLabelDefault;
+        }
+    }
+}
+
+function setCouponModalHash(couponId) {
+    const id = String(couponId);
+    const path = window.location.pathname + window.location.search;
+    history.replaceState(null, '', path + '#coupon=' + encodeURIComponent(id));
+}
+
+function clearCouponModalHash() {
+    if (!/^#coupon=/.test(window.location.hash)) return;
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+}
+
+function restoreCouponModalFromHash() {
+    const m = /^#coupon=(.+)$/.exec(window.location.hash);
+    if (!m) return;
+    const id = decodeURIComponent(m[1]);
+    const singleModal = document.getElementById('couponModal');
+    const allModal = document.getElementById('allCodesModal');
+    if (singleModal && singleModal.classList.contains('active')) return;
+    if (allModal && allModal.classList.contains('active')) return;
+
+    if (id === 'all-codes') {
+        const allRow = document.querySelector('.coupon-row[data-coupon-id="all-codes"]') ||
+            document.querySelector('.coupon-row[data-all-codes="1"]');
+        if (allRow) handleCouponClick(allRow);
+        return;
+    }
+
+    const btn = Array.prototype.find.call(document.querySelectorAll('.btn-get-code'), function (b) {
+        return b.dataset.couponId === id;
+    });
+    if (!btn) return;
+    if (btn.dataset.allCodes === '1' || btn.dataset.allCodes === 'true') {
+        handleCouponClick(btn.closest('.coupon-row') || btn);
+        return;
+    }
+    const type = btn.dataset.type;
+    const code = btn.dataset.code || '';
+    const url = btn.dataset.url;
+    const couponId = btn.dataset.couponId;
+    const activeTabBtn = document.querySelector('.filter-pill.active');
+    const activeTab = activeTabBtn ? (activeTabBtn.dataset.tab || 'all') : 'all';
+    if (type === 'deal' || activeTab === 'deals') {
+        clearCouponModalHash();
+        return;
+    }
+    if (!code) {
+        clearCouponModalHash();
+        return;
+    }
+    currentCouponRow = btn.closest('.coupon-row');
+    openModalForCoupon(couponId, code, url);
+}
+
 function openModalForCoupon(couponId, code, affUrl) {
     currentCode = code;
     currentCouponId = couponId;
@@ -1235,6 +1411,7 @@ function openModalForCoupon(couponId, code, affUrl) {
         goBtn.setAttribute('data-url', affUrl);
         goBtn.href = affUrl;
     }
+    setCouponModalHash(couponId);
 }
 
 function handleCouponClick(btn){
@@ -1250,6 +1427,7 @@ function handleCouponClick(btn){
             (document.querySelector('.btn-get-code[data-url]')?.dataset.url || null);
 
         document.getElementById('allCodesModal').classList.add('active');
+        setCouponModalHash('all-codes');
         document.querySelectorAll('.btn-copy-all-codes').forEach(function(bt) {
             bt.onclick = function() {
                 const code = this.dataset.code;
@@ -1279,7 +1457,7 @@ function handleCouponClick(btn){
                     this.textContent = originalText;
                     this.disabled = false;
                     this.classList.remove('copied');
-                }, 2000);
+                }, 1500);
             };
         });
         return false;
@@ -1314,10 +1492,24 @@ function handleCouponClick(btn){
 }
 
 function closeCouponPopup(){
+    if (couponCopyRedirectTimer) {
+        clearTimeout(couponCopyRedirectTimer);
+        couponCopyRedirectTimer = null;
+    }
+    hideCouponCopyToast();
+    const copyBtn = document.getElementById('copyCouponBtn');
+    if (copyBtn) {
+        copyBtn.disabled = false;
+        if (copyBtn.dataset.copyLabelDefault) {
+            copyBtn.innerText = copyBtn.dataset.copyLabelDefault;
+        }
+    }
     document.getElementById('couponModal').classList.remove('active');
+    clearCouponModalHash();
 }
 function closeAllCodesModal(){
     document.getElementById('allCodesModal').classList.remove('active');
+    clearCouponModalHash();
 }
 
 function handleFeedback(btn, worked){
@@ -1341,22 +1533,21 @@ function handleFeedback(btn, worked){
 function copyCoupon(btn){
     if(!currentCode) return;
 
-    copyCodeToClipboard(currentCode);
-    const originalText = btn.innerText;
+    if (!btn.dataset.copyLabelDefault) {
+        btn.dataset.copyLabelDefault = btn.innerText.trim();
+    }
 
-    // Hiện code thật trong popup sau khi copy
+    copyCodeToClipboard(currentCode);
+    const originalText = btn.dataset.copyLabelDefault;
+
     const codeBox = document.getElementById('modalCode');
     if (codeBox) {
         codeBox.innerText = currentCode;
     }
 
-    // Báo đã copy rồi hiển thị "Opening store..."
     btn.innerText = 'Copied ✓';
     btn.disabled = true;
-
-    setTimeout(() => {
-        btn.innerText = 'Opening store...';
-    }, 600);
+    showCouponCopyToast();
 
     const goBtn = document.querySelector('.go-to-store-btn');
     if(goBtn){
@@ -1370,14 +1561,16 @@ function copyCoupon(btn){
         revealCodeInRow(currentCouponId, currentCode, affUrl);
     }
 
-    // Delay 2s rồi mở store
-    setTimeout(() => {
+    if (couponCopyRedirectTimer) clearTimeout(couponCopyRedirectTimer);
+    couponCopyRedirectTimer = setTimeout(function() {
+        couponCopyRedirectTimer = null;
+        hideCouponCopyToast();
         if (affUrl) {
             window.open(affUrl, '_blank');
         }
         btn.innerText = originalText;
         btn.disabled = false;
-    }, 2000);
+    }, 1500);
 }
 function toggleQA(el){
     const item = el.closest('.qa-item');
@@ -1415,7 +1608,13 @@ document.addEventListener('DOMContentLoaded', function () {
             revealCodeInRow(showCouponId, decoded, affUrl);
             openModalForCoupon(showCouponId, decoded, affUrl);
         } catch (e) {}
+    } else {
+        restoreCouponModalFromHash();
     }
+
+    window.addEventListener('hashchange', function () {
+        restoreCouponModalFromHash();
+    });
 
     const tabs = document.querySelectorAll('.filter-pill');
     const rows = document.querySelectorAll('.coupon-row');

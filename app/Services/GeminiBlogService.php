@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\AdminSettings;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -13,9 +14,9 @@ class GeminiBlogService
 
     public function generateBlog(string $category, string $variant): ?array
     {
-        $apiKey = config('gemini.api_key');
-        $model = config('gemini.model', 'gemini-1.5-flash-latest');
-        $timeout = (int) config('gemini.timeout', 60);
+        $apiKey = AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'));
+        $model = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
+        $timeout = (int) AdminSettings::get('gemini_timeout', config('gemini.timeout', 60));
 
         if (empty($apiKey)) {
             $this->lastError = 'GEMINI_API_KEY chưa được cấu hình.';

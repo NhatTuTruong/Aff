@@ -22,7 +22,7 @@ class DeviceAnalyticsWidget extends ChartWidget
 
     protected function getData(): array
     {
-        $baseQuery = Click::query()->where('is_bot', false);
+        $baseQuery = Click::query()->where('is_bot', false)->forAdminStats();
 
         $desktop = (clone $baseQuery)->where('device_type', 'desktop')->count();
         $mobile = (clone $baseQuery)->where('device_type', 'mobile')->count();

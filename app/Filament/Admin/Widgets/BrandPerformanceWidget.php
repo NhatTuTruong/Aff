@@ -5,7 +5,6 @@ namespace App\Filament\Admin\Widgets;
 use App\Models\Brand;
 use App\Models\Click;
 use App\Models\PageView;
-use App\Services\AnalyticsService;
 use Filament\Widgets\Widget;
 
 class BrandPerformanceWidget extends Widget
@@ -24,18 +23,20 @@ class BrandPerformanceWidget extends Widget
 
     protected function getViewData(): array
     {
-        $analyticsService = app(AnalyticsService::class);
-        
         $brands = Brand::with(['campaigns.clicks', 'campaigns.pageViews'])
             ->has('campaigns')
             ->get()
-            ->map(function ($brand) use ($analyticsService) {
+            ->map(function ($brand) {
                 $totalClicks = $brand->campaigns->sum(function ($campaign) {
-                    return $campaign->clicks->where('is_bot', false)->count();
+                    return $campaign->clicks
+                        ->filter(fn ($c) => ! $c->is_bot && ! Click::countryIsVietnam($c->country))
+                        ->count();
                 });
                 
                 $totalViews = $brand->campaigns->sum(function ($campaign) {
-                    return $campaign->pageViews->where('is_bot', false)->count();
+                    return $campaign->pageViews
+                        ->filter(fn ($c) => ! $c->is_bot && ! PageView::countryIsVietnam($c->country))
+                        ->count();
                 });
                 
                 $ctr = $totalViews > 0 ? round(($totalClicks / $totalViews) * 100, 2) : 0;

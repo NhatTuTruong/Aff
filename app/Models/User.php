@@ -4,13 +4,14 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Category;
+use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     /** Danh mục mặc định cho user mới (affiliate) */
     public static function defaultCategoryNames(): array
@@ -42,6 +43,7 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'is_admin',
         'code',
+        'avatar_path',
     ];
 
     /**
@@ -68,6 +70,15 @@ class User extends Authenticatable implements FilamentUser
     public function isAdmin(): bool
     {
         return (bool) $this->is_admin;
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        if (! $this->avatar_path) {
+            return null;
+        }
+
+        return asset('storage/' . ltrim($this->avatar_path, '/'));
     }
 
     protected static function boot()

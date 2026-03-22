@@ -23,7 +23,8 @@
 <div class="legal-container">
     @php
         $content = \App\Models\SiteContent::get('page_contact', \App\Models\SiteContent::defaultPageContact());
-        $content = str_replace('[SITE_EMAIL]', config('mail.from.address', 'contact@reviewshays.com'), $content);
+        $contactEmail = \App\Support\AdminSettings::get('site_contact_email', config('mail.from.address', 'contact@reviewshays.com'));
+        $content = str_replace('[SITE_EMAIL]', (string) $contactEmail, $content);
     @endphp
     {!! $content !!}
 </div>

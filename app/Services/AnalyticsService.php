@@ -20,6 +20,9 @@ class AnalyticsService
     public function trackPageView(Campaign $campaign, Request $request): ?PageView
     {
         $ip = app(ClientIpService::class)->getClientIp($request);
+        if ($this->isAdminActiveIp($ip)) {
+            return null;
+        }
         $userId = $campaign->brand?->user_id;
         if ($this->shouldAutoBlockForRateLimit($ip, $userId, $campaign, 'view')) {
             return null;
@@ -63,6 +66,9 @@ class AnalyticsService
     public function trackClick(Campaign $campaign, Request $request): ?Click
     {
         $ip = app(ClientIpService::class)->getClientIp($request);
+        if ($this->isAdminActiveIp($ip)) {
+            return null;
+        }
         $userId = $campaign->brand?->user_id;
         if ($this->shouldAutoBlockForRateLimit($ip, $userId, $campaign, 'click')) {
             return null;
@@ -149,13 +155,22 @@ class AnalyticsService
         return true;
     }
 
+    private function isAdminActiveIp(string $ip): bool
+    {
+        if (trim($ip) === '') {
+            return false;
+        }
+
+        return (bool) Cache::get('admin_active_ip:' . $ip, false);
+    }
+
     /**
      * Calculate CTR (Click Through Rate)
      */
     public function calculateCTR(Campaign $campaign, $startDate = null, $endDate = null): float
     {
-        $viewsQuery = $campaign->pageViews()->where('is_bot', false);
-        $clicksQuery = $campaign->clicks()->where('is_bot', false);
+        $viewsQuery = $campaign->pageViews()->where('is_bot', false)->forAdminStats();
+        $clicksQuery = $campaign->clicks()->where('is_bot', false)->forAdminStats();
         
         if ($startDate) {
             $viewsQuery->whereDate('created_at', '>=', $startDate);
@@ -184,6 +199,7 @@ class AnalyticsService
     {
         $query = $campaign->pageViews()
             ->where('is_bot', false)
+            ->forAdminStats()
             ->selectRaw('COUNT(DISTINCT CONCAT(ip, "-", COALESCE(session_id, ""))) as unique_visitors');
         
         if ($startDate) {
@@ -202,7 +218,7 @@ class AnalyticsService
      */
     public function calculateBounceRate(Campaign $campaign, $startDate = null, $endDate = null): float
     {
-        $query = $campaign->pageViews()->where('is_bot', false);
+        $query = $campaign->pageViews()->where('is_bot', false)->forAdminStats();
         
         if ($startDate) {
             $query->whereDate('created_at', '>=', $startDate);
@@ -229,6 +245,7 @@ class AnalyticsService
     {
         $query = $campaign->pageViews()
             ->where('is_bot', false)
+            ->forAdminStats()
             ->whereNotNull('time_on_page');
         
         if ($startDate) {

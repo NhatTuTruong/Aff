@@ -32,10 +32,14 @@ class CampaignAnalyticsWidget extends ChartWidget
             
             $viewsData[] = PageView::whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
+                ->where('is_bot', false)
+                ->forAdminStats()
                 ->count();
             
             $clicksData[] = Click::whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
+                ->where('is_bot', false)
+                ->forAdminStats()
                 ->count();
         }
 

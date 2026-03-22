@@ -19,8 +19,8 @@ class AnalyticsOverviewWidget extends BaseWidget
     {
         $analyticsService = app(AnalyticsService::class);
         
-        $totalClicks = Click::where('is_bot', false)->count();
-        $totalViews = PageView::where('is_bot', false)->count();
+        $totalClicks = Click::where('is_bot', false)->forAdminStats()->count();
+        $totalViews = PageView::where('is_bot', false)->forAdminStats()->count();
         $totalCampaigns = Campaign::where('status', 'active')->count();
         
         // Calculate overall CTR
@@ -28,24 +28,25 @@ class AnalyticsOverviewWidget extends BaseWidget
         
         // Calculate unique visitors
         $uniqueVisitors = PageView::where('is_bot', false)
+            ->forAdminStats()
             ->selectRaw('COUNT(DISTINCT CONCAT(ip, "-", COALESCE(session_id, ""))) as unique_visitors')
             ->value('unique_visitors') ?? 0;
         
         // Calculate bounce rate
-        $totalPageViews = PageView::where('is_bot', false)->count();
-        $bounces = PageView::where('is_bot', false)->where('is_bounce', true)->count();
+        $totalPageViews = PageView::where('is_bot', false)->forAdminStats()->count();
+        $bounces = PageView::where('is_bot', false)->forAdminStats()->where('is_bounce', true)->count();
         $bounceRate = $totalPageViews > 0 ? round(($bounces / $totalPageViews) * 100, 2) : 0;
         
         // Clicks today
-        $clicksToday = Click::where('is_bot', false)->whereDate('created_at', today())->count();
-        $clicksYesterday = Click::where('is_bot', false)->whereDate('created_at', today()->subDay())->count();
+        $clicksToday = Click::where('is_bot', false)->forAdminStats()->whereDate('created_at', today())->count();
+        $clicksYesterday = Click::where('is_bot', false)->forAdminStats()->whereDate('created_at', today()->subDay())->count();
         $clicksChange = $clicksYesterday > 0 
             ? round((($clicksToday - $clicksYesterday) / $clicksYesterday) * 100, 1)
             : ($clicksToday > 0 ? 100 : 0);
         
         // Views today
-        $viewsToday = PageView::where('is_bot', false)->whereDate('created_at', today())->count();
-        $viewsYesterday = PageView::where('is_bot', false)->whereDate('created_at', today()->subDay())->count();
+        $viewsToday = PageView::where('is_bot', false)->forAdminStats()->whereDate('created_at', today())->count();
+        $viewsYesterday = PageView::where('is_bot', false)->forAdminStats()->whereDate('created_at', today()->subDay())->count();
         $viewsChange = $viewsYesterday > 0 
             ? round((($viewsToday - $viewsYesterday) / $viewsYesterday) * 100, 1)
             : ($viewsToday > 0 ? 100 : 0);
@@ -85,7 +86,7 @@ class AnalyticsOverviewWidget extends BaseWidget
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
-            $data[] = Click::where('is_bot', false)->whereDate('created_at', $date)->count();
+            $data[] = Click::where('is_bot', false)->forAdminStats()->whereDate('created_at', $date)->count();
         }
         return $data;
     }
@@ -95,7 +96,7 @@ class AnalyticsOverviewWidget extends BaseWidget
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
-            $data[] = PageView::where('is_bot', false)->whereDate('created_at', $date)->count();
+            $data[] = PageView::where('is_bot', false)->forAdminStats()->whereDate('created_at', $date)->count();
         }
         return $data;
     }

@@ -54,6 +54,7 @@ class ClicksByDayChartWidget extends ChartWidget
             $data[] = Click::query()
                 ->when($userId, $clickScope)
                 ->where('is_bot', false)
+                ->forAdminStats()
                 ->whereDate('created_at', $date)
                 ->count();
         }

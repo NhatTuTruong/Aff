@@ -1,11 +1,21 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
+    @php
+        $seoTitleSuffix = \App\Support\AdminSettings::get('seo_title_suffix', '- ' . config('app.name'));
+        $baseTitle = trim($__env->yieldContent('title', config('app.name')));
+        $finalTitle = $baseTitle;
+        if ($seoTitleSuffix !== '' && ! str_contains($baseTitle, $seoTitleSuffix)) {
+            $finalTitle = trim($baseTitle . ' ' . $seoTitleSuffix);
+        }
+        $defaultMetaDescription = \App\Support\AdminSettings::get('seo_meta_description_default', 'Best coupons, deals and store reviews.');
+        $defaultOgImage = \App\Support\AdminSettings::get('seo_og_image_default', '');
+    @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name'))</title>
-    <meta name="description" content="@yield('description', 'Best coupons, deals and store reviews.')">
+    <title>{{ $finalTitle }}</title>
+    <meta name="description" content="@yield('description', $defaultMetaDescription)">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-FF4K1DWWT7"></script>
@@ -20,24 +30,30 @@
     @yield('head')
     @hasSection('og_image')
     <meta property="og:type" content="@yield('og_type', 'website')">
-    <meta property="og:title" content="@yield('og_title', config('app.name'))">
-    <meta property="og:description" content="@yield('og_description', 'Best coupons, deals and store reviews.')">
+    <meta property="og:title" content="@yield('og_title', $finalTitle)">
+    <meta property="og:description" content="@yield('og_description', $defaultMetaDescription)">
     <meta property="og:url" content="@yield('og_url', url()->current())">
     <meta property="og:image" content="@yield('og_image')">
     <meta property="og:site_name" content="{{ config('app.name') }}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="@yield('og_title', config('app.name'))">
-    <meta name="twitter:description" content="@yield('og_description', 'Best coupons, deals and store reviews.')">
+    <meta name="twitter:title" content="@yield('og_title', $finalTitle)">
+    <meta name="twitter:description" content="@yield('og_description', $defaultMetaDescription)">
     <meta name="twitter:image" content="@yield('og_image')">
     @else
     <meta property="og:type" content="website">
-    <meta property="og:title" content="@yield('title', config('app.name'))">
-    <meta property="og:description" content="@yield('description', 'Best coupons, deals and store reviews.')">
+    <meta property="og:title" content="{{ $finalTitle }}">
+    <meta property="og:description" content="@yield('description', $defaultMetaDescription)">
     <meta property="og:url" content="{{ url()->current() }}">
+    @if(!empty($defaultOgImage))
+    <meta property="og:image" content="{{ $defaultOgImage }}">
+    @endif
     <meta property="og:site_name" content="{{ config('app.name') }}">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="@yield('title', config('app.name'))">
-    <meta name="twitter:description" content="@yield('description', 'Best coupons, deals and store reviews.')">
+    <meta name="twitter:card" content="{{ !empty($defaultOgImage) ? 'summary_large_image' : 'summary' }}">
+    <meta name="twitter:title" content="{{ $finalTitle }}">
+    <meta name="twitter:description" content="@yield('description', $defaultMetaDescription)">
+    @if(!empty($defaultOgImage))
+    <meta name="twitter:image" content="{{ $defaultOgImage }}">
+    @endif
     @endif
     @php
         $organizationSchema = [
@@ -45,7 +61,7 @@
             '@type' => 'Organization',
             'name' => config('app.name'),
             'url' => config('app.url'),
-            'description' => 'Best coupons, deals and store reviews.',
+            'description' => $defaultMetaDescription,
         ];
     @endphp
     <script type="application/ld+json">{{ json_encode($organizationSchema) }}</script>
@@ -83,22 +99,72 @@
 
         /* Header */
         .site-header {
-            background: rgba(255, 255, 255, 0.95);
+            background: linear-gradient(135deg, var(--text-dark) 0%, var(--primary-dark) 100%);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             position: sticky;
             top: 0;
             z-index: 100;
+        }
+        .site-header .logo,
+        .site-header .nav-links a {
+            color: #ffffff;
+        }
+        .site-header .logo span,
+        .site-header .nav-links a:hover {
+            color: #fde68a;
         }
         .header-inner {
             max-width: 1200px;
             margin: 0 auto;
             padding: 1rem 1.5rem;
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            gap: 1.5rem;
-            flex-wrap: wrap;
+            gap: 0.75rem 1rem;
+        }
+        .site-header .logo {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .site-header__toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .site-header__toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .site-header__toggle-bar {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: currentColor;
+            border-radius: 1px;
+            transition: transform 0.25s ease, opacity 0.2s ease;
+        }
+        .site-header--nav-open .site-header__toggle-bar:nth-child(1) {
+            transform: translateY(8px) rotate(45deg);
+        }
+        .site-header--nav-open .site-header__toggle-bar:nth-child(2) {
+            opacity: 0;
+        }
+        .site-header--nav-open .site-header__toggle-bar:nth-child(3) {
+            transform: translateY(-8px) rotate(-45deg);
         }
         .logo {
             font-family: 'Space Grotesk', sans-serif;
@@ -122,6 +188,70 @@
             transition: color 0.2s;
         }
         .nav-links a:hover { color: var(--accent); }
+        .site-header .nav-links a {
+            color: #ffffff;
+        }
+        .site-header .nav-links a:hover {
+            color: #fde68a;
+        }
+        @media (max-width: 768px) {
+            .site-header__toggle {
+                display: flex;
+            }
+            .site-header .nav-links {
+                display: none;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+                width: 100%;
+                flex-basis: 100%;
+                order: 3;
+                padding-top: 0.25rem;
+                margin: 0 -1.5rem -1rem;
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+                padding-bottom: 0.75rem;
+                border-top: 1px solid rgba(255, 255, 255, 0.15);
+                background: rgba(0, 0, 0, 0.12);
+            }
+            .site-header--nav-open .nav-links {
+                display: flex;
+            }
+            .site-header .nav-links a {
+                padding: 0.75rem 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                font-size: 1rem;
+            }
+            .site-header .nav-links a:last-child {
+                border-bottom: none;
+            }
+        }
+        @media (min-width: 769px) {
+            .header-inner {
+                flex-wrap: nowrap;
+                gap: 1.5rem;
+            }
+            .site-header .logo {
+                flex: 0 1 auto;
+            }
+            .site-header__toggle {
+                display: none !important;
+            }
+            .site-header .nav-links {
+                display: flex !important;
+                width: auto;
+                flex-basis: auto;
+                order: unset;
+                margin: 0;
+                padding: 0;
+                border-top: none;
+                background: transparent;
+            }
+            .site-header .nav-links a {
+                padding: 0;
+                border-bottom: none;
+            }
+        }
 
         /* Main */
         main { flex: 1; }

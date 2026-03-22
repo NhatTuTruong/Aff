@@ -2,9 +2,11 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\RememberAdminIpMiddleware;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -37,6 +39,12 @@ class AdminPanelProvider extends PanelProvider
             ->maxContentWidth(\Filament\Support\Enums\MaxWidth::Full)
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\\Filament\\Admin\\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\\Filament\\Admin\\Pages')
+            ->navigationGroups([
+                NavigationGroup::make()->label('Admin'),
+                NavigationGroup::make()->label('Quản lý'),
+                NavigationGroup::make()->label('Thống Kê'),
+                NavigationGroup::make()->label('Cài đặt'),
+            ])
             ->pages([
                 Pages\Dashboard::class,
             ])
@@ -53,6 +61,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                RememberAdminIpMiddleware::class,
             ])
             ->renderHook(
                 PanelsRenderHook::BODY_START,

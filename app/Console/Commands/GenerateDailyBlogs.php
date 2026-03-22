@@ -6,6 +6,7 @@ use App\Models\Blog;
 use App\Models\Brand;
 use App\Models\User;
 use App\Services\GeminiBlogService;
+use App\Support\AdminSettings;
 use Illuminate\Console\Command;
 
 class GenerateDailyBlogs extends Command
@@ -13,7 +14,7 @@ class GenerateDailyBlogs extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'blogs:generate-daily {--count=1 : Số bài muốn tạo mỗi ngày}';
+    protected $signature = 'blogs:generate-daily {--count=0 : Số bài cần tạo cho lần chạy này (0 = lấy theo cài đặt)} {--respect-daily-limit : Không vượt quá số bài/ngày đã cấu hình}';
 
     /**
      * The console command description.
@@ -25,8 +26,8 @@ class GenerateDailyBlogs extends Command
 
     public function handle(GeminiBlogService $gemini): int
     {
-        if (! config('gemini.api_key')) {
-            $this->warn('GEMINI_API_KEY chưa được cấu hình, bỏ qua.');
+        if (! AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'))) {
+            $this->warn('Gemini API key chưa được cấu hình (Cài đặt hệ thống), bỏ qua.');
             return self::SUCCESS;
         }
 
@@ -37,9 +38,36 @@ class GenerateDailyBlogs extends Command
         }
 
         $weights = $this->buildCategoryWeights($categoryNames);
-        $variants = ['best', 'guide', 'comparison'];
+        $variants = $this->enabledVariants();
+        if ($variants === []) {
+            $this->warn('Chưa bật variant nào trong Cài đặt hệ thống, bỏ qua.');
+
+            return self::SUCCESS;
+        }
+
+        $respectDailyLimit = (bool) $this->option('respect-daily-limit');
         $count = (int) $this->option('count');
-        $count = $count > 0 ? $count : 1;
+        if ($count <= 0) {
+            // Khi chạy bởi scheduler với chế độ giới hạn ngày, mỗi tick tạo 1 bài
+            // để phân bổ đều trong khung giờ; tổng số bài vẫn bị chặn bởi daily limit.
+            $count = $respectDailyLimit ? 1 : (int) AdminSettings::get('auto_blog_daily_count', 2);
+        }
+        $count = max(1, $count);
+
+        if ($respectDailyLimit) {
+            $dailyLimit = max(1, (int) AdminSettings::get('auto_blog_daily_count', 2));
+            $todayKey = 'auto_blog.generated.' . now()->format('Y-m-d');
+            $generatedToday = (int) AdminSettings::get($todayKey, 0);
+            $remaining = $dailyLimit - $generatedToday;
+
+            if ($remaining <= 0) {
+                $this->info('Đã đạt giới hạn số bài/ngày, bỏ qua.');
+
+                return self::SUCCESS;
+            }
+
+            $count = min($count, $remaining);
+        }
 
         $author = User::where('is_admin', true)->first() ?? User::first();
 
@@ -68,6 +96,12 @@ class GenerateDailyBlogs extends Command
             $blog->is_published = true;
             $blog->views_count = 0;
             $blog->save();
+
+            if ($respectDailyLimit) {
+                $todayKey = 'auto_blog.generated.' . now()->format('Y-m-d');
+                $generatedToday = (int) AdminSettings::get($todayKey, 0);
+                AdminSettings::set($todayKey, $generatedToday + 1);
+            }
 
             $this->info("Đã tạo blog: {$blog->title}");
         }
@@ -111,6 +145,25 @@ class GenerateDailyBlogs extends Command
         }
 
         return array_key_last($weights) ?? 'Tech';
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function enabledVariants(): array
+    {
+        $variants = [];
+        if ((bool) AdminSettings::get('auto_blog_variant_best', true)) {
+            $variants[] = 'best';
+        }
+        if ((bool) AdminSettings::get('auto_blog_variant_guide', true)) {
+            $variants[] = 'guide';
+        }
+        if ((bool) AdminSettings::get('auto_blog_variant_comparison', true)) {
+            $variants[] = 'comparison';
+        }
+
+        return $variants;
     }
 }
 

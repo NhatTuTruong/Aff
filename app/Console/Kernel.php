@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Support\AdminSettings;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\Log;
@@ -19,8 +20,26 @@ class Kernel extends ConsoleKernel
         // Báo cáo hiệu suất chiến dịch cho từng user (2 lần/ngày: 8h sáng, 8h tối)
         $schedule->command('reports:send-campaign-daily')->twiceDaily(8, 20);
 
-        // Tự động tạo blog hàng ngày (chạy lúc 6h sáng, tạo 1 bài)
-        $schedule->command('blogs:generate-daily --count=1')->twiceDaily(6, 18)->withoutOverlapping();
+        // Auto Blog theo cài đặt hệ thống: khung giờ + số bài/ngày + variant.
+        $schedule->command('blogs:generate-daily --respect-daily-limit')
+            ->hourly()
+            ->withoutOverlapping()
+            ->when(function (): bool {
+                if (! (bool) AdminSettings::get('auto_blog_enabled', true)) {
+                    return false;
+                }
+
+                $startHour = max(0, min(23, (int) AdminSettings::get('auto_blog_window_start_hour', 6)));
+                $endHour = max(0, min(23, (int) AdminSettings::get('auto_blog_window_end_hour', 18)));
+                $hour = now()->hour;
+
+                if ($startHour <= $endHour) {
+                    return $hour >= $startHour && $hour <= $endHour;
+                }
+
+                // Khung giờ qua đêm, ví dụ 22 -> 4
+                return $hour >= $startHour || $hour <= $endHour;
+            });
     }
 
     /**

@@ -24,7 +24,9 @@ class StatsOverviewWidget extends BaseWidget
 
     protected function getStats(): array
     {
-        $userId = Filament::auth()->id();
+        $user = Filament::auth()->user();
+        $isAdmin = (bool) ($user && ($user->is_admin ?? false));
+        $userId = $isAdmin ? null : Filament::auth()->id();
         $userScope = fn (Builder $q) => $q->where('user_id', $userId);
         $clickScope = fn (Builder $q) => $q->whereHas('campaign.brand', $userScope);
         $viewScope = fn (Builder $q) => $q->whereHas('campaign.brand', $userScope);
@@ -36,18 +38,22 @@ class StatsOverviewWidget extends BaseWidget
 
         $totalClicks = Click::when($userId, $clickScope)
             ->where('is_bot', false)
+            ->forAdminStats()
             ->count();
         $totalViews = PageView::when($userId, $viewScope)
             ->where('is_bot', false)
+            ->forAdminStats()
             ->count();
 
         // Clicks và Views hôm nay
         $clicksToday = Click::when($userId, $clickScope)
             ->where('is_bot', false)
+            ->forAdminStats()
             ->whereDate('created_at', today())
             ->count();
         $viewsToday = PageView::when($userId, $viewScope)
             ->where('is_bot', false)
+            ->forAdminStats()
             ->whereDate('created_at', today())
             ->count();
 
@@ -92,7 +98,9 @@ class StatsOverviewWidget extends BaseWidget
 
     protected function getActiveCampaignsChart(): array
     {
-        $userId = Filament::auth()->id();
+        $user = Filament::auth()->user();
+        $isAdmin = (bool) ($user && ($user->is_admin ?? false));
+        $userId = $isAdmin ? null : Filament::auth()->id();
         $userScope = fn (Builder $q) => $q->where('user_id', $userId);
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
@@ -107,13 +115,16 @@ class StatsOverviewWidget extends BaseWidget
 
     protected function getClicksChart(): array
     {
-        $userId = Filament::auth()->id();
+        $user = Filament::auth()->user();
+        $isAdmin = (bool) ($user && ($user->is_admin ?? false));
+        $userId = $isAdmin ? null : Filament::auth()->id();
         $clickScope = fn (Builder $q) => $q->whereHas('campaign.brand', fn ($b) => $b->where('user_id', $userId));
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
             $data[] = Click::when($userId, $clickScope)
                 ->where('is_bot', false)
+                ->forAdminStats()
                 ->whereDate('created_at', $date)
                 ->count();
         }
@@ -122,13 +133,16 @@ class StatsOverviewWidget extends BaseWidget
 
     protected function getViewsChart(): array
     {
-        $userId = Filament::auth()->id();
+        $user = Filament::auth()->user();
+        $isAdmin = (bool) ($user && ($user->is_admin ?? false));
+        $userId = $isAdmin ? null : Filament::auth()->id();
         $viewScope = fn (Builder $q) => $q->whereHas('campaign.brand', fn ($b) => $b->where('user_id', $userId));
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
             $data[] = PageView::when($userId, $viewScope)
                 ->where('is_bot', false)
+                ->forAdminStats()
                 ->whereDate('created_at', $date)
                 ->count();
         }
