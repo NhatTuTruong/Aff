@@ -27,7 +27,7 @@ class TrafficDomainFilter extends Page implements HasForms
     protected static ?string $navigationIcon = 'heroicon-o-funnel';
     protected static ?string $navigationLabel = 'Lọc traffic domain';
     protected static ?string $title = 'Lọc traffic theo domain';
-    protected static ?string $navigationGroup = 'Thống Kê';
+    protected static ?string $navigationGroup = 'Tool';
     protected static ?int $navigationSort = 10;
 
     protected static string $view = 'filament.admin.pages.traffic-domain-filter';
@@ -165,7 +165,8 @@ class TrafficDomainFilter extends Page implements HasForms
         $svc = app(ApifyTrafficService::class);
         $trafficThreshold = (int) ($state['traffic'] ?? 0);
 
-        $rows = [];
+        /** @var array<int, array<string, mixed>> */
+        $datasetItems = [];
         $totalExpected = count($domains);
         $processed = 0;
         $hadError = false;
@@ -193,86 +194,15 @@ class TrafficDomainFilter extends Page implements HasForms
                 }
 
                 foreach ($items as $item) {
-                    if (! is_array($item)) continue;
-                    $domain = (string) ($item['SiteName'] ?? '');
-                    $eng = is_array($item['Engagments'] ?? null) ? $item['Engagments'] : [];
-                    $visitsFormatted = $eng['VisitsFormatted'] ?? null;
-                    $pagesPerVisit = $eng['PagePerVisit'] ?? null;
-                    $bounceRateRaw = $eng['BounceRate'] ?? null;
-                    $timeOnSite = $eng['TimeOnSite'] ?? null;
-
-                    // Format visit duration như H:i:s nếu có seconds
-                    $visitDuration = null;
-                    if ($timeOnSite !== null && is_numeric($timeOnSite)) {
-                        $visitDuration = gmdate('H:i:s', (int) $timeOnSite);
+                    if (! is_array($item)) {
+                        continue;
                     }
-
-                    // Global / Country rank nằm ngoài Engagments theo mẫu dữ liệu
-                    $globalRank = null;
-                    if (is_array($item['GlobalRank'] ?? null)) {
-                        $globalRank = $item['GlobalRank']['Rank'] ?? null;
+                    $datasetItems[] = $item;
+                    $siteName = (string) ($item['SiteName'] ?? '');
+                    if ($siteName !== '') {
+                        $processed++;
+                        $this->appendLog("Đã lấy {$processed} record từ dataset (domain: {$siteName}).");
                     }
-                    $countryRank = null;
-                    if (is_array($item['CountryRank'] ?? null)) {
-                        $countryRank = $item['CountryRank']['Rank'] ?? null;
-                    }
-
-                    $visitsNum = null;
-                    if (isset($eng['Visits']) && is_numeric($eng['Visits'])) {
-                        $visitsNum = (int) $eng['Visits'];
-                    } elseif (is_string($visitsFormatted) && trim($visitsFormatted) !== '') {
-                        $visitsNum = $this->parseVisitsFormatted($visitsFormatted);
-                    }
-
-                    $status = ($visitsNum !== null && $visitsNum >= $trafficThreshold) ? 'GET' : '';
-
-                    // Top countries: gộp 3 nước vào một ô: US (20.00%), UK (40.12%), ...
-                    $countries = is_array($item['TopCountryShares'] ?? null) ? $item['TopCountryShares'] : [];
-                    $topCountries = collect($countries)
-                        ->take(3)
-                        ->map(function ($c) {
-                            if (! is_array($c)) return null;
-                            $cc = $c['CountryCode'] ?? null;
-                            $val = $c['Value'] ?? null;
-                            if ($cc === null || $val === null) return null;
-                            $pct = number_format((float) $val, 2) . '%';
-                            return $cc . ' (' . $pct . ')';
-                        })
-                        ->filter()
-                        ->implode(', ');
-
-                    // Top keywords: Name/NameKey(Volume), ...
-                    $keywords = is_array($item['TopKeywords'] ?? null) ? $item['TopKeywords'] : [];
-                    $topKeywords = collect($keywords)
-                        ->take(5)
-                        ->map(function ($k) {
-                            if (! is_array($k)) return null;
-                            $name = $k['Name'] ?? ($k['NameKey'] ?? null);
-                            $vol = $k['Volume'] ?? null;
-                            if ($name === null) return null;
-                            return $vol !== null
-                                ? "{$name}({$vol})"
-                                : $name;
-                        })
-                        ->filter()
-                        ->implode(', ');
-
-                    $rows[] = [
-                        $domain,
-                        $visitsFormatted,
-                        $status,
-                        $visitsNum,
-                        $visitDuration,
-                        $pagesPerVisit,
-                        $bounceRateRaw !== null ? number_format((float) $bounceRateRaw, 2) . '%' : null,
-                        $globalRank,
-                        $countryRank,
-                        $topCountries,
-                        $topKeywords,
-                    ];
-
-                    $processed++;
-                    $this->appendLog("Đã xử lý {$processed}/{$totalExpected} record (domain: {$domain}).");
                 }
 
                 if (count($items) < $limit) {
@@ -286,6 +216,8 @@ class TrafficDomainFilter extends Page implements HasForms
             $errorMessage = $e->getMessage();
             $this->appendLog('Lỗi khi gọi Apify: ' . $errorMessage);
         }
+
+        $rows = $this->buildTrafficRowsInInputOrder($domains, $datasetItems, $trafficThreshold);
 
         if ($hadError) {
             Notification::make()
@@ -344,6 +276,164 @@ class TrafficDomainFilter extends Page implements HasForms
             ->title('Đã lưu cấu hình API')
             ->success()
             ->send();
+    }
+
+    /**
+     * Chuẩn hóa domain để khớp SiteName từ Apify với dòng nhập vào (thứ tự CSV theo file).
+     */
+    protected static function normalizeTrafficDomain(string $domain): string
+    {
+        $d = strtolower(trim($domain));
+        $d = preg_replace('#^https?://#i', '', $d) ?? $d;
+        $d = explode('/', $d, 2)[0];
+        $d = rtrim($d, '.');
+        if (str_starts_with($d, 'www.')) {
+            $d = substr($d, 4);
+        }
+
+        return $d;
+    }
+
+    /**
+     * @param  array<int, string>  $domains
+     * @param  array<int, array<string, mixed>>  $datasetItems
+     * @return array<int, array<int, mixed>>
+     */
+    protected function buildTrafficRowsInInputOrder(array $domains, array $datasetItems, int $trafficThreshold): array
+    {
+        /** @var array<string, array<string, mixed>> */
+        $byKey = [];
+        foreach ($datasetItems as $item) {
+            $site = (string) ($item['SiteName'] ?? '');
+            if ($site === '') {
+                continue;
+            }
+            $key = static::normalizeTrafficDomain($site);
+            $byKey[$key] = $item;
+        }
+
+        $rows = [];
+        foreach ($domains as $inputDomain) {
+            $key = static::normalizeTrafficDomain($inputDomain);
+            $item = $byKey[$key] ?? null;
+            if ($item === null) {
+                foreach ($byKey as $storedItem) {
+                    $sn = (string) ($storedItem['SiteName'] ?? '');
+                    if ($sn !== '' && strcasecmp($sn, trim($inputDomain)) === 0) {
+                        $item = $storedItem;
+                        break;
+                    }
+                }
+            }
+            $rows[] = $this->buildTrafficCsvRowFromItem($item, $inputDomain, $trafficThreshold);
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $item
+     * @return array<int, mixed>
+     */
+    protected function buildTrafficCsvRowFromItem(?array $item, string $displayDomain, int $trafficThreshold): array
+    {
+        if ($item === null) {
+            return [
+                $displayDomain,
+                null,
+                '',
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                '',
+                '',
+            ];
+        }
+
+        $eng = is_array($item['Engagments'] ?? null) ? $item['Engagments'] : [];
+        $visitsFormatted = $eng['VisitsFormatted'] ?? null;
+        $pagesPerVisit = $eng['PagePerVisit'] ?? null;
+        $bounceRateRaw = $eng['BounceRate'] ?? null;
+        $timeOnSite = $eng['TimeOnSite'] ?? null;
+
+        $visitDuration = null;
+        if ($timeOnSite !== null && is_numeric($timeOnSite)) {
+            $visitDuration = gmdate('H:i:s', (int) $timeOnSite);
+        }
+
+        $globalRank = null;
+        if (is_array($item['GlobalRank'] ?? null)) {
+            $globalRank = $item['GlobalRank']['Rank'] ?? null;
+        }
+        $countryRank = null;
+        if (is_array($item['CountryRank'] ?? null)) {
+            $countryRank = $item['CountryRank']['Rank'] ?? null;
+        }
+
+        $visitsNum = null;
+        if (isset($eng['Visits']) && is_numeric($eng['Visits'])) {
+            $visitsNum = (int) $eng['Visits'];
+        } elseif (is_string($visitsFormatted) && trim($visitsFormatted) !== '') {
+            $visitsNum = $this->parseVisitsFormatted($visitsFormatted);
+        }
+
+        $status = ($visitsNum !== null && $visitsNum >= $trafficThreshold) ? 'GET' : '';
+
+        $countries = is_array($item['TopCountryShares'] ?? null) ? $item['TopCountryShares'] : [];
+        $topCountries = collect($countries)
+            ->take(3)
+            ->map(function ($c) {
+                if (! is_array($c)) {
+                    return null;
+                }
+                $cc = $c['CountryCode'] ?? null;
+                $val = $c['Value'] ?? null;
+                if ($cc === null || $val === null) {
+                    return null;
+                }
+                $pct = number_format((float) $val, 2) . '%';
+
+                return $cc . ' (' . $pct . ')';
+            })
+            ->filter()
+            ->implode(', ');
+
+        $keywords = is_array($item['TopKeywords'] ?? null) ? $item['TopKeywords'] : [];
+        $topKeywords = collect($keywords)
+            ->take(5)
+            ->map(function ($k) {
+                if (! is_array($k)) {
+                    return null;
+                }
+                $name = $k['Name'] ?? ($k['NameKey'] ?? null);
+                $vol = $k['Volume'] ?? null;
+                if ($name === null) {
+                    return null;
+                }
+
+                return $vol !== null
+                    ? "{$name}({$vol})"
+                    : $name;
+            })
+            ->filter()
+            ->implode(', ');
+
+        return [
+            $displayDomain,
+            $visitsFormatted,
+            $status,
+            $visitsNum,
+            $visitDuration,
+            $pagesPerVisit,
+            $bounceRateRaw !== null ? number_format((float) $bounceRateRaw, 2) . '%' : null,
+            $globalRank,
+            $countryRank,
+            $topCountries,
+            $topKeywords,
+        ];
     }
 
     protected function parseVisitsFormatted(string $value): ?int

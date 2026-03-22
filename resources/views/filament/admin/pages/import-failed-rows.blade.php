@@ -9,10 +9,13 @@
         </thead>
         <tbody>
             @foreach($failedRows as $index => $row)
+                @php
+                    $errorVi = \App\Support\ImportErrorHumanizer::humanize($row->validation_error);
+                @endphp
                 <tr class="border-b dark:border-gray-700">
                     <td class="px-4 py-2">{{ $index + 1 }}</td>
-                    <td class="px-4 py-2 text-danger-600 dark:text-danger-400 max-w-xs truncate" title="{{ $row->validation_error }}">
-                        {{ $row->validation_error ?? 'Lỗi không xác định' }}
+                    <td class="px-4 py-2 text-danger-600 dark:text-danger-400 max-w-md whitespace-normal break-words" title="{{ $errorVi }}">
+                        {{ $errorVi }}
                     </td>
                     <td class="px-4 py-2 text-gray-600 dark:text-gray-400 max-w-md">
                         <pre class="text-xs whitespace-pre-wrap break-all">{{ json_encode($row->data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) }}</pre>

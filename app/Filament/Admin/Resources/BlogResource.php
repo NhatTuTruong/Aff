@@ -18,11 +18,11 @@ class BlogResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationLabel = 'Quản lý Blog';
+    protected static ?string $navigationLabel = 'Quản lý Bài viết';
 
-    protected static ?string $modelLabel = 'Blog';
+    protected static ?string $modelLabel = 'Bài viết';
 
-    protected static ?string $pluralModelLabel = 'Blog';
+    protected static ?string $pluralModelLabel = 'Bài viết';
 
     protected static ?string $navigationGroup = 'Admin';
 

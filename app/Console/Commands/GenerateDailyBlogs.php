@@ -4,9 +4,12 @@ namespace App\Console\Commands;
 
 use App\Models\Blog;
 use App\Models\Brand;
+use App\Models\Campaign;
 use App\Models\User;
+use App\Services\BrandIntroBlogCandidateService;
 use App\Services\GeminiBlogService;
 use App\Support\AdminSettings;
+use App\Support\AutoBlogSettings;
 use Illuminate\Console\Command;
 
 class GenerateDailyBlogs extends Command
@@ -19,7 +22,7 @@ class GenerateDailyBlogs extends Command
     /**
      * The console command description.
      */
-    protected $description = 'Tự động tạo blog ngẫu nhiên theo danh mục mặc định bằng Gemini';
+    protected $description = 'Tự động tạo blog theo danh mục (Gemini) và tối đa 1 bài giới thiệu brand/ngày';
 
     /** Trọng số cho category không có cửa hàng (xác suất thấp hơn). */
     protected float $emptyCategoryWeight = 0.5;
@@ -38,11 +41,9 @@ class GenerateDailyBlogs extends Command
         }
 
         $weights = $this->buildCategoryWeights($categoryNames);
-        $variants = $this->enabledVariants();
+        $variants = AutoBlogSettings::enabledCategoryVariants();
         if ($variants === []) {
-            $this->warn('Chưa bật variant nào trong Cài đặt hệ thống, bỏ qua.');
-
-            return self::SUCCESS;
+            $this->warn('Chưa bật variant nào — bỏ qua bài blog theo danh mục (vẫn có thể tạo blog giới thiệu brand).');
         }
 
         $respectDailyLimit = (bool) $this->option('respect-daily-limit');
@@ -52,21 +53,24 @@ class GenerateDailyBlogs extends Command
             // để phân bổ đều trong khung giờ; tổng số bài vẫn bị chặn bởi daily limit.
             $count = $respectDailyLimit ? 1 : (int) AdminSettings::get('auto_blog_daily_count', 2);
         }
-        $count = max(1, $count);
 
-        if ($respectDailyLimit) {
-            $dailyLimit = max(1, (int) AdminSettings::get('auto_blog_daily_count', 2));
-            $todayKey = 'auto_blog.generated.' . now()->format('Y-m-d');
-            $generatedToday = (int) AdminSettings::get($todayKey, 0);
-            $remaining = $dailyLimit - $generatedToday;
+        if ($variants === []) {
+            $count = 0;
+        } else {
+            $count = max(1, $count);
+            if ($respectDailyLimit) {
+                $dailyLimit = max(1, (int) AdminSettings::get('auto_blog_daily_count', 2));
+                $todayKey = 'auto_blog.generated.' . now()->format('Y-m-d');
+                $generatedToday = (int) AdminSettings::get($todayKey, 0);
+                $remaining = $dailyLimit - $generatedToday;
 
-            if ($remaining <= 0) {
-                $this->info('Đã đạt giới hạn số bài/ngày, bỏ qua.');
-
-                return self::SUCCESS;
+                if ($remaining <= 0) {
+                    $this->info('Đã đạt giới hạn số bài blog theo danh mục/ngày; vẫn kiểm tra blog giới thiệu brand.');
+                    $count = 0;
+                } else {
+                    $count = min($count, $remaining);
+                }
             }
-
-            $count = min($count, $remaining);
         }
 
         $author = User::where('is_admin', true)->first() ?? User::first();
@@ -106,7 +110,60 @@ class GenerateDailyBlogs extends Command
             $this->info("Đã tạo blog: {$blog->title}");
         }
 
+        if (AutoBlogSettings::brandIntroEnabled()) {
+            $this->maybeGenerateBrandIntroBlog($gemini, $categoryNames, $author);
+        }
+
         return self::SUCCESS;
+    }
+
+    /**
+     * Tối đa 1 bài "brand intro" mỗi ngày (độc lập số bài category khác).
+     */
+    protected function maybeGenerateBrandIntroBlog(GeminiBlogService $gemini, array $categoryNames, ?User $author): void
+    {
+        $day = now()->format('Y-m-d');
+        if ((int) AdminSettings::get("auto_blog.intro_done.{$day}", 0) >= 1) {
+            return;
+        }
+
+        $picked = app(BrandIntroBlogCandidateService::class)->findBrandAndCampaignForIntro();
+        if ($picked === null) {
+            $this->warn('Blog giới thiệu store: không có chiến dịch import (import_id) kèm affiliate_url phù hợp.');
+
+            return;
+        }
+
+        /** @var Brand $brand */
+        /** @var Campaign $campaign */
+        [$brand, $campaign] = $picked;
+        $defaultCats = config('default_categories.names', User::defaultCategoryNames());
+        $categoryLabel = $brand->category?->name ?? (is_array($defaultCats) && $defaultCats !== [] ? $defaultCats[0] : 'General');
+
+        $this->info("Generating brand intro blog for store: {$brand->name} (imported campaign #{$campaign->id})");
+
+        $result = $gemini->generateBrandIntroBlog($brand, $campaign, $categoryLabel);
+        if (! $result) {
+            $err = $gemini->lastError ?? 'Không rõ lỗi';
+            $this->warn("Gemini lỗi (blog giới thiệu brand), sẽ thử lại lần chạy sau: {$err}");
+
+            return;
+        }
+
+        $blog = new Blog();
+        if ($author) {
+            $blog->user_id = $author->id;
+        }
+        $blog->title = $result['title'];
+        $blog->category = $categoryLabel;
+        $blog->content = $result['content'];
+        $blog->featured_image = $result['featured_image'] ?? null;
+        $blog->is_published = true;
+        $blog->views_count = 0;
+        $blog->save();
+
+        AdminSettings::set("auto_blog.intro_done.{$day}", 1);
+        $this->info("Đã tạo blog giới thiệu brand: {$blog->title}");
     }
 
     /** Đếm số cửa hàng theo tên category, ghép với default categories. */
@@ -147,23 +204,5 @@ class GenerateDailyBlogs extends Command
         return array_key_last($weights) ?? 'Tech';
     }
 
-    /**
-     * @return array<int, string>
-     */
-    protected function enabledVariants(): array
-    {
-        $variants = [];
-        if ((bool) AdminSettings::get('auto_blog_variant_best', true)) {
-            $variants[] = 'best';
-        }
-        if ((bool) AdminSettings::get('auto_blog_variant_guide', true)) {
-            $variants[] = 'guide';
-        }
-        if ((bool) AdminSettings::get('auto_blog_variant_comparison', true)) {
-            $variants[] = 'comparison';
-        }
-
-        return $variants;
-    }
 }
 

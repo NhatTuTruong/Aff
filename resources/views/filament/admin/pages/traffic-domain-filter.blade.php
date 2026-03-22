@@ -13,10 +13,6 @@
     </style>
 
     <div class="space-y-6 traffic-domain-filter-page">
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-            Nhập Apify token/Actor ID riêng của tài khoản bạn ở phần cấu hình bên dưới, sau đó upload file <code>.txt</code> (mỗi dòng 1 domain) và bấm <strong>Chạy &amp; tải CSV</strong>.
-        </p>
-
         <div x-cloak>
             {{ $this->form }}
         </div>

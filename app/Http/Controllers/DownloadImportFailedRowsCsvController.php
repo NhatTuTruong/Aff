@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\ImportErrorHumanizer;
 use Filament\Actions\Imports\Models\FailedImportRow;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Http\Request;
@@ -35,7 +36,9 @@ class DownloadImportFailedRowsCsvController extends Controller
             ->lazyById(100)
             ->each(fn (FailedImportRow $failedImportRow) => $csv->insertOne([
                 ...$failedImportRow->data,
-                'error' => $failedImportRow->validation_error ?? __('filament-actions::import.failure_csv.system_error'),
+                'error' => ImportErrorHumanizer::humanize(
+                    $failedImportRow->validation_error ?? __('filament-actions::import.failure_csv.system_error')
+                ),
             ]));
 
         $fileName = __('filament-actions::import.failure_csv.file_name', [

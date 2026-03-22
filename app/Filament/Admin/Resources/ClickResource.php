@@ -186,9 +186,11 @@ class ClickResource extends Resource
 
                         return match ($v) {
                             'bot' => $query->where('is_bot', true),
-                            'human' => $query->where(function (Builder $q) {
-                                $q->whereNull('is_bot')->orWhere('is_bot', false);
-                            }),
+                            'human' => $query
+                                ->where(function (Builder $q) {
+                                    $q->whereNull('is_bot')->orWhere('is_bot', false);
+                                })
+                                ->forAdminStats(),
                             'vietnam' => $query->fromVietnam(),
                             default => $query,
                         };
