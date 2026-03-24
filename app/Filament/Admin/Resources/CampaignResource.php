@@ -236,6 +236,7 @@ class CampaignResource extends Resource
                     ->schema([
                         Forms\Components\Repeater::make('couponItems')
                             ->relationship('couponItems')
+                            ->orderColumn('sort_order')
                             ->label('Danh sách mã giảm giá')
                             ->visible(fn (Forms\Get $get) => ($get('type') ?? 'coupon') === 'coupon')
                             ->schema(function () {
@@ -328,6 +329,7 @@ class CampaignResource extends Resource
                             ->grid(3)
                             ->defaultItems(0)
                             ->columnSpanFull()
+                            ->reorderable()
                             ->collapsible()
                             ->itemLabel(fn (array $state): ?string => $state['code'] ?? null),
                     ]),

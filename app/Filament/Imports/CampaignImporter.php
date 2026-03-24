@@ -241,6 +241,7 @@ class CampaignImporter extends Importer
                 'code' => $code,
                 'offer' => $offer,
                 'description' => $description,
+                'sort_order' => $i + 1,
             ]);
         }
     }

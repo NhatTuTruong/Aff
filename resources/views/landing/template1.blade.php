@@ -2887,22 +2887,9 @@
         let currentCouponId = null;
         let currentAffUrl = null;
         let couponCopyRedirectTimer = null;
-        const STORAGE_KEY = 'revealed_coupons_' + window.location.pathname;
+        function getStoredRevealed() { return {}; }
 
-        function getStoredRevealed() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                return raw ? JSON.parse(raw) : {};
-            } catch (e) {
-                return {};
-            }
-        }
-
-        function saveRevealed(couponId, code) {
-            const obj = getStoredRevealed();
-            obj[couponId] = code;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
-        }
+        function saveRevealed(couponId, code) { return; }
 
         function isSafari() {
             const ua = navigator.userAgent;
@@ -3264,10 +3251,7 @@
                 const b = document.querySelector('.btn-get-code[data-url]');
                 return b ? b.dataset.url : null;
             })();
-            const stored = getStoredRevealed();
-            Object.keys(stored).forEach(function(cid) {
-                revealCodeInRow(cid, stored[cid], affUrl);
-            });
+            // Không khôi phục code đã reveal từ lần tải trước.
 
             // Ẩn toàn bộ mã trong popup all-codes cho tới khi user copy
             document

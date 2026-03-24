@@ -62,7 +62,10 @@ class Campaign extends Model
 
     public function couponItems(): HasMany
     {
-        return $this->hasMany(Coupon::class);
+        return $this->hasMany(Coupon::class)
+            ->orderByRaw('CASE WHEN sort_order IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('sort_order')
+            ->orderBy('id');
     }
 
     public function pageViews(): HasMany

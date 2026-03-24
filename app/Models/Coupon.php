@@ -17,6 +17,7 @@ class Coupon extends Model
         'code',
         'offer',
         'description',
+        'sort_order',
         'starts_at',
         'ends_at',
     ];
