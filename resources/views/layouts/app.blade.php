@@ -39,6 +39,7 @@
     <meta name="twitter:title" content="@yield('og_title', $finalTitle)">
     <meta name="twitter:description" content="@yield('og_description', $defaultMetaDescription)">
     <meta name="twitter:image" content="@yield('og_image')">
+    <meta name="verify-admitad" content="4455f2e7bb" />
     @else
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ $finalTitle }}">
