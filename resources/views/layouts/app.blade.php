@@ -16,6 +16,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $finalTitle }}</title>
     <meta name="description" content="@yield('description', $defaultMetaDescription)">
+    <meta name="verify-admitad" content="4455f2e7bb" />
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-FF4K1DWWT7"></script>
@@ -39,7 +40,7 @@
     <meta name="twitter:title" content="@yield('og_title', $finalTitle)">
     <meta name="twitter:description" content="@yield('og_description', $defaultMetaDescription)">
     <meta name="twitter:image" content="@yield('og_image')">
-    <meta name="verify-admitad" content="4455f2e7bb" />
+    
     @else
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ $finalTitle }}">
