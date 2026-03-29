@@ -11,19 +11,26 @@
         return url(ltrim($url, '/'));
     };
 @endphp
+<div class="site-chrome-topbar">
+    Verified deals &middot; Updated regularly &middot;
+    <a href="{{ url('/affiliate-disclosure') }}">How we earn</a>
+</div>
 <header class="site-header">
     <div class="header-inner">
         <a href="{{ url('/') }}" class="logo font-heading">{{ config('app.name') }}<span>.</span></a>
-        <button type="button"
-            class="site-header__toggle"
-            id="site-header-toggle"
-            aria-expanded="false"
-            aria-controls="site-nav"
-            aria-label="Mở menu điều hướng">
-            <span class="site-header__toggle-bar" aria-hidden="true"></span>
-            <span class="site-header__toggle-bar" aria-hidden="true"></span>
-            <span class="site-header__toggle-bar" aria-hidden="true"></span>
-        </button>
+        <div class="site-header__actions">
+            <a href="{{ url('/#coupons') }}" class="site-header__cta">Hot deals</a>
+            <button type="button"
+                class="site-header__toggle"
+                id="site-header-toggle"
+                aria-expanded="false"
+                aria-controls="site-nav"
+                aria-label="Mở menu điều hướng">
+                <span class="site-header__toggle-bar" aria-hidden="true"></span>
+                <span class="site-header__toggle-bar" aria-hidden="true"></span>
+                <span class="site-header__toggle-bar" aria-hidden="true"></span>
+            </button>
+        </div>
         <nav class="nav-links" id="site-nav" aria-label="Điều hướng chính">
             @foreach ($navLinks as $link)
                 <a href="{{ $normalizeUrl($link['url'] ?? '/') }}">{{ $link['label'] ?? 'Link' }}</a>

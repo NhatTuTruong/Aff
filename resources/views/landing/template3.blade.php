@@ -16,11 +16,8 @@
             return $decoded !== false ? $decoded : $text;
         };
 
-        $coupons = $campaign->couponItems ?? collect();
-        // Sắp xếp coupon theo thứ tự tạo (cũ -> mới)
-        $coupons = $coupons
-            ->sortBy(fn ($c) => $c->created_at ?? $c->id ?? 0)
-            ->values();
+        // Thứ tự theo sort_order đã áp dụng trong Campaign::couponItems()
+        $coupons = ($campaign->couponItems ?? collect())->values();
         $maxPercent = 0;
         foreach ($coupons as $c) {
             $offerText = $ensureOfferUtf8($c->offer ?? '');
@@ -118,7 +115,7 @@
     <meta name="twitter:image" content="{{ $ogImage }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     @include('partials.site-chrome-styles')
     @if(config('app.ga4_id'))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('app.ga4_id') }}"></script>
@@ -133,16 +130,19 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --t3-primary: #6366f1;
-            --t3-primary-dark: #4f46e5;
-            --t3-primary-soft: #e0e7ff;
-            --t3-hero-bg: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            --t3-text: #1e1b4b;
+            --t3-primary: #059669;
+            --t3-primary-dark: #047857;
+            --t3-primary-soft: #d1fae5;
+            --t3-accent: #ea580c;
+            --t3-accent-hover: #c2410c;
+            --t3-hero-bg: linear-gradient(135deg, #0f766e 0%, #059669 55%, #10b981 100%);
+            --t3-text: #0f172a;
             --t3-text-muted: #64748b;
-            --t3-bg: #f5f3ff;
+            --t3-bg: #f1f5f9;
             --t3-card: #ffffff;
-            --t3-border: #e9d5ff;
-            --t3-shadow: 0 4px 20px rgba(99, 102, 241, 0.12);
+            --t3-border: #e2e8f0;
+            --t3-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 10px 20px -5px rgba(15, 23, 42, 0.08);
+            --t3-ribbon: linear-gradient(180deg, #0d9488 0%, #059669 50%, #047857 100%);
         }
         body {
             font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -154,15 +154,17 @@
         }
         a { text-decoration: none; color: inherit; transition: color 0.2s ease; }
 
-        /* Store banner - gradient hero */
+        /* Store strip — kiểu banner coupon site lớn */
         .t3-store-banner {
-            background: var(--t3-hero-bg);
-            padding: 16px 24px;
+            background: var(--t3-card);
+            border-bottom: 1px solid var(--t3-border);
+            padding: 18px 28px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 16px;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset;
         }
         .t3-banner-brand {
             display: flex;
@@ -170,145 +172,273 @@
             gap: 16px;
         }
         .t3-banner-logo {
-            width: 48px;
-            height: 48px;
+            width: 56px;
+            height: 56px;
             object-fit: contain;
             background: #fff;
-            border-radius: 8px;
-            padding: 6px;
+            border-radius: 12px;
+            padding: 8px;
+            border: 1px solid var(--t3-border);
+            box-shadow: var(--t3-shadow);
         }
         .t3-banner-name {
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: #fff;
+            font-weight: 800;
+            font-size: 1.35rem;
+            letter-spacing: -0.02em;
+            color: var(--t3-text);
+            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+        }
+        .t3-banner-tagline {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--t3-primary);
+            margin-top: 2px;
         }
         .t3-banner-cta {
             display: inline-flex;
             align-items: center;
-            padding: 10px 24px;
-            background: var(--t3-primary);
+            padding: 12px 28px;
+            background: var(--t3-accent);
             color: #fff;
-            font-weight: 700;
-            font-size: 0.95rem;
-            border-radius: 6px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            border-radius: 999px;
             border: none;
             cursor: pointer;
-            transition: background 0.2s, transform 0.2s;
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
         }
         .t3-banner-cta:hover {
-            background: var(--t3-primary-dark);
+            background: var(--t3-accent-hover);
             transform: translateY(-1px);
             color: #fff;
+            box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
         }
 
-        /* Full-width main */
         .t3-main {
-            max-width: 1100px;
+            max-width: 1140px;
             margin: 0 auto;
-            padding: 28px 24px 50px;
+            padding: 32px 24px 56px;
         }
 
-        /* Hero */
         .t3-hero {
-            margin-bottom: 24px;
+            margin-bottom: 28px;
+            padding: 28px 32px;
+            background: var(--t3-card);
+            border-radius: 20px;
+            border: 1px solid var(--t3-border);
+            box-shadow: var(--t3-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        .t3-hero::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: min(45%, 380px);
+            height: 100%;
+            background: radial-gradient(ellipse at 100% 0%, rgba(5, 150, 105, 0.12) 0%, transparent 70%);
+            pointer-events: none;
         }
         .t3-hero-title {
-            font-size: 1.85rem;
+            position: relative;
+            font-size: clamp(1.45rem, 3.5vw, 2rem);
             font-weight: 800;
             letter-spacing: -0.03em;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             color: var(--t3-text);
+            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+            line-height: 1.2;
+            max-width: 48rem;
         }
         .t3-hero-sub {
-            font-size: 0.95rem;
+            position: relative;
+            font-size: 1rem;
             color: var(--t3-text-muted);
         }
-        .t3-hero-sub strong { color: var(--t3-primary); font-weight: 700; }
+        .t3-hero-sub strong { color: var(--t3-primary); font-weight: 800; }
         .t3-hero-disclosure {
-            margin-top: 6px;
-            font-size: 0.85rem;
+            position: relative;
+            margin-top: 12px;
+            font-size: 0.8rem;
             color: #94a3b8;
+            padding-top: 12px;
+            border-top: 1px solid var(--t3-border);
         }
 
-        /* Quick menu - horizontal anchor links */
         .t3-quick-nav {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px 20px;
+            gap: 10px 14px;
             margin-bottom: 24px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--t3-border);
         }
         .t3-quick-nav a {
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--t3-text-muted);
-            padding: 6px 0;
-            border-bottom: 2px solid transparent;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: var(--t3-card);
+            border: 1px solid var(--t3-border);
+            transition: all 0.2s ease;
         }
-        .t3-quick-nav a:hover { color: var(--t3-primary); border-bottom-color: var(--t3-primary); }
+        .t3-quick-nav a:hover {
+            color: var(--t3-primary-dark);
+            border-color: var(--t3-primary);
+            background: var(--t3-primary-soft);
+        }
 
-        /* Stats bar - compact above coupon list */
         .t3-stats-bar {
             display: flex;
             flex-wrap: wrap;
-            gap: 16px 24px;
-            padding: 14px 18px;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .t3-stats-item {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 8px;
+            padding: 12px 20px;
             background: var(--t3-card);
             border: 1px solid var(--t3-border);
-            margin-bottom: 16px;
-            font-size: 0.9rem;
+            border-radius: 14px;
+            box-shadow: var(--t3-shadow);
         }
-        .t3-stats-item { display: flex; align-items: center; gap: 8px; }
-        .t3-stats-value { font-weight: 700; color: var(--t3-text); }
-        .t3-stats-label { color: var(--t3-text-muted); }
+        .t3-stats-value {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--t3-text);
+            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+        }
+        .t3-stats-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--t3-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
 
-        /* Coupon section header */
-        .t3-coupon-header-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
-        .t3-coupon-header-meta { font-size: 0.85rem; color: var(--t3-text-muted); margin-bottom: 12px; }
+        .t3-coupon-header-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+            letter-spacing: -0.02em;
+        }
+        .t3-coupon-header-meta {
+            font-size: 0.88rem;
+            color: var(--t3-text-muted);
+            margin-bottom: 16px;
+        }
 
-        /* Filter pills */
-        .t3-filter-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .t3-filter-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
         .filter-pill {
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 0.85rem;
+            border-radius: 999px;
+            padding: 9px 18px;
+            font-size: 0.82rem;
             border: 1px solid var(--t3-border);
             background: var(--t3-card);
             cursor: pointer;
             transition: all 0.2s ease;
-            font-weight: 500;
-            font-family: inherit;
-        }
-        .filter-pill:hover { border-color: var(--t3-primary); background: var(--t3-primary-soft); }
-        .filter-pill.active {
-            background: var(--t3-primary);
-            border-color: var(--t3-primary);
-            color: #fff;
             font-weight: 600;
+            font-family: inherit;
+            color: var(--t3-text-muted);
+        }
+        .filter-pill:hover {
+            border-color: var(--t3-primary);
+            color: var(--t3-primary-dark);
+            background: var(--t3-primary-soft);
+        }
+        .filter-pill.active {
+            background: var(--t3-text);
+            border-color: var(--t3-text);
+            color: #fff;
+            font-weight: 700;
         }
 
-        /* Coupon grid - card layout */
         .t3-coupon-list {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: 18px;
+            margin-bottom: 24px;
         }
         .coupon-row {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 108px 1fr minmax(130px, 150px);
             align-items: stretch;
-            gap: 16px;
-            padding: 24px 20px;
+            min-height: 140px;
             background: var(--t3-card);
             border: 1px solid var(--t3-border);
             border-radius: 16px;
             box-shadow: var(--t3-shadow);
-            transition: all 0.2s;
+            transition: box-shadow 0.25s ease, border-color 0.2s, transform 0.2s;
+            overflow: hidden;
         }
         .coupon-row:hover {
-            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.18);
-            border-color: var(--t3-primary);
+            box-shadow: 0 12px 40px -12px rgba(15, 23, 42, 0.15);
+            border-color: rgba(5, 150, 105, 0.35);
+            transform: translateY(-2px);
+        }
+        .t3-offer-strip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 10px;
+            background: var(--t3-ribbon);
+            color: #fff;
+            text-align: center;
+            gap: 2px;
+            min-height: 100%;
+            position: relative;
+        }
+        .t3-offer-strip::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 10%;
+            bottom: 10%;
+            width: 1px;
+            background: linear-gradient(180deg, transparent, rgba(255,255,255,0.45), transparent);
+        }
+        .t3-offer-strip--deal {
+            background: linear-gradient(180deg, #0369a1 0%, #0284c7 100%);
+        }
+        .t3-offer-num {
+            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+            font-weight: 800;
+            font-size: 1.65rem;
+            line-height: 1;
+            letter-spacing: -0.03em;
+        }
+        .t3-offer-unit {
+            font-size: 1rem;
+            font-weight: 800;
+            opacity: 0.95;
+        }
+        .t3-offer-caption {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            opacity: 0.92;
+        }
+        .t3-coupon-middle {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 18px 20px 18px 18px;
+            min-width: 0px;
+        }
+        .t3-coupon-cta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 14px;
+            background: linear-gradient(90deg, #f8fafc 0%, #fff 100%);
+            border-left: 1px dashed var(--t3-border);
         }
         .t3-coupon-content { flex: 1; min-width: 0; }
         .coupon-title {
@@ -322,13 +452,14 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #7c3aed;
-            color: #fff;
-            padding: 3px 8px;
-            border-radius: 4px;
+            background: var(--t3-primary-soft);
+            color: var(--t3-primary-dark);
+            padding: 4px 10px;
+            border-radius: 999px;
             font-size: 0.65rem;
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 6px;
+            border: 1px solid rgba(5, 150, 105, 0.25);
         }
         .staff-pick-badge::before { content: '⭐'; font-size: 0.6rem; }
         .badge-row {
@@ -341,10 +472,10 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #111827;
+            background: var(--t3-text);
             color: #fff;
-            padding: 3px 8px;
-            border-radius: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
             font-size: 0.65rem;
             font-weight: 800;
             margin-bottom: 6px;
@@ -354,12 +485,12 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #7c3aed;
+            background: var(--t3-primary);
             color: #fff;
-            padding: 3px 8px;
-            border-radius: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
             font-size: 0.65rem;
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 6px;
         }
         .all-verified-codes-badge::before { content: '✓'; font-size: 0.7rem; font-weight: 900; }
@@ -371,7 +502,7 @@
             color: var(--t3-text-muted);
         }
         .meta-item { display: flex; align-items: center; gap: 5px; }
-        .meta-item::before { content: '✓'; color: var(--t3-primary); font-weight: 700; }
+        .meta-item::before { content: '✓'; color: var(--t3-primary); font-weight: 800; }
         .meta-item.uses::before { content: '👥'; }
         .coupon-desc.coupon-verified {
             display: flex;
@@ -385,55 +516,65 @@
         .coupon-verified-badge { width: 20px; height: 20px; flex-shrink: 0; }
         .coupon-verified-badge img { width: 100%; height: 100%; object-fit: contain; }
         .btn-get-code {
-            background: var(--t3-primary);
+            background: var(--t3-accent);
             color: #fff;
             border: none;
             border-radius: 12px;
-            padding: 14px 24px;
-            font-size: 0.95rem;
-            font-weight: 700;
+            padding: 14px 16px;
+            font-size: 0.82rem;
+            font-weight: 800;
             cursor: pointer;
             white-space: nowrap;
             transition: all 0.2s ease;
             flex-shrink: 0;
             width: 100%;
             text-align: center;
-            font-family: inherit;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
         }
         .btn-get-code:hover {
-            background: var(--t3-primary-dark);
+            background: var(--t3-accent-hover);
             transform: translateY(-1px);
             color: #fff;
+            box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35);
         }
         .coupon-revealed-code {
             display: inline-flex;
             align-items: center;
-            padding: 10px 16px;
-            font-size: 0.95rem;
+            justify-content: center;
+            padding: 12px 16px;
+            font-size: 0.9rem;
             font-weight: 700;
             font-family: ui-monospace, monospace;
             letter-spacing: 0.05em;
             background: var(--t3-primary-soft);
             color: var(--t3-primary-dark);
             border: 1px dashed var(--t3-primary);
-            border-radius: 6px;
+            border-radius: 10px;
             white-space: nowrap;
             cursor: pointer;
             flex-shrink: 0;
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        /* Sections - flat cards */
         .section {
             background: var(--t3-card);
             border: 1px solid var(--t3-border);
-            padding: 24px 28px;
-            margin-bottom: 16px;
+            padding: 28px 32px;
+            margin-bottom: 20px;
+            border-radius: 18px;
+            box-shadow: var(--t3-shadow);
         }
         .section-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin-bottom: 14px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 16px;
             color: var(--t3-text);
+            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+            letter-spacing: -0.02em;
         }
         .section-body {
             font-size: 0.85rem;
@@ -755,30 +896,57 @@
         .all-codes-item-desc { padding: 10px 16px; font-size: 0.85rem; color: var(--t3-text-muted); }
 
         .t3-mobile-shop { display: none; }
-        @media (max-width: 768px) {
-            .t3-store-banner { padding: 14px 16px; }
-            .t3-banner-logo { width: 40px; height: 40px; }
-            .t3-banner-name { font-size: 1rem; }
-            .t3-main { padding: 20px 16px 40px; }
-            .t3-hero-title { font-size: 1.5rem; }
+        @media (max-width: 900px) {
             .t3-coupon-list { grid-template-columns: 1fr; }
-            .coupon-row { padding: 20px 16px; }
-            .btn-get-code { width: 100%; justify-content: center; }
-            .t3-mobile-shop { display: block; margin: 20px 0; text-align: center; }
+            .coupon-row {
+                grid-template-columns: 1fr;
+            }
+            .t3-offer-strip {
+                flex-direction: row;
+                justify-content: center;
+                gap: 8px;
+                padding: 12px 16px;
+                border-radius: 0;
+            }
+            .t3-offer-strip::after { display: none; }
+            .t3-offer-num { font-size: 1.4rem; }
+            .t3-coupon-cta {
+                border-left: none;
+                border-top: 1px dashed var(--t3-border);
+                padding: 14px 16px;
+            }
+            .btn-get-code { max-width: 280px; margin: 0 auto; }
+        }
+        @media (max-width: 768px) {
+            .t3-store-banner { padding: 14px 18px; }
+            .t3-banner-logo { width: 48px; height: 48px; }
+            .t3-banner-name { font-size: 1.15rem; }
+            .t3-main { padding: 22px 16px 44px; }
+            .t3-hero { padding: 22px 20px; border-radius: 16px; }
+            .t3-mobile-shop { display: block; margin: 24px 0; text-align: center; }
             .t3-mobile-shop a {
                 display: inline-block;
-                padding: 12px 24px;
-                background: var(--t3-primary);
+                padding: 14px 28px;
+                background: var(--t3-accent);
                 color: #fff;
-                font-weight: 700;
-                border-radius: 6px;
+                font-weight: 800;
+                border-radius: 999px;
+                box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
             }
-            .t3-mobile-shop a:hover { background: var(--t3-primary-dark); color: #fff; }
+            .t3-mobile-shop a:hover { background: var(--t3-accent-hover); color: #fff; }
+        }
+        @media (max-width: 567px) {
+            .coupon-row {
+                border-radius: 14px;
+            }
+            .t3-offer-strip {
+                border-radius: 14px 14px 0 0;
+            }
         }
         @media (max-width: 480px) {
-            .t3-quick-nav { flex-direction: column; }
-            .t3-stats-bar { flex-direction: column; gap: 10px; }
-            .filter-pill { font-size: 0.8rem; padding: 6px 12px; }
+            .t3-stats-bar { flex-direction: column; }
+            .t3-stats-item { width: 100%; justify-content: space-between; }
+            .filter-pill { font-size: 0.78rem; padding: 8px 14px; }
             .staff-pick-badge { display: none; }
         }
     </style>
@@ -795,7 +963,7 @@
         @else
             <img src="{{ asset('images/default-brand.svg') }}" alt="{{ $brandName }}" class="t3-banner-logo" loading="lazy">
         @endif
-        <span class="t3-banner-name">{{ $brandName }}</span>
+        <span class="t3-banner-name">{{ $brandName }}<span class="t3-banner-tagline">Verified coupons &amp; promo codes</span></span>
     </div>
     <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}" class="t3-banner-cta" target="_blank" rel="noopener">Shop Now</a>
 </div>
@@ -915,6 +1083,19 @@
                 data-tags="{{ $tagAttr }}"
                 data-coupon-id="{{ $coupon->id }}"
             >
+                <div class="t3-offer-strip {{ $offerType === 'text' && $offerValue === 'FREE' ? 't3-offer-strip--deal' : '' }}" aria-hidden="true">
+                    @if($offerType === 'percent')
+                        <span class="t3-offer-num">{{ $offerValue }}</span><span class="t3-offer-unit">%</span>
+                        <span class="t3-offer-caption">Off</span>
+                    @elseif($offerType === 'currency')
+                        <span class="t3-offer-num">{{ $currencySymbol }}{{ number_format((float) str_replace([',', ' '], ['', ''], $offerValue), 0, '.', '') }}</span>
+                        <span class="t3-offer-caption">Off</span>
+                    @else
+                        <span class="t3-offer-num">FREE</span>
+                        <span class="t3-offer-caption">Ship</span>
+                    @endif
+                </div>
+                <div class="t3-coupon-middle">
                 <div class="t3-coupon-content">
                     <div class="coupon-title">
                         @if($coupon->description)
@@ -948,6 +1129,8 @@
                         <span class="coupon-verified-text">Verified recently</span>
                     </div>
                 </div>
+                </div>
+                <div class="t3-coupon-cta">
                 <button class="btn-get-code"
                     type="button"
                     data-type="{{ $hasCode ? 'code' : 'deal' }}"
@@ -958,6 +1141,7 @@
                     onclick="return handleCouponClick(this)">
                     {{ $hasCode ? 'GET CODE' : 'GET DEAL' }}
                 </button>
+                </div>
             </article>
             @empty
             <article class="section">
@@ -974,6 +1158,16 @@
                 data-all-codes="1"
                 data-coupon-id="all-codes"
             >
+                <div class="t3-offer-strip" aria-hidden="true">
+                    @if($defaultCouponOfferType === 'currency')
+                        <span class="t3-offer-num">{{ $defaultCouponCurrencySymbol }}{{ number_format($defaultCouponOfferValue, 0, '.', '') }}</span>
+                        <span class="t3-offer-caption">Off</span>
+                    @else
+                        <span class="t3-offer-num">{{ $defaultCouponOfferValue }}</span><span class="t3-offer-unit">%</span>
+                        <span class="t3-offer-caption">Off</span>
+                    @endif
+                </div>
+                <div class="t3-coupon-middle">
                 <div class="t3-coupon-content">
                     <div class="coupon-title">
                         @if($defaultCouponOfferType === 'currency')
@@ -990,6 +1184,8 @@
                         <div class="meta-item uses">{{ number_format(($campaignSeed * 13 + 999) % 4900 + 100) }} Uses</div>
                     </div>
                 </div>
+                </div>
+                <div class="t3-coupon-cta">
                 <button class="btn-get-code"
                     type="button"
                     data-type="code"
@@ -1000,6 +1196,7 @@
                     onclick="return handleCouponClick(this)">
                     GET CODE
                 </button>
+                </div>
             </article>
             @endif
         </div>
@@ -1284,7 +1481,7 @@ function revealCodeInRow(couponId, code, affUrl) {
         copyCodeToClipboard(code);
         const t = this.textContent;
         this.textContent = 'Copied ✓';
-        this.style.background = '#6366f1';
+        this.style.background = '#059669';
         this.style.color = '#fff';
         setTimeout(() => { this.textContent = t; this.style.background = ''; this.style.color = ''; }, 1500);
     };
