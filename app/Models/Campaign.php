@@ -73,6 +73,11 @@ class Campaign extends Model
         return $this->hasMany(PageView::class);
     }
 
+    public function customerLeads(): HasMany
+    {
+        return $this->hasMany(CustomerLead::class);
+    }
+
     /** Tránh lỗi Array to string khi slug trong DB bị lưu sai hoặc form gửi array. */
     public function getSlugAttribute($value): ?string
     {

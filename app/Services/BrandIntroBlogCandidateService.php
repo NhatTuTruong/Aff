@@ -42,20 +42,26 @@ class BrandIntroBlogCandidateService
             ->orderBy('campaigns.brand_id')
             ->get();
 
-        foreach ($brandRows as $row) {
-            $brandId = (int) $row->brand_id;
-            $brand = Brand::query()->with('category')->whereKey($brandId)->first();
-            if (! $brand || ! $brand->approved) {
-                continue;
-            }
-
-            $campaign = $this->pickTopImportedCampaignForBrand($brand);
-            if ($campaign) {
-                return [$brand, $campaign];
-            }
+        if ($brandRows->isEmpty()) {
+            return null;
         }
 
-        return null;
+        // Mỗi ngày trong năm chọn 1 brand khác nhau (xoay vòng theo day-of-year)
+        $index = now()->dayOfYear() % $brandRows->count();
+        $row = $brandRows[$index];
+
+        $brandId = (int) $row->brand_id;
+        $brand = Brand::query()->with('category')->whereKey($brandId)->first();
+        if (! $brand || ! $brand->approved) {
+            return null;
+        }
+
+        $campaign = $this->pickTopImportedCampaignForBrand($brand);
+        if (! $campaign) {
+            return null;
+        }
+
+        return [$brand, $campaign];
     }
 
     /**

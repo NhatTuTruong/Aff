@@ -853,6 +853,60 @@
         .popup-feedback { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--t3-border); }
         .popup-feedback-question { text-align: center; font-size: 0.95rem; font-weight: 600; margin-bottom: 12px; }
         .popup-feedback-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .lead-capture {
+            margin-top: 14px;
+        }
+        .lead-capture-label {
+            margin: 0 0 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--t3-text);
+            letter-spacing: -0.01em;
+        }
+        .lead-capture-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+        }
+        .lead-capture-input {
+            height: 42px;
+            border-radius: 10px;
+            border: 1px solid var(--t3-border);
+            padding: 0 12px;
+            font-size: 0.9rem;
+            width: 100%;
+            font-family: inherit;
+            color: var(--t3-text);
+            background: #fff;
+        }
+        .lead-capture-input:focus {
+            outline: none;
+            border-color: var(--t3-primary);
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18);
+        }
+        .lead-capture-btn {
+            height: 42px;
+            border: none;
+            border-radius: 10px;
+            padding: 0 16px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+            background: var(--t3-primary);
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s ease;
+            white-space: nowrap;
+        }
+        .lead-capture-btn:hover { background: var(--t3-primary-dark); }
+        .lead-capture-msg {
+            margin-top: 6px;
+            min-height: 18px;
+            font-size: 0.78rem;
+            color: var(--t3-text-muted);
+        }
+        .lead-capture-msg.success { color: #16a34a; }
+        .lead-capture-msg.error { color: #dc2626; }
         .feedback-btn {
             background: #fff;
             border: 1px solid var(--t3-border);
@@ -1343,6 +1397,14 @@
                     Go To The Store
                 </a>
             </div>
+            <div class="lead-capture">
+                <p class="lead-capture-label">Get exclusive discount codes.</p>
+                <div class="lead-capture-row">
+                    <input id="leadEmailInput" type="email" class="lead-capture-input" placeholder="Enter your email">
+                    <button id="leadSubmitBtn" type="button" class="lead-capture-btn" onclick="submitLeadEmail(this)">Send</button>
+                </div>
+                <p id="leadCaptureMsg" class="lead-capture-msg"></p>
+            </div>
             <div class="popup-feedback">
                 <div class="popup-feedback-question">Did this code work?</div>
                 <div class="popup-feedback-buttons">
@@ -1453,6 +1515,16 @@
                     Go To The Store
                 </a>
             </div>
+            <div class="lead-capture">
+                <p class="lead-capture-label">Get exclusive discount codes.</p>
+                <div class="lead-capture-row">
+                    <input id="leadEmailInputAllCodes" type="email" class="lead-capture-input" placeholder="Enter your email">
+                    <button id="leadSubmitBtnAllCodes" type="button" class="lead-capture-btn"
+                            data-input-id="leadEmailInputAllCodes" data-msg-id="leadCaptureMsgAllCodes"
+                            onclick="submitLeadEmail(this)">Send</button>
+                </div>
+                <p id="leadCaptureMsgAllCodes" class="lead-capture-msg"></p>
+            </div>
         </div>
     </div>
 </div>
@@ -1463,6 +1535,7 @@ let currentCode = '';
 let currentCouponRow = null;
 let currentCouponId = null;
 let currentAffUrl = null;
+let affiliateAlreadyOpened = false;
 function getStoredRevealed() { return {}; }
 function saveRevealed(couponId, code) { return; }
 
@@ -1607,7 +1680,63 @@ function openModalForCoupon(couponId, code, affUrl) {
         goBtn.setAttribute('data-url', affUrl);
         goBtn.href = affUrl;
     }
+    resetLeadCapture('leadEmailInput', 'leadCaptureMsg', 'leadSubmitBtn');
     setCouponModalHash(couponId);
+}
+
+function resetLeadCapture(inputId, msgId, btnId) {
+    const input = document.getElementById(inputId);
+    const msg = document.getElementById(msgId);
+    const btn = document.getElementById(btnId);
+    if (input) input.value = '';
+    if (msg) { msg.textContent = ''; msg.className = 'lead-capture-msg'; }
+    if (btn) btn.disabled = false;
+}
+
+function submitLeadEmail(btn){
+    const inputId = (btn && btn.dataset && btn.dataset.inputId) ? btn.dataset.inputId : 'leadEmailInput';
+    const msgId = (btn && btn.dataset && btn.dataset.msgId) ? btn.dataset.msgId : 'leadCaptureMsg';
+    const input = document.getElementById(inputId);
+    const msg = document.getElementById(msgId);
+    if (!input || !msg) return;
+    const email = (input.value || '').trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        msg.textContent = 'Please enter a valid email address.';
+        msg.className = 'lead-capture-msg error';
+        return;
+    }
+
+    btn.disabled = true;
+    msg.textContent = 'Sending...';
+    msg.className = 'lead-capture-msg';
+
+    fetch('{{ route('customer-leads.store') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            campaign_id: {{ (int) $campaign->id }},
+            email: email,
+            source_template: 'template3'
+        })
+    })
+    .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data.message || 'Sending email failed');
+        msg.textContent = 'Email submitted successfully.';
+        msg.className = 'lead-capture-msg success';
+        input.value = '';
+    })
+    .catch((e) => {
+        msg.textContent = e.message || 'Unable to submit your email right now.';
+        msg.className = 'lead-capture-msg error';
+    })
+    .finally(() => {
+        btn.disabled = false;
+    });
 }
 
 function handleCouponClick(btn){
@@ -1622,7 +1751,18 @@ function handleCouponClick(btn){
             target.dataset.url ||
             (document.querySelector('.btn-get-code[data-url]')?.dataset.url || null);
 
+        if (!affiliateAlreadyOpened) {
+            // Flow mới: tab hiện tại -> link aff, tab mới -> mở trang coupon + modal
+            const couponUrl = new URL(window.location.href);
+            couponUrl.searchParams.set('aff_opened', '1');
+            couponUrl.hash = 'coupon=all-codes';
+            window.open(couponUrl.toString(), '_blank', 'noopener');
+            if (affUrl) window.location.href = affUrl;
+            return false;
+        }
+
         document.getElementById('allCodesModal').classList.add('active');
+        resetLeadCapture('leadEmailInputAllCodes', 'leadCaptureMsgAllCodes', 'leadSubmitBtnAllCodes');
         setCouponModalHash('all-codes');
         document.querySelectorAll('.btn-copy-all-codes').forEach(function(bt) {
             bt.onclick = function() {
@@ -1647,7 +1787,7 @@ function handleCouponClick(btn){
                 }, 600);
 
                 setTimeout(() => {
-                    if (affUrl) {
+                    if (affUrl && !affiliateAlreadyOpened) {
                         window.open(affUrl, '_blank');
                     }
                     this.textContent = originalText;
@@ -1682,7 +1822,20 @@ function handleCouponClick(btn){
     currentCouponId = couponId;
     currentCouponRow = actualBtn.closest('.coupon-row');
 
-    // Flow mới cho Get Code: chỉ mở popup, chưa mở store
+    // Flow mới cho Get Code:
+    // - Nếu chưa mở affiliate tab nào: tab hiện tại -> aff, tab mới -> trang coupon + modal
+    // - Nếu affiliate đã mở trước đó (tab mới): chỉ mở modal để copy
+    if (!affiliateAlreadyOpened) {
+        const couponUrl = new URL(window.location.href);
+        couponUrl.searchParams.set('show_coupon', String(couponId));
+        couponUrl.searchParams.set('code', String(code));
+        couponUrl.searchParams.set('aff_opened', '1');
+        couponUrl.hash = '';
+        window.open(couponUrl.toString(), '_blank', 'noopener');
+        if (url) window.location.href = url;
+        return false;
+    }
+
     openModalForCoupon(couponId, code, url);
     return false;
 }
@@ -1761,7 +1914,7 @@ function copyCoupon(btn){
     couponCopyRedirectTimer = setTimeout(function() {
         couponCopyRedirectTimer = null;
         hideCouponCopyToast();
-        if (affUrl) {
+        if (affUrl && !affiliateAlreadyOpened) {
             window.open(affUrl, '_blank');
         }
         btn.innerText = originalText;
@@ -1790,6 +1943,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
     const urlParams = new URLSearchParams(window.location.search);
+    affiliateAlreadyOpened = urlParams.get('aff_opened') === '1';
     const showCouponId = urlParams.get('show_coupon');
     const codeFromUrl = urlParams.get('code');
     if (showCouponId && codeFromUrl) {

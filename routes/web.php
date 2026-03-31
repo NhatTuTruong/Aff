@@ -65,6 +65,10 @@ Route::post('/api/track-page-view/{pageView}', [App\Http\Controllers\AnalyticsCo
     ->middleware('web')
     ->name('analytics.update-page-view');
 
+Route::post('/api/customer-leads', [App\Http\Controllers\CustomerLeadController::class, 'store'])
+    ->middleware('web')
+    ->name('customer-leads.store');
+
 // Legal Pages
 Route::get('/about', function () {
     return view('legal.about');
