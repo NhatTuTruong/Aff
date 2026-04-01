@@ -63,13 +63,15 @@ class ImportStatus extends Page implements HasTable
 
     public function table(Table $table): Table
     {
-        $userId = Filament::auth()->id();
-        
+        $user = Filament::auth()->user();
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+        $userId = $user?->id;
+
         return $table
             ->defaultPaginationPageOption(25)
             ->query(Import::query()
                 ->where('importer', \App\Filament\Imports\CampaignImporter::class)
-                ->when($userId, function (Builder $query) use ($userId) {
+                ->when(! $isAdmin && $userId, function (Builder $query) use ($userId) {
                     // Lọc import theo user_id thông qua import_id trong campaign/brand/category
                     $query->where(function ($q) use ($userId) {
                         // Import có user_id trùng với user hiện tại

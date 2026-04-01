@@ -43,7 +43,6 @@ class ClicksByDayChartWidget extends ChartWidget
         $user = Filament::auth()->user();
         $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
         $userId = $isAdmin ? null : Filament::auth()->id();
-        $clickScope = fn (Builder $q) => $q->whereHas('campaign.brand', fn ($b) => $b->where('user_id', $userId));
 
         $labels = [];
         $data = [];
@@ -52,7 +51,13 @@ class ClicksByDayChartWidget extends ChartWidget
             $date = today()->subDays($i);
             $labels[] = $date->format('d/m');
             $data[] = Click::query()
-                ->when($userId, $clickScope)
+                ->when(
+                    $userId !== null,
+                    fn (Builder $q) => $q->whereHas(
+                        'campaign.brand',
+                        fn (Builder $b) => $b->where('user_id', $userId),
+                    ),
+                )
                 ->where('is_bot', false)
                 ->forAdminStats()
                 ->whereDate('created_at', $date)

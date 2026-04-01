@@ -25,14 +25,22 @@ class StatsOverviewWidget extends BaseWidget
     protected function getStats(): array
     {
         $user = Filament::auth()->user();
-        $isAdmin = (bool) ($user && ($user->is_admin ?? false));
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
         $userId = $isAdmin ? null : Filament::auth()->id();
-        $userScope = fn (Builder $q) => $q->where('user_id', $userId);
-        $clickScope = fn (Builder $q) => $q->whereHas('campaign.brand', $userScope);
-        $viewScope = fn (Builder $q) => $q->whereHas('campaign.brand', $userScope);
+        // Admin: không lọc theo user. User thường: chỉ brand của họ.
+        // Tránh where('user_id', null) → chỉ khớp brand không có chủ (sai, thường = 0).
+        $brandScope = fn (Builder $q) => $userId !== null
+            ? $q->where('user_id', $userId)
+            : $q;
+        $clickScope = fn (Builder $q) => $q->whereHas('campaign.brand', $brandScope);
+        $viewScope = fn (Builder $q) => $q->whereHas('campaign.brand', $brandScope);
 
-        $activeCampaigns = Campaign::where('status', 'active')
-            ->whereHas('brand', $userScope)
+        $activeCampaigns = Campaign::query()
+            ->where('status', 'active')
+            ->when(
+                $userId !== null,
+                fn (Builder $q) => $q->whereHas('brand', fn (Builder $b) => $b->where('user_id', $userId)),
+            )
             ->count();
         $totalBrands = Brand::when($userId, fn ($q) => $q->where('user_id', $userId))->count();
 
@@ -99,14 +107,17 @@ class StatsOverviewWidget extends BaseWidget
     protected function getActiveCampaignsChart(): array
     {
         $user = Filament::auth()->user();
-        $isAdmin = (bool) ($user && ($user->is_admin ?? false));
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
         $userId = $isAdmin ? null : Filament::auth()->id();
-        $userScope = fn (Builder $q) => $q->where('user_id', $userId);
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
-            $data[] = Campaign::where('status', 'active')
-                ->whereHas('brand', $userScope)
+            $data[] = Campaign::query()
+                ->where('status', 'active')
+                ->when(
+                    $userId !== null,
+                    fn (Builder $q) => $q->whereHas('brand', fn (Builder $b) => $b->where('user_id', $userId)),
+                )
                 ->whereDate('created_at', '<=', $date)
                 ->count();
         }
@@ -116,9 +127,12 @@ class StatsOverviewWidget extends BaseWidget
     protected function getClicksChart(): array
     {
         $user = Filament::auth()->user();
-        $isAdmin = (bool) ($user && ($user->is_admin ?? false));
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
         $userId = $isAdmin ? null : Filament::auth()->id();
-        $clickScope = fn (Builder $q) => $q->whereHas('campaign.brand', fn ($b) => $b->where('user_id', $userId));
+        $clickScope = fn (Builder $q) => $q->whereHas(
+            'campaign.brand',
+            fn (Builder $b) => $userId !== null ? $b->where('user_id', $userId) : $b,
+        );
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
@@ -134,9 +148,12 @@ class StatsOverviewWidget extends BaseWidget
     protected function getViewsChart(): array
     {
         $user = Filament::auth()->user();
-        $isAdmin = (bool) ($user && ($user->is_admin ?? false));
+        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
         $userId = $isAdmin ? null : Filament::auth()->id();
-        $viewScope = fn (Builder $q) => $q->whereHas('campaign.brand', fn ($b) => $b->where('user_id', $userId));
+        $viewScope = fn (Builder $q) => $q->whereHas(
+            'campaign.brand',
+            fn (Builder $b) => $userId !== null ? $b->where('user_id', $userId) : $b,
+        );
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);

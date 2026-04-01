@@ -6,7 +6,6 @@ use App\Models\Campaign;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
 
 class CampaignsChartWidget extends ChartWidget
 {
@@ -26,7 +25,6 @@ class CampaignsChartWidget extends ChartWidget
         $user = Filament::auth()->user();
         $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
         $userId = $isAdmin ? null : Filament::auth()->id();
-        $userScope = fn (Builder $q) => $q->where('user_id', $userId);
 
         $months = [];
         $data = [];
@@ -38,7 +36,10 @@ class CampaignsChartWidget extends ChartWidget
 
             $count = Campaign::whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
-                ->when($userId, fn ($q) => $q->whereHas('brand', $userScope))
+                ->when(
+                    $userId !== null,
+                    fn ($q) => $q->whereHas('brand', fn (Builder $b) => $b->where('user_id', $userId)),
+                )
                 ->count();
 
             $data[] = $count;

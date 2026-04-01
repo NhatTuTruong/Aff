@@ -1353,7 +1353,7 @@
         <div id="couponCopyToast" class="coupon-copy-toast" role="status" aria-live="polite" hidden>
             <div class="coupon-copy-toast-row">
                 <span class="coupon-copy-toast-icon" aria-hidden="true">✓</span>
-                <p class="coupon-copy-toast-text">Code copied! Redirecting you to <strong>{{ e($brandName) }}</strong></p>
+                <p class="coupon-copy-toast-text">Code copied! Go to <strong>{{ e($brandName) }}</strong></p>
                 <button type="button" class="coupon-copy-toast-close" aria-label="Đóng" onclick="dismissCouponCopyToast()">✕</button>
             </div>
             <div class="coupon-copy-toast-progress" aria-hidden="true"></div>

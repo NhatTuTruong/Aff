@@ -40,6 +40,12 @@ class FileManager extends Page
 
     public ?string $dateTo = null;
 
+    /** Trang hiện tại khi phân trang danh sách tệp (1-based). */
+    public int $filePage = 1;
+
+    /** Số tệp mỗi trang. */
+    public int $filesPerPage = 24;
+
     protected function getUserBasePath(): string
     {
         $user = Filament::auth()->user();
@@ -125,11 +131,13 @@ class FileManager extends Page
             })
             ->toArray();
 
+        $this->filePage = 1;
         $this->applyDateFilter();
     }
 
     public function applyDateFilter(): void
     {
+        $this->filePage = 1;
         $now = time();
         $todayStart = strtotime('today 00:00:00');
         $weekStart = strtotime('-7 days 00:00:00');
@@ -145,6 +153,34 @@ class FileManager extends Page
                 default => true,
             };
         })->values()->toArray();
+    }
+
+    /** Danh sách tệp sau khi lọc ngày, đã cắt theo trang. */
+    public function getPaginatedFilesProperty(): array
+    {
+        $perPage = max(1, $this->filesPerPage);
+        $total = count($this->files);
+        $lastPage = max(1, (int) ceil($total / $perPage));
+        $page = max(1, min($this->filePage, $lastPage));
+
+        return array_slice($this->files, ($page - 1) * $perPage, $perPage);
+    }
+
+    public function getFilePaginationLastPageProperty(): int
+    {
+        $perPage = max(1, $this->filesPerPage);
+
+        return max(1, (int) ceil(count($this->files) / $perPage));
+    }
+
+    public function goPrevFilePage(): void
+    {
+        $this->filePage = max(1, $this->filePage - 1);
+    }
+
+    public function goNextFilePage(): void
+    {
+        $this->filePage = min($this->filePaginationLastPage, $this->filePage + 1);
     }
 
     protected function filterByDateRange(int $timestamp): bool
