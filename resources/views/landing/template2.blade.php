@@ -493,6 +493,7 @@
             justify-content: center;
             gap: 12px;
             max-width: 100%;
+            max-height: calc(100vh - 24px);
             padding: 0 12px;
             box-sizing: border-box;
         }
@@ -505,7 +506,14 @@
             padding: 0;
             border-radius: 16px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
-            position: relative;
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translate(-50%, -24px);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.26s ease, opacity 0.26s ease;
+            z-index: 10050;
             overflow: hidden;
             width: min(420px, calc(100vw - 2rem));
             max-width: min(420px, calc(100vw - 2rem));
@@ -514,6 +522,16 @@
             font-weight: 500;
             font-family: inherit;
             -webkit-tap-highlight-color: transparent;
+        }
+        .coupon-copy-toast.is-visible {
+            transform: translate(-50%, 0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .coupon-copy-toast.is-hiding {
+            transform: translate(-50%, -24px);
+            opacity: 0;
+            pointer-events: none;
         }
         .coupon-copy-toast-row {
             display: flex;
@@ -560,7 +578,7 @@
             height: 3px;
             background: #22c55e;
             transform-origin: left center;
-            animation: couponCopyToastProgress 1.5s linear forwards;
+            animation: couponCopyToastProgress 2s linear forwards;
         }
         @keyframes couponCopyToastProgress {
             from { transform: scaleX(1); }
@@ -570,11 +588,14 @@
             position: relative;
             background: var(--t2-card);
             width: 100%;
-            max-width: 460px;
+            max-width: 580px;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 25px 60px rgba(0,0,0,0.3);
             animation: t2PopupScale 0.3s ease;
+            max-height: calc(100vh - 24px);
+            display: flex;
+            flex-direction: column;
         }
         .t2-popup-banner {
             background: linear-gradient(180deg, var(--t2-banner) 0%, var(--t2-banner-dark) 100%);
@@ -593,7 +614,15 @@
         }
         .t2-popup-title { font-size: 1.2rem; font-weight: 700; color: #fff; margin: 0; }
         .t2-popup-subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.9); margin-top: 8px; }
-        .t2-popup-body { padding: 24px; }
+        .t2-popup-banner { flex-shrink: 0; }
+        .t2-popup-body {
+            padding: 24px;
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
         .coupon-code-container {
             background: var(--t2-banner);
             border-radius: 8px;
@@ -789,7 +818,7 @@
         .go-store-attention { animation: t2PulseGlow 0.9s ease-in-out 3; }
 
         /* All codes modal */
-        .all-codes-modal-content { max-width: 520px; }
+        .all-codes-modal-content { max-width: 580px; }
         .all-codes-list { display: flex; flex-direction: column; gap: 12px; }
         .all-codes-item {
             border: 1px solid var(--t2-border);
@@ -1324,6 +1353,7 @@
 
 <script>
 let couponCopyRedirectTimer = null;
+let couponCopyToastHideTimer = null;
 let currentCode = '';
 let currentCouponRow = null;
 let currentCouponId = null;
@@ -1375,7 +1405,14 @@ function copyCodeToClipboard(text) {
 function showCouponCopyToast() {
     const el = document.getElementById('couponCopyToast');
     if (!el) return;
+    if (couponCopyToastHideTimer) {
+        clearTimeout(couponCopyToastHideTimer);
+        couponCopyToastHideTimer = null;
+    }
+    el.classList.remove('is-hiding');
     el.hidden = false;
+    void el.offsetWidth;
+    el.classList.add('is-visible');
     const bar = el.querySelector('.coupon-copy-toast-progress');
     if (bar) {
         bar.style.animation = 'none';
@@ -1386,13 +1423,27 @@ function showCouponCopyToast() {
 
 function hideCouponCopyToast() {
     const el = document.getElementById('couponCopyToast');
-    if (el) el.hidden = true;
+    if (!el) return;
+    el.classList.remove('is-visible');
+    el.classList.add('is-hiding');
+    if (couponCopyToastHideTimer) {
+        clearTimeout(couponCopyToastHideTimer);
+    }
+    couponCopyToastHideTimer = setTimeout(function() {
+        el.hidden = true;
+        el.classList.remove('is-hiding');
+        couponCopyToastHideTimer = null;
+    }, 260);
 }
 
 function dismissCouponCopyToast() {
     if (couponCopyRedirectTimer) {
         clearTimeout(couponCopyRedirectTimer);
         couponCopyRedirectTimer = null;
+    }
+    if (couponCopyToastHideTimer) {
+        clearTimeout(couponCopyToastHideTimer);
+        couponCopyToastHideTimer = null;
     }
     hideCouponCopyToast();
     const copyBtn = document.getElementById('copyCouponBtn');
@@ -1577,7 +1628,7 @@ function handleCouponClick(btn){
                 this.disabled = true;
 
                 setTimeout(() => {
-                    this.textContent = 'Opening store...';
+                    this.textContent = 'Go To Store';
                 }, 600);
 
                 setTimeout(() => {
@@ -1713,7 +1764,7 @@ function copyCoupon(btn){
         }
         btn.innerText = originalText;
         btn.disabled = false;
-    }, 1500);
+    }, 2300);
 }
 function toggleQA(el){
     const item = el.closest('.qa-item');
