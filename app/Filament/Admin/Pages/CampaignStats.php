@@ -16,6 +16,7 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\HtmlString;
 
 class CampaignStats extends Page implements HasTable
 {
@@ -112,10 +113,12 @@ class CampaignStats extends Page implements HasTable
                     ->color('primary')
                     ->slideOver()
                     ->modalHeading(fn (Campaign $record): string => "Biểu đồ: {$record->title}")
-                    ->modalContent(fn (Campaign $record) => view('filament.admin.pages.campaign-stats-chart', [
-                        'campaign' => $record,
-                        'chartData' => $this->getChartData($record->id),
-                    ]))
+                    ->modalContent(fn (Campaign $record): HtmlString => new HtmlString(
+                        view('filament.admin.pages.campaign-stats-chart', [
+                            'campaign' => $record,
+                            'chartData' => $this->getChartData($record->id),
+                        ])->render()
+                    ))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Đóng'),
             ])

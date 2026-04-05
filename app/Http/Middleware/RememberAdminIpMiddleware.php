@@ -15,7 +15,7 @@ class RememberAdminIpMiddleware
         $response = $next($request);
 
         $user = Filament::auth()->user();
-        if ($user && ($user->is_admin ?? false)) {
+        if ($user && method_exists($user, 'isAdmin') && $user->isAdmin()) {
             $ip = app(ClientIpService::class)->getClientIp($request);
             if (trim($ip) !== '') {
                 Cache::put($this->cacheKey($ip), true, now()->addHours(12));

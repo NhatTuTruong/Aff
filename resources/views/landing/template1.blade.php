@@ -1048,7 +1048,14 @@
             padding: 0;
             border-radius: 16px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
-            position: relative;
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translate(-50%, -24px);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.26s ease, opacity 0.26s ease;
+            z-index: 10050;
             overflow: hidden;
             width: min(420px, calc(100vw - 2rem));
             max-width: min(420px, calc(100vw - 2rem));
@@ -1057,6 +1064,16 @@
             font-weight: 500;
             font-family: inherit;
             -webkit-tap-highlight-color: transparent;
+        }
+        .coupon-copy-toast.is-visible {
+            transform: translate(-50%, 0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .coupon-copy-toast.is-hiding {
+            transform: translate(-50%, -24px);
+            opacity: 0;
+            pointer-events: none;
         }
 
         .coupon-copy-toast-row {
@@ -1130,7 +1147,7 @@
             height: 3px;
             background: #22c55e;
             transform-origin: left center;
-            animation: couponCopyToastProgress 1.5s linear forwards;
+            animation: couponCopyToastProgress 2s linear forwards;
         }
 
         @keyframes couponCopyToastProgress {
@@ -1146,12 +1163,15 @@
         .coupon-modal-content {
             background: #ffffff;
             width: 100%;
-            max-width: 480px;
+            max-width: 580px;
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 25px 60px rgba(15, 23, 42, .35);
             animation: popupScale .3s ease;
             position: relative;
+            max-height: calc(100vh - 24px);
+            display: flex;
+            flex-direction: column;
         }
 
         .popup-banner {
@@ -1160,6 +1180,7 @@
             text-align: center;
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .popup-confetti {
@@ -1282,6 +1303,11 @@
 
         .popup-body {
             padding: 24px 28px 28px;
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
 
         @keyframes popupScale {
@@ -1463,6 +1489,60 @@
             gap: 10px;
             justify-content: center;
         }
+        .lead-capture {
+            margin-top: 14px;
+        }
+        .lead-capture-label {
+            margin: 0 0 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #111827;
+            letter-spacing: -0.01em;
+        }
+        .lead-capture-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+        }
+        .lead-capture-input {
+            height: 42px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            padding: 0 12px;
+            font-size: 0.9rem;
+            width: 100%;
+            font-family: inherit;
+            color: var(--text-dark);
+            background: #fff;
+        }
+        .lead-capture-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+        }
+        .lead-capture-btn {
+            height: 42px;
+            border: none;
+            border-radius: 10px;
+            padding: 0 16px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+            background: var(--primary);
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s ease;
+            white-space: nowrap;
+        }
+        .lead-capture-btn:hover { background: var(--primary-dark); }
+        .lead-capture-msg {
+            margin-top: 6px;
+            min-height: 18px;
+            font-size: 0.78rem;
+            color: #6b7280;
+        }
+        .lead-capture-msg.success { color: #16a34a; }
+        .lead-capture-msg.error { color: #dc2626; }
 
         .feedback-btn {
             background: #fff;
@@ -1508,7 +1588,7 @@
 
         /* All Codes Modal */
         .all-codes-modal-content {
-            max-width: 520px;
+            max-width: 580px;
         }
 
         .all-codes-list {
@@ -2651,7 +2731,7 @@
             <div id="couponCopyToast" class="coupon-copy-toast" role="status" aria-live="polite" hidden>
                 <div class="coupon-copy-toast-row">
                     <span class="coupon-copy-toast-icon" aria-hidden="true">✓</span>
-                    <p class="coupon-copy-toast-text">Code copied! Redirecting you to
+                    <p class="coupon-copy-toast-text">Code copied! Go to
                         <strong>{{ e($campaign->brand->name ?? $campaign->title) }}</strong>
                     </p>
                     <button type="button" class="coupon-copy-toast-close" aria-label="Đóng"
@@ -2730,6 +2810,14 @@
                         onclick="event.preventDefault(); const url = this.getAttribute('data-url'); if(url) { window.open(url, '_blank'); } return false;">
                         Go To {{ $campaign->brand->name ?? $campaign->title }}
                     </a>
+                </div>
+                <div class="lead-capture">
+                    <p class="lead-capture-label">Get exclusive discount codes.</p>
+                    <div class="lead-capture-row">
+                        <input id="leadEmailInput" type="email" class="lead-capture-input" placeholder="Enter your email">
+                        <button id="leadSubmitBtn" type="button" class="lead-capture-btn" onclick="submitLeadEmail(this)">Send</button>
+                    </div>
+                    <p id="leadCaptureMsg" class="lead-capture-msg"></p>
                 </div>
 
                 <!-- Feedback Section -->
@@ -2876,6 +2964,16 @@
                         Go To {{ $campaign->brand->name ?? $campaign->title }}
                     </a>
                 </div>
+                <div class="lead-capture">
+                    <p class="lead-capture-label">Get exclusive discount codes.</p>
+                    <div class="lead-capture-row">
+                        <input id="leadEmailInputAllCodes" type="email" class="lead-capture-input" placeholder="Enter your email">
+                        <button id="leadSubmitBtnAllCodes" type="button" class="lead-capture-btn"
+                            data-input-id="leadEmailInputAllCodes" data-msg-id="leadCaptureMsgAllCodes"
+                            onclick="submitLeadEmail(this)">Send</button>
+                    </div>
+                    <p id="leadCaptureMsgAllCodes" class="lead-capture-msg"></p>
+                </div>
             </div>
         </div>
     </div>
@@ -2886,7 +2984,9 @@
         let currentCouponRow = null;
         let currentCouponId = null;
         let currentAffUrl = null;
+        let affiliateAlreadyOpened = false;
         let couponCopyRedirectTimer = null;
+        let couponCopyToastHideTimer = null;
         function getStoredRevealed() { return {}; }
 
         function saveRevealed(couponId, code) { return; }
@@ -2948,7 +3048,14 @@
         function showCouponCopyToast() {
             const el = document.getElementById('couponCopyToast');
             if (!el) return;
+            if (couponCopyToastHideTimer) {
+                clearTimeout(couponCopyToastHideTimer);
+                couponCopyToastHideTimer = null;
+            }
+            el.classList.remove('is-hiding');
             el.hidden = false;
+            void el.offsetWidth;
+            el.classList.add('is-visible');
             const bar = el.querySelector('.coupon-copy-toast-progress');
             if (bar) {
                 bar.style.animation = 'none';
@@ -2959,13 +3066,27 @@
 
         function hideCouponCopyToast() {
             const el = document.getElementById('couponCopyToast');
-            if (el) el.hidden = true;
+            if (!el) return;
+            el.classList.remove('is-visible');
+            el.classList.add('is-hiding');
+            if (couponCopyToastHideTimer) {
+                clearTimeout(couponCopyToastHideTimer);
+            }
+            couponCopyToastHideTimer = setTimeout(() => {
+                el.hidden = true;
+                el.classList.remove('is-hiding');
+                couponCopyToastHideTimer = null;
+            }, 260);
         }
 
         function dismissCouponCopyToast() {
             if (couponCopyRedirectTimer) {
                 clearTimeout(couponCopyRedirectTimer);
                 couponCopyRedirectTimer = null;
+            }
+            if (couponCopyToastHideTimer) {
+                clearTimeout(couponCopyToastHideTimer);
+                couponCopyToastHideTimer = null;
             }
             hideCouponCopyToast();
             const copyBtn = document.getElementById('copyCouponBtn');
@@ -3046,7 +3167,63 @@
                 goBtn.setAttribute('data-url', affUrl);
                 goBtn.href = affUrl;
             }
+            resetLeadCapture('leadEmailInput', 'leadCaptureMsg', 'leadSubmitBtn');
             setCouponModalHash(couponId);
+        }
+
+        function resetLeadCapture(inputId, msgId, btnId) {
+            const input = document.getElementById(inputId);
+            const msg = document.getElementById(msgId);
+            const btn = document.getElementById(btnId);
+            if (input) input.value = '';
+            if (msg) { msg.textContent = ''; msg.className = 'lead-capture-msg'; }
+            if (btn) btn.disabled = false;
+        }
+
+        function submitLeadEmail(btn) {
+            const inputId = (btn && btn.dataset && btn.dataset.inputId) ? btn.dataset.inputId : 'leadEmailInput';
+            const msgId = (btn && btn.dataset && btn.dataset.msgId) ? btn.dataset.msgId : 'leadCaptureMsg';
+            const input = document.getElementById(inputId);
+            const msg = document.getElementById(msgId);
+            if (!input || !msg) return;
+            const email = (input.value || '').trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                msg.textContent = 'Please enter a valid email address.';
+                msg.className = 'lead-capture-msg error';
+                return;
+            }
+
+            btn.disabled = true;
+            msg.textContent = 'Sending...';
+            msg.className = 'lead-capture-msg';
+
+            fetch('{{ route('customer-leads.store') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    campaign_id: {{ (int) $campaign->id }},
+                    email: email,
+                    source_template: 'template1'
+                })
+            })
+            .then(async (res) => {
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.ok) throw new Error(data.message || 'Sending email failed');
+                msg.textContent = 'Email submitted successfully.';
+                msg.className = 'lead-capture-msg success';
+                input.value = '';
+            })
+            .catch((e) => {
+                msg.textContent = e.message || 'Unable to submit your email right now.';
+                msg.className = 'lead-capture-msg error';
+            })
+            .finally(() => {
+                btn.disabled = false;
+            });
         }
 
         function handleCouponClick(btn) {
@@ -3062,7 +3239,18 @@
                     target.dataset.url ||
                     (document.querySelector('.btn-get-code[data-url]')?.dataset.url || null);
 
+                if (!affiliateAlreadyOpened) {
+                    // Flow mới: tab hiện tại -> link aff, tab mới -> mở trang coupon + modal
+                    const couponUrl = new URL(window.location.href);
+                    couponUrl.searchParams.set('aff_opened', '1');
+                    couponUrl.hash = 'coupon=all-codes';
+                    window.open(couponUrl.toString(), '_blank', 'noopener');
+                    if (affUrl) window.location.href = affUrl;
+                    return false;
+                }
+
                 document.getElementById('allCodesModal').classList.add('active');
+                resetLeadCapture('leadEmailInputAllCodes', 'leadCaptureMsgAllCodes', 'leadSubmitBtnAllCodes');
                 setCouponModalHash('all-codes');
                 document.querySelectorAll('.btn-copy-all-codes').forEach(function(bt) {
                     bt.onclick = function() {
@@ -3089,11 +3277,11 @@
                         // Safari → mở ngay
                         if (safari) {
 
-                            if (affUrl) {
+                            if (affUrl && !affiliateAlreadyOpened) {
                                 window.open(affUrl, '_blank');
                             }
 
-                            this.textContent = 'Opening store...';
+                            this.textContent = 'Go To Store';
 
                             setTimeout(() => {
                                 this.textContent = originalText;
@@ -3104,11 +3292,11 @@
 
                             // Browser khác → giữ delay 2s
                             setTimeout(() => {
-                                this.textContent = 'Opening store...';
+                                this.textContent = 'Go To Store';
                             }, 600);
 
                             setTimeout(() => {
-                                if (affUrl) {
+                            if (affUrl && !affiliateAlreadyOpened) {
                                     window.open(affUrl, '_blank');
                                 }
                                 this.textContent = originalText;
@@ -3146,7 +3334,20 @@
             currentCouponId = couponId;
             currentCouponRow = actualBtn.closest('.coupon-row');
 
-            // Flow mới cho Get Code: chỉ mở popup, chưa mở store
+            // Flow mới cho Get Code:
+            // - Nếu chưa mở affiliate tab nào: tab hiện tại -> aff, tab mới -> trang coupon + modal
+            // - Nếu affiliate đã mở trước đó (tab mới): chỉ mở modal để copy
+            if (!affiliateAlreadyOpened) {
+                const couponUrl = new URL(window.location.href);
+                couponUrl.searchParams.set('show_coupon', String(couponId));
+                couponUrl.searchParams.set('code', String(code));
+                couponUrl.searchParams.set('aff_opened', '1');
+                couponUrl.hash = '';
+                window.open(couponUrl.toString(), '_blank', 'noopener');
+                if (url) window.location.href = url;
+                return false;
+            }
+
             openModalForCoupon(couponId, code, url);
             return false;
         }
@@ -3233,12 +3434,12 @@
             couponCopyRedirectTimer = setTimeout(() => {
                 couponCopyRedirectTimer = null;
                 hideCouponCopyToast();
-                if (affUrl) {
+                if (affUrl && !affiliateAlreadyOpened) {
                     window.open(affUrl, '_blank');
                 }
                 btn.innerText = originalText;
                 btn.disabled = false;
-            }, 1500);
+            }, 2300);
         }
 
         function toggleQA(el) {
@@ -3263,6 +3464,7 @@
                 });
 
             const urlParams = new URLSearchParams(window.location.search);
+            affiliateAlreadyOpened = urlParams.get('aff_opened') === '1';
             const showCouponId = urlParams.get('show_coupon');
             const codeFromUrl = urlParams.get('code');
             if (showCouponId && codeFromUrl) {

@@ -118,7 +118,7 @@
             <div>
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Tệp tin</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-                    @foreach($files as $file)
+                    @foreach($this->paginatedFiles as $file)
                         @php $isSelected = in_array($file['path'], $selectedFiles); @endphp
                         <div class="bg-white/80 dark:bg-gray-900 rounded-lg border p-2.5 hover:shadow-md transition-all relative {{ $isSelected ? 'ring-2 ring-primary-500 border-primary-500 dark:ring-primary-400 dark:border-primary-400' : 'border-gray-200 dark:border-gray-700' }}">
                             <div class="absolute top-2 left-2 z-10">
@@ -150,6 +150,25 @@
                         </div>
                     @endforeach
                 </div>
+                @if($this->filePaginationLastPage > 1)
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            Trang {{ $filePage }} / {{ $this->filePaginationLastPage }}
+                            <span class="text-gray-400">·</span>
+                            {{ count($files) }} tệp
+                            <span class="text-gray-400">·</span>
+                            {{ $filesPerPage }} / trang
+                        </p>
+                        <div class="flex gap-2">
+                            <x-filament::button type="button" wire:click="goPrevFilePage" size="sm" :disabled="$filePage <= 1">
+                                Trước
+                            </x-filament::button>
+                            <x-filament::button type="button" wire:click="goNextFilePage" size="sm" :disabled="$filePage >= $this->filePaginationLastPage">
+                                Sau
+                            </x-filament::button>
+                        </div>
+                    </div>
+                @endif
             </div>
         @elseif(count($allFiles) > 0 && $currentDirectory)
             <div class="text-center py-12">

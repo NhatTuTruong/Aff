@@ -14,6 +14,11 @@ use Throwable;
 
 class ImportCsvWithNullUser extends BaseImportCsv
 {
+    /**
+     * Tăng timeout cho job import CSV lớn (mặc định worker thường 60s).
+     */
+    public int $timeout = 600;
+
     public function handle(): void
     {
         $this->import->refresh();

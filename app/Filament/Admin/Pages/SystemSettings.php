@@ -36,7 +36,7 @@ class SystemSettings extends Page implements HasForms
     {
         $user = Filament::auth()->user();
 
-        return (bool) ($user && ($user->is_admin ?? false));
+        return (bool) ($user && method_exists($user, 'isAdmin') && $user->isAdmin());
     }
 
     public static function shouldRegisterNavigation(): bool
@@ -136,17 +136,16 @@ class SystemSettings extends Page implements HasForms
                             ->maxValue(23)
                             ->required(),
                         Toggle::make('auto_blog_variant_best')
-                            ->label('Bật variant: best')
+                            ->label('Bật variant: Bài viết lựa chọn tốt nhất')
                             ->inline(false),
                         Toggle::make('auto_blog_variant_guide')
-                            ->label('Bật variant: guide')
+                            ->label('Bật variant: Bài viết hướng dẫn')
                             ->inline(false),
                         Toggle::make('auto_blog_variant_comparison')
-                            ->label('Bật variant: comparison')
+                            ->label('Bật variant: Bài viết so sánh')
                             ->inline(false),
                         Toggle::make('auto_blog_brand_intro_enabled')
-                            ->label('Thêm 1 bài giới thiệu store/ngày (coupon + link aff)')
-                            ->helperText('Chỉ chiến dịch đã import (import_id). Ưu tiên store có tổng view+click cao nhất; tên store = tên brand; link aff & landing lấy từ chiến dịch đó.')
+                            ->label('Bật variant:Bài viết về cửa hàng đang có')
                             ->inline(false),
                     ])
                     ->columns(3),

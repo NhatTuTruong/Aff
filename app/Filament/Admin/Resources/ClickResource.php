@@ -41,7 +41,22 @@ class ClickResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('campaign_id')
-                    ->relationship('campaign', 'title')
+                    ->relationship(
+                        'campaign',
+                        'title',
+                        modifyQueryUsing: function (Builder $query): Builder {
+                            $user = Filament::auth()->user();
+                            $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+                            if (! $isAdmin && $user) {
+                                return $query->whereHas(
+                                    'brand',
+                                    fn (Builder $b) => $b->where('user_id', $user->id),
+                                );
+                            }
+
+                            return $query;
+                        },
+                    )
                     ->required(),
                 Forms\Components\TextInput::make('ip')
                     ->maxLength(255)
@@ -149,14 +164,16 @@ class ClickResource extends Resource
                 Tables\Filters\SelectFilter::make('country')
                     ->label('Quốc gia')
                     ->options(function () {
-                        $userId = Filament::auth()->id();
+                        $user = Filament::auth()->user();
+                        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+                        $ownerId = $isAdmin ? null : $user?->id;
 
                         return Click::query()
                             ->whereHas(
                                 'campaign.brand',
                                 fn (Builder $brandQuery) => $brandQuery->when(
-                                    $userId,
-                                    fn (Builder $q) => $q->where('user_id', $userId),
+                                    $ownerId,
+                                    fn (Builder $q) => $q->where('user_id', $ownerId),
                                 ),
                             )
                             ->whereNotNull('country')
@@ -169,7 +186,22 @@ class ClickResource extends Resource
                     ->searchable(),
                 Tables\Filters\SelectFilter::make('campaign_id')
                     ->label('Chiến dịch')
-                    ->relationship('campaign', 'title')
+                    ->relationship(
+                        'campaign',
+                        'title',
+                        modifyQueryUsing: function (Builder $query): Builder {
+                            $user = Filament::auth()->user();
+                            $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+                            if (! $isAdmin && $user) {
+                                return $query->whereHas(
+                                    'brand',
+                                    fn (Builder $b) => $b->where('user_id', $user->id),
+                                );
+                            }
+
+                            return $query;
+                        },
+                    )
                     ->searchable()
                     ->preload(),
                 Tables\Filters\SelectFilter::make('interaction_kind')
@@ -205,14 +237,16 @@ class ClickResource extends Resource
                 Tables\Filters\SelectFilter::make('browser')
                     ->label('Trình duyệt')
                     ->options(function () {
-                        $userId = Filament::auth()->id();
+                        $user = Filament::auth()->user();
+                        $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
+                        $ownerId = $isAdmin ? null : $user?->id;
 
                         return Click::query()
                             ->whereHas(
                                 'campaign.brand',
                                 fn (Builder $brandQuery) => $brandQuery->when(
-                                    $userId,
-                                    fn (Builder $q) => $q->where('user_id', $userId),
+                                    $ownerId,
+                                    fn (Builder $q) => $q->where('user_id', $ownerId),
                                 ),
                             )
                             ->whereNotNull('browser')

@@ -26,13 +26,15 @@ class TopCampaignsByClicksWidget extends Widget
         $user = Filament::auth()->user();
         $isAdmin = $user && method_exists($user, 'isAdmin') && $user->isAdmin();
         $userId = $isAdmin ? null : Filament::auth()->id();
-        $userScope = fn (Builder $q) => $q->where('user_id', $userId);
 
         $campaigns = Campaign::query()
             ->withCount([
                 'clicks as clicks_count' => fn (Builder $q) => $q->where('is_bot', false)->forAdminStats(),
             ])
-            ->when($userId, fn ($q) => $q->whereHas('brand', $userScope))
+            ->when(
+                $userId !== null,
+                fn (Builder $q) => $q->whereHas('brand', fn (Builder $b) => $b->where('user_id', $userId)),
+            )
             ->orderByDesc('clicks_count')
             ->take(10)
             ->get()
