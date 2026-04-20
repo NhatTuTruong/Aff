@@ -17,6 +17,7 @@
     <title>{{ $finalTitle }}</title>
     <meta name="description" content="@yield('description', $defaultMetaDescription)">
     <meta name="verify-admitad" content="4455f2e7bb" />
+    <meta name='impact-site-verification' value='35f2fb10-d495-4208-b451-b9f1e79b72a9'>
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-FF4K1DWWT7"></script>
