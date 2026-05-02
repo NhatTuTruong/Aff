@@ -16,11 +16,28 @@ class LandingPageController extends Controller
         $this->analyticsService = $analyticsService;
     }
 
-    public function show($userCode, $slug, Request $request)
+    /**
+     * Chuyển URL cũ /visit/{user_code}/{segment} sang /visit/{slug} (301).
+     */
+    public function legacyVisitRedirect(string $userCode, string $slug, Request $request)
     {
-        // Tìm campaign theo slug đầy đủ (user_code/slug) - không phụ thuộc user để tránh 404 khi user bị xóa
-        $fullSlug = "{$userCode}/{$slug}";
-        $campaign = Campaign::where('slug', $fullSlug)
+        $campaign = Campaign::where('slug', "{$userCode}/{$slug}")->first();
+        if (! $campaign) {
+            $campaign = Campaign::where('slug', $slug)->first();
+            if ($campaign && (string) optional($campaign->brand?->user)->code !== (string) $userCode) {
+                abort(404);
+            }
+        }
+        if (! $campaign) {
+            abort(404);
+        }
+
+        return redirect()->route('landing.show', ['slug' => $campaign->slug], 301);
+    }
+
+    public function show(string $slug, Request $request)
+    {
+        $campaign = Campaign::where('slug', $slug)
             ->whereHas('brand')
             ->with(['assets', 'brand', 'couponItems'])
             ->firstOrFail();

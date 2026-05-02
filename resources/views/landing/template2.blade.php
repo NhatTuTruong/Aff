@@ -80,10 +80,7 @@
 
         $couponsWithCodes = $coupons->filter(fn ($c) => !empty($c->code))->values();
         
-        // Parse slug để lấy userCode và slugPart
-        $slugParts = explode('/', $campaign->slug, 2);
-        $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
-        $slugPart = count($slugParts) === 2 ? $slugParts[1] : $campaign->slug;
+        $campaignSlug = $campaign->slug;
 
         $brandName = $campaign->brand->name ?? $campaign->title;
         $rawIntro = (string) ($campaign->subtitle ?? $campaign->intro ?? '');
@@ -870,7 +867,7 @@
         @endif
         <span class="t2-banner-name">{{ $brandName }}</span>
     </div>
-    <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}" class="t2-banner-cta" target="_blank" rel="noopener">Shop Now</a>
+    <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}" class="t2-banner-cta" target="_blank" rel="noopener">Shop Now</a>
 </div>
 
 <div class="t2-main">
@@ -1026,7 +1023,7 @@
                     data-type="{{ $hasCode ? 'code' : 'deal' }}"
                     data-code="{{ $coupon->code }}"
                     data-coupon-id="{{ $coupon->id }}"
-                    data-url="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}"
+                    data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
                     aria-label="{{ $hasCode ? 'Get coupon code and go to store' : 'Open deal and go to store' }}"
                     onclick="return handleCouponClick(this)">
                     {{ $hasCode ? 'GET CODE' : 'GET DEAL' }}
@@ -1068,7 +1065,7 @@
                     data-type="code"
                     data-all-codes="1"
                     data-coupon-id="all-codes"
-                    data-url="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}"
+                    data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
                     aria-label="View all coupon codes"
                     onclick="return handleCouponClick(this)">
                     GET CODE
@@ -1078,7 +1075,7 @@
         </div>
 
         <div class="t2-mobile-shop">
-            <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}" target="_blank" rel="nofollow sponsored noopener">Shop Now</a>
+            <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}" target="_blank" rel="nofollow sponsored noopener">Shop Now</a>
         </div>
     </section>
 
@@ -1331,7 +1328,7 @@
                 @endforeach
             </div>
             <div class="coupon-modal-actions" style="margin-top: 20px;">
-                <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}"
+                <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
                    target="_blank" rel="nofollow sponsored noopener"
                    class="coupon-btn store">
                     Go To The Store

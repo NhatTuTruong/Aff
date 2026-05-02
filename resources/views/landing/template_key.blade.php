@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     @php
-        $slugParts = explode('/', $campaign->slug, 2);
-        $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
-        $slugPart = count($slugParts) === 2 ? $slugParts[1] : $campaign->slug;
+        $campaignSlug = $campaign->slug;
         $backgroundImage = $campaign->background_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->background_image) : null;
         $productImages = $campaign->key_product_images ?? [];
         $logoUrl = $campaign->logo ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->logo) : ($campaign->brand?->image_url ?? asset('images/default-brand.svg'));
@@ -273,7 +271,7 @@
                 @endif
 
                 <div class="cta-section">
-                    <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}" class="cta-button" target="_blank" rel="nofollow sponsored noopener">
+                    <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}" class="cta-button" target="_blank" rel="nofollow sponsored noopener">
                         {{ $campaign->cta_text ?? 'Nhận ngay' }}
                     </a>
                 </div>

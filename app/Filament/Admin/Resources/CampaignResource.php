@@ -71,9 +71,7 @@ class CampaignResource extends Resource
                                         }
                                         // Slug dùng user_code của cửa hàng (brand), tránh slug 3 phần 21419/55628/...
                                         if (empty($get('slug'))) {
-                                            $userCode = $brand->user?->code ?? Filament::auth()->user()?->code ?? '00000';
-                                            $baseSlug = \Illuminate\Support\Str::slug($brand->name);
-                                            $set('slug', "{$userCode}/{$baseSlug}");
+                                            $set('slug', \Illuminate\Support\Str::slug($brand->name));
                                         }
                                     }
                                 }
@@ -95,12 +93,8 @@ class CampaignResource extends Resource
                             ->label('Tiêu đề')
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
-                                $brandId = $get('brand_id');
-                                $brand = $brandId ? Brand::find($brandId) : null;
-                                $userCode = $brand?->user?->code ?? Filament::auth()->user()?->code ?? '00000';
-                                $baseSlug = \Illuminate\Support\Str::slug($state);
-                                $set('slug', "{$userCode}/{$baseSlug}");
+                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                $set('slug', \Illuminate\Support\Str::slug($state));
                             }),
                         Forms\Components\TextInput::make('slug')
                             ->label('Slug')
@@ -109,7 +103,7 @@ class CampaignResource extends Resource
                                 ignoreRecord: true,
                                 modifyRuleUsing: fn (\Illuminate\Validation\Rules\Unique $rule) => $rule->whereNull('deleted_at')
                             )
-                            ->helperText('Tự động tạo từ tiêu đề. Format: {user_code}/{slug}. URL: /visit/{user_code}/{slug}'),
+                            ->helperText('Duy nhất toàn hệ thống. URL landing: /visit/{slug}'),
                         Forms\Components\TextInput::make('affiliate_url')
                             ->label('URL Affiliate')
                             ->required()
@@ -362,12 +356,11 @@ class CampaignResource extends Resource
                 Tables\Columns\TextColumn::make('landing_url')
                     ->label('URL')
                     ->state(function ($record) {
-                        if (!$record->slug) return '';
-                        $parts = explode('/', $record->slug, 2);
-                        if (count($parts) === 2) {
-                            return url(route('landing.show', ['userCode' => $parts[0], 'slug' => $parts[1]]));
+                        if (! $record->slug) {
+                            return '';
                         }
-                        return url(route('landing.show', ['userCode' => '00000', 'slug' => $record->slug]));
+
+                        return url(route('landing.show', ['slug' => $record->slug]));
                     })
                     ->copyable()
                     ->copyMessage('Đã copy URL')
@@ -488,37 +481,29 @@ class CampaignResource extends Resource
                     ->tooltip('Nhân bản')
                     ->mutateRecordDataUsing(function (array $data, Campaign $record): array {
                         $baseTitle = $record->title;
-                        $baseSlug = $record->slug;
-                        
-                        // Tách user_code và slug
-                        $parts = explode('/', $baseSlug, 2);
-                        $userCode = count($parts) === 2 ? $parts[0] : (Filament::auth()->user()?->code ?? '00000');
-                        $slugPart = count($parts) === 2 ? $parts[1] : $baseSlug;
-                        
+                        $slugPart = $record->slug;
+                        $segments = array_values(array_filter(explode('/', (string) $slugPart)));
+                        if (count($segments) >= 2) {
+                            $slugPart = end($segments);
+                        }
+
                         $title = $baseTitle . '-copy';
-                        $newSlugPart = $slugPart . '-copy';
-                        $slug = "{$userCode}/{$newSlugPart}";
+                        $newSlug = $slugPart . '-copy';
                         $n = 0;
-                        while (Campaign::where('title', $title)->exists() || Campaign::where('slug', $slug)->exists()) {
+                        while (Campaign::where('title', $title)->exists()
+                            || Campaign::where('slug', $newSlug)->whereNull('deleted_at')->exists()) {
                             $n++;
                             $title = $baseTitle . '-copy' . $n;
-                            $newSlugPart = $slugPart . '-copy' . $n;
-                            $slug = "{$userCode}/{$newSlugPart}";
+                            $newSlug = $slugPart . '-copy' . $n;
                         }
                         $data['title'] = $title;
-                        $data['slug'] = $slug;
+                        $data['slug'] = $newSlug;
+
                         return $data;
                     }),
                 Tables\Actions\Action::make('view_landing')
                     ->label('')
-                    ->url(function ($record) {
-                        if (!$record->slug) return '#';
-                        $parts = explode('/', $record->slug, 2);
-                        if (count($parts) === 2) {
-                            return route('landing.show', ['userCode' => $parts[0], 'slug' => $parts[1]]);
-                        }
-                        return route('landing.show', ['userCode' => '00000', 'slug' => $record->slug]);
-                    })
+                    ->url(fn ($record) => $record->slug ? route('landing.show', ['slug' => $record->slug]) : '#')
                     ->openUrlInNewTab()
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->color('success')

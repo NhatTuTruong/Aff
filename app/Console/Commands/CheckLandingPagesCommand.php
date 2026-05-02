@@ -49,18 +49,17 @@ class CheckLandingPagesCommand extends Command
 
         foreach ($campaigns as $campaign) {
             $slug = (string) ($campaign->slug ?? '');
-            [$code, $slugPart] = array_pad(explode('/', $slug, 2), 2, '');
 
             $statusCode = 0;
             $error = null;
             $urlPath = '';
 
-            if (! preg_match('/^[0-9]{5}$/', $code) || ! preg_match('/^[a-z0-9-]+$/', $slugPart)) {
+            if (! preg_match('/^[a-z0-9-]+$/', $slug)) {
                 $statusCode = 0;
                 $error = 'invalid_slug_format';
-                $urlPath = "/visit/{$code}/{$slugPart}";
+                $urlPath = '/visit/' . $slug;
             } else {
-                $urlPath = "/visit/{$code}/{$slugPart}";
+                $urlPath = '/visit/' . $slug;
 
                 try {
                     $request = Request::create($urlPath, 'GET', ['health_check' => 1], server: [

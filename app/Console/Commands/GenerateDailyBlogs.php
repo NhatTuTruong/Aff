@@ -137,8 +137,7 @@ class GenerateDailyBlogs extends Command
         /** @var Brand $brand */
         /** @var Campaign $campaign */
         [$brand, $campaign] = $picked;
-        $defaultCats = config('default_categories.names', User::defaultCategoryNames());
-        $categoryLabel = $brand->category?->name ?? (is_array($defaultCats) && $defaultCats !== [] ? $defaultCats[0] : 'General');
+        $categoryLabel = $this->resolveBrandCategoryLabel($brand);
 
         $this->info("Generating brand intro blog for store: {$brand->name} (imported campaign #{$campaign->id})");
 
@@ -202,6 +201,25 @@ class GenerateDailyBlogs extends Command
         }
 
         return array_key_last($weights) ?? 'Tech';
+    }
+
+    /**
+     * Ưu tiên danh mục thật của brand, hỗ trợ cả dữ liệu legacy.
+     */
+    protected function resolveBrandCategoryLabel(Brand $brand): string
+    {
+        $brand->loadMissing('category');
+
+        if (filled($brand->category?->name)) {
+            return (string) $brand->category->name;
+        }
+
+        $legacyCategory = trim((string) $brand->getAttribute('category'));
+        if ($legacyCategory !== '') {
+            return $legacyCategory;
+        }
+
+        return 'General';
     }
 
 }

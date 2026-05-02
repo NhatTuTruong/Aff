@@ -23,12 +23,11 @@ class BotClickTrackingTest extends TestCase
             'brand_id' => $brand->id,
             'status' => 'active',
             'affiliate_url' => 'https://example.com',
-            'slug' => $user->code . '/test-campaign',
+            'slug' => 'test-campaign',
         ]);
 
         // 1 click từ người dùng thật
         $this->get(route('click.redirect', [
-            'userCode' => $user->code,
             'slug' => 'test-campaign',
         ]), [
             'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
@@ -36,7 +35,6 @@ class BotClickTrackingTest extends TestCase
 
         // 1 click từ bot (Googlebot)
         $this->get(route('click.redirect', [
-            'userCode' => $user->code,
             'slug' => 'test-campaign',
         ]), [
             'User-Agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',

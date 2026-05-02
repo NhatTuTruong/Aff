@@ -645,11 +645,8 @@
                             @php $campaign = $coupon->campaign; $brand = $campaign?->brand; @endphp
                             @if($brand)
                                 @php
-                                    $slugParts = $campaign ? explode('/', $campaign->slug, 2) : ['00000', ''];
-                                    $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
-                                    $slugPart = count($slugParts) === 2 ? $slugParts[1] : '';
                                     $dealUrl = $campaign && $campaign->affiliate_url
-                                        ? route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart])
+                                        ? route('click.redirect', ['slug' => $campaign->slug])
                                         : '#';
                                 @endphp
                                 <article class="blog-deal-card">

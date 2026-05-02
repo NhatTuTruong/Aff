@@ -93,8 +93,7 @@ class ListBlogs extends ListRecords
                             return;
                         }
                         [$brand, $campaign] = $picked;
-                        $defaultCats = config('default_categories.names', User::defaultCategoryNames());
-                        $categoryLabel = $brand->category?->name ?? (is_array($defaultCats) && $defaultCats !== [] ? $defaultCats[0] : 'General');
+                        $categoryLabel = $this->resolveBrandCategoryLabel($brand);
                         $result = $gemini->generateBrandIntroBlog($brand, $campaign, $categoryLabel);
                     } else {
                         $category = $categoryNames[array_rand($categoryNames)];
@@ -134,5 +133,21 @@ class ListBlogs extends ListRecords
             Actions\CreateAction::make()
                 ->label('Thêm blog'),
         ];
+    }
+
+    protected function resolveBrandCategoryLabel(\App\Models\Brand $brand): string
+    {
+        $brand->loadMissing('category');
+
+        if (filled($brand->category?->name)) {
+            return (string) $brand->category->name;
+        }
+
+        $legacyCategory = trim((string) $brand->getAttribute('category'));
+        if ($legacyCategory !== '') {
+            return $legacyCategory;
+        }
+
+        return 'General';
     }
 }

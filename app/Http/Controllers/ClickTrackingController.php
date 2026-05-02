@@ -16,11 +16,30 @@ class ClickTrackingController extends Controller
         $this->analyticsService = $analyticsService;
     }
 
-    public function redirect($userCode, $slug, Request $request)
+    public function legacyOutRedirect(string $userCode, string $slug, Request $request)
     {
-        // Tìm campaign theo slug đầy đủ (user_code/slug) - không phụ thuộc user để tránh 404 khi user bị xóa
-        $fullSlug = "{$userCode}/{$slug}";
-        $campaign = Campaign::where('slug', $fullSlug)
+        $campaign = Campaign::where('slug', "{$userCode}/{$slug}")->first();
+        if (! $campaign) {
+            $campaign = Campaign::where('slug', $slug)->first();
+            if ($campaign && (string) optional($campaign->brand?->user)->code !== (string) $userCode) {
+                abort(404);
+            }
+        }
+        if (! $campaign) {
+            abort(404);
+        }
+
+        $url = route('click.redirect', ['slug' => $campaign->slug]);
+        if ($request->getQueryString()) {
+            $url .= '?' . $request->getQueryString();
+        }
+
+        return redirect()->to($url, 301);
+    }
+
+    public function redirect(string $slug, Request $request)
+    {
+        $campaign = Campaign::where('slug', $slug)
             ->whereHas('brand')
             ->firstOrFail();
         

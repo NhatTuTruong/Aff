@@ -245,10 +245,7 @@
                         @php $campaign = $coupon->campaign; $brand = $campaign?->brand; @endphp
                         @if($campaign && $brand)
                             @php
-                                $slugParts = explode('/', $campaign->slug, 2);
-                                $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
-                                $slugPart = count($slugParts) === 2 ? $slugParts[1] : $campaign->slug;
-                                $landingUrl = route('landing.show', ['userCode' => $userCode, 'slug' => $slugPart]);
+                                $landingUrl = route('landing.show', ['slug' => $campaign->slug]);
                             @endphp
                             <article class="deal-card">
                                 <div class="deal-topline">

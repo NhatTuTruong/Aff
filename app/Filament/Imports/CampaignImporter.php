@@ -176,26 +176,11 @@ class CampaignImporter extends Importer
             $this->record->template = $this->record->type === 'key' ? 'template_key' : 'template1';
         }
         
-        // Lấy user_code từ brand
-        $user = $this->record->brand?->user ?? \App\Models\User::find($this->record->brand?->user_id);
-        $userCode = $user?->code ?? '00000';
-        
-        $baseSlug = $this->record->slug ?: Str::slug($this->record->title);
-        $fullSlug = "{$userCode}/{$baseSlug}";
-        
-        // Kiểm tra slug đã tồn tại trong cùng user
-        if (Campaign::where('slug', $fullSlug)
-            ->where('id', '!=', $this->record->id ?? 0)
-            ->whereHas('brand', function ($q) use ($user) {
-                if ($user) {
-                    $q->where('user_id', $user->id);
-                }
-            })
-            ->exists()) {
-            throw new RowImportFailedException("Slug chiến dịch đã tồn tại: {$fullSlug}");
-        }
-        
-        $this->record->slug = $fullSlug;
+        $this->record->slug = Campaign::normalizeCampaignSlug(
+            $this->record->slug ?: Str::slug($this->record->title),
+            $this->record->title ?? '',
+            $this->record->id
+        );
     }
 
     protected function afterSave(): void

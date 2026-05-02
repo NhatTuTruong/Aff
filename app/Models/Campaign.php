@@ -110,44 +110,35 @@ class Campaign extends Model
             $campaign->slug = static::normalizeCampaignSlug(
                 $campaign->slug,
                 $campaign->title ?? '',
-                $campaign->brand_id
+                null
             );
         });
 
         static::updating(function ($campaign) {
-            $slug = $campaign->slug;
-            $segments = array_filter(explode('/', is_array($slug) ? implode('/', $slug) : (string) $slug));
-            if ($campaign->isDirty('slug') || $campaign->isDirty('title') || count($segments) > 2) {
+            $raw = is_array($campaign->slug) ? implode('/', $campaign->slug) : (string) $campaign->slug;
+            $segments = array_values(array_filter(explode('/', $raw)));
+            $needsNormalize = $campaign->isDirty('slug')
+                || $campaign->isDirty('title')
+                || count($segments) !== 1
+                || str_contains($raw, '/');
+            if ($needsNormalize) {
                 $campaign->slug = static::normalizeCampaignSlug(
                     $campaign->slug,
                     $campaign->title ?? '',
-                    $campaign->brand_id
+                    $campaign->id
                 );
             }
         });
     }
 
     /**
-     * Slug luôn đúng format: {userCode}/{slugPart} (đúng 2 phần, slugPart không chứa /).
-     * Tránh slug dạng 21419/55628/black-friday gây 404 và lỗi khi edit.
+     * Slug một segment (URL /visit/{slug}), duy nhất giữa các chiến dịch đang hoạt động (deleted_at null).
+     * Hỗ trợ nhập cũ dạng {userCode}/{part}: chỉ giữ phần cuối làm slug.
      *
      * @param  string|array|null  $slug
      */
-    public static function normalizeCampaignSlug(mixed $slug, string $title, $brandId): string
+    public static function normalizeCampaignSlug(mixed $slug, string $title, ?int $ignoreCampaignId): string
     {
-        $userCode = '00000';
-        if ($brandId) {
-            try {
-                $brand = \App\Models\Brand::withoutEvents(fn () => \App\Models\Brand::find($brandId));
-                if ($brand && $brand->user_id) {
-                    $user = \App\Models\User::withoutEvents(fn () => \App\Models\User::find($brand->user_id));
-                    $userCode = $user?->code ?? '00000';
-                }
-            } catch (\Throwable $e) {
-                // keep 00000
-            }
-        }
-
         if (is_array($slug)) {
             $slug = implode('/', $slug);
         }
@@ -155,13 +146,40 @@ class Campaign extends Model
         $segments = array_values(array_filter(explode('/', $slug)));
 
         if (count($segments) === 0) {
-            return $userCode . '/' . Str::slug($title ?: 'campaign');
+            $base = Str::slug($title ?: 'campaign');
+        } elseif (count($segments) === 1) {
+            $base = Str::slug($segments[0]) ?: Str::slug($title ?: 'campaign');
+        } else {
+            $base = Str::slug(end($segments)) ?: Str::slug($title ?: 'campaign');
         }
-        if (count($segments) === 1) {
-            return $userCode . '/' . Str::slug($segments[0]);
+
+        if ($base === '') {
+            $base = Str::slug($title ?: 'campaign') ?: 'campaign';
         }
-        // 2+ segments: luôn dùng userCode của brand và phần slug là 1 segment (phần cuối)
-        $slugPart = Str::slug(end($segments)) ?: Str::slug($title ?: 'campaign');
-        return $userCode . '/' . $slugPart;
+
+        return static::ensureUniqueCampaignSlug($base, $ignoreCampaignId);
+    }
+
+    public static function ensureUniqueCampaignSlug(string $base, ?int $ignoreCampaignId = null): string
+    {
+        $base = Str::slug($base) ?: 'campaign';
+        $candidate = $base;
+        $n = 2;
+
+        $conflicts = static::query()
+            ->where('slug', $candidate)
+            ->whereNull('deleted_at')
+            ->when($ignoreCampaignId !== null, fn ($q) => $q->where('id', '!=', $ignoreCampaignId));
+
+        while ($conflicts->exists()) {
+            $candidate = $base . '-' . $n;
+            $n++;
+            $conflicts = static::query()
+                ->where('slug', $candidate)
+                ->whereNull('deleted_at')
+                ->when($ignoreCampaignId !== null, fn ($q) => $q->where('id', '!=', $ignoreCampaignId));
+        }
+
+        return $candidate;
     }
 }

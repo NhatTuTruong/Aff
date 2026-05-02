@@ -825,10 +825,7 @@
                                     $brand = $campaign->brand;
                                     $reviewSlug = $campaign->slug;
                                     if ($reviewSlug) {
-                                        $slugParts = explode('/', $reviewSlug, 2);
-                                        $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
-                                        $slugPart = count($slugParts) === 2 ? $slugParts[1] : $reviewSlug;
-                                        $reviewUrl = route('landing.show', ['userCode' => $userCode, 'slug' => $slugPart]);
+                                        $reviewUrl = route('landing.show', ['slug' => $reviewSlug]);
                                     } else {
                                         $reviewUrl = url('/') . '?q=' . urlencode($brand?->name ?? $campaign->title);
                                     }
@@ -853,10 +850,7 @@
                                     $brand = $campaign->brand;
                                     $reviewSlug = $campaign->slug;
                                     if ($reviewSlug) {
-                                        $slugParts = explode('/', $reviewSlug, 2);
-                                        $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
-                                        $slugPart = count($slugParts) === 2 ? $slugParts[1] : $reviewSlug;
-                                        $reviewUrl = route('landing.show', ['userCode' => $userCode, 'slug' => $slugPart]);
+                                        $reviewUrl = route('landing.show', ['slug' => $reviewSlug]);
                                     } else {
                                         $reviewUrl = url('/') . '?q=' . urlencode($brand?->name ?? $campaign->title);
                                     }
@@ -925,12 +919,7 @@
                                 </button>
                             @endif
                             @if($campaign && $campaign->affiliate_url)
-                                @php
-                                    $slugParts = explode('/', $campaign->slug, 2);
-                                    $userCode = count($slugParts) === 2 ? $slugParts[0] : '00000';
-                                    $slugPart = count($slugParts) === 2 ? $slugParts[1] : $campaign->slug;
-                                @endphp
-                                <a href="{{ route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart]) }}" class="coupon-card-cta" target="_blank" rel="noopener">Get Deal</a>
+                                <a href="{{ route('click.redirect', ['slug' => $campaign->slug]) }}" class="coupon-card-cta" target="_blank" rel="noopener">Get Deal</a>
                             @endif
                         </div>
                         </div>

@@ -69,11 +69,9 @@ PROMPT;
         $brand->loadMissing('category');
         $campaign->loadMissing('couponItems');
 
-        $segments = array_values(array_filter(explode('/', (string) $campaign->slug)));
-        $userCode = $segments[0] ?? '00000';
-        $slugPart = $segments[1] ?? Str::slug($campaign->title ?: 'deal');
-        $affiliateTrackingUrl = route('click.redirect', ['userCode' => $userCode, 'slug' => $slugPart], true);
-        $couponLandingUrl = route('landing.show', ['userCode' => $userCode, 'slug' => $slugPart], true);
+        $campaignSlug = (string) $campaign->slug;
+        $affiliateTrackingUrl = route('click.redirect', ['slug' => $campaignSlug], true);
+        $couponLandingUrl = route('landing.show', ['slug' => $campaignSlug], true);
 
         $brandName = $brand->name;
         $domain = $brand->domain ? trim((string) $brand->domain) : '';

@@ -38,12 +38,7 @@ class CreateCampaign extends CreateRecord
 
     protected function afterCreate(): void
     {
-        $parts = explode('/', $this->record->slug, 2);
-        if (count($parts) === 2) {
-            $landingUrl = route('landing.show', ['userCode' => $parts[0], 'slug' => $parts[1]]);
-        } else {
-            $landingUrl = route('landing.show', ['userCode' => '00000', 'slug' => $this->record->slug]);
-        }
+        $landingUrl = route('landing.show', ['slug' => $this->record->slug]);
         $fullUrl = url($landingUrl);
         
         Notification::make()
