@@ -74,17 +74,18 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #ffffff;
-            --surface: #f9fafb;
-            --surface-hover: #f3f4f6;
-            --text: #111827;
-            --text-dark: #111827;
-            --text-muted: #6b7280;
-            --primary: #22c55e;
-            --primary-dark: #16a34a;
-            --accent: var(--primary);
-            --accent-hover: var(--primary-dark);
-            --border: #e5e7eb;
+            --bg: #f7f5fb;
+            --surface: #ffffff;
+            --surface-hover: #f5f3ff;
+            --text: #0c0a12;
+            --text-dark: #0c0a12;
+            --text-muted: #5c5866;
+            --primary: #6d28d9;
+            --primary-dark: #5b21b6;
+            --accent: #6d28d9;
+            --accent-hover: #be123c;
+            --accent-rose: #e11d48;
+            --border: rgba(12, 10, 18, 0.1);
             --radius: 12px;
             --radius-sm: 8px;
         }
@@ -108,7 +109,13 @@
             text-decoration: none;
             letter-spacing: -0.02em;
         }
-        .logo span { color: var(--accent); }
+        .logo span {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-rose) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: var(--accent);
+        }
 
         /* Main */
         main { flex: 1; }
@@ -189,10 +196,11 @@
             flex-wrap: wrap;
         }
         .cookie-consent p { margin: 0; font-size: 0.9rem; flex: 1; min-width: 200px; }
-        .cookie-consent a { color: #93c5fd; text-decoration: underline; }
+        .cookie-consent a { color: #e9d5ff; text-decoration: underline; text-underline-offset: 2px; }
+        .cookie-consent a:hover { color: #fce7f3; }
         .cookie-consent-btn {
             padding: 0.5rem 1.25rem;
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-rose) 100%);
             color: #fff;
             border: none;
             border-radius: var(--radius-sm);
@@ -200,7 +208,10 @@
             cursor: pointer;
             white-space: nowrap;
         }
-        .cookie-consent-btn:hover { background: var(--accent-hover); }
+        .cookie-consent-btn:hover {
+            filter: brightness(1.06);
+            box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35);
+        }
     </style>
     @include('partials.site-chrome-styles')
     @stack('styles')

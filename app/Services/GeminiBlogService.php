@@ -110,7 +110,7 @@ You are an expert English SEO copywriter for affiliate coupon sites.
 Write ONE long-form blog article introducing the store/brand below. Language: **English**. Target length **1,800–2,600 words**. Tone: helpful, trustworthy, conversion-oriented but honest.
 
 ## Brand & campaign facts (use only as facts; do not invent unavailable data)
-- This row is an **imported campaign** in our system. The **store name** in the article must be the Brand name below (same store as on the campaign landing / coupon page).
+- This row is a campaign in our system. The **store name** in the article must be the Brand name below (same store as on the campaign landing / coupon page).
 - Category niche: {$categoryName}
 - Brand / store name (exact spelling): {$brandName}
 - Domain (if any): {$domain}

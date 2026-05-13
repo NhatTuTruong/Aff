@@ -6,307 +6,381 @@
 @push('styles')
 <style>
     .home-page {
-        --home-primary: #059669;
-        --home-primary-dark: #047857;
-        --home-primary-soft: #d1fae5;
-        --home-accent: #ea580c;
-        --home-accent-hover: #c2410c;
-        --home-border: #e2e8f0;
-        --home-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 12px 24px -8px rgba(15, 23, 42, 0.1);
-        --home-ribbon: linear-gradient(180deg, #0d9488 0%, #059669 55%, #047857 100%);
-        background: linear-gradient(180deg, #f1f5f9 0%, #f8fafc 40%, #eef2f7 100%);
+        --hp-ink: #0c0a12;
+        --hp-muted: #5c5866;
+        --hp-line: rgba(12, 10, 18, 0.08);
+        --hp-violet: #6d28d9;
+        --hp-violet-deep: #5b21b6;
+        --hp-rose: #e11d48;
+        --hp-rose-deep: #be123c;
+        --hp-surface: #ffffff;
+        --hp-cream: #f7f5fb;
+        --hp-glow: radial-gradient(120% 80% at 80% 0%, rgba(109, 40, 217, 0.14) 0%, transparent 55%),
+            radial-gradient(90% 60% at 10% 100%, rgba(225, 29, 72, 0.08) 0%, transparent 50%);
+        background: var(--hp-cream);
+        background-image: var(--hp-glow);
+        color: var(--hp-ink);
     }
-    .container { max-width: 1140px; margin: 0 auto; padding: 0 1.5rem; }
-
-    .hero {
-        position: relative;
-        padding: 3rem 0 2.5rem;
-        text-align: center;
-        overflow: hidden;
-    }
-    .hero-inner {
-        max-width: 920px;
+    .home-page .hp-shell {
+        width: 100%;
+        max-width: 1180px;
         margin: 0 auto;
-        padding: 2.75rem 2rem 2.5rem;
-        background: #ffffff;
-        border-radius: 22px;
-        border: 1px solid var(--home-border);
-        box-shadow: var(--home-shadow);
+        padding: 0 1.25rem;
+    }
+
+    .hp-hero {
         position: relative;
+        padding: clamp(2.5rem, 6vw, 4.25rem) 0 clamp(2rem, 4vw, 3rem);
         overflow: hidden;
     }
-    .hero-inner::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: min(42%, 340px);
-        height: 100%;
-        background: radial-gradient(ellipse at 100% 0%, rgba(5, 150, 105, 0.1) 0%, transparent 65%);
-        pointer-events: none;
-    }
-    .hero::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: radial-gradient(circle at 15% 40%, rgba(5, 150, 105, 0.08) 0%, transparent 45%),
-                    radial-gradient(circle at 85% 70%, rgba(234, 88, 12, 0.06) 0%, transparent 50%);
-        pointer-events: none;
-    }
-    .hero .container { position: relative; z-index: 1; }
-    .hero-badge {
-        display: inline-block;
-        font-size: 0.7rem;
-        font-weight: 800;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--home-primary-dark);
-        background: var(--home-primary-soft);
-        border: 1px solid rgba(5, 150, 105, 0.25);
-        padding: 0.35rem 0.85rem;
-        border-radius: 999px;
-        margin-bottom: 1rem;
-    }
-    .hero h1 {
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: clamp(1.85rem, 4.5vw, 2.85rem);
-        font-weight: 800;
-        letter-spacing: -0.04em;
-        line-height: 1.15;
-        margin-bottom: 1rem;
-        color: #0f172a;
-        position: relative;
-        max-width: 38rem;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .hero p {
-        color: #64748b;
-        font-size: clamp(1rem, 2vw, 1.08rem);
-        margin-bottom: 1.5rem;
-        max-width: 34rem;
-        margin-left: auto;
-        margin-right: auto;
-        line-height: 1.7;
-        position: relative;
-    }
-    .hero-trust-line {
-        font-size: 0.8125rem;
-        color: #94a3b8;
-        margin-top: -0.75rem;
-        margin-bottom: 1.5rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--home-border);
-        position: relative;
-    }
-    .hero-trust-line a { color: var(--home-primary); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
-    .hero-trust-line a:hover { color: var(--home-primary-dark); }
-
-    .search-box {
-        max-width: 520px;
-        margin: 0 auto;
-        display: flex;
-        background: #f8fafc;
-        border: 2px solid var(--home-border);
-        border-radius: 999px;
-        overflow: hidden;
-        transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .search-box:focus-within {
-        border-color: var(--home-primary);
-        box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.12);
-    }
-    .search-box input {
-        flex: 1;
-        padding: 1.1rem 1.35rem;
-        background: transparent;
-        border: none;
-        color: var(--text);
-        font-size: 1rem;
-        outline: none;
-    }
-    .search-box input::placeholder {
-        color: var(--text-muted);
-        opacity: 0.75;
-    }
-    .search-box button {
-        padding: 0.95rem 1.5rem;
-        margin: 4px;
-        border-radius: 999px;
-        background: linear-gradient(135deg, var(--home-accent) 0%, var(--home-accent-hover) 100%);
-        color: white;
-        border: none;
-        font-weight: 800;
-        font-size: 0.875rem;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
-    }
-    .search-box button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 18px rgba(234, 88, 12, 0.4);
-    }
-
-    .stats-section {
-        padding: 1.5rem 0 2.5rem;
-        background: transparent;
-    }
-    .stats-grid {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.75rem 1rem;
-    }
-    .stats-section .container {
-        background: transparent;
-        padding: 0;
-        border: none;
-        box-shadow: none;
-    }
-    .stat-item {
-        display: inline-flex;
-        align-items: baseline;
-        gap: 0.5rem;
-        padding: 0.85rem 1.35rem;
-        background: #fff;
-        border: 1px solid var(--home-border);
-        border-radius: 14px;
-        box-shadow: var(--home-shadow);
-    }
-    .stat-number {
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: #0f172a;
-        letter-spacing: -0.02em;
-    }
-    .stat-label {
-        color: #64748b;
-        font-size: 0.72rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-    }
-
-    .section {
-        padding: 3.25rem 0;
-        position: relative;
-    }
-    .section--surface {
-        background: #fff;
-        border-top: 1px solid var(--home-border);
-        border-bottom: 1px solid var(--home-border);
-        box-shadow: 0 1px 0 rgba(255,255,255,0.9);
-    }
-    .section-title {
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: clamp(1.5rem, 3.5vw, 2rem);
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        color: #0f172a;
-        letter-spacing: -0.03em;
-    }
-    .section-title::before {
-        content: '';
-        width: 4px;
-        height: 1.75rem;
-        background: var(--home-ribbon);
-        border-radius: 4px;
-        flex-shrink: 0;
-    }
-    .section-eyebrow {
-        font-size: 0.7rem;
-        font-weight: 800;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--home-primary);
-        margin-bottom: 0.35rem;
-    }
-    .section-subtitle {
-        color: #64748b;
-        font-size: 1rem;
-        margin-bottom: 1.75rem;
-        max-width: 36rem;
-        line-height: 1.55;
-    }
-    .deals-disclaimer {
-        font-size: 0.8125rem;
-        color: #64748b;
-        margin-top: -0.5rem;
-        margin-bottom: 1.5rem;
-        max-width: 720px;
-        padding: 0.75rem 1rem;
-        background: #f8fafc;
-        border-radius: 10px;
-        border: 1px solid var(--home-border);
-    }
-    .deals-disclaimer a { color: var(--home-primary); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
-    .deals-disclaimer a:hover { color: var(--home-primary-dark); }
-    #coupons { scroll-margin-top: 5rem; }
-    #stores { scroll-margin-top: 5rem; }
-    #blog { scroll-margin-top: 5rem; }
-    #categories { scroll-margin-top: 5rem; }
-
-    .popular-categories {
-        padding: 3.5rem 0;
-        background: linear-gradient(155deg, #0f172a 0%, #134e4a 45%, #0f172a 100%);
-        color: #fff;
-        position: relative;
-        overflow: hidden;
-    }
-    .popular-categories::before {
+    .hp-hero::before {
         content: '';
         position: absolute;
         inset: 0;
-        background: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(16, 185, 129, 0.2) 0%, transparent 55%);
+        background:
+            linear-gradient(165deg, rgba(255, 255, 255, 0.92) 0%, rgba(247, 245, 251, 0.65) 45%, transparent 100%),
+            repeating-linear-gradient(-12deg, transparent, transparent 48px, rgba(109, 40, 217, 0.03) 48px, rgba(109, 40, 217, 0.03) 49px);
         pointer-events: none;
     }
-    .popular-categories .container { position: relative; z-index: 1; }
-    .popular-categories .section-title { color: #fff; }
-    .popular-categories .section-title::before {
-        background: linear-gradient(180deg, #34d399 0%, #059669 100%);
-        box-shadow: 0 0 20px rgba(52, 211, 153, 0.35);
+    .hp-hero-grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        align-items: center;
     }
-    .categories-wrap {
+    @media (min-width: 900px) {
+        .hp-hero-grid {
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 3rem;
+        }
+    }
+    .hp-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--hp-violet-deep);
+        margin-bottom: 1rem;
+    }
+    .hp-kicker::before {
+        content: '';
+        width: 2rem;
+        height: 2px;
+        background: linear-gradient(90deg, var(--hp-violet), var(--hp-rose));
+        border-radius: 2px;
+    }
+    .hp-hero h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(2.1rem, 5vw, 3.35rem);
+        font-weight: 700;
+        letter-spacing: -0.045em;
+        line-height: 1.08;
+        color: var(--hp-ink);
+        margin: 0 0 1.1rem;
+        max-width: 16ch;
+    }
+    .hp-hero-lead {
+        font-size: clamp(1rem, 1.35vw, 1.125rem);
+        color: var(--hp-muted);
+        line-height: 1.65;
+        max-width: 38rem;
+        margin: 0 0 1.25rem;
+    }
+    .hp-trust {
+        font-size: 0.8125rem;
+        color: var(--hp-muted);
+        margin-bottom: 1.75rem;
+        max-width: 36rem;
+    }
+    .hp-trust a {
+        color: var(--hp-violet);
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+    .hp-trust a:hover { color: var(--hp-violet-deep); }
+
+    .hp-search {
         display: flex;
         flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.65rem 0.85rem;
+        gap: 0.6rem;
+        padding: 0.45rem;
+        background: var(--hp-surface);
+        border: 1px solid var(--hp-line);
+        border-radius: 999px;
+        box-shadow: 0 18px 50px -28px rgba(12, 10, 18, 0.35);
+        max-width: 520px;
     }
-    .category-pill {
-        display: inline-block;
-        padding: 0.55rem 1.15rem;
-        border: 1px solid rgba(255,255,255,0.22);
-        border-radius: 9999px;
-        color: #f1f5f9;
-        text-decoration: none;
-        font-size: 0.9rem;
-        font-weight: 600;
-        background: rgba(255,255,255,0.06);
-        backdrop-filter: blur(8px);
-        transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    .hp-search:focus-within {
+        border-color: rgba(109, 40, 217, 0.35);
+        box-shadow: 0 18px 50px -28px rgba(109, 40, 217, 0.25);
     }
-    .category-pill:hover {
-        border-color: #34d399;
-        background: rgba(16, 185, 129, 0.15);
-        transform: translateY(-1px);
+    .hp-search input {
+        flex: 1;
+        min-width: 0;
+        border: none;
+        background: transparent;
+        padding: 0.85rem 1rem 0.85rem 1.15rem;
+        font-size: 1rem;
+        color: var(--hp-ink);
+        outline: none;
+    }
+    .hp-search input::placeholder { color: #9ca3af; }
+    .hp-search button {
+        border: none;
+        cursor: pointer;
+        padding: 0.85rem 1.35rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.8125rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
         color: #fff;
+        background: linear-gradient(135deg, var(--hp-violet) 0%, var(--hp-rose) 100%);
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 8px 24px -8px rgba(109, 40, 217, 0.55);
+    }
+    .hp-search button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 28px -8px rgba(225, 29, 72, 0.45);
     }
 
-    .stores-panel {
-        background: #fff;
-        border: 1px solid var(--home-border);
+    .hp-hero-aside {
+        position: relative;
+        min-height: 220px;
+        border-radius: 28px;
+        background: linear-gradient(145deg, #1e1033 0%, #312e81 42%, #4c1d95 100%);
+        padding: 1.75rem;
+        color: #f5f3ff;
+        overflow: hidden;
+        box-shadow: 0 28px 60px -24px rgba(49, 46, 129, 0.65);
+    }
+    .hp-hero-aside::after {
+        content: '';
+        position: absolute;
+        right: -20%;
+        top: -30%;
+        width: 70%;
+        height: 90%;
+        background: radial-gradient(circle, rgba(225, 29, 72, 0.35) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .hp-aside-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.75;
+        margin-bottom: 0.75rem;
+        position: relative;
+        z-index: 1;
+    }
+    .hp-aside-stat {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(2.25rem, 4vw, 2.85rem);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        margin-bottom: 0.35rem;
+        position: relative;
+        z-index: 1;
+    }
+    .hp-aside-caption {
+        font-size: 0.9rem;
+        opacity: 0.88;
+        max-width: 14rem;
+        line-height: 1.45;
+        position: relative;
+        z-index: 1;
+    }
+    .hp-aside-dots {
+        position: absolute;
+        bottom: 1.25rem;
+        right: 1.25rem;
+        display: flex;
+        gap: 0.35rem;
+        z-index: 1;
+    }
+    .hp-aside-dots span {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.35);
+    }
+    .hp-aside-dots span:nth-child(2) { background: rgba(244, 114, 182, 0.9); }
+
+    .hp-stats {
+        padding: 0 0 2.5rem;
+        position: relative;
+        z-index: 1;
+    }
+    .hp-stats-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+    @media (min-width: 640px) {
+        .hp-stats-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    .hp-stat-card {
+        background: var(--hp-surface);
+        border: 1px solid var(--hp-line);
+        border-radius: 18px;
+        padding: 1.1rem 1rem;
+        text-align: center;
+        box-shadow: 0 12px 32px -22px rgba(12, 10, 18, 0.2);
+    }
+    .hp-stat-num {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.65rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        color: var(--hp-ink);
+    }
+    .hp-stat-label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--hp-muted);
+        margin-top: 0.35rem;
+    }
+
+    .hp-section {
+        padding: clamp(2.5rem, 5vw, 3.75rem) 0;
+    }
+    .hp-section--tint {
+        background: var(--hp-surface);
+        border-top: 1px solid var(--hp-line);
+        border-bottom: 1px solid var(--hp-line);
+    }
+    .hp-sec-head {
+        margin-bottom: 1.75rem;
+        max-width: 40rem;
+    }
+    .hp-sec-eyebrow {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--hp-rose);
+        margin-bottom: 0.4rem;
+    }
+    .hp-sec-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(1.45rem, 3vw, 2rem);
+        font-weight: 700;
+        letter-spacing: -0.035em;
+        color: var(--hp-ink);
+        margin: 0 0 0.5rem;
+    }
+    .hp-sec-desc {
+        margin: 0;
+        color: var(--hp-muted);
+        font-size: 1rem;
+        line-height: 1.55;
+    }
+    .hp-disclaimer {
+        font-size: 0.8125rem;
+        color: var(--hp-muted);
+        margin: -0.25rem 0 1.5rem;
+        padding: 0.85rem 1rem;
+        border-radius: 14px;
+        border: 1px dashed var(--hp-line);
+        background: rgba(109, 40, 217, 0.04);
+        max-width: 720px;
+    }
+    .hp-disclaimer a {
+        color: var(--hp-violet);
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+    #coupons, #stores, #blog, #categories { scroll-margin-top: 5rem; }
+
+    .hp-posts {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 1.1rem;
+    }
+    .hp-post-card {
+        display: flex;
+        flex-direction: column;
         border-radius: 20px;
-        padding: 1.75rem 1.25rem 1.5rem;
-        box-shadow: var(--home-shadow);
+        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        background: var(--hp-surface);
+        border: 1px solid var(--hp-line);
+        box-shadow: 0 16px 40px -30px rgba(12, 10, 18, 0.35);
+        transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.2s;
+    }
+    .hp-post-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(109, 40, 217, 0.22);
+        box-shadow: 0 24px 50px -28px rgba(109, 40, 217, 0.28);
+    }
+    .hp-post-media {
+        aspect-ratio: 16 / 10;
+        background: #ede9fe;
+        overflow: hidden;
+    }
+    .hp-post-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .hp-post-body {
+        padding: 1.15rem 1.2rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    .hp-post-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.3;
+        margin: 0 0 0.5rem;
+        color: var(--hp-ink);
+    }
+    .hp-post-meta {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--hp-muted);
+        margin-top: auto;
+    }
+    .hp-post-link {
+        margin-top: 0.65rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--hp-violet);
+    }
+    .hp-post-card:hover .hp-post-link { color: var(--hp-rose); }
+    .hp-all-posts {
+        margin-top: 1.5rem;
+    }
+    .hp-all-posts a {
+        font-weight: 700;
+        color: var(--hp-violet);
+        text-decoration: none;
+        border-bottom: 2px solid rgba(109, 40, 217, 0.25);
+        padding-bottom: 2px;
+    }
+    .hp-all-posts a:hover { color: var(--hp-rose); border-bottom-color: rgba(225, 29, 72, 0.35); }
+
+    .hp-stores-panel {
+        background: var(--hp-surface);
+        border: 1px solid var(--hp-line);
+        border-radius: 24px;
+        padding: 1.5rem 1rem 1.35rem;
+        box-shadow: 0 20px 50px -32px rgba(12, 10, 18, 0.25);
     }
     .stores-carousel-wrap {
         overflow: hidden;
@@ -315,21 +389,17 @@
         cursor: grab;
         user-select: none;
     }
-    .stores-carousel-wrap:active {
-        cursor: grabbing;
-    }
+    .stores-carousel-wrap:active { cursor: grabbing; }
     .stores-carousel-track {
         display: flex;
         width: max-content;
         transition: transform 0.1s ease-out;
     }
-    .stores-carousel-wrap.dragging .stores-carousel-track {
-        transition: none;
-    }
+    .stores-carousel-wrap.dragging .stores-carousel-track { transition: none; }
     .stores-carousel {
         display: flex;
         align-items: flex-start;
-        gap: 2rem;
+        gap: 1.75rem;
         padding: 0.5rem 1rem 0.5rem 0;
     }
     .store-carousel-item {
@@ -339,47 +409,38 @@
         align-items: center;
         text-decoration: none;
         color: inherit;
-        width: 96px;
+        width: 100px;
         transition: transform 0.2s ease;
     }
-    .store-carousel-item:hover {
-        transform: translateY(-3px);
-    }
+    .store-carousel-item:hover { transform: translateY(-4px); }
     .store-carousel-img-wrap {
-        width: 76px;
-        height: 76px;
-        border-radius: 16px;
+        width: 80px;
+        height: 80px;
+        border-radius: 22px;
         overflow: hidden;
-        background: #f8fafc;
-        border: 1px solid var(--home-border);
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+        background: linear-gradient(180deg, #faf5ff 0%, #f3e8ff 100%);
+        border: 1px solid var(--hp-line);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 0.5rem;
-        flex-shrink: 0;
-        transition: box-shadow 0.2s, border-color 0.2s;
+        margin-bottom: 0.55rem;
+        box-shadow: 0 10px 24px -14px rgba(109, 40, 217, 0.35);
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
     .store-carousel-item:hover .store-carousel-img-wrap {
-        border-color: rgba(5, 150, 105, 0.35);
-        box-shadow: 0 8px 20px rgba(5, 150, 105, 0.12);
+        border-color: rgba(109, 40, 217, 0.35);
+        box-shadow: 0 14px 28px -12px rgba(225, 29, 72, 0.2);
     }
     .store-carousel-img-wrap img {
         width: 100%;
         height: 100%;
         object-fit: contain;
-        padding: 6px;
-    }
-    .store-carousel-placeholder {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--text-muted);
-        background: #ffffff;
+        padding: 8px;
     }
     .store-carousel-name {
         font-size: 0.78rem;
         font-weight: 700;
-        color: #334155;
+        color: #433d4d;
         text-align: center;
         line-height: 1.25;
         max-width: 100%;
@@ -390,124 +451,51 @@
         -webkit-box-orient: vertical;
     }
 
-    .posts-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 1.25rem;
-    }
-    .post-card-home {
-        display: flex;
-        flex-direction: column;
-        border: 1px solid var(--home-border);
-        border-radius: 16px;
-        text-decoration: none;
-        color: inherit;
-        overflow: hidden;
-        background: #fff;
-        box-shadow: var(--home-shadow);
-        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-    }
-    .post-card-home:hover {
-        border-color: rgba(5, 150, 105, 0.35);
-        box-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.15);
-        transform: translateY(-3px);
-    }
-    .post-card-home-img-wrap {
-        aspect-ratio: 16 / 10;
-        overflow: hidden;
-        background: #f1f5f9;
-    }
-    .post-card-home-thumb {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    .post-card-home-thumb-placeholder {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--text-muted);
-        font-size: 0.75rem;
-        height: 100%;
-        min-height: 140px;
-    }
-    .post-card-home-content {
-        padding: 1.1rem 1.15rem 1.2rem;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-    .post-card-home-title {
-        font-size: 1.05rem;
-        font-weight: 700;
-        margin: 0 0 0.5rem;
-        line-height: 1.35;
-        color: #0f172a;
-        letter-spacing: -0.02em;
-    }
-    .post-card-home-meta {
-        font-size: 0.8rem;
-        color: #64748b;
-        margin: 0;
-        margin-top: auto;
-        font-weight: 500;
-    }
-    .post-card-home-read {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: var(--home-primary);
-        margin-top: 0.65rem;
-    }
-    .post-card-home:hover .post-card-home-read {
-        color: var(--home-primary-dark);
-    }
-
-    .coupons-grid {
+    .hp-coupons {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 1rem;
     }
     .coupon-card {
         display: grid;
-        grid-template-columns: 72px 1fr;
-        background: #fff;
-        border: 1px solid var(--home-border);
-        border-radius: 16px;
+        grid-template-columns: 76px 1fr;
+        background: var(--hp-surface);
+        border: 1px solid var(--hp-line);
+        border-radius: 20px;
         overflow: hidden;
-        transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
-        box-shadow: var(--home-shadow);
-        animation: fadeInUp 0.5s ease-out backwards;
+        box-shadow: 0 14px 36px -24px rgba(12, 10, 18, 0.22);
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        animation: hpFadeUp 0.55s ease backwards;
     }
     .coupon-card:hover {
-        border-color: rgba(5, 150, 105, 0.35);
-        box-shadow: 0 14px 36px -10px rgba(15, 23, 42, 0.14);
-        transform: translateY(-2px);
+        transform: translateY(-3px);
+        border-color: rgba(109, 40, 217, 0.2);
+        box-shadow: 0 22px 44px -22px rgba(109, 40, 217, 0.22);
     }
     .coupon-card-strip {
-        background: var(--home-ribbon);
+        background: linear-gradient(180deg, #5b21b6 0%, #7c3aed 50%, #be185d 100%);
         color: #fff;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 0.75rem 0.35rem;
+        padding: 0.75rem 0.4rem;
         text-align: center;
         font-weight: 800;
-        font-size: 0.65rem;
-        letter-spacing: 0.08em;
+        font-size: 0.62rem;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
         line-height: 1.2;
-        gap: 0.2rem;
+        gap: 0.25rem;
     }
     .coupon-card-strip-icon {
-        font-size: 1.35rem;
+        font-size: 1.4rem;
         font-weight: 800;
         letter-spacing: 0;
         text-transform: none;
-        line-height: 1;
     }
     .coupon-card-main {
-        padding: 1rem 1rem 1rem 0.85rem;
+        padding: 1rem 1rem 1rem 0.9rem;
         display: flex;
         flex-direction: column;
         min-width: 0;
@@ -519,34 +507,26 @@
         margin-bottom: 0.45rem;
     }
     .coupon-card-logo {
-        width: 42px;
-        height: 42px;
+        width: 44px;
+        height: 44px;
         object-fit: contain;
-        border-radius: 10px;
-        background: #f8fafc;
+        border-radius: 12px;
+        background: #faf5ff;
         padding: 4px;
-        border: 1px solid var(--home-border);
+        border: 1px solid var(--hp-line);
         flex-shrink: 0;
-    }
-    .coupon-card-logo-placeholder {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--text-muted);
     }
     .coupon-card-brand {
         font-weight: 700;
-        font-size: 0.92rem;
-        color: #0f172a;
+        font-size: 0.95rem;
+        color: var(--hp-ink);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
     .coupon-card-offer {
         font-size: 0.84rem;
-        color: #64748b;
+        color: var(--hp-muted);
         margin: 0 0 0.75rem;
         line-height: 1.45;
         display: -webkit-box;
@@ -566,217 +546,199 @@
         align-items: center;
         gap: 0.35rem;
         padding: 0.45rem 0.7rem;
-        background: #ecfdf5;
-        border: 1px dashed var(--home-primary);
-        border-radius: 8px;
+        background: #f5f3ff;
+        border: 1px dashed var(--hp-violet);
+        border-radius: 10px;
         font-size: 0.78rem;
         font-weight: 700;
-        color: var(--home-primary-dark);
+        color: var(--hp-violet-deep);
         cursor: pointer;
         transition: background 0.2s, border-color 0.2s;
         font-family: ui-monospace, monospace;
     }
     .coupon-card-code:hover {
-        background: #d1fae5;
-        border-color: var(--home-primary-dark);
+        background: #ede9fe;
+        border-color: var(--hp-violet-deep);
     }
     .coupon-card-code.copied {
-        background: #d1fae5;
-        border-color: var(--home-primary);
-        color: #065f46;
+        background: #ede9fe;
+        border-color: var(--hp-violet);
+        color: #5b21b6;
     }
     .coupon-card-code-label {
-        font-size: 0.65rem;
+        font-size: 0.62rem;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.06em;
         opacity: 0.85;
     }
-    .coupon-card-code-value {
-        letter-spacing: 0.02em;
-    }
-    .coupon-card-code-copy {
-        font-size: 0.65rem;
-        opacity: 0.85;
-    }
-    .coupon-card-code.copied .coupon-card-code-copy {
-        display: none;
-    }
+    .coupon-card-code-value { letter-spacing: 0.02em; }
+    .coupon-card-code-copy { font-size: 0.62rem; opacity: 0.85; }
+    .coupon-card-code.copied .coupon-card-code-copy { display: none; }
     .coupon-card-code.copied::after {
         content: '✓';
         margin-left: 0.25rem;
-        color: var(--home-primary);
+        color: var(--hp-violet);
     }
     .coupon-card-cta {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 0.45rem 1rem;
-        background: linear-gradient(135deg, var(--home-accent) 0%, var(--home-accent-hover) 100%);
+        padding: 0.48rem 1rem;
+        background: linear-gradient(135deg, var(--hp-violet) 0%, var(--hp-rose) 100%);
         color: #fff;
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         font-weight: 800;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.07em;
         text-transform: uppercase;
-        border-radius: 10px;
+        border-radius: 11px;
         text-decoration: none;
         transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.28);
+        box-shadow: 0 6px 18px -6px rgba(109, 40, 217, 0.55);
     }
     .coupon-card-cta:hover {
         transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35);
+        box-shadow: 0 10px 22px -6px rgba(225, 29, 72, 0.45);
         color: #fff;
     }
 
-    .pagination-wrap {
-        margin-top: 2rem;
+    .hp-cats {
+        padding: clamp(2.75rem, 5vw, 3.75rem) 0;
+        background: linear-gradient(135deg, #ede9fe 0%, #fce7f3 55%, #faf5ff 100%);
+        border-top: 1px solid var(--hp-line);
+        position: relative;
+        overflow: hidden;
+    }
+    .hp-cats::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(60% 80% at 100% 0%, rgba(109, 40, 217, 0.12) 0%, transparent 55%);
+        pointer-events: none;
+    }
+    .hp-cats .hp-shell { position: relative; z-index: 1; }
+    .hp-cats .hp-sec-eyebrow { color: var(--hp-violet-deep); }
+    .hp-cats .hp-sec-title { color: var(--hp-ink); }
+    .hp-cat-row {
         display: flex;
-        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.55rem 0.65rem;
+        justify-content: flex-start;
     }
-    .pagination-wrap nav a, .pagination-wrap nav span {
+    @media (min-width: 720px) {
+        .hp-cat-row { justify-content: center; }
+    }
+    .hp-cat-pill {
         display: inline-block;
-        padding: 0.45rem 0.8rem;
-        margin: 0 0.12rem;
-        background: #fff;
-        border: 1px solid var(--home-border);
-        border-radius: 10px;
-        color: var(--text);
+        padding: 0.55rem 1.2rem;
+        border-radius: 999px;
         text-decoration: none;
-        font-size: 0.88rem;
-        font-weight: 500;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--hp-ink);
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(12, 10, 18, 0.08);
+        backdrop-filter: blur(8px);
+        transition: background 0.2s, border-color 0.2s, transform 0.2s;
     }
-    .pagination-wrap nav a:hover {
-        border-color: var(--home-primary);
-        color: var(--home-primary);
+    .hp-cat-pill:hover {
+        background: #fff;
+        border-color: rgba(109, 40, 217, 0.35);
+        transform: translateY(-2px);
     }
-    .pagination-wrap nav span { color: #94a3b8; }
-    .empty-state {
+
+    .hp-empty {
         text-align: center;
-        padding: 3rem 1rem;
-        color: #64748b;
-        background: #f8fafc;
-        border-radius: 16px;
-        border: 1px dashed var(--home-border);
+        padding: 3rem 1.25rem;
+        border-radius: 22px;
+        border: 1px dashed var(--hp-line);
+        background: rgba(255, 255, 255, 0.7);
+        color: var(--hp-muted);
     }
-    .empty-state svg {
+    .hp-empty svg {
         width: 72px;
         height: 72px;
         margin: 0 auto 1.25rem;
-        opacity: 0.45;
-        color: #94a3b8;
+        opacity: 0.4;
+        color: #a78bfa;
     }
-    .empty-state h3 {
+    .hp-empty h3 {
+        font-family: 'Space Grotesk', sans-serif;
         font-size: 1.15rem;
         font-weight: 700;
+        color: var(--hp-ink);
         margin-bottom: 0.5rem;
-        color: #0f172a;
     }
 
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(14px); }
+    @keyframes hpFadeUp {
+        from { opacity: 0; transform: translateY(16px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    .coupon-card:nth-child(1) { animation-delay: 0.05s; }
+    .coupon-card:nth-child(1) { animation-delay: 0.04s; }
     .coupon-card:nth-child(2) { animation-delay: 0.1s; }
-    .coupon-card:nth-child(3) { animation-delay: 0.15s; }
+    .coupon-card:nth-child(3) { animation-delay: 0.16s; }
 
     @media (max-width: 768px) {
-        .hero {
-            padding: 2.25rem 0 2rem;
-        }
-        .hero-inner {
-            padding: 2rem 1.35rem;
-            border-radius: 18px;
-        }
-        .search-box {
-            flex-direction: column;
-            border-radius: 14px;
-        }
-        .search-box button {
-            margin: 0 4px 4px;
-            width: calc(100% - 8px);
-        }
-        .stores-carousel {
-            gap: 1.25rem;
-        }
-        .store-carousel-item {
-            width: 84px;
-        }
-        .store-carousel-img-wrap {
-            width: 64px;
-            height: 64px;
-        }
-        .categories-wrap {
-            gap: 0.5rem;
-        }
-        .category-pill {
-            padding: 0.5rem 1rem;
-            font-size: 0.85rem;
-        }
-        .coupons-grid {
-            grid-template-columns: 1fr;
-        }
-        .stat-item {
-            flex: 1 1 calc(50% - 0.5rem);
-            justify-content: center;
-        }
+        .hp-search { border-radius: 18px; }
+        .hp-search button { width: 100%; }
+        .stores-carousel { gap: 1.25rem; }
+        .store-carousel-item { width: 88px; }
+        .store-carousel-img-wrap { width: 72px; height: 72px; }
+        .hp-coupons { grid-template-columns: 1fr; }
     }
     @media (max-width: 520px) {
-        .coupon-card {
-            grid-template-columns: 1fr;
-        }
+        .coupon-card { grid-template-columns: 1fr; }
         .coupon-card-strip {
             flex-direction: row;
             gap: 0.5rem;
             padding: 0.65rem 1rem;
         }
-        .coupon-card-main {
-            padding: 1rem 1rem 1.1rem;
-        }
+        .coupon-card-main { padding: 1rem 1rem 1.1rem; }
     }
 </style>
 @endpush
 
 @section('content')
 <div class="home-page">
-    <section class="hero">
-        <div class="container">
-            <div class="hero-inner">
-            <p class="hero-badge">Verified deals &amp; reviews</p>
-            <h1 class="font-heading">Discover Amazing Deals & Store Reviews</h1>
-            <p>Find the best coupon codes, exclusive promotions, and trusted store reviews. Save more with verified deals updated daily.</p>
-            <p class="hero-trust-line">Independent deal finder. We may earn from qualifying purchases. <a href="{{ url('/affiliate-disclosure') }}">Learn more</a>.</p>
-            <form action="{{ url('/') }}" method="get" class="search-box">
-                <input type="search" name="q" value="{{ $searchQuery ?? '' }}" placeholder="Search stores, brands, or deals..." autocomplete="off">
-                <button type="submit">
-                    <span>🔍</span> Search
-                </button>
-            </form>
+    <section class="hp-hero">
+        <div class="hp-shell hp-hero-grid">
+            <div>
+                <p class="hp-kicker">Deals you can trust</p>
+                <h1 class="font-heading">Save smarter with curated coupons &amp; honest store picks</h1>
+                <p class="hp-hero-lead">Search verified promotions, explore top stores, and read updates from our blog — refreshed often so you never miss a strong offer.</p>
+                <p class="hp-trust">We are an independent deal finder. We may earn from qualifying purchases. <a href="{{ url('/affiliate-disclosure') }}">Read our disclosure</a>.</p>
+                <form action="{{ url('/') }}" method="get" class="hp-search">
+                    <input type="search" name="q" value="{{ $searchQuery ?? '' }}" placeholder="Search brands, stores, or offers…" autocomplete="off">
+                    <button type="submit">Search</button>
+                </form>
             </div>
+            <aside class="hp-hero-aside" aria-hidden="true">
+                <p class="hp-aside-label">Why shoppers stay</p>
+                <p class="hp-aside-stat">Curated</p>
+                <p class="hp-aside-caption">Human-reviewed paths to real savings — fewer dead codes, clearer next steps.</p>
+                <div class="hp-aside-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            </aside>
         </div>
     </section>
 
     @if(($verifiedBrandsCount ?? 0) > 0 || $hotCoupons->isNotEmpty())
-    <section class="stats-section">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-number">
-                        {{ $verifiedBrandsCount ?? 0 }}+
-                    </div>
-                    <div class="stat-label">Verified Brands</div>
+    <section class="hp-stats">
+        <div class="hp-shell">
+            <div class="hp-stats-row">
+                <div class="hp-stat-card">
+                    <div class="hp-stat-num">{{ $verifiedBrandsCount ?? 0 }}+</div>
+                    <div class="hp-stat-label">Verified brands</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number">{{ $activeCouponsCount ?? $hotCoupons->count() }}+</div>
-                    <div class="stat-label">Active Coupons</div>
+                <div class="hp-stat-card">
+                    <div class="hp-stat-num">{{ $activeCouponsCount ?? $hotCoupons->count() }}+</div>
+                    <div class="hp-stat-label">Active coupons</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number">100%</div>
-                    <div class="stat-label">Trusted Reviews</div>
+                <div class="hp-stat-card">
+                    <div class="hp-stat-num">Editorial</div>
+                    <div class="hp-stat-label">Guides &amp; picks</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number">Daily</div>
-                    <div class="stat-label">Updated Deals</div>
+                <div class="hp-stat-card">
+                    <div class="hp-stat-num">Daily</div>
+                    <div class="hp-stat-label">Fresh checks</div>
                 </div>
             </div>
         </div>
@@ -784,44 +746,46 @@
     @endif
 
     @if(isset($latestPosts) && $latestPosts->isNotEmpty())
-    <section class="section section--surface" id="blog">
-        <div class="container">
-            <p class="section-eyebrow">From the blog</p>
-            <h2 class="section-title">Latest Blog Posts</h2>
-            <p class="section-subtitle">Recent articles and updates</p>
-            <div class="posts-grid">
+    <section class="hp-section hp-section--tint" id="blog">
+        <div class="hp-shell">
+            <header class="hp-sec-head">
+                <p class="hp-sec-eyebrow">Editorial</p>
+                <h2 class="hp-sec-title">Latest from the blog</h2>
+                <p class="hp-sec-desc">Short reads on saving tactics, store notes, and what changed this week.</p>
+            </header>
+            <div class="hp-posts">
                 @foreach($latestPosts as $post)
-                    <a href="{{ route('blog.show', $post->slug) }}" class="post-card-home">
-                        <div class="post-card-home-img-wrap">
-                            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" class="post-card-home-thumb" loading="lazy">
+                    <a href="{{ route('blog.show', $post->slug) }}" class="hp-post-card">
+                        <div class="hp-post-media">
+                            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy">
                         </div>
-                        <div class="post-card-home-content">
-                            <h3 class="post-card-home-title">{{ $post->title }}</h3>
-                            <p class="post-card-home-meta">{{ $post->created_at?->format('d M Y') }}</p>
-                            <span class="post-card-home-read">Read article →</span>
+                        <div class="hp-post-body">
+                            <h3 class="hp-post-title">{{ $post->title }}</h3>
+                            <p class="hp-post-meta">{{ $post->created_at?->format('d M Y') }}</p>
+                            <span class="hp-post-link">Open story</span>
                         </div>
                     </a>
                 @endforeach
             </div>
-            <p class="section-subtitle" style="margin-top:1.5rem; margin-bottom:0;">
-                <a href="{{ route('blog.index') }}" style="color:#059669;font-weight:700;">View all posts →</a>
-            </p>
+            <p class="hp-all-posts"><a href="{{ route('blog.index') }}">Browse the full archive</a></p>
         </div>
     </section>
     @endif
 
-    <section class="section" id="stores">
-        <div class="container">
-            <p class="section-eyebrow">Shop smarter</p>
-            <h2 class="section-title">Featured Stores</h2>
-            <p class="section-subtitle">Click a store to go straight to its coupon page</p>
+    <section class="hp-section" id="stores">
+        <div class="hp-shell">
+            <header class="hp-sec-head">
+                <p class="hp-sec-eyebrow">Stores in focus</p>
+                <h2 class="hp-sec-title">Featured destinations</h2>
+                <p class="hp-sec-desc">Tap a logo to jump straight into coupons and campaign details for that brand.</p>
+            </header>
             @if(isset($featuredCampaigns) && $featuredCampaigns->count() > 0)
-                <div class="stores-panel">
+                <div class="hp-stores-panel">
                 <div class="stores-carousel-wrap">
                     <div class="stores-carousel-track">
                         <div class="stores-carousel">
                             @foreach($featuredCampaigns as $campaign)
-                                @php 
+                                @php
                                     $brand = $campaign->brand;
                                     $reviewSlug = $campaign->slug;
                                     if ($reviewSlug) {
@@ -846,7 +810,7 @@
                         </div>
                         <div class="stores-carousel">
                             @foreach($featuredCampaigns as $campaign)
-                                @php 
+                                @php
                                     $brand = $campaign->brand;
                                     $reviewSlug = $campaign->slug;
                                     if ($reviewSlug) {
@@ -873,27 +837,27 @@
                 </div>
                 </div>
             @else
-                <div class="empty-state">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="hp-empty">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
-                    <h3>No campaigns available yet</h3>
-                    <p>
-                        Check back soon for new campaigns and deals!
-                    </p>
+                    <h3>No campaigns yet</h3>
+                    <p>Check back soon — new partner stores and offers land here first.</p>
                 </div>
             @endif
         </div>
     </section>
 
     @if($hotCoupons->isNotEmpty())
-    <section class="section section--surface" id="coupons">
-        <div class="container">
-            <p class="section-eyebrow">Limited time</p>
-            <h2 class="section-title">🔥 Hot Coupons & Deals</h2>
-            <p class="section-subtitle">Don't miss out on these exclusive offers and limited-time promotions</p>
-            <p class="deals-disclaimer">Offers may expire or change. Verify discount at the store checkout. We may earn a commission when you use our links — <a href="{{ url('/affiliate-disclosure') }}">see disclosure</a>.</p>
-            <div class="coupons-grid">
+    <section class="hp-section hp-section--tint" id="coupons">
+        <div class="hp-shell">
+            <header class="hp-sec-head">
+                <p class="hp-sec-eyebrow">Limited windows</p>
+                <h2 class="hp-sec-title">Hot coupons &amp; standout deals</h2>
+                <p class="hp-sec-desc">High-signal picks from brands we track — copy a code or open the offer in one tap.</p>
+            </header>
+            <p class="hp-disclaimer">Promotions can change or expire at any time. Always confirm at checkout. We may earn a commission when you use our links — <a href="{{ url('/affiliate-disclosure') }}">see disclosure</a>.</p>
+            <div class="hp-coupons">
                 @foreach($hotCoupons as $coupon)
                     @php $campaign = $coupon->campaign; $brand = $campaign?->brand; @endphp
                     @if($brand)
@@ -919,7 +883,7 @@
                                 </button>
                             @endif
                             @if($campaign && $campaign->affiliate_url)
-                                <a href="{{ route('click.redirect', ['slug' => $campaign->slug]) }}" class="coupon-card-cta" target="_blank" rel="noopener">Get Deal</a>
+                                <a href="{{ route('click.redirect', ['slug' => $campaign->slug]) }}" class="coupon-card-cta" target="_blank" rel="noopener">Get deal</a>
                             @endif
                         </div>
                         </div>
@@ -932,18 +896,21 @@
     @endif
 
     @if(isset($popularCategories) && $popularCategories->isNotEmpty())
-    <section class="popular-categories" id="categories">
-        <div class="container">
-            <p class="section-eyebrow" style="color:rgba(255,255,255,0.75);">Browse by topic</p>
-            <h2 class="section-title">Popular Categories</h2>
-            <div class="categories-wrap">
+    <section class="hp-cats" id="categories">
+        <div class="hp-shell">
+            <header class="hp-sec-head" style="text-align:center;margin-left:auto;margin-right:auto;">
+                <p class="hp-sec-eyebrow">Topics</p>
+                <h2 class="hp-sec-title">Browse by category</h2>
+                <p class="hp-sec-desc" style="margin-left:auto;margin-right:auto;">Jump into the verticals we cover most — each link filters the featured strip.</p>
+            </header>
+            <div class="hp-cat-row">
                 @foreach($popularCategories as $cat)
                     @php
                         $catName = is_object($cat) ? $cat->name : $cat['name'];
                         $catSlug = is_object($cat) ? ($cat->slug ?? '') : ($cat['slug'] ?? '');
                         $url = $catSlug ? url('/?cat=' . $catSlug) . '#stores' : url('/') . '#stores';
                     @endphp
-                    <a href="{{ $url }}" class="category-pill">{{ $catName }}</a>
+                    <a href="{{ $url }}" class="hp-cat-pill">{{ $catName }}</a>
                 @endforeach
             </div>
         </div>
@@ -962,8 +929,8 @@
         var startTx = 0;
         var dragging = false;
         var didDrag = false;
-        var direction = -1; // -1: scroll left, 1: scroll right
-        var step = 0.6; // pixels per tick
+        var direction = -1;
+        var step = 0.6;
         var autoPlayTimer = null;
 
         function clamp(x, min, max) { return Math.min(Math.max(x, min), max); }

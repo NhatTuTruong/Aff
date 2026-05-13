@@ -29,11 +29,9 @@ class BrandIntroBlogCandidateService
             ->leftJoinSub($pvSub, 'pv', 'pv.campaign_id', '=', 'campaigns.id')
             ->leftJoinSub($ckSub, 'ck', 'ck.campaign_id', '=', 'campaigns.id')
             ->join('brands', 'brands.id', '=', 'campaigns.brand_id')
-            ->whereNotNull('campaigns.import_id')
             ->whereNull('campaigns.deleted_at')
             ->whereNotNull('campaigns.affiliate_url')
             ->where('campaigns.affiliate_url', '!=', '')
-            ->where('brands.approved', true)
             ->whereNull('brands.deleted_at')
             ->when(app()->environment('production'), fn ($q) => $q->where('campaigns.status', 'active'))
             ->select('campaigns.brand_id', DB::raw('SUM(COALESCE(pv.cnt, 0) + COALESCE(ck.cnt, 0)) AS total_eng'))
@@ -52,7 +50,7 @@ class BrandIntroBlogCandidateService
 
         $brandId = (int) $row->brand_id;
         $brand = Brand::query()->with('category')->whereKey($brandId)->first();
-        if (! $brand || ! $brand->approved) {
+        if (! $brand) {
             return null;
         }
 
@@ -82,7 +80,6 @@ class BrandIntroBlogCandidateService
             ->leftJoinSub($pvSub, 'pv', 'pv.campaign_id', '=', 'campaigns.id')
             ->leftJoinSub($ckSub, 'ck', 'ck.campaign_id', '=', 'campaigns.id')
             ->where('campaigns.brand_id', $brand->id)
-            ->whereNotNull('campaigns.import_id')
             ->whereNull('campaigns.deleted_at')
             ->whereNotNull('campaigns.affiliate_url')
             ->where('campaigns.affiliate_url', '!=', '')

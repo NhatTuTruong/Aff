@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\BlogResource\Pages;
 
 use App\Filament\Admin\Resources\BlogResource;
 use App\Models\Blog;
+use App\Models\Category;
 use App\Models\User;
 use App\Services\BrandIntroBlogCandidateService;
 use App\Services\GeminiBlogService;
@@ -12,6 +13,7 @@ use App\Support\AutoBlogSettings;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Str;
 
 class ListBlogs extends ListRecords
 {
@@ -87,7 +89,7 @@ class ListBlogs extends ListRecords
                         if ($picked === null) {
                             Notification::make()
                                 ->title('Không tạo được blog giới thiệu store')
-                                ->body('Cần ít nhất một chiến dịch đã import (có import_id) kèm affiliate_url và brand đã duyệt.')
+                                ->body('Cần ít nhất một chiến dịch có affiliate_url hợp lệ (và chưa bị xóa).')
                                 ->danger()
                                 ->send();
                             return;
@@ -143,11 +145,23 @@ class ListBlogs extends ListRecords
             return (string) $brand->category->name;
         }
 
-        $legacyCategory = trim((string) $brand->getAttribute('category'));
-        if ($legacyCategory !== '') {
-            return $legacyCategory;
+        // Category có thể đã soft-delete nên relation mặc định trả null.
+        if ($brand->category_id) {
+            $category = Category::withTrashed()->find($brand->category_id);
+            if (filled($category?->name)) {
+                return (string) $category->name;
+            }
         }
 
-        return 'General';
+        $legacyCategory = trim((string) $brand->getAttribute('category'));
+        if ($legacyCategory !== '') {
+            $raw = (string) Str::of($legacyCategory)->afterLast('/')->replace('-', ' ')->replace('_', ' ');
+            $normalized = Str::title(trim($raw));
+            if ($normalized !== '') {
+                return $normalized;
+            }
+        }
+
+        return (string) (config('default_categories.names.0') ?? 'General');
     }
 }

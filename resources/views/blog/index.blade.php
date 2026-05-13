@@ -5,284 +5,458 @@
 
 @push('styles')
 <style>
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
-
-    .blog-hero {
-        padding: 3.5rem 0 2.5rem;
-        background: radial-gradient(900px 350px at 50% 0%, rgba(34,197,94,0.16) 0%, rgba(34,197,94,0.00) 70%);
-        border-bottom: 1px solid var(--border);
+    .blog-page {
+        --bp-ink: #0c0a12;
+        --bp-muted: #5c5866;
+        --bp-line: rgba(12, 10, 18, 0.08);
+        --bp-violet: #6d28d9;
+        --bp-violet-deep: #5b21b6;
+        --bp-rose: #e11d48;
+        --bp-surface: #ffffff;
+        --bp-cream: #f7f5fb;
+        background: var(--bp-cream);
+        color: var(--bp-ink);
     }
-    .blog-hero-inner { text-align: center; }
-    .blog-hero h1 {
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: clamp(2rem, 4vw, 3rem);
-        font-weight: 800;
-        letter-spacing: -0.03em;
-    }
-    .blog-hero p {
-        color: var(--text-muted);
-        margin: 0.75rem auto 0;
-        max-width: 720px;
-        font-size: 1.05rem;
-    }
-
-    .blog-toolbar {
-        margin-top: 1.5rem;
-        display: flex;
-        justify-content: center;
-    }
-    .blog-search {
+    .blog-page .bp-shell {
         width: 100%;
-        max-width: 720px;
-        display: flex;
-        gap: 0.75rem;
-        background: rgba(255,255,255,0.95);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 0.5rem;
-        box-shadow: 0 6px 24px rgba(17,24,39,0.06);
-    }
-    .blog-search input {
-        flex: 1;
-        border: none;
-        outline: none;
-        background: transparent;
-        padding: 0.75rem 0.9rem;
-        font-size: 1rem;
-        color: var(--text);
-    }
-    .blog-search button {
-        border: none;
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-        color: #fff;
-        padding: 0.75rem 1.1rem;
-        border-radius: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        white-space: nowrap;
-    }
-    .blog-search button:hover { opacity: 0.95; }
-
-    .category-chips {
-        margin-top: 1.25rem;
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    .chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.4rem 0.8rem;
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        text-decoration: none;
-        color: var(--text);
-        background: #fff;
-        font-size: 0.9rem;
-        transition: border-color 0.2s, background 0.2s, color 0.2s;
-    }
-    .chip:hover { border-color: var(--accent); color: var(--accent); }
-    .chip-active {
-        background: rgba(34,197,94,0.10);
-        border-color: rgba(34,197,94,0.35);
-        color: #166534;
-        font-weight: 700;
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 1.25rem;
     }
 
-    .blog-wrap { padding: 2rem 0 3rem; }
-    .posts-grid {
+    .bp-hero {
+        position: relative;
+        padding: clamp(2.5rem, 5vw, 4rem) 0 clamp(1.75rem, 3vw, 2.5rem);
+        overflow: hidden;
+        border-bottom: 1px solid var(--bp-line);
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 245, 251, 0.4) 100%),
+            radial-gradient(100% 120% at 0% 0%, rgba(109, 40, 217, 0.12) 0%, transparent 55%);
+    }
+    .bp-hero-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1.25rem;
+        gap: 2rem;
+        align-items: end;
     }
-    @media (max-width: 1024px) {
-        .posts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (min-width: 880px) {
+        .bp-hero-grid {
+            grid-template-columns: 1fr minmax(280px, 38%);
+            gap: 2.5rem;
+            align-items: end;
+        }
     }
-    @media (max-width: 640px) {
-        .posts-grid { grid-template-columns: 1fr; }
-        .blog-search { flex-direction: column; }
-        .blog-search button { width: 100%; }
+    .bp-hero-kicker {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--bp-rose);
+        margin-bottom: 0.65rem;
+    }
+    .bp-hero h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(2.25rem, 5vw, 3.5rem);
+        font-weight: 700;
+        letter-spacing: -0.045em;
+        line-height: 1.05;
+        margin: 0 0 0.85rem;
+        max-width: 12ch;
+    }
+    .bp-hero-lead {
+        margin: 0;
+        font-size: clamp(1rem, 1.25vw, 1.1rem);
+        color: var(--bp-muted);
+        line-height: 1.6;
+        max-width: 36rem;
     }
 
-    .post-card {
+    .bp-search-card {
+        background: var(--bp-surface);
+        border: 1px solid var(--bp-line);
+        border-radius: 22px;
+        padding: 1rem;
+        box-shadow: 0 22px 50px -34px rgba(12, 10, 18, 0.35);
+    }
+    .bp-search-form {
         display: flex;
         flex-direction: column;
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        overflow: hidden;
+        gap: 0.6rem;
+    }
+    @media (min-width: 520px) {
+        .bp-search-form { flex-direction: row; align-items: stretch; }
+    }
+    .bp-search-form input {
+        flex: 1;
+        border: 1px solid var(--bp-line);
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+        font-size: 1rem;
+        outline: none;
+        background: #fafafa;
+        color: var(--bp-ink);
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .bp-search-form input:focus {
+        border-color: rgba(109, 40, 217, 0.35);
+        box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.12);
         background: #fff;
-        text-decoration: none;
-        color: inherit;
-        transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-        min-height: 100%;
     }
-    .post-card:hover {
-        border-color: rgba(34,197,94,0.5);
-        box-shadow: 0 12px 28px rgba(17,24,39,0.08);
-        transform: translateY(-2px);
-    }
-    .post-thumb {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-        background: var(--surface);
-        display: block;
-    }
-    .post-thumb-placeholder {
-        width: 100%;
-        height: 180px;
-        background: linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(34,197,94,0.00) 70%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--text-muted);
+    .bp-search-form button {
+        border: none;
+        border-radius: 14px;
+        padding: 0.85rem 1.25rem;
         font-weight: 700;
-        letter-spacing: 0.02em;
+        cursor: pointer;
+        color: #fff;
+        background: linear-gradient(135deg, var(--bp-violet) 0%, var(--bp-rose) 100%);
+        white-space: nowrap;
+        box-shadow: 0 10px 26px -10px rgba(109, 40, 217, 0.55);
+        transition: transform 0.2s, box-shadow 0.2s;
     }
-    .post-body { padding: 1.1rem 1.1rem 1rem; display: flex; flex-direction: column; gap: 0.6rem; flex: 1; }
-    .post-topline { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
-    .post-badge {
+    .bp-search-form button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 30px -10px rgba(225, 29, 72, 0.45);
+    }
+
+    .bp-chips {
+        margin-top: 1.35rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        justify-content: flex-start;
+    }
+    @media (min-width: 880px) {
+        .bp-chips { justify-content: flex-end; }
+    }
+    .bp-chip {
         display: inline-flex;
         align-items: center;
-        padding: 0.25rem 0.55rem;
+        padding: 0.42rem 0.95rem;
         border-radius: 999px;
-        background: rgba(34,197,94,0.10);
-        color: #166534;
-        border: 1px solid rgba(34,197,94,0.25);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--bp-ink);
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid var(--bp-line);
+        transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
+    .bp-chip:hover {
+        border-color: rgba(109, 40, 217, 0.35);
+        color: var(--bp-violet);
+    }
+    .bp-chip--on {
+        background: linear-gradient(135deg, rgba(109, 40, 217, 0.12) 0%, rgba(225, 29, 72, 0.08) 100%);
+        border-color: rgba(109, 40, 217, 0.35);
+        color: var(--bp-violet-deep);
+    }
+
+    .bp-main {
+        padding: clamp(2rem, 4vw, 3rem) 0 clamp(2.5rem, 5vw, 4rem);
+    }
+    .bp-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.15rem;
+    }
+    @media (min-width: 720px) {
+        .bp-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+    @media (min-width: 1024px) {
+        .bp-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    .bp-card {
+        display: flex;
+        flex-direction: column;
+        border-radius: 20px;
+        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        background: var(--bp-surface);
+        border: 1px solid var(--bp-line);
+        box-shadow: 0 16px 42px -32px rgba(12, 10, 18, 0.35);
+        min-height: 100%;
+        transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.2s;
+    }
+    .bp-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(109, 40, 217, 0.22);
+        box-shadow: 0 26px 50px -28px rgba(109, 40, 217, 0.25);
+    }
+    .bp-card--feature {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+    @media (min-width: 800px) {
+        .bp-card--feature {
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+            min-height: 280px;
+        }
+    }
+    .bp-card-media {
+        position: relative;
+        background: #ede9fe;
+        min-height: 200px;
+    }
+    @media (min-width: 800px) {
+        .bp-card--feature .bp-card-media { min-height: 100%; }
+    }
+    .bp-card-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        min-height: 200px;
+    }
+    .bp-card--feature .bp-card-media img {
+        min-height: 280px;
+    }
+    @media (max-width: 799px) {
+        .bp-card--feature .bp-card-media img { min-height: 220px; }
+    }
+    .bp-card-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        padding: 0.3rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #fff;
+        background: linear-gradient(135deg, var(--bp-violet) 0%, var(--bp-rose) 100%);
+        box-shadow: 0 8px 20px -8px rgba(12, 10, 18, 0.45);
+    }
+    .bp-card-date {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 10px;
         font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--bp-ink);
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(6px);
+    }
+    .bp-card-body {
+        padding: 1.2rem 1.25rem 1.3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+        flex: 1;
+    }
+    .bp-card--feature .bp-card-body {
+        justify-content: center;
+        padding: clamp(1.25rem, 3vw, 2rem);
+    }
+    .bp-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+    .bp-card-tag {
+        display: inline-flex;
+        max-width: 70%;
+        padding: 0.28rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
-        max-width: 70%;
+        letter-spacing: 0.05em;
+        color: var(--bp-violet-deep);
+        background: rgba(109, 40, 217, 0.1);
+        border: 1px solid rgba(109, 40, 217, 0.2);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    .post-date { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
-    .post-title {
+    .bp-card-date-inline {
+        font-size: 0.78rem;
+        color: var(--bp-muted);
+        white-space: nowrap;
+        font-weight: 600;
+    }
+    .bp-card-title {
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 1.15rem;
-        font-weight: 800;
-        line-height: 1.3;
-        letter-spacing: -0.02em;
+        font-size: 1.12rem;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        line-height: 1.28;
+        margin: 0;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-    .post-excerpt {
-        font-size: 0.95rem;
-        color: var(--text-muted);
+    .bp-card--feature .bp-card-title {
+        font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+        -webkit-line-clamp: 3;
+    }
+    .bp-card-excerpt {
+        font-size: 0.94rem;
+        color: var(--bp-muted);
         line-height: 1.55;
+        margin: 0;
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-    .post-cta {
+    .bp-card--feature .bp-card-excerpt {
+        -webkit-line-clamp: 4;
+    }
+    .bp-card-cta {
         margin-top: auto;
         display: inline-flex;
         align-items: center;
-        gap: 0.4rem;
-        color: var(--accent);
+        gap: 0.35rem;
         font-weight: 700;
-        font-size: 0.95rem;
-    }
-    .pagination-wrap {
-        margin-top: 2rem;
-        display: flex;
-        justify-content: center;
-    }
-    .pagination-wrap nav a, .pagination-wrap nav span {
-        display: inline-block;
-        padding: 0.5rem 0.75rem;
-        margin: 0 0.15rem;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        color: var(--text);
-        text-decoration: none;
         font-size: 0.9rem;
+        color: var(--bp-violet);
     }
-    .pagination-wrap nav a:hover { border-color: var(--accent); color: var(--accent); }
-    .empty-state {
+    .bp-card:hover .bp-card-cta { color: var(--bp-rose); }
+
+    .bp-pagination {
+        margin-top: 2.25rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .bp-pagination .pagination-list {
+        gap: 0.35rem !important;
+    }
+    .bp-pagination .pagination-item:not(.pagination-ellipsis) {
+        border-radius: 12px !important;
+        border-color: var(--bp-line) !important;
+        background: var(--bp-surface) !important;
+        font-weight: 600 !important;
+    }
+    .bp-pagination .pagination-item:hover:not(.pagination-disabled):not(.pagination-current) {
+        border-color: rgba(109, 40, 217, 0.35) !important;
+        color: var(--bp-violet) !important;
+    }
+    .bp-pagination .pagination-current {
+        border-color: rgba(109, 40, 217, 0.45) !important;
+        color: var(--bp-violet) !important;
+    }
+    .bp-pagination .pagination-info {
+        color: var(--bp-muted) !important;
+    }
+
+    .bp-empty {
         text-align: center;
-        padding: 3rem 1rem;
-        color: var(--text-muted);
+        padding: 3.5rem 1.5rem;
+        border-radius: 24px;
+        border: 1px dashed var(--bp-line);
+        background: rgba(255, 255, 255, 0.75);
+        color: var(--bp-muted);
+        max-width: 520px;
+        margin: 0 auto;
+    }
+    .bp-empty strong {
+        display: block;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.2rem;
+        color: var(--bp-ink);
+        margin-bottom: 0.5rem;
     }
 </style>
 @endpush
 
 @section('content')
-    <header class="blog-hero">
-        <div class="container blog-hero-inner">
-            <h1 class="font-heading">Blog</h1>
-            <p>Guides, updates, and deal highlights — written to help you save time and money.</p>
-
-            <div class="blog-toolbar">
-                <form action="{{ route('blog.index') }}" method="get" class="blog-search">
-                    <input type="search" name="q" value="{{ $searchQuery ?? '' }}" placeholder="Search articles…" autocomplete="off">
-                    @if(!empty($selectedCategory))
-                        <input type="hidden" name="category" value="{{ $selectedCategory }}">
-                    @endif
-                    <button type="submit">Search</button>
-                </form>
+<div class="blog-page">
+    <header class="bp-hero">
+        <div class="bp-shell bp-hero-grid">
+            <div>
+                <p class="bp-hero-kicker">Stories &amp; signals</p>
+                <h1 class="font-heading">Blog</h1>
+                <p class="bp-hero-lead">Guides, changelog notes, and deal context — written to help you decide faster and waste fewer clicks.</p>
             </div>
-
-            @if(isset($categories) && $categories->count() > 0)
-                <nav class="category-chips" aria-label="Blog categories">
+            <div>
+                <div class="bp-search-card">
+                    <form action="{{ route('blog.index') }}" method="get" class="bp-search-form">
+                        <input type="search" name="q" value="{{ $searchQuery ?? '' }}" placeholder="Search articles…" autocomplete="off">
+                        @if(!empty($selectedCategory))
+                            <input type="hidden" name="category" value="{{ $selectedCategory }}">
+                        @endif
+                        <button type="submit">Search</button>
+                    </form>
+                </div>
+                @if(isset($categories) && $categories->count() > 0)
                     @php
                         $baseParams = [];
-                        if (!empty($searchQuery)) $baseParams['q'] = $searchQuery;
+                        if (!empty($searchQuery)) {
+                            $baseParams['q'] = $searchQuery;
+                        }
                     @endphp
-                    <a class="chip {{ empty($selectedCategory) ? 'chip-active' : '' }}" href="{{ route('blog.index', $baseParams) }}">All</a>
-                    @foreach($categories as $cat)
-                        <a class="chip {{ ($selectedCategory ?? '') === $cat ? 'chip-active' : '' }}"
-                           href="{{ route('blog.index', array_merge($baseParams, ['category' => $cat])) }}">
-                            {{ $cat }}
-                        </a>
-                    @endforeach
-                </nav>
-            @endif
+                    <nav class="bp-chips" aria-label="Blog categories">
+                        <a class="bp-chip {{ empty($selectedCategory) ? 'bp-chip--on' : '' }}" href="{{ route('blog.index', $baseParams) }}">All</a>
+                        @foreach($categories as $cat)
+                            <a class="bp-chip {{ ($selectedCategory ?? '') === $cat ? 'bp-chip--on' : '' }}"
+                               href="{{ route('blog.index', array_merge($baseParams, ['category' => $cat])) }}">
+                                {{ $cat }}
+                            </a>
+                        @endforeach
+                    </nav>
+                @endif
+            </div>
         </div>
     </header>
 
-    <div class="blog-wrap">
-        <div class="container">
+    <div class="bp-main">
+        <div class="bp-shell">
             @if($posts->count() > 0)
-                <div class="posts-grid">
+                <div class="bp-grid">
                     @foreach($posts as $post)
-                        <a href="{{ route('blog.show', $post->slug) }}" class="post-card">
-                            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" class="post-thumb" loading="lazy">
-                            <div class="post-body">
-                                <div class="post-topline">
-                                    @if(!empty($post->category))
-                                        <span class="post-badge">{{ $post->category }}</span>
-                                    @else
-                                        <span class="post-badge">News</span>
-                                    @endif
-                                    <span class="post-date">{{ $post->created_at?->format('d/m/Y') }}</span>
-                                </div>
-                                <h2 class="post-title">{{ $post->title }}</h2>
-                                @if($post->content)
-                                    <p class="post-excerpt">{{ Str::limit(trim(strip_tags($post->content)), 160) }}</p>
+                        <a href="{{ route('blog.show', $post->slug) }}" class="bp-card {{ $loop->first ? 'bp-card--feature' : '' }}">
+                            <div class="bp-card-media">
+                                <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy">
+                                @if($loop->first)
+                                    <span class="bp-card-badge">Featured</span>
                                 @endif
-                                <span class="post-cta">Read article →</span>
+                                <span class="bp-card-date">{{ $post->created_at?->format('d M Y') }}</span>
+                            </div>
+                            <div class="bp-card-body">
+                                @unless($loop->first)
+                                    <div class="bp-card-top">
+                                        @if(!empty($post->category))
+                                            <span class="bp-card-tag">{{ $post->category }}</span>
+                                        @else
+                                            <span class="bp-card-tag">News</span>
+                                        @endif
+                                        <span class="bp-card-date-inline">{{ $post->created_at?->format('d/m/Y') }}</span>
+                                    </div>
+                                @endunless
+                                <h2 class="bp-card-title">{{ $post->title }}</h2>
+                                @if($post->content)
+                                    <p class="bp-card-excerpt">{{ Str::limit(trim(strip_tags($post->content)), $loop->first ? 280 : 160) }}</p>
+                                @endif
+                                <span class="bp-card-cta">Read article →</span>
                             </div>
                         </a>
                     @endforeach
                 </div>
 
-                <div class="pagination-wrap">
+                <div class="bp-pagination">
                     {{ $posts->links('vendor.pagination.simple') }}
                 </div>
             @else
-                <div class="empty-state">
-                    No blog posts available yet. Please check back later!
+                <div class="bp-empty">
+                    <strong>No posts yet</strong>
+                    New articles will appear here once they are published. Check back soon.
                 </div>
             @endif
         </div>
     </div>
+</div>
 @endsection

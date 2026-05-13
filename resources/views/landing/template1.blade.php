@@ -162,15 +162,15 @@
         }
 
         :root {
-            --primary: #22c55e;
-            --primary-dark: #16a34a;
-            --primary-soft: #bbf7d0;
-            --accent: #f97316;
-            --text-dark: #111827;
-            --text-light: #6b7280;
-            --bg-page: #f9fafb;
+            --primary: #6d28d9;
+            --primary-dark: #5b21b6;
+            --primary-soft: #ede9fe;
+            --accent: #e11d48;
+            --text-dark: #0c0a12;
+            --text-light: #5c5866;
+            --bg-page: #f7f5fb;
             --bg-card: #ffffff;
-            --border: #e5e7eb;
+            --border: rgba(12, 10, 18, 0.1);
             --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
             --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.1);
             --shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.15);
@@ -197,41 +197,57 @@
         .shell {
             max-width: 1200px;
             margin: 0 auto 50px;
-            padding: 30px 20px 50px;
+            padding: 36px 20px 56px;
         }
 
         .page-panel {
             background: var(--bg-card);
-            border-radius: 24px;
-            box-shadow: var(--shadow-lg);
-            padding: 32px 32px 40px;
-            border: 1px solid rgba(229, 231, 235, 0.5);
+            border-radius: 28px;
+            box-shadow: 0 24px 65px -30px rgba(76, 29, 149, 0.35);
+            padding: 36px 36px 44px;
+            border: 1px solid rgba(109, 40, 217, 0.12);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(55% 40% at 6% 0%, rgba(109, 40, 217, 0.07) 0%, transparent 70%),
+                radial-gradient(45% 35% at 100% 100%, rgba(225, 29, 72, 0.06) 0%, transparent 70%);
         }
 
         /* ===== HERO (TOP TITLE LIKE TENERE) ===== */
         .hero {
             text-align: center;
-            margin-bottom: 32px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid var(--border);
+            margin-bottom: 36px;
+            padding: 22px 18px 30px;
+            border: 1px solid rgba(109, 40, 217, 0.14);
+            border-radius: 20px;
+            background: linear-gradient(135deg, #faf5ff 0%, #fdf2f8 55%, #ffffff 100%);
         }
 
         .hero-title {
-            font-size: 2rem;
+            font-size: 2.1rem;
             font-weight: 800;
             letter-spacing: -0.04em;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             line-height: 1.2;
-            background: linear-gradient(135deg, var(--text-dark) 0%, var(--primary-dark) 100%);
+            background: linear-gradient(135deg, #0f172a 0%, var(--primary-dark) 58%, var(--accent) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         .hero-sub {
-            font-size: 1rem;
+            font-size: 1.02rem;
             color: var(--text-light);
-            line-height: 1.6;
+            line-height: 1.7;
+            max-width: 760px;
+            margin: 0 auto;
         }
 
         .hero-sub strong {
@@ -248,11 +264,11 @@
         }
 
         .left-card {
-            background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-            border-radius: 20px;
+            background: linear-gradient(180deg, #ffffff 0%, #faf5ff 100%);
+            border-radius: 22px;
             padding: 28px 24px 28px;
             box-shadow: var(--shadow-md);
-            border: 1px solid rgba(229, 231, 235, 0.8);
+            border: 1px solid rgba(109, 40, 217, 0.14);
             position: relative;
             display: flex;
             flex-direction: column;
@@ -268,7 +284,7 @@
             border-radius: 16px;
             background: #fff;
             padding: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 10px 30px rgba(109, 40, 217, 0.2);
             transition: none;
         }
 
@@ -303,11 +319,11 @@
 
         /* Stats card (Working Codes, Success Rate, Total Saved) */
         .stats-card {
-            background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+            background: linear-gradient(180deg, #faf5ff 0%, #f5f3ff 100%);
             border-radius: 14px;
             padding: 14px 16px;
             margin-top: 12px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid rgba(109, 40, 217, 0.16);
         }
 
         .stats-list {
@@ -320,7 +336,7 @@
             justify-content: space-between;
             padding: 10px 0;
             gap: 10px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid rgba(109, 40, 217, 0.14);
         }
 
         .stats-row:last-child {
@@ -402,7 +418,7 @@
             cursor: pointer;
             text-decoration: none;
             transition: background 0.2s, transform 0.2s;
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+            box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);
         }
 
         .quick-menu-shop-now:hover {
@@ -421,11 +437,11 @@
         .note-bar {
             font-size: 0.85rem;
             color: var(--text-light);
-            background: linear-gradient(135deg, #f0fdf4 0%, #f9fafb 100%);
+            background: linear-gradient(135deg, #faf5ff 0%, #fff1f2 100%);
             border-radius: 12px;
             padding: 12px 18px;
             margin-bottom: 16px;
-            border: 1px solid rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(109, 40, 217, 0.2);
             line-height: 1.6;
         }
 
@@ -476,7 +492,7 @@
             border-color: var(--primary);
             color: #fff;
             font-weight: 500;
-            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+            box-shadow: 0 2px 8px rgba(109, 40, 217, 0.3);
         }
 
         .coupon-list {
@@ -490,26 +506,26 @@
         .coupon-row {
             background: #fff;
             border-radius: 20px;
-            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+            box-shadow: 0 14px 30px -24px rgba(109, 40, 217, 0.45);
             padding: 0;
             display: grid;
             grid-template-columns: 180px 1fr;
             gap: 0;
             align-items: stretch;
             transition: none;
-            border: 1px solid rgba(229, 231, 235, 0.5);
+            border: 1px solid rgba(109, 40, 217, 0.14);
             overflow: hidden;
             position: relative;
         }
 
         .coupon-row:hover {
-            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+            box-shadow: 0 18px 34px -22px rgba(109, 40, 217, 0.5);
             transform: none;
         }
 
         /* Left section - Discount Visual */
         .coupon-discount-visual {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            background: linear-gradient(160deg, #faf5ff 0%, #f5f3ff 58%, #fdf2f8 100%);
             padding: 18px 16px;
             display: flex;
             flex-direction: column;
@@ -536,7 +552,7 @@
         .discount-up-to {
             font-size: 0.7rem;
             font-weight: 600;
-            color: #f97316;
+            color: var(--accent);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 6px;
@@ -553,7 +569,7 @@
         }
 
         .discount-off-badge {
-            background: #f97316;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
             color: #fff;
             padding: 5px 14px;
             border-radius: 8px;
@@ -582,18 +598,18 @@
 
         .coupon-title {
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 1.02rem;
             letter-spacing: -0.01em;
             line-height: 1.35;
             flex: 1;
-            color: #111827;
+            color: var(--text-dark);
         }
 
         .btn-get-code {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
             color: #fff;
             border: none;
-            border-radius: 8px;
+            border-radius: 999px;
             padding: 10px 20px;
             font-size: 0.9rem;
             font-weight: 700;
@@ -603,13 +619,13 @@
             gap: 6px;
             white-space: nowrap;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+            box-shadow: 0 2px 8px rgba(109, 40, 217, 0.3);
         }
 
         .btn-get-code:hover {
-            background: var(--primary-dark);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #be123c 100%);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+            box-shadow: 0 4px 12px rgba(109, 40, 217, 0.4);
         }
 
         .btn-get-code::after {
@@ -625,10 +641,10 @@
             font-weight: 700;
             font-family: ui-monospace, monospace;
             letter-spacing: 0.05em;
-            background: #f0fdf4;
+            background: #faf5ff;
             color: var(--primary-dark);
             border: 1px dashed var(--primary);
-            border-radius: 8px;
+            border-radius: 12px;
             white-space: nowrap;
             cursor: pointer;
             transition: none;
@@ -700,14 +716,14 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: #dcfce7;
-            color: #166534;
+            background: #f5f3ff;
+            color: #5b21b6;
             padding: 4px 10px;
             border-radius: 999px;
             font-size: 0.75rem;
             font-weight: 800;
             margin-top: 10px;
-            border: 1px solid rgba(22, 101, 52, 0.18);
+            border: 1px solid rgba(109, 40, 217, 0.25);
         }
 
         .all-verified-badge::before {
@@ -753,7 +769,7 @@
             align-items: center;
             gap: 4px;
             font-weight: 600;
-            color: #16a34a;
+            color: #5b21b6;
         }
 
         .coupon-verified-badge {
@@ -948,12 +964,14 @@
 
         .modal-box {
             background: #fff;
-            border-radius: 14px;
+            border-radius: 18px;
             width: 420px;
             max-width: 92%;
-            padding: 24px;
+            padding: 20px;
             text-align: center;
             position: relative;
+            border: 1px solid rgba(109, 40, 217, 0.2);
+            box-shadow: 0 24px 50px -24px rgba(109, 40, 217, 0.55);
         }
 
         .modal-close {
@@ -978,22 +996,25 @@
 
         .modal-code span {
             padding: 10px 18px;
-            border: 2px dashed #22c55e;
+            border: 2px dashed var(--primary);
             font-weight: 700;
+            border-radius: 10px;
+            background: #faf5ff;
         }
 
         .modal-code button {
             margin-left: 6px;
             padding: 10px 14px;
-            background: #22c55e;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
             color: #fff;
             border: none;
             cursor: pointer;
             font-weight: 700;
+            border-radius: 10px;
         }
 
         .modal-link {
-            color: #22c55e;
+            color: #6d28d9;
             font-weight: 600;
         }
 
@@ -1142,7 +1163,7 @@
         .coupon-copy-toast-progress {
             width: 100%;
             height: 3px;
-            background: #22c55e;
+            background: #6d28d9;
             transform-origin: left center;
             animation: couponCopyToastProgress 2s linear forwards;
         }
@@ -1172,12 +1193,18 @@
         }
 
         .popup-banner {
-            background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
+            background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 58%, #e11d48 100%);
             padding: 32px 28px 40px;
             text-align: center;
             position: relative;
             overflow: hidden;
             flex-shrink: 0;
+        }
+        .popup-banner .popup-title {
+            color: #ffffff;
+        }
+        .popup-banner .popup-subtitle {
+            color: rgba(255, 255, 255, 0.95);
         }
 
         .popup-confetti {
@@ -1363,7 +1390,7 @@
         .coupon-code-icon {
             width: 24px;
             height: 24px;
-            background: #84cc16;
+            background: linear-gradient(135deg, #6d28d9 0%, #e11d48 100%);
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -1387,7 +1414,7 @@
         }
 
         .btn-copy-code-modal {
-            background: #84cc16;
+            background: linear-gradient(135deg, #6d28d9 0%, #e11d48 100%);
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -1397,13 +1424,13 @@
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(132, 204, 22, 0.3);
+            box-shadow: 0 6px 18px rgba(109, 40, 217, 0.32);
         }
 
         .btn-copy-code-modal:hover {
-            background: #65a30d;
+            background: linear-gradient(135deg, #5b21b6 0%, #be123c 100%);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(132, 204, 22, 0.4);
+            box-shadow: 0 10px 24px rgba(109, 40, 217, 0.4);
         }
 
         .btn-copy-code-modal:active {
@@ -1429,14 +1456,14 @@
 
         .verification-item::before {
             content: '✓';
-            color: #22c55e;
+            color: #6d28d9;
             font-weight: 700;
             font-size: 0.9rem;
         }
 
         .verification-item.success::before {
             content: '●';
-            color: #22c55e;
+            color: #6d28d9;
         }
 
         .coupon-modal-actions {
@@ -1515,7 +1542,7 @@
         .lead-capture-input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+            box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.18);
         }
         .lead-capture-btn {
             height: 42px;
@@ -1538,7 +1565,7 @@
             font-size: 0.78rem;
             color: #6b7280;
         }
-        .lead-capture-msg.success { color: #16a34a; }
+        .lead-capture-msg.success { color: #5b21b6; }
         .lead-capture-msg.error { color: #dc2626; }
 
         .feedback-btn {
@@ -1570,8 +1597,8 @@
         }
 
         .feedback-btn.worked {
-            border-color: #22c55e;
-            color: #22c55e;
+            border-color: #6d28d9;
+            color: #6d28d9;
         }
 
         .feedback-btn.failed {
@@ -1612,7 +1639,7 @@
 
         .btn-copy-all-codes:active,
         .btn-copy-all-codes.copied {
-            background: #65a30d !important;
+            background: #5b21b6 !important;
         }
 
         /* Q&A Section */
@@ -1754,19 +1781,19 @@
             gap: 6px;
             padding: 10px 18px;
             border-radius: 999px;
-            background: #22c55e;
+            background: #6d28d9;
             color: #fff;
             font-weight: 700;
             font-size: 0.85rem;
             cursor: pointer;
             border: none;
             transition: all 0.2s ease;
-            box-shadow: 0 10px 24px rgba(34, 197, 94, 0.35);
+            box-shadow: 0 10px 24px rgba(109, 40, 217, 0.35);
         }
 
         .btn-get-coupon:hover {
             transform: translateY(-1px);
-            background: #16a34a;
+            background: #5b21b6;
             cursor: pointer;
         }
 
@@ -1791,17 +1818,17 @@
         /* Go to Store highlight animation */
         @keyframes pulseGlow {
             0% {
-                box-shadow: 0 0 0 rgba(34, 197, 94, 0.0);
+                box-shadow: 0 0 0 rgba(109, 40, 217, 0.0);
                 transform: scale(1);
             }
 
             50% {
-                box-shadow: 0 0 25px rgba(34, 197, 94, 0.65);
+                box-shadow: 0 0 25px rgba(109, 40, 217, 0.65);
                 transform: scale(1.05);
             }
 
             100% {
-                box-shadow: 0 0 0 rgba(34, 197, 94, 0.0);
+                box-shadow: 0 0 0 rgba(109, 40, 217, 0.0);
                 transform: scale(1);
             }
         }
@@ -1847,11 +1874,11 @@
 
             .left-card-header {
                 order: 1;
-                background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+                background: linear-gradient(180deg, #ffffff 0%, #faf5ff 100%);
                 border-radius: 20px;
                 padding: 24px 20px;
                 box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-                border: 1px solid rgba(229, 231, 235, 0.8);
+                border: 1px solid rgba(109, 40, 217, 0.14);
             }
 
             .right-column-coupon-section {
@@ -1864,11 +1891,11 @@
 
             .left-card-footer {
                 order: 4;
-                background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+                background: linear-gradient(180deg, #ffffff 0%, #faf5ff 100%);
                 border-radius: 20px;
                 padding: 24px 20px;
                 box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-                border: 1px solid rgba(229, 231, 235, 0.8);
+                border: 1px solid rgba(109, 40, 217, 0.14);
                 margin-top: 8px;
             }
 
@@ -2254,7 +2281,7 @@
                 font-weight: 600;
                 font-size: 0.95rem;
                 text-decoration: none;
-                box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+                box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);
             }
 
             .mobile-shop-now-bottom:hover {
@@ -3012,7 +3039,7 @@
                 copyCodeToClipboard(code);
                 const t = this.textContent;
                 this.textContent = 'Copied ✓';
-                this.style.background = '#22c55e';
+                this.style.background = '#6d28d9';
                 this.style.color = '#fff';
                 setTimeout(() => {
                     this.textContent = t;
@@ -3383,7 +3410,7 @@
             // Highlight selected button
             if (worked) {
                 btn.style.background = '#dcfce7';
-                btn.style.borderColor = '#22c55e';
+                btn.style.borderColor = '#6d28d9';
                 btn.innerHTML = '<span class="feedback-icon">✓</span><span>Thank you!</span>';
             } else {
                 btn.style.background = '#fef2f2';

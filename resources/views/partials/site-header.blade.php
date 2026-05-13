@@ -19,7 +19,6 @@
     <div class="header-inner">
         <a href="{{ url('/') }}" class="logo font-heading">{{ config('app.name') }}<span>.</span></a>
         <div class="site-header__actions">
-            <a href="{{ url('/#coupons') }}" class="site-header__cta">Hot deals</a>
             <button type="button"
                 class="site-header__toggle"
                 id="site-header-toggle"
