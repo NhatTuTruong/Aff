@@ -193,26 +193,55 @@
     .hp-aside-caption {
         font-size: 0.9rem;
         opacity: 0.88;
-        max-width: 14rem;
+        max-width: 16rem;
         line-height: 1.45;
         position: relative;
         z-index: 1;
+    }
+    .hp-aside-slider {
+        position: relative;
+        z-index: 1;
+        min-height: 200px;
+        overflow: hidden;
+    }
+    .hp-aside-track {
+        display: flex;
+        width: 100%;
+        transition: transform 0.45s ease;
+        will-change: transform;
+    }
+    .hp-aside-slide {
+        flex: 0 0 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
     .hp-aside-dots {
         position: absolute;
         bottom: 1.25rem;
         right: 1.25rem;
         display: flex;
-        gap: 0.35rem;
-        z-index: 1;
+        gap: 0.4rem;
+        z-index: 2;
+        align-items: center;
     }
-    .hp-aside-dots span {
-        width: 7px;
-        height: 7px;
+    .hp-aside-dot {
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.35);
+        padding: 0;
+        border: none;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.32);
+        transition: transform 0.2s, background 0.2s;
+        -webkit-tap-highlight-color: transparent;
     }
-    .hp-aside-dots span:nth-child(2) { background: rgba(244, 114, 182, 0.9); }
+    .hp-aside-dot:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
+    .hp-aside-dot.is-active {
+        background: rgba(244, 114, 182, 0.95);
+        transform: scale(1.2);
+    }
 
     .hp-stats {
         padding: 0 0 2.5rem;
@@ -711,14 +740,104 @@
                     <button type="submit">Search</button>
                 </form>
             </div>
-            <aside class="hp-hero-aside" aria-hidden="true">
-                <p class="hp-aside-label">Why shoppers stay</p>
-                <p class="hp-aside-stat">Curated</p>
-                <p class="hp-aside-caption">Human-reviewed paths to real savings — fewer dead codes, clearer next steps.</p>
-                <div class="hp-aside-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <aside class="hp-hero-aside" aria-label="Site highlights">
+                <div class="hp-aside-slider" id="hp-hero-aside-slider">
+                    <div class="hp-aside-track" id="hp-aside-track">
+                        <div class="hp-aside-slide">
+                            <p class="hp-aside-label">Why shoppers stay</p>
+                            <p class="hp-aside-stat">Curated</p>
+                            <p class="hp-aside-caption">Human-reviewed paths to real savings — fewer dead codes, clearer next steps.</p>
+                        </div>
+                        <div class="hp-aside-slide">
+                            <p class="hp-aside-label">Always in motion</p>
+                            <p class="hp-aside-stat">Updated</p>
+                            <p class="hp-aside-caption">We refresh offers and landing details often so you see what still works — not yesterday’s leftovers.</p>
+                        </div>
+                        <div class="hp-aside-slide">
+                            <p class="hp-aside-label">Built for trust</p>
+                            <p class="hp-aside-stat">Verified</p>
+                            <p class="hp-aside-caption">Clear affiliate disclosure, honest pros &amp; cons on store pages, and CTAs that take you straight to the deal.</p>
+                        </div>
+                    </div>
+                    <nav class="hp-aside-dots" id="hp-aside-dots" aria-label="Highlight slides">
+                        <button type="button" class="hp-aside-dot is-active" aria-label="Slide 1" aria-current="true" data-slide="0"></button>
+                        <button type="button" class="hp-aside-dot" aria-label="Slide 2" data-slide="1"></button>
+                        <button type="button" class="hp-aside-dot" aria-label="Slide 3" data-slide="2"></button>
+                    </nav>
+                </div>
             </aside>
         </div>
     </section>
+
+    @push('scripts')
+    <script>
+    (function () {
+        var slider = document.getElementById('hp-hero-aside-slider');
+        var track = document.getElementById('hp-aside-track');
+        var dotsWrap = document.getElementById('hp-aside-dots');
+        if (!slider || !track || !dotsWrap) return;
+
+        var dots = dotsWrap.querySelectorAll('.hp-aside-dot');
+        var n = dots.length;
+        if (n === 0) return;
+
+        var i = 0;
+        var timer = null;
+        var delay = 3000;
+
+        function setActive() {
+            track.style.transform = 'translateX(' + (-i * 100) + '%)';
+            dots.forEach(function (d, j) {
+                var on = j === i;
+                d.classList.toggle('is-active', on);
+                d.setAttribute('aria-current', on ? 'true' : 'false');
+            });
+        }
+
+        function go(to) {
+            i = (to % n + n) % n;
+            setActive();
+        }
+
+        function start() {
+            stop();
+            timer = setInterval(function () {
+                if (document.hidden) return;
+                if (slider.matches(':hover')) return;
+                go(i + 1);
+            }, delay);
+        }
+
+        function stop() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+        }
+
+        dots.forEach(function (d) {
+            d.addEventListener('click', function () {
+                var idx = parseInt(d.getAttribute('data-slide') || '0', 10);
+                if (!isNaN(idx)) {
+                    go(idx);
+                    stop();
+                    start();
+                }
+            });
+        });
+
+        slider.addEventListener('mouseenter', stop);
+        slider.addEventListener('mouseleave', start);
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) stop();
+            else start();
+        });
+
+        setActive();
+        start();
+    })();
+    </script>
+    @endpush
 
     @if(($verifiedBrandsCount ?? 0) > 0 || $hotCoupons->isNotEmpty())
     <section class="hp-stats">

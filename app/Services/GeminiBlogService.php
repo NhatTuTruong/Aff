@@ -50,6 +50,74 @@ PROMPT;
     }
 
     /**
+     * Bài ngắn về một brand/store chỉ từ tên hoặc domain người dùng nhập — không dùng dữ liệu DB trên site.
+     *
+     * @return array{title: string, content: string, featured_image: ?string}|null
+     */
+    public function generateBrandSpotlightFromHint(string $hint): ?array
+    {
+        $apiKey = AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'));
+        $model = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
+        $timeout = (int) AdminSettings::get('gemini_timeout', config('gemini.timeout', 60));
+
+        if (empty($apiKey)) {
+            $this->lastError = 'GEMINI_API_KEY chưa được cấu hình.';
+
+            return null;
+        }
+
+        $hint = trim($hint);
+        if ($hint === '') {
+            $this->lastError = 'Thiếu tên brand hoặc domain.';
+
+            return null;
+        }
+
+        $hint = Str::limit($hint, 240, '');
+        $hintSafe = htmlspecialchars($hint, ENT_QUOTES, 'UTF-8');
+
+        $prompt = <<<PROMPT
+You are an expert English copywriter for a deals and shopping blog.
+
+The editor typed this brand or store identifier (it may be a company name OR a domain like example.com). Use it only as the **subject label** — you have **no access** to our internal database, coupons, or verified facts about this merchant.
+
+**Subject (verbatim from editor):** {$hintSafe}
+
+## Your task
+Write ONE **short** editorial-style article in **English** about this brand/store as a general shopping subject.
+
+## Length & tone
+- Target **450–700 words** (shorter than a full review; scannable).
+- Helpful, neutral-to-positive, **not** salesy. Do **not** invent specific prices, coupon codes, percentages, or time-limited promotions.
+- You may use **high-level, generic** industry knowledge only; if unsure, stay vague and recommend readers check the official site.
+- If the subject looks like a **domain**, you may mention it as the likely official web presence. Add **at most one** link to `https://` + that host only if it is clearly a domain (use `rel="nofollow noopener"`). If it is only a brand name with no clear domain, **do not** invent URLs.
+
+## HTML rules
+- Return a **complete HTML fragment** only: one `<h1>`, several `<h2>`, `<p>`, optional `<ul>`. No `<html>` / `<body>`.
+- The `<h1>` should naturally include the brand/store subject.
+
+## Structure (suggested)
+1. Brief intro: who/what readers might look for.
+2. What shoppers typically care about for this kind of brand (generic).
+3. Practical tips to evaluate deals safely (generic).
+4. Short closing + soft disclaimer that details change and readers should verify on the official site.
+
+Do not claim the brand partners with our site or that we verified offers.
+PROMPT;
+
+        $result = $this->callGemini($apiKey, $model, $prompt, max(60, $timeout), [
+            'maxOutputTokens' => 4096,
+            'temperature' => 0.75,
+        ]);
+
+        if ($result !== null) {
+            $result['featured_image'] = null;
+        }
+
+        return $result;
+    }
+
+    /**
      * Blog giới thiệu brand + coupon landing, có CTA và link affiliate khi nhắc tên brand.
      *
      * @return array{title: string, content: string, featured_image: ?string}|null

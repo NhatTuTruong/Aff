@@ -65,6 +65,10 @@ class AdminPanelProvider extends PanelProvider
                 RememberAdminIpMiddleware::class,
             ])
             ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn () => view('components.filament-rich-editor-hide-attachment-caption')
+            )
+            ->renderHook(
                 PanelsRenderHook::BODY_START,
                 fn () => view('components.import-notification-trigger')
             )

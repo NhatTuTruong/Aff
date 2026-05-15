@@ -84,9 +84,9 @@ class BlogResource extends Resource
                                 'bold',
                                 'italic',
                                 'underline',
-                                'strikeThrough',
+                                'strike',
                                 'link',
-                                'image',
+                                'attachFiles',
                                 'orderedList',
                                 'bulletList',
                                 'blockquote',
@@ -94,6 +94,9 @@ class BlogResource extends Resource
                                 'undo',
                                 'redo',
                             ])
+                            ->fileAttachmentsDisk('public')
+                            ->fileAttachmentsDirectory('blogs/content')
+                            ->helperText('Chèn ảnh: nút hình trên thanh công cụ, hoặc dán (Ctrl+V) ảnh từ clipboard tại vị trí con trỏ. Ảnh lưu trên storage công khai.')
                             ->columnSpanFull()
                             ->extraInputAttributes(['style' => 'min-height: 300px;']),
                     ]),

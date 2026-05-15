@@ -296,6 +296,11 @@
         border: 1px solid var(--blog-border);
     }
 
+    /* Nội dung từ Trix: ẩn caption tên file + dung lượng dưới ảnh */
+    .blog-content.prose figure.attachment .attachment__caption {
+        display: none !important;
+    }
+
     .blog-side-media {
         margin-top: 1.75rem;
         display: grid;
