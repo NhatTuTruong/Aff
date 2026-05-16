@@ -40,17 +40,27 @@ class BotClickTrackingTest extends TestCase
             'User-Agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
         ]);
 
-        // Tổng bản ghi click = 2 (có log đầy đủ)
-        $this->assertEquals(2, Click::count());
+        // 1 click từ fetcher Google (có chữ "google", không nhất thiết có "bot")
+        $this->get(route('click.redirect', [
+            'slug' => 'test-campaign',
+        ]), [
+            'User-Agent' => 'APIs-Google (+https://developers.google.com/webmasters/APIs-Google.html)',
+        ]);
+
+        // Tổng bản ghi click = 3 (có log đầy đủ)
+        $this->assertEquals(3, Click::count());
 
         // Click người: is_bot = false
         $this->assertEquals(1, Click::where('is_bot', false)->count());
 
         // Click bot: is_bot = true
-        $this->assertEquals(1, Click::where('is_bot', true)->count());
+        $this->assertEquals(2, Click::where('is_bot', true)->count());
 
         // Các thống kê cho campaign phải chỉ tính click người
         $this->assertEquals(1, $campaign->clicks()->where('is_bot', false)->count());
+
+        $this->assertTrue(\App\Models\PageView::isBot('APIs-Google (+https://developers.google.com/webmasters/APIs-Google.html)'));
+        $this->assertFalse(\App\Models\PageView::isBot('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36'));
 
         // Kiểm tra một cách gián tiếp: homepage sắp xếp theo tổng click + page view,
         // nhưng chỉ tính clicks.is_bot = 0 / page_views.is_bot = 0,

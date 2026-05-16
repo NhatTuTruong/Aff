@@ -132,6 +132,11 @@ class PageView extends Model
 
         $ua = strtolower($userAgent);
 
+        // Google crawlers / fetchers thường có "google" trong UA nhưng không lúc nào cũng có "bot"
+        if (str_contains($ua, 'google')) {
+            return true;
+        }
+
         // Common bot indicators
         $botKeywords = [
             'bot',

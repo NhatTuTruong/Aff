@@ -42,27 +42,54 @@ class Blog extends Model
     public function getFeaturedImageUrlAttribute(): string
     {
         if ($this->featured_image && Storage::disk('public')->exists($this->featured_image)) {
-            return Storage::disk('public')->url($this->featured_image);
+            return $this->ensureAbsoluteMediaUrl(Storage::disk('public')->url($this->featured_image));
         }
         $slug = $this->category ? Str::slug($this->category) : 'default';
-        $basePath = public_path('images/categories');
         $extensions = ['svg', 'png', 'jpg', 'jpeg', 'webp', 'gif'];
         if ($slug !== 'default') {
             foreach ($extensions as $ext) {
                 $path = "images/categories/{$slug}.{$ext}";
                 if (file_exists(public_path($path))) {
-                    return asset($path);
+                    return $this->ensureAbsoluteMediaUrl(asset($path));
                 }
             }
         }
+
+        $categoryDefault = public_path('category/default.png');
+        if (file_exists($categoryDefault)) {
+            return $this->ensureAbsoluteMediaUrl(asset('category/default.png'));
+        }
+
         foreach ($extensions as $ext) {
             $path = "images/categories/default.{$ext}";
             if (file_exists(public_path($path))) {
-                return asset($path);
+                return $this->ensureAbsoluteMediaUrl(asset($path));
             }
         }
 
-        return asset('images/placeholder.svg');
+        return $this->ensureAbsoluteMediaUrl(asset('images/placeholder.svg'));
+    }
+
+    /**
+     * Filament ImageColumn chỉ hiển thị được src nếu là URL tuyệt đối (FILTER_VALIDATE_URL).
+     * Storage::url() / asset() đôi khi trả path tương đối (/storage/...) → getImageUrl() trả null.
+     */
+    protected function ensureAbsoluteMediaUrl(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '') {
+            return url('/images/placeholder.svg');
+        }
+        if (preg_match('#^https?://#i', $url)) {
+            return $url;
+        }
+        if (str_starts_with($url, '//')) {
+            $scheme = parse_url((string) config('app.url'), PHP_URL_SCHEME) ?: 'https';
+
+            return "{$scheme}:{$url}";
+        }
+
+        return url('/'.ltrim($url, '/'));
     }
 
     protected static function boot()

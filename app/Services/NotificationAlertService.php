@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Brand;
 use App\Models\Campaign;
 use App\Models\Click;
 use App\Models\User;
@@ -13,31 +12,43 @@ use Illuminate\Support\Facades\Http;
 
 class NotificationAlertService
 {
-    protected const MILESTONES = [100, 200, 300];
+    protected const CACHE_PREFIX_CAMPAIGN_HUMAN_CLICKS_DAILY = 'notification_campaign_human_clicks_daily_';
 
-    protected const CACHE_PREFIX_MILESTONE = 'notification_milestone_';
-
-    protected const CACHE_PREFIX_ALERT_DAILY = 'notification_alert_click_';
+    protected const HUMAN_CLICKS_PER_DAY_MIN = 10;
 
     public function checkAndSendAlerts(): void
     {
-        $this->checkCampaignMilestones();
-        $this->checkClickAnomaly();
+        $this->notifyCampaignsDailyHumanClicksThreshold();
         $this->checkUnusualClicks();
         $this->checkLandingPageAvailability();
     }
 
-    protected function checkCampaignMilestones(): void
+    /**
+     * Một thông báo đơn giản cho chủ brand: trong ngày chiến dịch đạt tối thiểu N click từ người (không bot),
+     * gửi tối đa một lần mỗi ngày mỗi chiến dịch. Không còn mốc 100/200/300 hay so sánh tăng/giảm với hôm qua.
+     */
+    protected function notifyCampaignsDailyHumanClicksThreshold(): void
     {
-        $campaignIds = Click::query()
-            ->select('campaign_id')
-            ->selectRaw('COUNT(*) as total_clicks')
-            ->where('is_bot', false)
-            ->groupBy('campaign_id')
-            ->havingRaw('COUNT(*) >= 100')
-            ->pluck('total_clicks', 'campaign_id');
+        $todayStart = now()->startOfDay();
+        $todayEnd = now()->endOfDay();
 
-        foreach ($campaignIds as $campaignId => $totalClicks) {
+        $rows = Click::query()
+            ->where('is_bot', false)
+            ->whereBetween('created_at', [$todayStart, $todayEnd])
+            ->selectRaw('campaign_id, COUNT(*) as cnt')
+            ->groupBy('campaign_id')
+            ->havingRaw('COUNT(*) >= ?', [self::HUMAN_CLICKS_PER_DAY_MIN])
+            ->get();
+
+        foreach ($rows as $row) {
+            $campaignId = (int) $row->campaign_id;
+            $count = (int) $row->cnt;
+
+            $cacheKey = self::CACHE_PREFIX_CAMPAIGN_HUMAN_CLICKS_DAILY . $campaignId . '_' . $todayStart->toDateString();
+            if (Cache::has($cacheKey)) {
+                continue;
+            }
+
             $campaign = Campaign::with('brand.user')->find($campaignId);
             if (! $campaign || ! $campaign->brand?->user) {
                 continue;
@@ -45,83 +56,14 @@ class NotificationAlertService
 
             $user = $campaign->brand->user;
 
-            foreach (self::MILESTONES as $milestone) {
-                if ($totalClicks >= $milestone) {
-                    $cacheKey = self::CACHE_PREFIX_MILESTONE . "{$campaignId}_{$milestone}";
-                    if (Cache::has($cacheKey)) {
-                        continue;
-                    }
+            Notification::make()
+                ->title('Chiến dịch đạt ' . self::HUMAN_CLICKS_PER_DAY_MIN . '+ click từ người hôm nay')
+                ->body("{$campaign->title}: {$count} click (đã loại bot).")
+                ->success()
+                ->icon('heroicon-o-cursor-arrow-rays')
+                ->sendToDatabase($user);
 
-                    Notification::make()
-                        ->title("Chiến dịch đạt mốc {$milestone} clicks")
-                        ->body("{$campaign->title} đã đạt {$totalClicks} clicks.")
-                        ->success()
-                        ->icon('heroicon-o-trophy')
-                        ->sendToDatabase($user);
-
-                    Cache::put($cacheKey, true, now()->addDays(30));
-                }
-            }
-        }
-    }
-
-    protected function checkClickAnomaly(): void
-    {
-        $todayStart = now()->startOfDay();
-        $yesterdayStart = now()->subDay()->startOfDay();
-        $todayEnd = now()->endOfDay();
-        $yesterdayEnd = now()->subDay()->endOfDay();
-
-        $userIds = Brand::whereNotNull('user_id')->pluck('user_id')->unique();
-
-        foreach ($userIds as $userId) {
-            $brandIds = Brand::where('user_id', $userId)->pluck('id');
-            $campaignIds = Campaign::whereIn('brand_id', $brandIds)->pluck('id');
-
-            $todayCount = Click::whereIn('campaign_id', $campaignIds)
-                ->where('is_bot', false)
-                ->whereBetween('created_at', [$todayStart, $todayEnd])
-                ->count();
-            $yesterdayCount = Click::whereIn('campaign_id', $campaignIds)
-                ->where('is_bot', false)
-                ->whereBetween('created_at', [$yesterdayStart, $yesterdayEnd])
-                ->count();
-
-            if ($yesterdayCount < 5) {
-                continue;
-            }
-
-            $change = $yesterdayCount > 0
-                ? (($todayCount - $yesterdayCount) / $yesterdayCount) * 100
-                : 0;
-
-            $cacheKey = self::CACHE_PREFIX_ALERT_DAILY . $userId . '_' . $todayStart->toDateString();
-            if (Cache::has($cacheKey)) {
-                continue;
-            }
-
-            $user = User::find($userId);
-            if (! $user) {
-                continue;
-            }
-
-            if ($change <= -50) {
-                Notification::make()
-                    ->title('Cảnh báo: Click giảm mạnh')
-                    ->body("Hôm nay click giảm " . round(abs($change)) . "% so với hôm qua ({$todayCount} vs {$yesterdayCount}).")
-                    ->warning()
-                    ->icon('heroicon-o-arrow-trending-down')
-                    ->sendToDatabase($user);
-                Cache::put($cacheKey, true, now()->endOfDay());
-            } elseif ($change >= 100 && $todayCount >= 10) {
-                Notification::make()
-                    ->title('Click tăng đột biến')
-                    ->body("Hôm nay click tăng " . round($change) . "% so với hôm qua ({$todayCount} vs {$yesterdayCount}).")
-                    ->success()
-                    ->icon('heroicon-o-arrow-trending-up')
-                    ->sendToDatabase($user);
-                Cache::put($cacheKey, true, now()->endOfDay());
-            }
+            Cache::put($cacheKey, true, $todayEnd);
         }
     }
 
@@ -149,8 +91,7 @@ class NotificationAlertService
             $ip = $item->ip;
             $cnt = $item->cnt;
             $cacheKey = 'notification_unusual_ip_' . $ip . '_' . now()->format('Y-m-d-H-i');
-            
-            // Chỉ gửi 1 lần cho mỗi IP trong mỗi phút
+
             if (Cache::has($cacheKey)) {
                 continue;
             }
@@ -163,8 +104,7 @@ class NotificationAlertService
                     ->icon('heroicon-o-shield-exclamation')
                     ->sendToDatabase($user);
             }
-            
-            // Cache 15 phút để tránh spam
+
             Cache::put($cacheKey, true, now()->addMinutes(15));
         }
     }
@@ -211,7 +151,6 @@ class NotificationAlertService
                         )
                     );
                 } catch (\Throwable $e) {
-                    // Tránh làm hỏng job do lỗi gửi mail
                     report($e);
                 }
             }

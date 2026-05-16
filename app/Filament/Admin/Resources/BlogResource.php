@@ -139,9 +139,10 @@ class BlogResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('featured_image')
                     ->label('Ảnh')
-                    ->disk('public')
-                    ->size(60)
-                    ->defaultImageUrl(fn () => url('/images/placeholder.svg'))
+                    ->getStateUsing(fn (Blog $record): string => $record->featured_image_url)
+                    ->defaultImageUrl(fn () => asset('category/default.png'))
+                    ->size(40)
+                    ->extraImgAttributes(['class' => 'rounded-[10px]'])
                     ->circular(false),
                 Tables\Columns\TextColumn::make('title')
                     ->label('Tiêu đề')
