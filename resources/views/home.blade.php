@@ -8,15 +8,15 @@
     .home-page {
         --hp-ink: #0c0a12;
         --hp-muted: #5c5866;
-        --hp-line: rgba(12, 10, 18, 0.08);
-        --hp-violet: #6d28d9;
-        --hp-violet-deep: #5b21b6;
-        --hp-rose: #e11d48;
-        --hp-rose-deep: #be123c;
+        --hp-line: rgba(5, 150, 105, 0.12);
+        --hp-violet: #059669;
+        --hp-violet-deep: #047857;
+        --hp-rose: #10b981;
+        --hp-rose-deep: #047857;
         --hp-surface: #ffffff;
-        --hp-cream: #f7f5fb;
-        --hp-glow: radial-gradient(120% 80% at 80% 0%, rgba(109, 40, 217, 0.14) 0%, transparent 55%),
-            radial-gradient(90% 60% at 10% 100%, rgba(225, 29, 72, 0.08) 0%, transparent 50%);
+        --hp-cream: #ecfdf5;
+        --hp-glow: radial-gradient(120% 80% at 80% 0%, rgba(5, 150, 105, 0.14) 0%, transparent 55%),
+            radial-gradient(90% 60% at 10% 100%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
         background: var(--hp-cream);
         background-image: var(--hp-glow);
         color: var(--hp-ink);
@@ -30,178 +30,233 @@
 
     .hp-hero {
         position: relative;
-        padding: clamp(2.5rem, 6vw, 4.25rem) 0 clamp(2rem, 4vw, 3rem);
+        padding: clamp(1.25rem, 3vw, 2rem) 0 clamp(1.5rem, 3vw, 2.25rem);
+    }
+    .hp-hero-panel {
+        position: relative;
+        border-radius: 5px;
+        border: 1px solid var(--hp-line);
+        background: var(--hp-surface);
+        box-shadow: 0 24px 56px -36px rgba(5, 150, 105, 0.28);
         overflow: hidden;
     }
-    .hp-hero::before {
+    .hp-hero-panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--hp-violet) 0%, var(--hp-rose) 55%, #34d399 100%);
+    }
+    .hp-hero-panel::after {
         content: '';
         position: absolute;
         inset: 0;
         background:
-            linear-gradient(165deg, rgba(255, 255, 255, 0.92) 0%, rgba(247, 245, 251, 0.65) 45%, transparent 100%),
-            repeating-linear-gradient(-12deg, transparent, transparent 48px, rgba(109, 40, 217, 0.03) 48px, rgba(109, 40, 217, 0.03) 49px);
+            radial-gradient(90% 70% at 100% 0%, rgba(5, 150, 105, 0.08) 0%, transparent 55%),
+            radial-gradient(60% 50% at 0% 100%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
         pointer-events: none;
     }
-    .hp-hero-grid {
+    .hp-hero-inner {
         position: relative;
         z-index: 1;
         display: grid;
         grid-template-columns: 1fr;
-        gap: 2rem;
-        align-items: center;
+        gap: 0;
     }
     @media (min-width: 900px) {
-        .hp-hero-grid {
-            grid-template-columns: 1.05fr 0.95fr;
-            gap: 3rem;
+        .hp-hero-inner {
+            grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
         }
     }
-    .hp-kicker {
+    .hp-hero-main {
+        padding: clamp(1.5rem, 3vw, 2.25rem);
+    }
+    @media (min-width: 900px) {
+        .hp-hero-main {
+            padding: clamp(1.75rem, 3vw, 2.5rem) 2rem clamp(1.75rem, 3vw, 2.5rem) clamp(1.75rem, 3vw, 2.5rem);
+            border-right: 1px solid var(--hp-line);
+        }
+    }
+    .hp-badge {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.16em;
+        gap: 0.4rem;
+        padding: 0.35rem 0.75rem;
+        margin-bottom: 1rem;
+        border-radius: 5px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
         color: var(--hp-violet-deep);
-        margin-bottom: 1rem;
+        background: rgba(5, 150, 105, 0.08);
+        border: 1px solid rgba(5, 150, 105, 0.18);
     }
-    .hp-kicker::before {
-        content: '';
-        width: 2rem;
-        height: 2px;
-        background: linear-gradient(90deg, var(--hp-violet), var(--hp-rose));
-        border-radius: 2px;
+    .hp-badge__dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--hp-rose);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+        animation: hp-pulse 2s ease-in-out infinite;
+    }
+    @keyframes hp-pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.65; transform: scale(0.85); }
     }
     .hp-hero h1 {
         font-family: 'Space Grotesk', sans-serif;
-        font-size: clamp(2.1rem, 5vw, 3.35rem);
+        font-size: clamp(1.85rem, 4.5vw, 2.85rem);
         font-weight: 700;
-        letter-spacing: -0.045em;
-        line-height: 1.08;
+        letter-spacing: -0.04em;
+        line-height: 1.12;
         color: var(--hp-ink);
-        margin: 0 0 1.1rem;
-        max-width: 16ch;
+        margin: 0 0 0.85rem;
+        max-width: 22ch;
+    }
+    @media (min-width: 900px) {
+        .hp-hero h1 { max-width: 14ch; }
+    }
+    .hp-hero h1 em {
+        font-style: normal;
+        color: var(--hp-violet);
     }
     .hp-hero-lead {
-        font-size: clamp(1rem, 1.35vw, 1.125rem);
+        font-size: clamp(0.95rem, 1.2vw, 1.05rem);
         color: var(--hp-muted);
-        line-height: 1.65;
-        max-width: 38rem;
-        margin: 0 0 1.25rem;
+        line-height: 1.6;
+        max-width: 34rem;
+        margin: 0 0 1.15rem;
     }
-    .hp-trust {
-        font-size: 0.8125rem;
-        color: var(--hp-muted);
-        margin-bottom: 1.75rem;
-        max-width: 36rem;
+    .hp-hero-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
     }
-    .hp-trust a {
-        color: var(--hp-violet);
-        font-weight: 600;
-        text-decoration: underline;
-        text-underline-offset: 3px;
-    }
-    .hp-trust a:hover { color: var(--hp-violet-deep); }
-
     .hp-search {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.6rem;
-        padding: 0.45rem;
-        background: var(--hp-surface);
+        gap: 0.45rem;
+        padding: 0.35rem;
+        background: #f8fafc;
         border: 1px solid var(--hp-line);
-        border-radius: 999px;
-        box-shadow: 0 18px 50px -28px rgba(12, 10, 18, 0.35);
-        max-width: 520px;
+        border-radius: 5px;
+        max-width: 100%;
+    }
+    @media (min-width: 520px) {
+        .hp-search { max-width: 480px; }
     }
     .hp-search:focus-within {
-        border-color: rgba(109, 40, 217, 0.35);
-        box-shadow: 0 18px 50px -28px rgba(109, 40, 217, 0.25);
+        border-color: rgba(5, 150, 105, 0.4);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
     }
     .hp-search input {
         flex: 1;
         min-width: 0;
         border: none;
         background: transparent;
-        padding: 0.85rem 1rem 0.85rem 1.15rem;
-        font-size: 1rem;
+        padding: 0.75rem 0.85rem;
+        font-size: 0.98rem;
         color: var(--hp-ink);
         outline: none;
     }
-    .hp-search input::placeholder { color: #9ca3af; }
+    .hp-search input::placeholder { color: #94a3b8; }
     .hp-search button {
         border: none;
         cursor: pointer;
-        padding: 0.85rem 1.35rem;
-        border-radius: 999px;
+        padding: 0.75rem 1.15rem;
+        border-radius: 5px;
         font-weight: 700;
-        font-size: 0.8125rem;
-        letter-spacing: 0.04em;
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
         color: #fff;
-        background: linear-gradient(135deg, var(--hp-violet) 0%, var(--hp-rose) 100%);
-        transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 8px 24px -8px rgba(109, 40, 217, 0.55);
+        background: var(--hp-violet);
+        transition: background 0.2s, transform 0.2s;
     }
     .hp-search button:hover {
+        background: var(--hp-violet-deep);
         transform: translateY(-1px);
-        box-shadow: 0 12px 28px -8px rgba(225, 29, 72, 0.45);
     }
+    .hp-quick {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        align-items: center;
+    }
+    .hp-quick__label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--hp-muted);
+        margin-right: 0.15rem;
+    }
+    .hp-quick a {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.4rem 0.75rem;
+        border-radius: 5px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: var(--hp-ink);
+        background: rgba(5, 150, 105, 0.06);
+        border: 1px solid var(--hp-line);
+        transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .hp-quick a:hover {
+        color: var(--hp-violet-deep);
+        border-color: rgba(5, 150, 105, 0.35);
+        background: rgba(5, 150, 105, 0.1);
+    }
+    .hp-hero-foot {
+        padding: 0.75rem clamp(1.5rem, 3vw, 2rem);
+        border-top: 1px solid var(--hp-line);
+        background: rgba(236, 253, 245, 0.55);
+        font-size: 0.78rem;
+        color: var(--hp-muted);
+        line-height: 1.5;
+    }
+    .hp-hero-foot a {
+        color: var(--hp-violet);
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+    .hp-hero-foot a:hover { color: var(--hp-violet-deep); }
 
     .hp-hero-aside {
         position: relative;
-        min-height: 220px;
-        border-radius: 28px;
-        background: linear-gradient(145deg, #1e1033 0%, #312e81 42%, #4c1d95 100%);
-        padding: 1.75rem;
-        color: #f5f3ff;
-        overflow: hidden;
-        box-shadow: 0 28px 60px -24px rgba(49, 46, 129, 0.65);
+        padding: clamp(1.25rem, 2.5vw, 1.75rem);
+        background: linear-gradient(160deg, #064e3b 0%, #047857 50%, #059669 100%);
+        color: #ecfdf5;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
-    .hp-hero-aside::after {
+    @media (min-width: 900px) {
+        .hp-hero-aside { min-height: 100%; }
+    }
+    .hp-hero-aside::before {
         content: '';
         position: absolute;
-        right: -20%;
-        top: -30%;
-        width: 70%;
-        height: 90%;
-        background: radial-gradient(circle, rgba(225, 29, 72, 0.35) 0%, transparent 70%);
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        background-size: 24px 24px;
+        opacity: 0.5;
         pointer-events: none;
-    }
-    .hp-aside-label {
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        opacity: 0.75;
-        margin-bottom: 0.75rem;
-        position: relative;
-        z-index: 1;
-    }
-    .hp-aside-stat {
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: clamp(2.25rem, 4vw, 2.85rem);
-        font-weight: 700;
-        letter-spacing: -0.03em;
-        line-height: 1;
-        margin-bottom: 0.35rem;
-        position: relative;
-        z-index: 1;
-    }
-    .hp-aside-caption {
-        font-size: 0.9rem;
-        opacity: 0.88;
-        max-width: 16rem;
-        line-height: 1.45;
-        position: relative;
-        z-index: 1;
     }
     .hp-aside-slider {
         position: relative;
         z-index: 1;
-        min-height: 200px;
+        min-height: 168px;
         overflow: hidden;
     }
     .hp-aside-track {
@@ -214,33 +269,72 @@
         flex: 0 0 100%;
         min-width: 0;
         box-sizing: border-box;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+        padding-right: 0.5rem;
+    }
+    .hp-aside-icon {
+        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .hp-aside-body { min-width: 0; }
+    .hp-aside-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin: 0 0 0.35rem;
+    }
+    .hp-aside-stat {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(1.65rem, 3vw, 2.1rem);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        margin: 0 0 0.4rem;
+    }
+    .hp-aside-caption {
+        font-size: 0.86rem;
+        opacity: 0.9;
+        margin: 0;
+        line-height: 1.5;
+        max-width: 20rem;
     }
     .hp-aside-dots {
-        position: absolute;
-        bottom: 1.25rem;
-        right: 1.25rem;
-        display: flex;
-        gap: 0.4rem;
+        position: relative;
         z-index: 2;
+        display: flex;
+        gap: 0.35rem;
         align-items: center;
+        margin-top: 1rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
     }
     .hp-aside-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
+        flex: 1;
+        height: 4px;
+        border-radius: 5px;
         padding: 0;
         border: none;
         cursor: pointer;
-        background: rgba(255, 255, 255, 0.32);
-        transition: transform 0.2s, background 0.2s;
+        background: rgba(255, 255, 255, 0.22);
+        transition: background 0.25s, transform 0.2s;
         -webkit-tap-highlight-color: transparent;
     }
-    .hp-aside-dot:hover {
-        background: rgba(255, 255, 255, 0.5);
-    }
+    .hp-aside-dot:hover { background: rgba(255, 255, 255, 0.38); }
     .hp-aside-dot.is-active {
-        background: rgba(244, 114, 182, 0.95);
-        transform: scale(1.2);
+        background: #6ee7b7;
+        transform: scaleY(1.35);
     }
 
     .hp-stats {
@@ -321,7 +415,7 @@
         padding: 0.85rem 1rem;
         border-radius: 14px;
         border: 1px dashed var(--hp-line);
-        background: rgba(109, 40, 217, 0.04);
+        background: rgba(5, 150, 105, 0.04);
         max-width: 720px;
     }
     .hp-disclaimer a {
@@ -351,12 +445,12 @@
     }
     .hp-post-card:hover {
         transform: translateY(-4px);
-        border-color: rgba(109, 40, 217, 0.22);
-        box-shadow: 0 24px 50px -28px rgba(109, 40, 217, 0.28);
+        border-color: rgba(5, 150, 105, 0.22);
+        box-shadow: 0 24px 50px -28px rgba(5, 150, 105, 0.28);
     }
     .hp-post-media {
         aspect-ratio: 16 / 10;
-        background: #ede9fe;
+        background: #d1fae5;
         overflow: hidden;
     }
     .hp-post-media img {
@@ -399,10 +493,10 @@
         font-weight: 700;
         color: var(--hp-violet);
         text-decoration: none;
-        border-bottom: 2px solid rgba(109, 40, 217, 0.25);
+        border-bottom: 2px solid rgba(5, 150, 105, 0.25);
         padding-bottom: 2px;
     }
-    .hp-all-posts a:hover { color: var(--hp-rose); border-bottom-color: rgba(225, 29, 72, 0.35); }
+    .hp-all-posts a:hover { color: var(--hp-rose); border-bottom-color: rgba(16, 185, 129, 0.35); }
 
     .hp-stores-panel {
         background: var(--hp-surface);
@@ -447,18 +541,18 @@
         height: 80px;
         border-radius: 22px;
         overflow: hidden;
-        background: linear-gradient(180deg, #faf5ff 0%, #f3e8ff 100%);
+        background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%);
         border: 1px solid var(--hp-line);
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 0.55rem;
-        box-shadow: 0 10px 24px -14px rgba(109, 40, 217, 0.35);
+        box-shadow: 0 10px 24px -14px rgba(5, 150, 105, 0.35);
         transition: border-color 0.2s, box-shadow 0.2s;
     }
     .store-carousel-item:hover .store-carousel-img-wrap {
-        border-color: rgba(109, 40, 217, 0.35);
-        box-shadow: 0 14px 28px -12px rgba(225, 29, 72, 0.2);
+        border-color: rgba(5, 150, 105, 0.35);
+        box-shadow: 0 14px 28px -12px rgba(16, 185, 129, 0.2);
     }
     .store-carousel-img-wrap img {
         width: 100%;
@@ -498,11 +592,11 @@
     }
     .coupon-card:hover {
         transform: translateY(-3px);
-        border-color: rgba(109, 40, 217, 0.2);
-        box-shadow: 0 22px 44px -22px rgba(109, 40, 217, 0.22);
+        border-color: rgba(5, 150, 105, 0.2);
+        box-shadow: 0 22px 44px -22px rgba(5, 150, 105, 0.22);
     }
     .coupon-card-strip {
-        background: linear-gradient(180deg, #5b21b6 0%, #7c3aed 50%, #be185d 100%);
+        background: linear-gradient(180deg, #047857 0%, #059669 50%, #047857 100%);
         color: #fff;
         display: flex;
         flex-direction: column;
@@ -540,7 +634,7 @@
         height: 44px;
         object-fit: contain;
         border-radius: 12px;
-        background: #faf5ff;
+        background: #ecfdf5;
         padding: 4px;
         border: 1px solid var(--hp-line);
         flex-shrink: 0;
@@ -575,7 +669,7 @@
         align-items: center;
         gap: 0.35rem;
         padding: 0.45rem 0.7rem;
-        background: #f5f3ff;
+        background: #ecfdf5;
         border: 1px dashed var(--hp-violet);
         border-radius: 10px;
         font-size: 0.78rem;
@@ -586,13 +680,13 @@
         font-family: ui-monospace, monospace;
     }
     .coupon-card-code:hover {
-        background: #ede9fe;
+        background: #d1fae5;
         border-color: var(--hp-violet-deep);
     }
     .coupon-card-code.copied {
-        background: #ede9fe;
+        background: #d1fae5;
         border-color: var(--hp-violet);
-        color: #5b21b6;
+        color: #047857;
     }
     .coupon-card-code-label {
         font-size: 0.62rem;
@@ -622,17 +716,17 @@
         border-radius: 11px;
         text-decoration: none;
         transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 6px 18px -6px rgba(109, 40, 217, 0.55);
+        box-shadow: 0 6px 18px -6px rgba(5, 150, 105, 0.55);
     }
     .coupon-card-cta:hover {
         transform: translateY(-1px);
-        box-shadow: 0 10px 22px -6px rgba(225, 29, 72, 0.45);
+        box-shadow: 0 10px 22px -6px rgba(16, 185, 129, 0.45);
         color: #fff;
     }
 
     .hp-cats {
         padding: clamp(2.75rem, 5vw, 3.75rem) 0;
-        background: linear-gradient(135deg, #ede9fe 0%, #fce7f3 55%, #faf5ff 100%);
+        background: linear-gradient(135deg, #d1fae5 0%, #d1fae5 55%, #ecfdf5 100%);
         border-top: 1px solid var(--hp-line);
         position: relative;
         overflow: hidden;
@@ -641,7 +735,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: radial-gradient(60% 80% at 100% 0%, rgba(109, 40, 217, 0.12) 0%, transparent 55%);
+        background: radial-gradient(60% 80% at 100% 0%, rgba(5, 150, 105, 0.12) 0%, transparent 55%);
         pointer-events: none;
     }
     .hp-cats .hp-shell { position: relative; z-index: 1; }
@@ -671,7 +765,7 @@
     }
     .hp-cat-pill:hover {
         background: #fff;
-        border-color: rgba(109, 40, 217, 0.35);
+        border-color: rgba(5, 150, 105, 0.35);
         transform: translateY(-2px);
     }
 
@@ -688,7 +782,7 @@
         height: 72px;
         margin: 0 auto 1.25rem;
         opacity: 0.4;
-        color: #a78bfa;
+        color: #34d399;
     }
     .hp-empty h3 {
         font-family: 'Space Grotesk', sans-serif;
@@ -729,43 +823,64 @@
 @section('content')
 <div class="home-page">
     <section class="hp-hero">
-        <div class="hp-shell hp-hero-grid">
-            <div>
-                <p class="hp-kicker">Deals you can trust</p>
-                <h1 class="font-heading">Save smarter with curated coupons &amp; honest store picks</h1>
-                <p class="hp-hero-lead">Search verified promotions, explore top stores, and read updates from our blog — refreshed often so you never miss a strong offer.</p>
-                <p class="hp-trust">We are an independent deal finder. We may earn from qualifying purchases. <a href="{{ url('/affiliate-disclosure') }}">Read our disclosure</a>.</p>
-                <form action="{{ url('/') }}" method="get" class="hp-search">
-                    <input type="search" name="q" value="{{ $searchQuery ?? '' }}" placeholder="Search brands, stores, or offers…" autocomplete="off">
-                    <button type="submit">Search</button>
-                </form>
-            </div>
-            <aside class="hp-hero-aside" aria-label="Site highlights">
-                <div class="hp-aside-slider" id="hp-hero-aside-slider">
-                    <div class="hp-aside-track" id="hp-aside-track">
-                        <div class="hp-aside-slide">
-                            <p class="hp-aside-label">Why shoppers stay</p>
-                            <p class="hp-aside-stat">Curated</p>
-                            <p class="hp-aside-caption">Human-reviewed paths to real savings — fewer dead codes, clearer next steps.</p>
-                        </div>
-                        <div class="hp-aside-slide">
-                            <p class="hp-aside-label">Always in motion</p>
-                            <p class="hp-aside-stat">Updated</p>
-                            <p class="hp-aside-caption">We refresh offers and landing details often so you see what still works — not yesterday’s leftovers.</p>
-                        </div>
-                        <div class="hp-aside-slide">
-                            <p class="hp-aside-label">Built for trust</p>
-                            <p class="hp-aside-stat">Verified</p>
-                            <p class="hp-aside-caption">Clear affiliate disclosure, honest pros &amp; cons on store pages, and CTAs that take you straight to the deal.</p>
+        <div class="hp-shell">
+            <div class="hp-hero-panel">
+                <div class="hp-hero-inner">
+                    <div class="hp-hero-main">
+                        <p class="hp-badge"><span class="hp-badge__dot" aria-hidden="true"></span> Deals you can trust</p>
+                        <h1 class="font-heading">Save smarter with <em>curated coupons</em> &amp; honest store picks</h1>
+                        <p class="hp-hero-lead">Search verified promotions, explore top stores, and read updates from our blog — refreshed often so you never miss a strong offer.</p>
+                        <div class="hp-hero-actions">
+                            <form action="{{ url('/') }}" method="get" class="hp-search">
+                                <input type="search" name="q" value="{{ $searchQuery ?? '' }}" placeholder="Search brands, stores, or offers…" autocomplete="off">
+                                <button type="submit">Search</button>
+                            </form>
+                            <div class="hp-quick">
+                                <span class="hp-quick__label">Jump to</span>
+                                <a href="{{ route('deals.index') }}">Deals</a>
+                                <a href="{{ url('/') }}#stores">Stores</a>
+                                <a href="{{ route('blog.index') }}">Blog</a>
+                            </div>
                         </div>
                     </div>
-                    <nav class="hp-aside-dots" id="hp-aside-dots" aria-label="Highlight slides">
-                        <button type="button" class="hp-aside-dot is-active" aria-label="Slide 1" aria-current="true" data-slide="0"></button>
-                        <button type="button" class="hp-aside-dot" aria-label="Slide 2" data-slide="1"></button>
-                        <button type="button" class="hp-aside-dot" aria-label="Slide 3" data-slide="2"></button>
-                    </nav>
+                    <aside class="hp-hero-aside" aria-label="Site highlights">
+                        <div class="hp-aside-slider" id="hp-hero-aside-slider">
+                            <div class="hp-aside-track" id="hp-aside-track">
+                                <div class="hp-aside-slide">
+                                    <span class="hp-aside-icon" aria-hidden="true">✓</span>
+                                    <div class="hp-aside-body">
+                                        <p class="hp-aside-label">Why shoppers stay</p>
+                                        <p class="hp-aside-stat">Curated</p>
+                                        <p class="hp-aside-caption">Human-reviewed paths to real savings — fewer dead codes, clearer next steps.</p>
+                                    </div>
+                                </div>
+                                <div class="hp-aside-slide">
+                                    <span class="hp-aside-icon" aria-hidden="true">↻</span>
+                                    <div class="hp-aside-body">
+                                        <p class="hp-aside-label">Always in motion</p>
+                                        <p class="hp-aside-stat">Updated</p>
+                                        <p class="hp-aside-caption">We refresh offers and landing details often so you see what still works — not yesterday’s leftovers.</p>
+                                    </div>
+                                </div>
+                                <div class="hp-aside-slide">
+                                    <span class="hp-aside-icon" aria-hidden="true">◎</span>
+                                    <div class="hp-aside-body">
+                                        <p class="hp-aside-label">Built for trust</p>
+                                        <p class="hp-aside-stat">Verified</p>
+                                        <p class="hp-aside-caption">Clear affiliate disclosure, honest pros &amp; cons on store pages, and CTAs that take you straight to the deal.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <nav class="hp-aside-dots" id="hp-aside-dots" aria-label="Highlight slides">
+                                <button type="button" class="hp-aside-dot is-active" aria-label="Slide 1: Curated" aria-current="true" data-slide="0"></button>
+                                <button type="button" class="hp-aside-dot" aria-label="Slide 2: Updated" data-slide="1"></button>
+                                <button type="button" class="hp-aside-dot" aria-label="Slide 3: Verified" data-slide="2"></button>
+                            </nav>
+                        </div>
+                    </aside>
                 </div>
-            </aside>
+                <p class="hp-hero-foot">We are an independent deal finder. We may earn from qualifying purchases. <a href="{{ url('/affiliate-disclosure') }}">Read our disclosure</a>.</p>
+            </div>
         </div>
     </section>
 

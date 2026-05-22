@@ -34,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Emerald,
             ])
             ->favicon(asset('favicon.svg'))
             ->maxContentWidth(\Filament\Support\Enums\MaxWidth::Full)

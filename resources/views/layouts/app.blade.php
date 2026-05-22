@@ -74,18 +74,18 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f7f5fb;
+            --bg: #ecfdf5;
             --surface: #ffffff;
-            --surface-hover: #f5f3ff;
-            --text: #0c0a12;
-            --text-dark: #0c0a12;
-            --text-muted: #5c5866;
-            --primary: #6d28d9;
-            --primary-dark: #5b21b6;
-            --accent: #6d28d9;
-            --accent-hover: #be123c;
-            --accent-rose: #e11d48;
-            --border: rgba(12, 10, 18, 0.1);
+            --surface-hover: #d1fae5;
+            --text: #0f172a;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --primary: #059669;
+            --primary-dark: #047857;
+            --accent: #059669;
+            --accent-hover: #047857;
+            --accent-rose: #10b981;
+            --border: rgba(5, 150, 105, 0.12);
             --radius: 12px;
             --radius-sm: 8px;
         }
@@ -93,6 +93,7 @@
         body {
             font-family: 'DM Sans', system-ui, sans-serif;
             background: var(--bg);
+            background-image: radial-gradient(ellipse 100% 80% at 50% -30%, rgba(5, 150, 105, 0.12) 0%, transparent 55%);
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
@@ -196,8 +197,8 @@
             flex-wrap: wrap;
         }
         .cookie-consent p { margin: 0; font-size: 0.9rem; flex: 1; min-width: 200px; }
-        .cookie-consent a { color: #e9d5ff; text-decoration: underline; text-underline-offset: 2px; }
-        .cookie-consent a:hover { color: #fce7f3; }
+        .cookie-consent a { color: #6ee7b7; text-decoration: underline; text-underline-offset: 2px; }
+        .cookie-consent a:hover { color: #a7f3d0; }
         .cookie-consent-btn {
             padding: 0.5rem 1.25rem;
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-rose) 100%);
@@ -210,7 +211,7 @@
         }
         .cookie-consent-btn:hover {
             filter: brightness(1.06);
-            box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35);
+            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
         }
     </style>
     @include('partials.site-chrome-styles')

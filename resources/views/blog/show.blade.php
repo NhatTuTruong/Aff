@@ -6,18 +6,18 @@
 @push('styles')
 <style>
     :root {
-        --blog-bg: #f7f5fb;
+        --blog-bg: #ecfdf5;
         --blog-surface: #ffffff;
-        --blog-border: rgba(12, 10, 18, 0.1);
+        --blog-border: rgba(5, 150, 105, 0.1);
         --blog-text: #0c0a12;
         --blog-muted: #5c5866;
-        --blog-accent: #6d28d9;
-        --blog-accent-rose: #e11d48;
-        --blog-accent-soft: rgba(109, 40, 217, 0.12);
+        --blog-accent: #059669;
+        --blog-accent-rose: #10b981;
+        --blog-accent-soft: rgba(5, 150, 105, 0.12);
     }
 
     body {
-        background: #f7f5fb;
+        background: #ecfdf5;
     }
 
     .blog-shell {
@@ -54,8 +54,8 @@
         border-radius: 1.5rem;
         overflow: hidden;
         border: 1px solid var(--blog-border);
-        background: radial-gradient(circle at top left, rgba(109, 40, 217, 0.12), transparent 55%),
-                    radial-gradient(circle at bottom right, rgba(225, 29, 72, 0.08), transparent 60%),
+        background: radial-gradient(circle at top left, rgba(5, 150, 105, 0.12), transparent 55%),
+                    radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.08), transparent 60%),
                     #ffffff;
         display: grid;
         grid-template-columns: minmax(0, 3fr) minmax(0, 2.5fr);
@@ -118,7 +118,7 @@
     .blog-hero-media {
         position: relative;
         min-height: 200px;
-        background: radial-gradient(circle at center, rgba(109, 40, 217, 0.1), rgba(225, 29, 72, 0.06));
+        background: radial-gradient(circle at center, rgba(5, 150, 105, 0.1), rgba(16, 185, 129, 0.06));
         overflow: hidden;
     }
 
@@ -230,9 +230,9 @@
     }
 
     .blog-chip-accent {
-        border-color: rgba(109, 40, 217, 0.35);
+        border-color: rgba(5, 150, 105, 0.35);
         background: var(--blog-accent-soft);
-        color: #5b21b6;
+        color: #047857;
     }
 
     .blog-share-button {
@@ -366,7 +366,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, rgba(109, 40, 217, 0.12), transparent 55%);
+        background: linear-gradient(135deg, rgba(5, 150, 105, 0.12), transparent 55%);
         opacity: 0;
         transition: opacity 0.18s;
         pointer-events: none;
@@ -458,7 +458,7 @@
     .blog-deal-code.copied {
         background: var(--blog-accent-soft);
         border-color: var(--blog-accent);
-        color: #5b21b6;
+        color: #047857;
     }
 
     .blog-deal-cta {

@@ -162,15 +162,15 @@
         }
 
         :root {
-            --primary: #6d28d9;
-            --primary-dark: #5b21b6;
-            --primary-soft: #ede9fe;
-            --accent: #e11d48;
+            --primary: #059669;
+            --primary-dark: #047857;
+            --primary-soft: #d1fae5;
+            --accent: #10b981;
             --text-dark: #0c0a12;
             --text-light: #5c5866;
-            --bg-page: #f7f5fb;
+            --bg-page: #ecfdf5;
             --bg-card: #ffffff;
-            --border: rgba(12, 10, 18, 0.1);
+            --border: rgba(5, 150, 105, 0.1);
             --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
             --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.1);
             --shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.15);
@@ -205,7 +205,7 @@
             border-radius: 28px;
             box-shadow: 0 24px 65px -30px rgba(76, 29, 149, 0.35);
             padding: 36px 36px 44px;
-            border: 1px solid rgba(109, 40, 217, 0.12);
+            border: 1px solid rgba(5, 150, 105, 0.12);
             position: relative;
             overflow: hidden;
         }
@@ -216,8 +216,8 @@
             inset: 0;
             pointer-events: none;
             background:
-                radial-gradient(55% 40% at 6% 0%, rgba(109, 40, 217, 0.07) 0%, transparent 70%),
-                radial-gradient(45% 35% at 100% 100%, rgba(225, 29, 72, 0.06) 0%, transparent 70%);
+                radial-gradient(55% 40% at 6% 0%, rgba(5, 150, 105, 0.07) 0%, transparent 70%),
+                radial-gradient(45% 35% at 100% 100%, rgba(16, 185, 129, 0.06) 0%, transparent 70%);
         }
 
         /* ===== HERO (TOP TITLE LIKE TENERE) ===== */
@@ -225,9 +225,9 @@
             text-align: center;
             margin-bottom: 36px;
             padding: 22px 18px 30px;
-            border: 1px solid rgba(109, 40, 217, 0.14);
+            border: 1px solid rgba(5, 150, 105, 0.14);
             border-radius: 20px;
-            background: linear-gradient(135deg, #faf5ff 0%, #fdf2f8 55%, #ffffff 100%);
+            background: linear-gradient(135deg, #ecfdf5 0%, #e5fff6 55%, #ffffff 100%);
         }
 
         .hero-title {
@@ -264,11 +264,11 @@
         }
 
         .left-card {
-            background: linear-gradient(180deg, #ffffff 0%, #faf5ff 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #ecfdf5 100%);
             border-radius: 22px;
             padding: 28px 24px 28px;
             box-shadow: var(--shadow-md);
-            border: 1px solid rgba(109, 40, 217, 0.14);
+            border: 1px solid rgba(5, 150, 105, 0.14);
             position: relative;
             display: flex;
             flex-direction: column;
@@ -284,7 +284,7 @@
             border-radius: 16px;
             background: #fff;
             padding: 12px;
-            box-shadow: 0 10px 30px rgba(109, 40, 217, 0.2);
+            box-shadow: 0 10px 30px rgba(5, 150, 105, 0.2);
             transition: none;
         }
 
@@ -319,11 +319,11 @@
 
         /* Stats card (Working Codes, Success Rate, Total Saved) */
         .stats-card {
-            background: linear-gradient(180deg, #faf5ff 0%, #f5f3ff 100%);
+            background: linear-gradient(180deg, #ecfdf5 0%, #ecfdf5 100%);
             border-radius: 14px;
             padding: 14px 16px;
             margin-top: 12px;
-            border: 1px solid rgba(109, 40, 217, 0.16);
+            border: 1px solid rgba(5, 150, 105, 0.16);
         }
 
         .stats-list {
@@ -336,7 +336,7 @@
             justify-content: space-between;
             padding: 10px 0;
             gap: 10px;
-            border-bottom: 1px solid rgba(109, 40, 217, 0.14);
+            border-bottom: 1px solid rgba(5, 150, 105, 0.14);
         }
 
         .stats-row:last-child {
@@ -418,7 +418,7 @@
             cursor: pointer;
             text-decoration: none;
             transition: background 0.2s, transform 0.2s;
-            box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
         }
 
         .quick-menu-shop-now:hover {
@@ -437,11 +437,11 @@
         .note-bar {
             font-size: 0.85rem;
             color: var(--text-light);
-            background: linear-gradient(135deg, #faf5ff 0%, #fff1f2 100%);
+            background: linear-gradient(135deg, #ecfdf5 0%, #fff1f2 100%);
             border-radius: 12px;
             padding: 12px 18px;
             margin-bottom: 16px;
-            border: 1px solid rgba(109, 40, 217, 0.2);
+            border: 1px solid rgba(5, 150, 105, 0.2);
             line-height: 1.6;
         }
 
@@ -492,7 +492,7 @@
             border-color: var(--primary);
             color: #fff;
             font-weight: 500;
-            box-shadow: 0 2px 8px rgba(109, 40, 217, 0.3);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
         }
 
         .coupon-list {
@@ -506,26 +506,26 @@
         .coupon-row {
             background: #fff;
             border-radius: 20px;
-            box-shadow: 0 14px 30px -24px rgba(109, 40, 217, 0.45);
+            box-shadow: 0 14px 30px -24px rgba(5, 150, 105, 0.45);
             padding: 0;
             display: grid;
             grid-template-columns: 180px 1fr;
             gap: 0;
             align-items: stretch;
             transition: none;
-            border: 1px solid rgba(109, 40, 217, 0.14);
+            border: 1px solid rgba(5, 150, 105, 0.14);
             overflow: hidden;
             position: relative;
         }
 
         .coupon-row:hover {
-            box-shadow: 0 18px 34px -22px rgba(109, 40, 217, 0.5);
+            box-shadow: 0 18px 34px -22px rgba(5, 150, 105, 0.5);
             transform: none;
         }
 
         /* Left section - Discount Visual */
         .coupon-discount-visual {
-            background: linear-gradient(160deg, #faf5ff 0%, #f5f3ff 58%, #fdf2f8 100%);
+            background: linear-gradient(160deg, #ecfdf5 0%, #ecfdf5 58%, #e5fff6 100%);
             padding: 18px 16px;
             display: flex;
             flex-direction: column;
@@ -619,13 +619,13 @@
             gap: 6px;
             white-space: nowrap;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(109, 40, 217, 0.3);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
         }
 
         .btn-get-code:hover {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, #be123c 100%);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #047857 100%);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(109, 40, 217, 0.4);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
         }
 
         .btn-get-code::after {
@@ -641,7 +641,7 @@
             font-weight: 700;
             font-family: ui-monospace, monospace;
             letter-spacing: 0.05em;
-            background: #faf5ff;
+            background: #ecfdf5;
             color: var(--primary-dark);
             border: 1px dashed var(--primary);
             border-radius: 12px;
@@ -716,14 +716,14 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: #f5f3ff;
-            color: #5b21b6;
+            background: #ecfdf5;
+            color: #047857;
             padding: 4px 10px;
             border-radius: 999px;
             font-size: 0.75rem;
             font-weight: 800;
             margin-top: 10px;
-            border: 1px solid rgba(109, 40, 217, 0.25);
+            border: 1px solid rgba(5, 150, 105, 0.25);
         }
 
         .all-verified-badge::before {
@@ -769,7 +769,7 @@
             align-items: center;
             gap: 4px;
             font-weight: 600;
-            color: #5b21b6;
+            color: #047857;
         }
 
         .coupon-verified-badge {
@@ -970,8 +970,8 @@
             padding: 20px;
             text-align: center;
             position: relative;
-            border: 1px solid rgba(109, 40, 217, 0.2);
-            box-shadow: 0 24px 50px -24px rgba(109, 40, 217, 0.55);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            box-shadow: 0 24px 50px -24px rgba(5, 150, 105, 0.55);
         }
 
         .modal-close {
@@ -999,7 +999,7 @@
             border: 2px dashed var(--primary);
             font-weight: 700;
             border-radius: 10px;
-            background: #faf5ff;
+            background: #ecfdf5;
         }
 
         .modal-code button {
@@ -1014,7 +1014,7 @@
         }
 
         .modal-link {
-            color: #6d28d9;
+            color: #059669;
             font-weight: 600;
         }
 
@@ -1163,7 +1163,7 @@
         .coupon-copy-toast-progress {
             width: 100%;
             height: 3px;
-            background: #6d28d9;
+            background: #059669;
             transform-origin: left center;
             animation: couponCopyToastProgress 2s linear forwards;
         }
@@ -1193,7 +1193,7 @@
         }
 
         .popup-banner {
-            background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 58%, #e11d48 100%);
+            background: linear-gradient(135deg, #059669 0%, #047857 58%, #10b981 100%);
             padding: 32px 28px 40px;
             text-align: center;
             position: relative;
@@ -1234,7 +1234,7 @@
 
         .confetti-piece:nth-child(2) {
             left: 20%;
-            color: #a78bfa;
+            color: #34d399;
             animation-delay: 0.5s;
         }
 
@@ -1258,7 +1258,7 @@
 
         .confetti-piece:nth-child(6) {
             left: 60%;
-            color: #a78bfa;
+            color: #34d399;
             animation-delay: 0.8s;
         }
 
@@ -1390,7 +1390,7 @@
         .coupon-code-icon {
             width: 24px;
             height: 24px;
-            background: linear-gradient(135deg, #6d28d9 0%, #e11d48 100%);
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -1414,7 +1414,7 @@
         }
 
         .btn-copy-code-modal {
-            background: linear-gradient(135deg, #6d28d9 0%, #e11d48 100%);
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -1424,13 +1424,13 @@
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
-            box-shadow: 0 6px 18px rgba(109, 40, 217, 0.32);
+            box-shadow: 0 6px 18px rgba(5, 150, 105, 0.32);
         }
 
         .btn-copy-code-modal:hover {
-            background: linear-gradient(135deg, #5b21b6 0%, #be123c 100%);
+            background: linear-gradient(135deg, #047857 0%, #047857 100%);
             transform: translateY(-1px);
-            box-shadow: 0 10px 24px rgba(109, 40, 217, 0.4);
+            box-shadow: 0 10px 24px rgba(5, 150, 105, 0.4);
         }
 
         .btn-copy-code-modal:active {
@@ -1456,14 +1456,14 @@
 
         .verification-item::before {
             content: '✓';
-            color: #6d28d9;
+            color: #059669;
             font-weight: 700;
             font-size: 0.9rem;
         }
 
         .verification-item.success::before {
             content: '●';
-            color: #6d28d9;
+            color: #059669;
         }
 
         .coupon-modal-actions {
@@ -1542,7 +1542,7 @@
         .lead-capture-input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.18);
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18);
         }
         .lead-capture-btn {
             height: 42px;
@@ -1565,7 +1565,7 @@
             font-size: 0.78rem;
             color: #6b7280;
         }
-        .lead-capture-msg.success { color: #5b21b6; }
+        .lead-capture-msg.success { color: #047857; }
         .lead-capture-msg.error { color: #dc2626; }
 
         .feedback-btn {
@@ -1597,8 +1597,8 @@
         }
 
         .feedback-btn.worked {
-            border-color: #6d28d9;
-            color: #6d28d9;
+            border-color: #059669;
+            color: #059669;
         }
 
         .feedback-btn.failed {
@@ -1639,7 +1639,7 @@
 
         .btn-copy-all-codes:active,
         .btn-copy-all-codes.copied {
-            background: #5b21b6 !important;
+            background: #047857 !important;
         }
 
         /* Q&A Section */
@@ -1781,19 +1781,19 @@
             gap: 6px;
             padding: 10px 18px;
             border-radius: 999px;
-            background: #6d28d9;
+            background: #059669;
             color: #fff;
             font-weight: 700;
             font-size: 0.85rem;
             cursor: pointer;
             border: none;
             transition: all 0.2s ease;
-            box-shadow: 0 10px 24px rgba(109, 40, 217, 0.35);
+            box-shadow: 0 10px 24px rgba(5, 150, 105, 0.35);
         }
 
         .btn-get-coupon:hover {
             transform: translateY(-1px);
-            background: #5b21b6;
+            background: #047857;
             cursor: pointer;
         }
 
@@ -1818,17 +1818,17 @@
         /* Go to Store highlight animation */
         @keyframes pulseGlow {
             0% {
-                box-shadow: 0 0 0 rgba(109, 40, 217, 0.0);
+                box-shadow: 0 0 0 rgba(5, 150, 105, 0.0);
                 transform: scale(1);
             }
 
             50% {
-                box-shadow: 0 0 25px rgba(109, 40, 217, 0.65);
+                box-shadow: 0 0 25px rgba(5, 150, 105, 0.65);
                 transform: scale(1.05);
             }
 
             100% {
-                box-shadow: 0 0 0 rgba(109, 40, 217, 0.0);
+                box-shadow: 0 0 0 rgba(5, 150, 105, 0.0);
                 transform: scale(1);
             }
         }
@@ -1874,11 +1874,11 @@
 
             .left-card-header {
                 order: 1;
-                background: linear-gradient(180deg, #ffffff 0%, #faf5ff 100%);
+                background: linear-gradient(180deg, #ffffff 0%, #ecfdf5 100%);
                 border-radius: 20px;
                 padding: 24px 20px;
                 box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-                border: 1px solid rgba(109, 40, 217, 0.14);
+                border: 1px solid rgba(5, 150, 105, 0.14);
             }
 
             .right-column-coupon-section {
@@ -1891,11 +1891,11 @@
 
             .left-card-footer {
                 order: 4;
-                background: linear-gradient(180deg, #ffffff 0%, #faf5ff 100%);
+                background: linear-gradient(180deg, #ffffff 0%, #ecfdf5 100%);
                 border-radius: 20px;
                 padding: 24px 20px;
                 box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-                border: 1px solid rgba(109, 40, 217, 0.14);
+                border: 1px solid rgba(5, 150, 105, 0.14);
                 margin-top: 8px;
             }
 
@@ -2281,7 +2281,7 @@
                 font-weight: 600;
                 font-size: 0.95rem;
                 text-decoration: none;
-                box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);
+                box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
             }
 
             .mobile-shop-now-bottom:hover {
@@ -3039,7 +3039,7 @@
                 copyCodeToClipboard(code);
                 const t = this.textContent;
                 this.textContent = 'Copied ✓';
-                this.style.background = '#6d28d9';
+                this.style.background = '#059669';
                 this.style.color = '#fff';
                 setTimeout(() => {
                     this.textContent = t;
@@ -3410,7 +3410,7 @@
             // Highlight selected button
             if (worked) {
                 btn.style.background = '#dcfce7';
-                btn.style.borderColor = '#6d28d9';
+                btn.style.borderColor = '#059669';
                 btn.innerHTML = '<span class="feedback-icon">✓</span><span>Thank you!</span>';
             } else {
                 btn.style.background = '#fef2f2';

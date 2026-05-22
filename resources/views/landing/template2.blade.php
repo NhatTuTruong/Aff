@@ -130,9 +130,9 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --t2-primary: #f59e0b;
-            --t2-primary-dark: #d97706;
-            --t2-primary-soft: #fef3c7;
+            --t2-primary: #059669;
+            --t2-primary-dark: #047857;
+            --t2-primary-soft: #d1fae5;
             --t2-banner: #1e293b;
             --t2-banner-dark: #0f172a;
             --t2-text: #1e293b;
