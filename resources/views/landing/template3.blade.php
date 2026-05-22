@@ -127,9 +127,9 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --t3-primary: #059669;
-            --t3-primary-dark: #047857;
-            --t3-primary-soft: #d1fae5;
+            --t3-primary: #38bdf8;
+            --t3-primary-dark: #0284c7;
+            --t3-primary-soft: #e0f2fe;
             --t3-accent: #ea580c;
             --t3-accent-hover: #c2410c;
             --t3-hero-bg: linear-gradient(135deg, #0f766e 0%, #059669 55%, #10b981 100%);

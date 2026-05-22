@@ -130,9 +130,9 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --t2-primary: #f59e0b;
-            --t2-primary-dark: #d97706;
-            --t2-primary-soft: #fef3c7;
+            --t2-primary: #38bdf8;
+            --t2-primary-dark: #0284c7;
+            --t2-primary-soft: #e0f2fe;
             --t2-banner: #1e293b;
             --t2-banner-dark: #0f172a;
             --t2-text: #1e293b;
@@ -312,7 +312,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #7c3aed;
+            background: #0284c7;
             color: #fff;
             padding: 3px 8px;
             border-radius: 4px;
@@ -344,7 +344,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #7c3aed;
+            background: #0284c7;
             color: #fff;
             padding: 3px 8px;
             border-radius: 4px;

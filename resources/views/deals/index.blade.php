@@ -9,7 +9,7 @@
 
     .deals-hero {
         padding: 3.5rem 0 2.5rem;
-        background: radial-gradient(900px 350px at 50% 0%, rgba(34,197,94,0.16) 0%, rgba(34,197,94,0.00) 70%);
+        background: radial-gradient(900px 350px at 50% 0%, rgba(56,189,248,0.2) 0%, rgba(56,189,248,0) 70%);
         border-bottom: 1px solid var(--border);
     }
     .deals-hero-inner { text-align: center; }
@@ -43,7 +43,7 @@
         gap: 0.75rem;
         background: rgba(255,255,255,0.95);
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: 5px;
         padding: 0.5rem;
         box-shadow: 0 6px 24px rgba(17,24,39,0.06);
     }
@@ -61,12 +61,15 @@
         background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
         color: #fff;
         padding: 0.75rem 1.1rem;
-        border-radius: 12px;
+        border-radius: 5px;
         font-weight: 700;
         cursor: pointer;
         white-space: nowrap;
     }
-    .deals-search button:hover { opacity: 0.95; }
+    .deals-search button:hover {
+        background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+        box-shadow: 0 8px 20px -8px rgba(56, 189, 248, 0.45);
+    }
 
     .deals-wrap { padding: 2rem 0 3rem; }
     .deals-grid {
@@ -83,7 +86,7 @@
 
     .deal-card {
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: 5px;
         background: #fff;
         overflow: hidden;
         padding: 1.1rem 1.1rem 1rem;
@@ -108,7 +111,7 @@
     .deal-logo {
         width: 40px;
         height: 40px;
-        border-radius: 999px;
+        border-radius: 5px;
         background: #ffffff;
         border: 1px solid var(--border);
         display: flex;
@@ -163,7 +166,7 @@
         align-items: center;
         gap: 0.35rem;
         padding: 0.45rem 0.7rem;
-        border-radius: 999px;
+        border-radius: 5px;
         border: 1px dashed #ca8a04;
         background: #fefce8;
         color: #a16207;
@@ -186,7 +189,7 @@
         align-items: center;
         justify-content: center;
         padding: 0.55rem 1rem;
-        border-radius: 12px;
+        border-radius: 5px;
         background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
         color: #fff;
         font-size: 0.9rem;
@@ -206,7 +209,7 @@
         margin: 0 0.15rem;
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
+        border-radius: 5px;
         color: var(--text);
         text-decoration: none;
         font-size: 0.9rem;

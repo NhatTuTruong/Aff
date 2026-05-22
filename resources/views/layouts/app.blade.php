@@ -74,25 +74,27 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f7f5fb;
+            --bg: #f0f9ff;
             --surface: #ffffff;
-            --surface-hover: #f5f3ff;
-            --text: #0c0a12;
-            --text-dark: #0c0a12;
-            --text-muted: #5c5866;
-            --primary: #6d28d9;
-            --primary-dark: #5b21b6;
-            --accent: #6d28d9;
-            --accent-hover: #be123c;
-            --accent-rose: #e11d48;
-            --border: rgba(12, 10, 18, 0.1);
-            --radius: 12px;
-            --radius-sm: 8px;
+            --surface-hover: #e0f2fe;
+            --text: #0f172a;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --primary: #38bdf8;
+            --primary-dark: #0284c7;
+            --accent: #0ea5e9;
+            --accent-hover: #0369a1;
+            --accent-rose: #0284c7;
+            --border: rgba(14, 116, 144, 0.12);
+            --radius: 5px;
+            --radius-sm: 5px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
         body {
             font-family: 'DM Sans', system-ui, sans-serif;
             background: var(--bg);
+            background-image: radial-gradient(ellipse 100% 80% at 50% -30%, rgba(56, 189, 248, 0.18) 0%, transparent 55%);
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
@@ -196,11 +198,11 @@
             flex-wrap: wrap;
         }
         .cookie-consent p { margin: 0; font-size: 0.9rem; flex: 1; min-width: 200px; }
-        .cookie-consent a { color: #e9d5ff; text-decoration: underline; text-underline-offset: 2px; }
-        .cookie-consent a:hover { color: #fce7f3; }
+        .cookie-consent a { color: #7dd3fc; text-decoration: underline; text-underline-offset: 2px; }
+        .cookie-consent a:hover { color: #bae6fd; }
         .cookie-consent-btn {
             padding: 0.5rem 1.25rem;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-rose) 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--primary-dark) 100%);
             color: #fff;
             border: none;
             border-radius: var(--radius-sm);
@@ -210,7 +212,51 @@
         }
         .cookie-consent-btn:hover {
             filter: brightness(1.06);
-            box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35);
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
+        }
+
+        /* Search / CTA hovers — sky blue only */
+        .blg-masthead__search button:hover,
+        .idx-banner__search button:hover,
+        .deals-search button:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+        }
+
+        /* Unified block corners (public site) */
+        .idx-banner__spotlight,
+        .idx-banner__search,
+        .idx-metric__item,
+        .idx-article__card,
+        .idx-brands__box,
+        .idx-deal,
+        .idx-empty,
+        .idx-block__legal,
+        .idx-deal__logo,
+        .idx-deal__code,
+        .idx-deal__cta,
+        .idx-brand__logo,
+        .idx-topics__chip,
+        .blg-feature,
+        .blg-card,
+        .blg-masthead__search,
+        .blg-empty,
+        .blg-article__cover,
+        .blg-article__main,
+        .blg-sidebar__panel,
+        .blg-deal,
+        .blg-related__card,
+        .blg-tab,
+        .deal-card,
+        .deals-search,
+        .deals-search button,
+        .deal-code-btn,
+        .deal-cta,
+        .deal-logo,
+        .site-header__toggle,
+        .site-header__cta,
+        .cookie-consent-btn,
+        .pagination-item:not(.pagination-ellipsis) {
+            border-radius: var(--radius);
         }
     </style>
     @include('partials.site-chrome-styles')
