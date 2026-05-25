@@ -227,7 +227,7 @@
             padding: 22px 18px 30px;
             border: 1px solid rgba(56, 189, 248, 0.14);
             border-radius: 20px;
-            background: linear-gradient(135deg, #f0f9ff 0%, #fdf2f8 55%, #ffffff 100%);
+            background: linear-gradient(135deg, #f0f9ff 0%, #f0f9ff 55%, #ffffff 100%);
         }
 
         .hero-title {
@@ -525,7 +525,7 @@
 
         /* Left section - Discount Visual */
         .coupon-discount-visual {
-            background: linear-gradient(160deg, #f0f9ff 0%, #e0f2fe 58%, #fdf2f8 100%);
+            background: linear-gradient(160deg, #f0f9ff 0%, #e0f2fe 58%, #f0f9ff 100%);
             padding: 18px 16px;
             display: flex;
             flex-direction: column;
