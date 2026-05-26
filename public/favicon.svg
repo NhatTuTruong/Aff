@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
   <rect width="64" height="64" rx="12" fill="#ffffff"/>
-  <text x="32" y="43" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="34" font-weight="700" fill="#0ea5e9">K</text>
+  <text x="32" y="43" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="24" font-weight="700">
+    <tspan fill="#ff0400">K</tspan><tspan fill="#141E99">T</tspan><tspan fill="#38952B">S</tspan>
+  </text>
 </svg>
