@@ -1,20 +1,20 @@
 @extends('layouts.app')
 
-@section('title', 'Blog - ' . config('app.name'))
-@section('description', 'Latest articles, coupon updates and deals.')
+@section('title', 'Savings Journal - ' . config('app.name'))
+@section('description', 'Insights, coupon updates, and practical saving tactics.')
 
 @push('styles')
 <style>
     .blog-page {
-        --bp-ink: #0c0a12;
-        --bp-muted: #5c5866;
-        --bp-line: rgba(12, 10, 18, 0.08);
-        --bp-violet: #6d28d9;
-        --bp-violet-deep: #5b21b6;
-        --bp-rose: #e11d48;
+        --bp-ink: #0f172a;
+        --bp-muted: #475569;
+        --bp-line: rgba(15, 23, 42, 0.14);
+        --bp-violet: #0f766e;
+        --bp-violet-deep: #115e59;
+        --bp-rose: #1d4ed8;
         --bp-surface: #ffffff;
-        --bp-cream: #f7f5fb;
-        background: var(--bp-cream);
+        --bp-cream: #e8edf3;
+        background: linear-gradient(180deg, #eef2f7 0%, #e2e8f0 100%);
         color: var(--bp-ink);
     }
     .blog-page .bp-shell {
@@ -28,10 +28,11 @@
         position: relative;
         padding: clamp(2.5rem, 5vw, 4rem) 0 clamp(1.75rem, 3vw, 2.5rem);
         overflow: hidden;
-        border-bottom: 1px solid var(--bp-line);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 245, 251, 0.4) 100%),
-            radial-gradient(100% 120% at 0% 0%, rgba(109, 40, 217, 0.12) 0%, transparent 55%);
+            linear-gradient(135deg, #0f172a 0%, #0f766e 50%, #1d4ed8 100%);
+        backdrop-filter: blur(4px);
+        color: #f8fafc;
     }
     .bp-hero-grid {
         display: grid;
@@ -50,7 +51,7 @@
         font-weight: 700;
         letter-spacing: 0.16em;
         text-transform: uppercase;
-        color: var(--bp-rose);
+        color: #bae6fd;
         margin-bottom: 0.65rem;
     }
     .bp-hero h1 {
@@ -59,23 +60,24 @@
         font-weight: 700;
         letter-spacing: -0.045em;
         line-height: 1.05;
-        margin: 0 0 0.85rem;
+        margin: 0 0 0.9rem;
         max-width: 12ch;
+        color: #ffffff;
     }
     .bp-hero-lead {
         margin: 0;
         font-size: clamp(1rem, 1.25vw, 1.1rem);
-        color: var(--bp-muted);
+        color: rgba(241, 245, 249, 0.92);
         line-height: 1.6;
         max-width: 36rem;
     }
 
     .bp-search-card {
-        background: var(--bp-surface);
-        border: 1px solid var(--bp-line);
-        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 14px;
         padding: 1rem;
-        box-shadow: 0 22px 50px -34px rgba(12, 10, 18, 0.35);
+        box-shadow: 0 16px 36px -22px rgba(2, 6, 23, 0.5);
     }
     .bp-search-form {
         display: flex;
@@ -97,8 +99,8 @@
         transition: border-color 0.2s, box-shadow 0.2s;
     }
     .bp-search-form input:focus {
-        border-color: rgba(109, 40, 217, 0.35);
-        box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.12);
+        border-color: rgba(20, 184, 166, 0.35);
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
         background: #fff;
     }
     .bp-search-form button {
@@ -110,12 +112,13 @@
         color: #fff;
         background: linear-gradient(135deg, var(--bp-violet) 0%, var(--bp-rose) 100%);
         white-space: nowrap;
-        box-shadow: 0 10px 26px -10px rgba(109, 40, 217, 0.55);
+        box-shadow: 0 10px 26px -10px rgba(20, 184, 166, 0.55);
         transition: transform 0.2s, box-shadow 0.2s;
     }
     .bp-search-form button:hover {
         transform: translateY(-1px);
-        box-shadow: 0 14px 30px -10px rgba(225, 29, 72, 0.45);
+        filter: brightness(1.06) saturate(1.02);
+        box-shadow: 0 14px 30px -10px rgba(37, 99, 235, 0.45);
     }
 
     .bp-chips {
@@ -137,18 +140,19 @@
         font-size: 0.875rem;
         font-weight: 600;
         color: var(--bp-ink);
-        background: rgba(255, 255, 255, 0.75);
-        border: 1px solid var(--bp-line);
+        background: rgba(15, 23, 42, 0.38);
+        border: 1px solid rgba(186, 230, 253, 0.28);
+        color: #e2e8f0;
         transition: border-color 0.2s, background 0.2s, color 0.2s;
     }
     .bp-chip:hover {
-        border-color: rgba(109, 40, 217, 0.35);
-        color: var(--bp-violet);
+        border-color: rgba(186, 230, 253, 0.7);
+        color: #ffffff;
     }
     .bp-chip--on {
-        background: linear-gradient(135deg, rgba(109, 40, 217, 0.12) 0%, rgba(225, 29, 72, 0.08) 100%);
-        border-color: rgba(109, 40, 217, 0.35);
-        color: var(--bp-violet-deep);
+        background: rgba(255, 255, 255, 0.9);
+        border-color: rgba(186, 230, 253, 0.8);
+        color: #0f172a;
     }
 
     .bp-main {
@@ -173,20 +177,20 @@
     .bp-card {
         display: flex;
         flex-direction: column;
-        border-radius: 20px;
+        border-radius: 18px;
         overflow: hidden;
         text-decoration: none;
         color: inherit;
         background: var(--bp-surface);
         border: 1px solid var(--bp-line);
-        box-shadow: 0 16px 42px -32px rgba(12, 10, 18, 0.35);
+        box-shadow: 0 14px 28px -18px rgba(15, 23, 42, 0.32);
         min-height: 100%;
         transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.2s;
     }
     .bp-card:hover {
-        transform: translateY(-4px);
-        border-color: rgba(109, 40, 217, 0.22);
-        box-shadow: 0 26px 50px -28px rgba(109, 40, 217, 0.25);
+        transform: translateY(-3px);
+        border-color: rgba(15, 118, 110, 0.36);
+        box-shadow: 0 18px 34px -18px rgba(15, 118, 110, 0.3);
     }
     .bp-card--feature {
         grid-column: 1 / -1;
@@ -201,7 +205,7 @@
     }
     .bp-card-media {
         position: relative;
-        background: #ede9fe;
+        background: #dbe7f4;
         min-height: 200px;
     }
     @media (min-width: 800px) {
@@ -232,7 +236,7 @@
         text-transform: uppercase;
         color: #fff;
         background: linear-gradient(135deg, var(--bp-violet) 0%, var(--bp-rose) 100%);
-        box-shadow: 0 8px 20px -8px rgba(12, 10, 18, 0.45);
+        box-shadow: 0 8px 20px -8px rgba(11, 23, 36, 0.45);
     }
     .bp-card-date {
         position: absolute;
@@ -273,8 +277,8 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: var(--bp-violet-deep);
-        background: rgba(109, 40, 217, 0.1);
-        border: 1px solid rgba(109, 40, 217, 0.2);
+        background: rgba(20, 184, 166, 0.1);
+        border: 1px solid rgba(20, 184, 166, 0.2);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -302,7 +306,7 @@
         -webkit-line-clamp: 3;
     }
     .bp-card-excerpt {
-        font-size: 0.94rem;
+        font-size: 0.95rem;
         color: var(--bp-muted);
         line-height: 1.55;
         margin: 0;
@@ -321,7 +325,9 @@
         gap: 0.35rem;
         font-weight: 700;
         font-size: 0.9rem;
-        color: var(--bp-violet);
+        color: #0f766e;
+        text-decoration: underline;
+        text-underline-offset: 3px;
     }
     .bp-card:hover .bp-card-cta { color: var(--bp-rose); }
 
@@ -342,11 +348,11 @@
         font-weight: 600 !important;
     }
     .bp-pagination .pagination-item:hover:not(.pagination-disabled):not(.pagination-current) {
-        border-color: rgba(109, 40, 217, 0.35) !important;
+        border-color: rgba(20, 184, 166, 0.35) !important;
         color: var(--bp-violet) !important;
     }
     .bp-pagination .pagination-current {
-        border-color: rgba(109, 40, 217, 0.45) !important;
+        border-color: rgba(20, 184, 166, 0.45) !important;
         color: var(--bp-violet) !important;
     }
     .bp-pagination .pagination-info {
@@ -378,9 +384,9 @@
     <header class="bp-hero">
         <div class="bp-shell bp-hero-grid">
             <div>
-                <p class="bp-hero-kicker">Stories &amp; signals</p>
-                <h1 class="font-heading">Blog</h1>
-                <p class="bp-hero-lead">Guides, changelog notes, and deal context — written to help you decide faster and waste fewer clicks.</p>
+                <p class="bp-hero-kicker">Insights &amp; updates</p>
+                <h1 class="font-heading">Savings Journal</h1>
+                <p class="bp-hero-lead">Actionable deal breakdowns, shopping tactics, and weekly updates to help you save with less guesswork.</p>
             </div>
             <div>
                 <div class="bp-search-card">
@@ -422,7 +428,7 @@
                             <div class="bp-card-media">
                                 <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy">
                                 @if($loop->first)
-                                    <span class="bp-card-badge">Featured</span>
+                                    <span class="bp-card-badge">Editor's pick</span>
                                 @endif
                                 <span class="bp-card-date">{{ $post->created_at?->format('d M Y') }}</span>
                             </div>
@@ -432,7 +438,7 @@
                                         @if(!empty($post->category))
                                             <span class="bp-card-tag">{{ $post->category }}</span>
                                         @else
-                                            <span class="bp-card-tag">News</span>
+                                            <span class="bp-card-tag">Update</span>
                                         @endif
                                         <span class="bp-card-date-inline">{{ $post->created_at?->format('d/m/Y') }}</span>
                                     </div>
@@ -441,7 +447,7 @@
                                 @if($post->content)
                                     <p class="bp-card-excerpt">{{ Str::limit(trim(strip_tags($post->content)), $loop->first ? 280 : 160) }}</p>
                                 @endif
-                                <span class="bp-card-cta">Read article →</span>
+                                <span class="bp-card-cta">Open insight →</span>
                             </div>
                         </a>
                     @endforeach
@@ -452,7 +458,7 @@
                 </div>
             @else
                 <div class="bp-empty">
-                    <strong>No posts yet</strong>
+                    <strong>No stories yet</strong>
                     New articles will appear here once they are published. Check back soon.
                 </div>
             @endif

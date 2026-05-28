@@ -6,18 +6,18 @@
 @push('styles')
 <style>
     :root {
-        --blog-bg: #f7f5fb;
+        --blog-bg: #e8edf3;
         --blog-surface: #ffffff;
-        --blog-border: rgba(12, 10, 18, 0.1);
-        --blog-text: #0c0a12;
-        --blog-muted: #5c5866;
-        --blog-accent: #6d28d9;
-        --blog-accent-rose: #e11d48;
-        --blog-accent-soft: rgba(109, 40, 217, 0.12);
+        --blog-border: rgba(15, 23, 42, 0.14);
+        --blog-text: #0f172a;
+        --blog-muted: #475569;
+        --blog-accent: #0f766e;
+        --blog-accent-rose: #1d4ed8;
+        --blog-accent-soft: rgba(15, 118, 110, 0.12);
     }
 
     body {
-        background: #f7f5fb;
+        background: #e8edf3;
     }
 
     .blog-shell {
@@ -51,12 +51,11 @@
 
     .blog-hero {
         position: relative;
-        border-radius: 1.5rem;
+        border-radius: 1.75rem;
         overflow: hidden;
-        border: 1px solid var(--blog-border);
-        background: radial-gradient(circle at top left, rgba(109, 40, 217, 0.12), transparent 55%),
-                    radial-gradient(circle at bottom right, rgba(225, 29, 72, 0.08), transparent 60%),
-                    #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        background: linear-gradient(135deg, #0f172a 0%, #115e59 48%, #1e40af 100%);
+        box-shadow: 0 20px 38px -20px rgba(15, 23, 42, 0.6);
         display: grid;
         grid-template-columns: minmax(0, 3fr) minmax(0, 2.5fr);
         gap: 0;
@@ -80,10 +79,10 @@
         gap: 0.4rem;
         padding: 0.2rem 0.75rem;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.75);
-        border: 1px solid var(--blog-border);
+        background: rgba(15, 23, 42, 0.35);
+        border: 1px solid rgba(186, 230, 253, 0.35);
         font-size: 0.75rem;
-        color: var(--blog-muted);
+        color: #dbeafe;
         margin-bottom: 0.85rem;
         backdrop-filter: blur(10px);
     }
@@ -100,25 +99,25 @@
         font-weight: 750;
         letter-spacing: -0.03em;
         line-height: 1.25;
-        color: var(--blog-text);
+        color: #ffffff;
         margin-bottom: 0.85rem;
     }
 
     .blog-meta {
         font-size: 0.9rem;
-        color: var(--blog-muted);
+        color: rgba(226, 232, 240, 0.92);
         max-width: 38rem;
     }
 
     .blog-meta a {
-        color: var(--blog-accent);
+        color: #99f6e4;
         text-decoration: underline;
     }
 
     .blog-hero-media {
         position: relative;
         min-height: 200px;
-        background: radial-gradient(circle at center, rgba(109, 40, 217, 0.1), rgba(225, 29, 72, 0.06));
+        background: radial-gradient(circle at center, rgba(15, 118, 110, 0.1), rgba(29, 78, 216, 0.06));
         overflow: hidden;
     }
 
@@ -141,8 +140,8 @@
     .blog-hero-media-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(to right, rgba(255, 255, 255, 0.92), transparent 55%),
-                    linear-gradient(to top, rgba(255, 255, 255, 0.5), transparent 45%);
+        background: linear-gradient(to right, rgba(15, 23, 42, 0.5), transparent 55%),
+                    linear-gradient(to top, rgba(15, 23, 42, 0.25), transparent 45%);
     }
 
     .blog-hero-media-fallback {
@@ -172,10 +171,10 @@
     .blog-main {
         min-width: 0;
         background: #ffffff;
-        border-radius: 1.25rem;
+        border-radius: 1.5rem;
         border: 1px solid var(--blog-border);
         padding: 1.75rem 1.75rem 2rem;
-        box-shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
+        box-shadow: 0 18px 36px -18px rgba(15, 23, 42, 0.28);
     }
 
     @media (max-width: 640px) {
@@ -230,9 +229,9 @@
     }
 
     .blog-chip-accent {
-        border-color: rgba(109, 40, 217, 0.35);
+        border-color: rgba(20, 184, 166, 0.35);
         background: var(--blog-accent-soft);
-        color: #5b21b6;
+        color: #0f766e;
     }
 
     .blog-share-button {
@@ -323,11 +322,11 @@
 
     .blog-aside {
         min-width: 0;
-        border-radius: 1.25rem;
+        border-radius: 1.5rem;
         border: 1px solid var(--blog-border);
         background: #ffffff;
         padding: 1.5rem 1.5rem 1.75rem;
-        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+        box-shadow: 0 18px 32px -20px rgba(15, 23, 42, 0.3);
         position: sticky;
         top: 1.5rem;
         height: fit-content;
@@ -354,7 +353,7 @@
     }
 
     .blog-deal-card {
-        background: #ffffff;
+        background: #f8fafc;
         border: 1px solid var(--blog-border);
         border-radius: 0.9rem;
         padding: 0.85rem 0.95rem;
@@ -366,7 +365,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, rgba(109, 40, 217, 0.12), transparent 55%);
+        background: linear-gradient(135deg, rgba(20, 184, 166, 0.12), transparent 55%);
         opacity: 0;
         transition: opacity 0.18s;
         pointer-events: none;
@@ -458,7 +457,7 @@
     .blog-deal-code.copied {
         background: var(--blog-accent-soft);
         border-color: var(--blog-accent);
-        color: #5b21b6;
+        color: #0f766e;
     }
 
     .blog-deal-cta {
@@ -487,7 +486,7 @@
     .related-blogs {
         margin-top: 2.75rem;
         padding-top: 2.25rem;
-        border-top: 1px solid rgba(148, 163, 184, 0.35);
+        border-top: 1px solid rgba(125, 211, 252, 0.35);
     }
 
     .related-blogs-title {
@@ -507,7 +506,7 @@
     .related-blog-card {
         text-decoration: none;
         color: inherit;
-        border-radius: 0.9rem;
+        border-radius: 1rem;
         border: 1px solid var(--blog-border);
         background: #ffffff;
         overflow: hidden;
@@ -518,7 +517,7 @@
 
     .related-blog-card:hover {
         border-color: var(--blog-accent);
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.7);
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
         transform: translateY(-1px);
     }
 
@@ -597,7 +596,7 @@
             <article class="blog-main">
                 <a href="{{ route('blog.index') }}" class="blog-back">
                     <span class="icon">←</span>
-                    <span>Back to all articles</span>
+                    <span>Back to journal</span>
                 </a>
 
                 <div class="blog-chip-row">
@@ -607,9 +606,9 @@
                     <span class="blog-chip">{{ $post->created_at?->format('d/m/Y') }}</span>
                     <span class="blog-chip">{{ $readingMinutes }} min read</span>
                     <button type="button" class="blog-share-button"
-                        onclick="navigator.clipboard.writeText(window.location.href); this.textContent='Link copied'; setTimeout(() => this.textContent='Copy link', 1200);">
+                        onclick="navigator.clipboard.writeText(window.location.href); this.textContent='Link copied'; setTimeout(() => this.textContent='Share link', 1200);">
                         <span>🔗</span>
-                        <span>Copy link</span>
+                        <span>Share link</span>
                     </button>
                 </div>
 
@@ -639,9 +638,9 @@
             <aside class="blog-aside">
                 <h2 class="blog-aside-title">
                     @if($post->category)
-                        Deals for {{ $post->category }}
+                        Top picks for {{ $post->category }}
                     @else
-                        Hot deals for this topic
+                        Top picks for this topic
                     @endif
                 </h2>
 
@@ -676,7 +675,7 @@
                                         @endif
                                         @if($dealUrl !== '#')
                                             <a href="{{ $dealUrl }}" class="blog-deal-cta" target="_blank" rel="nofollow sponsored noopener">
-                                                <span>Get deal</span>
+                                                <span>Open deal</span>
                                             </a>
                                         @endif
                                     </div>
@@ -698,7 +697,7 @@
 
         @if(isset($relatedBlogs) && $relatedBlogs->isNotEmpty())
             <section class="related-blogs">
-                <h2 class="related-blogs-title">Related articles</h2>
+                <h2 class="related-blogs-title">More from the journal</h2>
                 <div class="related-blogs-grid">
                     @foreach($relatedBlogs as $related)
                         <a href="{{ route('blog.show', $related->slug) }}" class="related-blog-card">

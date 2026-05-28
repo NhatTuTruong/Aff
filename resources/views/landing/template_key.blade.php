@@ -30,22 +30,23 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --primary-light: #60a5fa;
-            --accent: #f59e0b;
-            --text-dark: #111827;
-            --text-light: #6b7280;
-            --bg-page: #ffffff;
-            --bg-overlay: rgba(0, 0, 0, 0.5);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --primary: #0f766e;
+            --primary-dark: #115e59;
+            --primary-light: #2dd4bf;
+            --accent: #1d4ed8;
+            --text-dark: #0f172a;
+            --text-light: #475569;
+            --bg-page: #e8edf3;
+            --bg-overlay: rgba(2, 6, 23, 0.55);
+            --shadow: 0 10px 22px -16px rgba(15, 23, 42, 0.28);
+            --shadow-lg: 0 26px 60px -34px rgba(2, 6, 23, 0.55);
         }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             color: var(--text-dark);
             overflow-x: hidden;
+            background: var(--bg-page);
         }
         a { text-decoration: none; color: inherit; }
 
@@ -59,7 +60,10 @@
             background-position: center;
             background-attachment: fixed;
             @else
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background:
+                radial-gradient(70% 90% at 8% 10%, rgba(45, 212, 191, 0.22) 0%, transparent 55%),
+                radial-gradient(70% 90% at 92% 88%, rgba(96, 165, 250, 0.22) 0%, transparent 55%),
+                linear-gradient(135deg, #0f172a 0%, #115e59 48%, #1e40af 100%);
             @endif
         }
         .page-wrapper::before {
@@ -69,7 +73,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
+            background:
+                linear-gradient(180deg, rgba(2, 6, 23, 0.2) 0%, rgba(2, 6, 23, 0.55) 100%);
             z-index: 1;
         }
 
@@ -79,7 +84,7 @@
             z-index: 2;
             max-width: 1400px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 48px 20px;
         }
 
         /* Header */
@@ -125,21 +130,54 @@
 
         /* Content Section */
         .content-section {
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 24px;
-            padding: 50px 40px;
+            background: rgba(248, 250, 252, 0.92);
+            border-radius: 22px;
+            padding: 46px 40px;
             box-shadow: var(--shadow-lg);
             margin-bottom: 40px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            overflow: hidden;
         }
         .intro {
             font-size: 1.125rem;
             color: var(--text-light);
             line-height: 1.8;
             margin-bottom: 40px;
+            max-width: 920px;
+            margin-left: auto;
+            margin-right: auto;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
         .intro p {
             margin-bottom: 16px;
+        }
+        .intro h1, .intro h2, .intro h3 {
+            color: var(--text-dark);
+            line-height: 1.25;
+            margin: 1rem 0 0.5rem;
+        }
+        .intro a {
+            color: var(--primary-dark);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .intro img,
+        .intro video,
+        .intro iframe,
+        .intro table,
+        .intro pre,
+        .intro code {
+            max-width: 100%;
+        }
+        .intro table {
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .intro pre {
+            overflow-x: auto;
         }
 
         /* Product Images Grid */
@@ -156,6 +194,7 @@
             box-shadow: var(--shadow);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             background: #ffffff;
+            border: 1px solid rgba(148, 163, 184, 0.22);
         }
         .product-item:hover {
             transform: translateY(-8px);
@@ -184,20 +223,21 @@
         }
         .cta-button {
             display: inline-block;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
             color: #ffffff;
             font-size: 1.25rem;
             font-weight: 700;
             padding: 20px 50px;
             border-radius: 50px;
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 14px 30px -16px rgba(2, 6, 23, 0.65);
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
         .cta-button:hover {
             transform: scale(1.05);
-            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
+            filter: brightness(1.06) saturate(1.03);
+            box-shadow: 0 18px 38px -16px rgba(2, 6, 23, 0.7);
         }
         .cta-button:active {
             transform: scale(0.98);
@@ -241,6 +281,12 @@
             </header>
 
             <div class="content-section">
+                <div class="cta-section" style="margin-top: 0; margin-bottom: 34px;">
+                    <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}" class="cta-button" target="_blank" rel="nofollow sponsored noopener">
+                        {{ $campaign->cta_text ?? 'Nhận ngay' }}
+                    </a>
+                </div>
+
                 @if($campaign->intro)
                     @php
                         $intro = (string) $campaign->intro;
@@ -269,12 +315,6 @@
                     @endforeach
                 </div>
                 @endif
-
-                <div class="cta-section">
-                    <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}" class="cta-button" target="_blank" rel="nofollow sponsored noopener">
-                        {{ $campaign->cta_text ?? 'Nhận ngay' }}
-                    </a>
-                </div>
             </div>
         </div>
     </div>

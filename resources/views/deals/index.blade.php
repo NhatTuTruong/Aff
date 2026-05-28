@@ -9,7 +9,9 @@
 
     .deals-hero {
         padding: 3.5rem 0 2.5rem;
-        background: radial-gradient(900px 350px at 50% 0%, rgba(34,197,94,0.16) 0%, rgba(34,197,94,0.00) 70%);
+        background:
+            radial-gradient(900px 350px at 50% 0%, rgba(15,118,110,0.14) 0%, rgba(15,118,110,0.00) 70%),
+            linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(226,232,240,0.7) 100%);
         border-bottom: 1px solid var(--border);
     }
     .deals-hero-inner { text-align: center; }
@@ -41,11 +43,11 @@
         max-width: 720px;
         display: flex;
         gap: 0.75rem;
-        background: rgba(255,255,255,0.95);
+        background: rgba(248,250,252,0.96);
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: 18px;
         padding: 0.5rem;
-        box-shadow: 0 6px 24px rgba(17,24,39,0.06);
+        box-shadow: 0 10px 22px rgba(15,23,42,0.12);
     }
     .deals-search input {
         flex: 1;
@@ -83,8 +85,8 @@
 
     .deal-card {
         border: 1px solid var(--border);
-        border-radius: 16px;
-        background: #fff;
+        border-radius: 20px;
+        background: #f8fafc;
         overflow: hidden;
         padding: 1.1rem 1.1rem 1rem;
         display: flex;
@@ -94,8 +96,8 @@
         min-height: 100%;
     }
     .deal-card:hover {
-        border-color: rgba(34,197,94,0.5);
-        box-shadow: 0 12px 28px rgba(17,24,39,0.08);
+        border-color: rgba(15,118,110,0.45);
+        box-shadow: 0 12px 24px rgba(15,23,42,0.12);
         transform: translateY(-2px);
     }
     .deal-topline { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
@@ -173,7 +175,7 @@
         max-width: 100%;
     }
     .deal-code-btn strong { font-weight: 800; overflow: hidden; text-overflow: ellipsis; }
-    .deal-code-btn.copied { border-color: var(--accent); background: #dcfce7; color: #166534; }
+    .deal-code-btn.copied { border-color: var(--accent); background: #ccfbf1; color: #0f766e; }
     .deal-code-btn.copied::after {
         content: '✓';
         margin-left: 0.35rem;
@@ -186,7 +188,7 @@
         align-items: center;
         justify-content: center;
         padding: 0.55rem 1rem;
-        border-radius: 12px;
+        border-radius: 999px;
         background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
         color: #fff;
         font-size: 0.9rem;

@@ -1,22 +1,22 @@
 <style>
 /* Public chrome — header + footer (synced with site editorial palette) */
 :root {
-    --chrome-ink: #0c0a12;
-    --chrome-muted: #5c5866;
-    --chrome-muted-soft: #7c738a;
-    --chrome-line: rgba(12, 10, 18, 0.1);
-    --chrome-violet: #6d28d9;
-    --chrome-violet-deep: #5b21b6;
-    --chrome-rose: #e11d48;
-    --chrome-cream: #f7f5fb;
+    --chrome-ink: #0f172a;
+    --chrome-muted: #475569;
+    --chrome-muted-soft: #94a3b8;
+    --chrome-line: rgba(15, 23, 42, 0.14);
+    --chrome-violet: #0f766e;
+    --chrome-violet-deep: #115e59;
+    --chrome-rose: #1d4ed8;
+    --chrome-cream: #e8edf3;
     --chrome-white: #ffffff;
-    --chrome-footer-0: #0c0614;
-    --chrome-footer-1: #1a0f2e;
+    --chrome-footer-0: #0f172a;
+    --chrome-footer-1: #1e293b;
 }
 
 .site-chrome-topbar {
-    background: linear-gradient(92deg, #1e1033 0%, #312e81 48%, #5b21b6 100%);
-    color: rgba(245, 243, 255, 0.92);
+    background: linear-gradient(92deg, #111827 0%, #0f172a 50%, #1e293b 100%);
+    color: rgba(226, 232, 240, 0.96);
     font-size: 0.8125rem;
     text-align: center;
     padding: 0.45rem 1rem;
@@ -24,19 +24,19 @@
     letter-spacing: 0.01em;
 }
 .site-chrome-topbar a {
-    color: #f9a8d4;
+    color: #5eead4;
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 3px;
 }
 .site-chrome-topbar a:hover {
-    color: #fce7f3;
+    color: #99f6e4;
 }
 
 .site-header {
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.95);
     border-bottom: 1px solid var(--chrome-line);
-    box-shadow: 0 8px 32px -20px rgba(12, 10, 18, 0.18);
+    box-shadow: 0 8px 32px -20px rgba(11, 23, 36, 0.2);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -87,14 +87,14 @@
     text-transform: uppercase;
     border-radius: 999px;
     text-decoration: none;
-    box-shadow: 0 8px 22px -8px rgba(109, 40, 217, 0.55);
+    box-shadow: 0 8px 22px -8px rgba(20, 184, 166, 0.55);
     transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
 }
 .site-header__cta:hover {
     color: #fff !important;
     transform: translateY(-1px);
-    box-shadow: 0 12px 28px -8px rgba(225, 29, 72, 0.45);
-    filter: brightness(1.03);
+    box-shadow: 0 12px 28px -8px rgba(37, 99, 235, 0.45);
+    filter: brightness(1.07) saturate(1.04);
 }
 .site-header__toggle {
     display: none;
@@ -107,7 +107,7 @@
     padding: 0;
     border: 1px solid var(--chrome-line);
     border-radius: 12px;
-    background: linear-gradient(180deg, #faf5ff 0%, #f5f3ff 100%);
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
     color: var(--chrome-ink);
     cursor: pointer;
     flex-shrink: 0;
@@ -115,8 +115,8 @@
     -webkit-tap-highlight-color: transparent;
 }
 .site-header__toggle:hover {
-    background: #ede9fe;
-    border-color: rgba(109, 40, 217, 0.25);
+    background: #e2e8f0;
+    border-color: rgba(20, 184, 166, 0.25);
 }
 .site-header__toggle-bar {
     display: block;
@@ -186,27 +186,27 @@
         padding-right: 1.25rem;
         padding-bottom: 0.65rem;
         border-top: 1px solid var(--chrome-line);
-        background: linear-gradient(180deg, #faf5ff 0%, #f5f3ff 100%);
+        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
     }
     .site-header--nav-open .nav-links { display: flex; }
     .site-header .nav-links a {
         padding: 0.8rem 0;
-        border-bottom: 1px solid rgba(12, 10, 18, 0.06);
+        border-bottom: 1px solid rgba(11, 23, 36, 0.06);
         font-size: 1rem;
         color: var(--chrome-ink) !important;
     }
     .site-header .nav-links a:hover {
         color: var(--chrome-violet-deep) !important;
-        border-bottom-color: rgba(12, 10, 18, 0.06);
+        border-bottom-color: rgba(11, 23, 36, 0.06);
     }
     .site-header .nav-links a:last-child { border-bottom: none; }
 }
 
 .site-footer {
-    background: linear-gradient(180deg, var(--chrome-footer-0) 0%, var(--chrome-footer-1) 55%, #0c0614 100%);
-    border-top: 1px solid rgba(196, 181, 253, 0.12);
+    background: linear-gradient(180deg, var(--chrome-footer-0) 0%, var(--chrome-footer-1) 55%, #0b1220 100%);
+    border-top: 1px solid rgba(148, 163, 184, 0.24);
     margin-top: auto;
-    color: #e9d5ff;
+    color: #e0f2fe;
 }
 .site-footer .footer-inner {
     max-width: 1180px;
@@ -229,14 +229,14 @@
     font-family: 'Space Grotesk', 'DM Sans', sans-serif;
     font-size: 1.25rem;
     font-weight: 700;
-    color: #faf5ff !important;
+    color: #f0f9ff !important;
 }
 .site-footer .footer-brand .logo span {
-    background: linear-gradient(135deg, #c4b5fd 0%, #f9a8d4 100%) !important;
+    background: linear-gradient(135deg, #2dd4bf 0%, #60a5fa 100%) !important;
     -webkit-background-clip: text !important;
     background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
-    color: #c4b5fd !important;
+    color: #2dd4bf !important;
 }
 .site-footer .footer-brand p {
     margin-top: 0.875rem;
@@ -248,11 +248,11 @@
 .site-footer .footer-social-link {
     display: inline-flex;
     margin-top: 1rem;
-    color: #a78bfa;
+    color: #93c5fd;
     transition: color 0.2s, transform 0.2s;
 }
 .site-footer .footer-social-link:hover {
-    color: #f9a8d4;
+    color: #dbeafe;
     transform: translateY(-1px);
 }
 .site-footer .footer-col h4 {
@@ -261,24 +261,24 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(196, 181, 253, 0.75);
+    color: rgba(148, 163, 184, 0.9);
     margin-bottom: 1rem;
 }
 .site-footer .footer-col ul { list-style: none; margin: 0; padding: 0; }
 .site-footer .footer-col li { margin-bottom: 0.55rem; }
 .site-footer .footer-col a {
-    color: #f5f3ff;
+    color: #f0f9ff;
     text-decoration: none;
     font-size: 0.9375rem;
     font-weight: 500;
     transition: color 0.2s;
 }
 .site-footer .footer-col a:hover {
-    color: #f9a8d4;
+    color: #93c5fd;
 }
 .site-footer .footer-disclosure {
     padding: 1.15rem 0;
-    border-top: 1px solid rgba(196, 181, 253, 0.12);
+    border-top: 1px solid rgba(125, 211, 252, 0.14);
 }
 .site-footer .footer-disclosure-text {
     font-size: 0.8125rem;
@@ -287,20 +287,20 @@
     max-width: 760px;
 }
 .site-footer .footer-disclosure-text a {
-    color: #e9d5ff;
+    color: #bae6fd;
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 3px;
 }
 .site-footer .footer-disclosure-text a:hover {
-    color: #fbcfe8;
+    color: #e0f2fe;
 }
 .site-footer .footer-bottom {
     padding-top: 1.35rem;
-    border-top: 1px solid rgba(196, 181, 253, 0.12);
+    border-top: 1px solid rgba(125, 211, 252, 0.14);
 }
 .site-footer .footer-bottom p {
-    color: rgba(167, 139, 250, 0.75);
+    color: rgba(125, 211, 252, 0.76);
     font-size: 0.8125rem;
     line-height: 1.5;
 }

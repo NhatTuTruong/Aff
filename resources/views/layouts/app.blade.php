@@ -74,18 +74,18 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f7f5fb;
+            --bg: #e8edf3;
             --surface: #ffffff;
-            --surface-hover: #f5f3ff;
-            --text: #0c0a12;
-            --text-dark: #0c0a12;
-            --text-muted: #5c5866;
-            --primary: #6d28d9;
-            --primary-dark: #5b21b6;
-            --accent: #6d28d9;
-            --accent-hover: #be123c;
-            --accent-rose: #e11d48;
-            --border: rgba(12, 10, 18, 0.1);
+            --surface-hover: #e2e8f0;
+            --text: #0f172a;
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --primary: #0f172a;
+            --primary-dark: #020617;
+            --accent: #0f766e;
+            --accent-hover: #155e75;
+            --accent-rose: #1d4ed8;
+            --border: rgba(15, 23, 42, 0.14);
             --radius: 12px;
             --radius-sm: 8px;
         }
@@ -179,7 +179,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: var(--text);
+            background: #0f172a;
             color: #fff;
             padding: 1rem 1.5rem;
             z-index: 999;
@@ -196,8 +196,8 @@
             flex-wrap: wrap;
         }
         .cookie-consent p { margin: 0; font-size: 0.9rem; flex: 1; min-width: 200px; }
-        .cookie-consent a { color: #e9d5ff; text-decoration: underline; text-underline-offset: 2px; }
-        .cookie-consent a:hover { color: #fce7f3; }
+        .cookie-consent a { color: #7dd3fc; text-decoration: underline; text-underline-offset: 2px; }
+        .cookie-consent a:hover { color: #bae6fd; }
         .cookie-consent-btn {
             padding: 0.5rem 1.25rem;
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-rose) 100%);
@@ -210,7 +210,7 @@
         }
         .cookie-consent-btn:hover {
             filter: brightness(1.06);
-            box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35);
+            box-shadow: 0 4px 14px rgba(20, 184, 166, 0.35);
         }
     </style>
     @include('partials.site-chrome-styles')
