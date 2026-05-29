@@ -884,6 +884,53 @@
     </section>
     @endif
 
+    @if($hotCoupons->isNotEmpty())
+    <section class="hp-section hp-section--tint" id="coupons">
+        <div class="hp-shell">
+            <header class="hp-sec-head">
+                <p class="hp-sec-eyebrow">Limited windows</p>
+                <h2 class="hp-sec-title">Hot coupons &amp; standout deals</h2>
+                <p class="hp-sec-desc">High-signal picks from brands we track — copy a code or open the offer in one tap.</p>
+            </header>
+            <p class="hp-disclaimer">Promotions can change or expire at any time. Always confirm at checkout. We may earn a commission when you use our links — <a href="{{ url('/affiliate-disclosure') }}">see disclosure</a>.</p>
+            <div class="hp-coupons">
+                @foreach($hotCoupons as $coupon)
+                    @php $campaign = $coupon->campaign; $brand = $campaign?->brand; @endphp
+                    @if($brand)
+                    <article class="coupon-card">
+                        <div class="coupon-card-strip" aria-hidden="true">
+                            <span class="coupon-card-strip-icon">%</span>
+                            <span>{{ $coupon->code ? 'Code' : 'Deal' }}</span>
+                        </div>
+                        <div class="coupon-card-main">
+                        <div class="coupon-card-header">
+                            <img src="{{ $brand->image_url }}" alt="{{ $brand->name }}" class="coupon-card-logo" loading="lazy">
+                            <div class="coupon-card-brand">{{ $brand->name }}</div>
+                        </div>
+                        @if($coupon->offer)
+                            <p class="coupon-card-offer">{{ $coupon->offer }}</p>
+                        @endif
+                        <div class="coupon-card-actions">
+                            @if($coupon->code)
+                                <button type="button" class="coupon-card-code" onclick="navigator.clipboard.writeText('{{ $coupon->code }}'); this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 1200);" title="Click to copy">
+                                    <span class="coupon-card-code-label">Code</span>
+                                    <span class="coupon-card-code-value">{{ $coupon->code }}</span>
+                                    <span class="coupon-card-code-copy">Copy</span>
+                                </button>
+                            @endif
+                            @if($campaign && $campaign->affiliate_url)
+                                <a href="{{ route('click.redirect', ['slug' => $campaign->slug]) }}" class="coupon-card-cta" target="_blank" rel="noopener">Get deal</a>
+                            @endif
+                        </div>
+                        </div>
+                    </article>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
     @if(isset($latestPosts) && $latestPosts->isNotEmpty())
     <section class="hp-section hp-section--tint" id="blog">
         <div class="hp-shell">
@@ -986,53 +1033,6 @@
             @endif
         </div>
     </section>
-
-    @if($hotCoupons->isNotEmpty())
-    <section class="hp-section hp-section--tint" id="coupons">
-        <div class="hp-shell">
-            <header class="hp-sec-head">
-                <p class="hp-sec-eyebrow">Limited windows</p>
-                <h2 class="hp-sec-title">Hot coupons &amp; standout deals</h2>
-                <p class="hp-sec-desc">High-signal picks from brands we track — copy a code or open the offer in one tap.</p>
-            </header>
-            <p class="hp-disclaimer">Promotions can change or expire at any time. Always confirm at checkout. We may earn a commission when you use our links — <a href="{{ url('/affiliate-disclosure') }}">see disclosure</a>.</p>
-            <div class="hp-coupons">
-                @foreach($hotCoupons as $coupon)
-                    @php $campaign = $coupon->campaign; $brand = $campaign?->brand; @endphp
-                    @if($brand)
-                    <article class="coupon-card">
-                        <div class="coupon-card-strip" aria-hidden="true">
-                            <span class="coupon-card-strip-icon">%</span>
-                            <span>{{ $coupon->code ? 'Code' : 'Deal' }}</span>
-                        </div>
-                        <div class="coupon-card-main">
-                        <div class="coupon-card-header">
-                            <img src="{{ $brand->image_url }}" alt="{{ $brand->name }}" class="coupon-card-logo" loading="lazy">
-                            <div class="coupon-card-brand">{{ $brand->name }}</div>
-                        </div>
-                        @if($coupon->offer)
-                            <p class="coupon-card-offer">{{ $coupon->offer }}</p>
-                        @endif
-                        <div class="coupon-card-actions">
-                            @if($coupon->code)
-                                <button type="button" class="coupon-card-code" onclick="navigator.clipboard.writeText('{{ $coupon->code }}'); this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 1200);" title="Click to copy">
-                                    <span class="coupon-card-code-label">Code</span>
-                                    <span class="coupon-card-code-value">{{ $coupon->code }}</span>
-                                    <span class="coupon-card-code-copy">Copy</span>
-                                </button>
-                            @endif
-                            @if($campaign && $campaign->affiliate_url)
-                                <a href="{{ route('click.redirect', ['slug' => $campaign->slug]) }}" class="coupon-card-cta" target="_blank" rel="noopener">Get deal</a>
-                            @endif
-                        </div>
-                        </div>
-                    </article>
-                    @endif
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
 
     @if(isset($popularCategories) && $popularCategories->isNotEmpty())
     <section class="hp-cats" id="categories">

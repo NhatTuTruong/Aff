@@ -69,6 +69,23 @@
     -webkit-text-fill-color: transparent !important;
     color: var(--chrome-violet) !important;
 }
+.site-header .logo--image,
+.site-footer .logo--image {
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+}
+.site-logo-img {
+    display: block;
+    height: 2rem;
+    width: auto;
+    max-width: min(220px, 100%);
+    object-fit: contain;
+}
+.site-footer .site-logo-img {
+    height: 1.75rem;
+    max-width: min(200px, 100%);
+}
 .site-header__actions {
     display: flex;
     align-items: center;
@@ -146,7 +163,7 @@
 }
 .site-header .nav-links a:hover {
     color: var(--chrome-violet-deep) !important;
-    border-bottom-color: rgba(225, 29, 72, 0.55);
+    border-bottom-color: #1a2e5b;
 }
 
 @media (min-width: 769px) {

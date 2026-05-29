@@ -42,4 +42,21 @@ class AdminSettings
 
         SiteContent::set('settings.secure.' . $key, Crypt::encryptString($value));
     }
+
+    public static function siteLogoPath(): ?string
+    {
+        $path = trim((string) static::get('site_logo_path', ''));
+
+        return $path !== '' ? $path : null;
+    }
+
+    public static function siteLogoUrl(): ?string
+    {
+        $path = static::siteLogoPath();
+        if ($path === null) {
+            return null;
+        }
+
+        return asset('storage/' . ltrim($path, '/'));
+    }
 }

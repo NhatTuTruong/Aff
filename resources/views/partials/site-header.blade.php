@@ -17,7 +17,7 @@
 </div>
 <header class="site-header">
     <div class="header-inner">
-        <a href="{{ url('/') }}" class="logo font-heading">{{ config('app.name') }}<span>.</span></a>
+        @include('partials.site-logo')
         <div class="site-header__actions">
             <button type="button"
                 class="site-header__toggle"

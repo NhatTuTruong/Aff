@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Pages;
 
 use App\Models\User;
+use App\Support\AdminSettings;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
@@ -52,7 +53,7 @@ class ProfileSettings extends Page implements HasForms
             return;
         }
 
-        $this->form->fill([
+        $fill = [
             'name' => $user->name,
             'email' => $user->email,
             'code' => $user->code,
@@ -60,7 +61,13 @@ class ProfileSettings extends Page implements HasForms
             'current_password' => null,
             'new_password' => null,
             'new_password_confirmation' => null,
-        ]);
+        ];
+
+        if ($user->isAdmin()) {
+            $fill['site_logo_path'] = AdminSettings::siteLogoPath();
+        }
+
+        $this->form->fill($fill);
     }
 
     public function form(Form $form): Form
@@ -129,6 +136,19 @@ class ProfileSettings extends Page implements HasForms
                             ->disk('public')
                             ->maxSize(2048)
                             ->helperText('Kích thước tối đa 2MB.'),
+                    ]),
+                Section::make('Logo website')
+                    ->visible($isAdmin)
+                    ->description('Hiển thị ở header và footer. Nếu không tải lên, site dùng tên dạng chữ mặc định.')
+                    ->schema([
+                        FileUpload::make('site_logo_path')
+                            ->label('Logo site')
+                            ->image()
+                            ->imageEditor()
+                            ->directory('site-logo')
+                            ->disk('public')
+                            ->maxSize(2048)
+                            ->helperText('PNG hoặc JPG khuyến nghị, nền trong suốt. Tối đa 2MB.'),
                     ]),
             ])
             ->statePath('data');
@@ -203,7 +223,11 @@ class ProfileSettings extends Page implements HasForms
 
         $user->save();
 
-        $this->form->fill([
+        if ($userIsAdmin) {
+            AdminSettings::set('site_logo_path', $state['site_logo_path'] ?? '');
+        }
+
+        $fill = [
             'name' => $user->name,
             'email' => $user->email,
             'code' => $user->code,
@@ -211,7 +235,13 @@ class ProfileSettings extends Page implements HasForms
             'current_password' => null,
             'new_password' => null,
             'new_password_confirmation' => null,
-        ]);
+        ];
+
+        if ($userIsAdmin) {
+            $fill['site_logo_path'] = AdminSettings::siteLogoPath();
+        }
+
+        $this->form->fill($fill);
 
         Notification::make()
             ->title('Đã cập nhật hồ sơ')
