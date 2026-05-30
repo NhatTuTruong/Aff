@@ -268,7 +268,7 @@
         .hp-stats-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     }
     .hp-stat-card {
-        background: #e8edf3;
+        background: #f7f7f7;
         border: 1px solid var(--hp-line);
         border-radius: 18px;
         padding: 1.1rem 1rem;
