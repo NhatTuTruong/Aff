@@ -2,20 +2,28 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     @php
+        use App\Support\MetaTag;
+
         $seoTitleSuffix = \App\Support\AdminSettings::get('seo_title_suffix', '- ' . config('app.name'));
         $baseTitle = trim($__env->yieldContent('title', config('app.name')));
         $finalTitle = $baseTitle;
         if ($seoTitleSuffix !== '' && ! str_contains($baseTitle, $seoTitleSuffix)) {
             $finalTitle = trim($baseTitle . ' ' . $seoTitleSuffix);
         }
+        $pageDescription = trim($__env->yieldContent('description', \App\Support\AdminSettings::get('seo_meta_description_default', 'Best coupons, deals and store reviews.')));
+        $ogTitleOverride = trim($__env->yieldContent('og_title', ''));
+        $ogDescriptionOverride = trim($__env->yieldContent('og_description', ''));
+        $documentTitle = MetaTag::plain($finalTitle);
+        $metaTitle = MetaTag::plain($ogTitleOverride !== '' ? $ogTitleOverride : $finalTitle);
+        $metaDescription = MetaTag::plain($ogDescriptionOverride !== '' ? $ogDescriptionOverride : $pageDescription);
         $defaultMetaDescription = \App\Support\AdminSettings::get('seo_meta_description_default', 'Best coupons, deals and store reviews.');
         $defaultOgImage = \App\Support\AdminSettings::get('seo_og_image_default', '');
     @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $finalTitle }}</title>
-    <meta name="description" content="@yield('description', $defaultMetaDescription)">
+    <title>{{ $documentTitle }}</title>
+    <meta name="description" content="{{ $metaDescription }}">
     <meta name="verify-admitad" content="4455f2e7bb" />
     <meta name='impact-site-verification' value='35f2fb10-d495-4208-b451-b9f1e79b72a9'>
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
@@ -32,28 +40,28 @@
     @yield('head')
     @hasSection('og_image')
     <meta property="og:type" content="@yield('og_type', 'website')">
-    <meta property="og:title" content="@yield('og_title', $finalTitle)">
-    <meta property="og:description" content="@yield('og_description', $defaultMetaDescription)">
+    <meta property="og:title" content="{{ $metaTitle }}">
+    <meta property="og:description" content="{{ $metaDescription }}">
     <meta property="og:url" content="@yield('og_url', url()->current())">
     <meta property="og:image" content="@yield('og_image')">
-    <meta property="og:site_name" content="{{ config('app.name') }}">
+    <meta property="og:site_name" content="{{ MetaTag::plain(config('app.name')) }}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="@yield('og_title', $finalTitle)">
-    <meta name="twitter:description" content="@yield('og_description', $defaultMetaDescription)">
+    <meta name="twitter:title" content="{{ $metaTitle }}">
+    <meta name="twitter:description" content="{{ $metaDescription }}">
     <meta name="twitter:image" content="@yield('og_image')">
     
     @else
     <meta property="og:type" content="website">
-    <meta property="og:title" content="{{ $finalTitle }}">
-    <meta property="og:description" content="@yield('description', $defaultMetaDescription)">
+    <meta property="og:title" content="{{ $metaTitle }}">
+    <meta property="og:description" content="{{ $metaDescription }}">
     <meta property="og:url" content="{{ url()->current() }}">
     @if(!empty($defaultOgImage))
     <meta property="og:image" content="{{ $defaultOgImage }}">
     @endif
-    <meta property="og:site_name" content="{{ config('app.name') }}">
+    <meta property="og:site_name" content="{{ MetaTag::plain(config('app.name')) }}">
     <meta name="twitter:card" content="{{ !empty($defaultOgImage) ? 'summary_large_image' : 'summary' }}">
-    <meta name="twitter:title" content="{{ $finalTitle }}">
-    <meta name="twitter:description" content="@yield('description', $defaultMetaDescription)">
+    <meta name="twitter:title" content="{{ $metaTitle }}">
+    <meta name="twitter:description" content="{{ $metaDescription }}">
     @if(!empty($defaultOgImage))
     <meta name="twitter:image" content="{{ $defaultOgImage }}">
     @endif
@@ -62,9 +70,9 @@
         $organizationSchema = [
             '@context' => 'https://schema.org',
             '@type' => 'Organization',
-            'name' => config('app.name'),
+            'name' => MetaTag::plain(config('app.name')),
             'url' => config('app.url'),
-            'description' => $defaultMetaDescription,
+            'description' => MetaTag::plain($defaultMetaDescription),
         ];
     @endphp
     <script type="application/ld+json">{{ json_encode($organizationSchema) }}</script>

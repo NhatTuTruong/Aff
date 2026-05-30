@@ -101,17 +101,17 @@
             $ogImage = asset('images/default-brand.svg');
         }
     @endphp
-    <title>{{ $metaTitle }}</title>
-    <meta name="description" content="{{ $metaDescription }}">
+    <title>{{ \App\Support\MetaTag::plain($metaTitle) }}</title>
+    <meta name="description" content="{{ \App\Support\MetaTag::plain($metaDescription) }}">
     <meta name="robots" content="index, follow">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="{{ $metaTitle }}">
-    <meta property="og:description" content="{{ $metaDescription }}">
+    <meta property="og:title" content="{{ \App\Support\MetaTag::plain($metaTitle) }}">
+    <meta property="og:description" content="{{ \App\Support\MetaTag::plain($metaDescription) }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:image" content="{{ $ogImage }}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $metaTitle }}">
-    <meta name="twitter:description" content="{{ $metaDescription }}">
+    <meta name="twitter:title" content="{{ \App\Support\MetaTag::plain($metaTitle) }}">
+    <meta name="twitter:description" content="{{ \App\Support\MetaTag::plain($metaDescription) }}">
     <meta name="twitter:image" content="{{ $ogImage }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

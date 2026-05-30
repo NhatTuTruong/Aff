@@ -10,8 +10,8 @@
         $productImages = $campaign->key_product_images ?? [];
         $logoUrl = $campaign->logo ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->logo) : ($campaign->brand?->image_url ?? asset('images/default-brand.svg'));
     @endphp
-    <title>{{ $campaign->title }}</title>
-    <meta name="description" content="{{ $campaign->subtitle ?? strip_tags($campaign->intro ?? '') }}">
+    <title>{{ \App\Support\MetaTag::plain($campaign->title) }}</title>
+    <meta name="description" content="{{ \App\Support\MetaTag::plain($campaign->subtitle ?? strip_tags($campaign->intro ?? '')) }}">
     <meta name="robots" content="index, follow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
