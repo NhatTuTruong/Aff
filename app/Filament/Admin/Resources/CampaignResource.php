@@ -4,12 +4,14 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\CampaignResource\Pages;
 use App\Filament\Admin\Resources\CampaignResource\RelationManagers;
-use App\Filament\Imports\CampaignImporter;
 use App\Filament\Exports\CampaignExporter;
-use App\Models\Campaign;
+use App\Filament\Imports\CampaignImporter;
 use App\Models\Brand;
+use App\Models\Campaign;
 use App\Models\User;
+use App\Services\CampaignCopyService;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -18,6 +20,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CampaignResource extends Resource
@@ -471,6 +474,60 @@ class CampaignResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                Tables\Actions\Action::make('copyToUserRow')
+                    ->label('')
+                    ->icon('heroicon-o-arrow-right-circle')
+                    ->color('info')
+                    ->tooltip('Copy sang TK khác')
+                    ->modalHeading('Copy chiến dịch sang tài khoản khác')
+                    ->modalDescription(fn (Campaign $record): string => 'Copy «'.$record->title.'» sang tài khoản khác. Cửa hàng trùng tên trên TK đích sẽ bị từ chối.')
+                    ->form([
+                        Forms\Components\Select::make('target_user_id')
+                            ->label('Tài khoản đích')
+                            ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->all())
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                    ])
+                    ->action(function (Campaign $record, array $data, CampaignCopyService $copyService): void {
+                        $targetUser = User::query()->find($data['target_user_id'] ?? null);
+
+                        if (! $targetUser) {
+                            Notification::make()
+                                ->title('Tài khoản đích không hợp lệ')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        $record->load(['brand.category', 'couponItems']);
+
+                        try {
+                            $newCampaign = $copyService->copyToUser($record, $targetUser);
+                        } catch (\Throwable $e) {
+                            Notification::make()
+                                ->title('Không thể copy chiến dịch')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        $editUrl = static::getUrl('edit', ['record' => $newCampaign]);
+
+                        Notification::make()
+                            ->title('Đã copy chiến dịch')
+                            ->body("Chiến dịch mới: {$newCampaign->title} → {$targetUser->name}")
+                            ->success()
+                            ->actions([
+                                \Filament\Notifications\Actions\Action::make('edit')
+                                    ->label('Mở chiến dịch')
+                                    ->url($editUrl),
+                            ])
+                            ->send();
+                    }),
                 Tables\Actions\EditAction::make()
                     ->label('')
                     ->icon('heroicon-o-pencil-square')
@@ -524,6 +581,76 @@ class CampaignResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('copyToUser')
+                        ->label('Copy sang TK khác')
+                        ->icon('heroicon-o-arrow-right-circle')
+                        ->color('info')
+                        ->modalHeading('Copy chiến dịch sang tài khoản khác')
+                        ->modalDescription(fn (Collection $records): string => 'Đã chọn '.$records->count().' chiến dịch. Cửa hàng trùng tên trên TK đích sẽ bị bỏ qua (trừ khi nhiều chiến dịch cùng cửa hàng trong lần chọn này — dùng chung cửa hàng mới tạo).')
+                        ->form([
+                            Forms\Components\Select::make('target_user_id')
+                                ->label('Tài khoản đích')
+                                ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->all())
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+                        ])
+                        ->action(function (Collection $records, array $data, CampaignCopyService $copyService): void {
+                            $targetUser = User::query()->find($data['target_user_id'] ?? null);
+
+                            if (! $targetUser) {
+                                Notification::make()
+                                    ->title('Tài khoản đích không hợp lệ')
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+
+                            $records->load(['brand.category', 'couponItems']);
+
+                            $result = $copyService->copyManyToUser($records, $targetUser);
+                            $succeeded = $result['succeeded'];
+                            $failed = $result['failed'];
+                            $successCount = count($succeeded);
+                            $failCount = count($failed);
+
+                            if ($successCount === 0) {
+                                $body = collect($failed)
+                                    ->map(fn (array $item): string => '• '.$item['title'].': '.$item['message'])
+                                    ->implode("\n");
+
+                                Notification::make()
+                                    ->title('Không copy được chiến dịch nào')
+                                    ->body($body)
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+
+                            $body = "Thành công: {$successCount} chiến dịch → {$targetUser->name}.";
+
+                            if ($failCount > 0) {
+                                $body .= "\n\nThất bại ({$failCount}):\n";
+                                $body .= collect($failed)
+                                    ->map(fn (array $item): string => '• '.$item['title'].': '.$item['message'])
+                                    ->implode("\n");
+                            }
+
+                            $notification = Notification::make()
+                                ->title($failCount > 0 ? 'Copy một phần' : 'Đã copy chiến dịch')
+                                ->body($body);
+
+                            if ($failCount > 0) {
+                                $notification->warning();
+                            } else {
+                                $notification->success();
+                            }
+
+                            $notification->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
