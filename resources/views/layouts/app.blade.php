@@ -82,18 +82,18 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #e8edf3;
+            --bg: #f5f5f5;
             --surface: #ffffff;
-            --surface-hover: #e2e8f0;
+            --surface-hover: #e0f2fe;
             --text: #0f172a;
             --text-dark: #0f172a;
-            --text-muted: #475569;
+            --text-muted: #64748b;
             --primary: #0f172a;
             --primary-dark: #020617;
-            --accent: #0f766e;
-            --accent-hover: #155e75;
-            --accent-rose: #1d4ed8;
-            --border: rgba(15, 23, 42, 0.14);
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --accent-rose: #0284c7;
+            --border: rgba(15, 23, 42, 0.08);
             --radius: 12px;
             --radius-sm: 8px;
         }

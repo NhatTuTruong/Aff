@@ -1,14 +1,14 @@
 <style>
-/* Public chrome — header + footer (synced with site editorial palette) */
+/* Public chrome — header + footer (synced with home sky-blue palette) */
 :root {
     --chrome-ink: #0f172a;
-    --chrome-muted: #475569;
+    --chrome-muted: #64748b;
     --chrome-muted-soft: #94a3b8;
-    --chrome-line: rgba(15, 23, 42, 0.14);
-    --chrome-violet: #0f766e;
-    --chrome-violet-deep: #115e59;
-    --chrome-rose: #1d4ed8;
-    --chrome-cream: #e8edf3;
+    --chrome-line: rgba(15, 23, 42, 0.08);
+    --chrome-violet: #38bdf8;
+    --chrome-violet-deep: #0ea5e9;
+    --chrome-rose: #0284c7;
+    --chrome-cream: #f5f5f5;
     --chrome-white: #ffffff;
     --chrome-footer-0: #0f172a;
     --chrome-footer-1: #1e293b;
@@ -24,13 +24,13 @@
     letter-spacing: 0.01em;
 }
 .site-chrome-topbar a {
-    color: #5eead4;
+    color: #7dd3fc;
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 3px;
 }
 .site-chrome-topbar a:hover {
-    color: #99f6e4;
+    color: #bae6fd;
 }
 
 .site-header {
@@ -104,13 +104,13 @@
     text-transform: uppercase;
     border-radius: 999px;
     text-decoration: none;
-    box-shadow: 0 8px 22px -8px rgba(20, 184, 166, 0.55);
+    box-shadow: 0 8px 22px -8px rgba(56, 189, 248, 0.5);
     transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
 }
 .site-header__cta:hover {
     color: #fff !important;
     transform: translateY(-1px);
-    box-shadow: 0 12px 28px -8px rgba(37, 99, 235, 0.45);
+    box-shadow: 0 12px 28px -8px rgba(56, 189, 248, 0.45);
     filter: brightness(1.07) saturate(1.04);
 }
 .site-header__toggle {
@@ -133,7 +133,7 @@
 }
 .site-header__toggle:hover {
     background: #e2e8f0;
-    border-color: rgba(20, 184, 166, 0.25);
+    border-color: rgba(56, 189, 248, 0.35);
 }
 .site-header__toggle-bar {
     display: block;
@@ -163,7 +163,7 @@
 }
 .site-header .nav-links a:hover {
     color: var(--chrome-violet-deep) !important;
-    border-bottom-color: #1a2e5b;
+    border-bottom-color: rgba(56, 189, 248, 0.45);
 }
 
 @media (min-width: 769px) {
@@ -249,11 +249,11 @@
     color: #f0f9ff !important;
 }
 .site-footer .footer-brand .logo span {
-    background: linear-gradient(135deg, #2dd4bf 0%, #60a5fa 100%) !important;
+    background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%) !important;
     -webkit-background-clip: text !important;
     background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
-    color: #2dd4bf !important;
+    color: #38bdf8 !important;
 }
 .site-footer .footer-brand p {
     margin-top: 0.875rem;

@@ -5,19 +5,23 @@
 
 @push('styles')
 <style>
+    body:has(.home-page) { background: #ffffff; }
     .home-page {
-        --hp-ink: #0b1724;
-        --hp-muted: #557085;
-        --hp-line: rgba(11, 23, 36, 0.08);
-        --hp-violet: #14b8a6;
-        --hp-violet-deep: #0f766e;
-        --hp-rose: #2563eb;
-        --hp-rose-deep: #1d4ed8;
+        --hp-ink: #0f172a;
+        --hp-muted: #64748b;
+        --hp-line: rgba(15, 23, 42, 0.08);
+        --hp-accent: #38bdf8;
+        --hp-accent-deep: #0ea5e9;
+        --hp-accent-darker: #0284c7;
+        --hp-violet: #38bdf8;
+        --hp-violet-deep: #0ea5e9;
+        --hp-rose: #0ea5e9;
+        --hp-rose-deep: #0284c7;
         --hp-surface: #ffffff;
-        --hp-cream: #f4fbfa;
-        --hp-glow: radial-gradient(120% 80% at 80% 0%, rgba(20, 184, 166, 0.14) 0%, transparent 55%),
-            radial-gradient(90% 60% at 10% 100%, rgba(37, 99, 235, 0.08) 0%, transparent 50%);
-        background: var(--hp-cream);
+        --hp-cream: #ffffff;
+        --hp-glow: radial-gradient(120% 80% at 80% 0%, rgba(56, 189, 248, 0.2) 0%, transparent 58%),
+            radial-gradient(90% 60% at 10% 100%, rgba(56, 189, 248, 0.14) 0%, transparent 55%);
+        background: #f5f5f5;
         background-image: var(--hp-glow);
         color: var(--hp-ink);
     }
@@ -38,9 +42,10 @@
         position: absolute;
         inset: 0;
         background:
-            radial-gradient(75% 85% at 8% 0%, rgba(15, 118, 110, 0.18) 0%, transparent 70%),
-            radial-gradient(60% 70% at 92% 15%, rgba(29, 78, 216, 0.2) 0%, transparent 72%),
-            linear-gradient(160deg, rgba(255, 255, 255, 0.95) 0%, rgba(226, 232, 240, 0.86) 100%);
+            radial-gradient(80% 90% at 8% 0%, rgba(56, 189, 248, 0.22) 0%, transparent 78%),
+            radial-gradient(68% 78% at 92% 12%, rgba(56, 189, 248, 0.18) 0%, transparent 80%),
+            radial-gradient(55% 65% at 50% 85%, rgba(56, 189, 248, 0.1) 0%, transparent 70%),
+            linear-gradient(160deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.88) 100%);
         pointer-events: none;
     }
     .hp-hero-grid {
@@ -65,19 +70,19 @@
         font-weight: 700;
         letter-spacing: 0.16em;
         text-transform: uppercase;
-        color: #0f766e;
+        color: var(--hp-accent-deep);
         margin-bottom: 1rem;
         padding: 0.35rem 0.7rem;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.68);
-        border: 1px solid rgba(15, 118, 110, 0.22);
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(56, 189, 248, 0.35);
         backdrop-filter: blur(8px);
     }
     .hp-kicker::before {
         content: '';
         width: 2rem;
         height: 2px;
-        background: linear-gradient(90deg, var(--hp-violet), var(--hp-rose));
+        background: linear-gradient(90deg, var(--hp-accent), var(--hp-accent-deep));
         border-radius: 2px;
     }
     .hp-hero h1 {
@@ -124,8 +129,8 @@
         backdrop-filter: blur(9px);
     }
     .hp-search:focus-within {
-        border-color: rgba(15, 118, 110, 0.5);
-        box-shadow: 0 18px 40px -24px rgba(15, 118, 110, 0.3);
+        border-color: rgba(56, 189, 248, 0.55);
+        box-shadow: 0 18px 40px -24px rgba(56, 189, 248, 0.28);
     }
     .hp-search input {
         flex: 1;
@@ -148,13 +153,13 @@
         letter-spacing: 0.04em;
         text-transform: uppercase;
         color: #fff;
-        background: linear-gradient(135deg, #0f766e 0%, #1d4ed8 100%);
+        background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
         transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 10px 24px -10px rgba(15, 118, 110, 0.62);
+        box-shadow: 0 10px 24px -10px rgba(56, 189, 248, 0.5);
     }
     .hp-search button:hover {
         transform: translateY(-1px);
-        box-shadow: 0 12px 28px -8px rgba(37, 99, 235, 0.45);
+        box-shadow: 0 12px 28px -8px rgba(56, 189, 248, 0.45);
     }
 
     .hp-hero-aside {
@@ -162,14 +167,14 @@
         min-height: 220px;
         border-radius: 24px;
         background:
-            radial-gradient(circle at 20% 20%, rgba(45, 212, 191, 0.22), transparent 45%),
-            radial-gradient(circle at 85% 80%, rgba(96, 165, 250, 0.25), transparent 40%),
-            linear-gradient(145deg, #0f172a 0%, #0f766e 45%, #1d4ed8 100%);
+            radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.28), transparent 45%),
+            radial-gradient(circle at 85% 80%, rgba(14, 165, 233, 0.22), transparent 40%),
+            linear-gradient(145deg, #0c4a6e 0%, #0369a1 48%, #0284c7 100%);
         padding: 1.75rem;
         color: #f0f9ff;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        box-shadow: 0 26px 44px -24px rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(56, 189, 248, 0.38);
+        box-shadow: 0 26px 44px -24px rgba(2, 132, 199, 0.5);
     }
     .hp-hero-aside::after {
         content: '';
@@ -178,7 +183,7 @@
         top: -30%;
         width: 70%;
         height: 90%;
-        background: radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, transparent 70%);
         pointer-events: none;
     }
     .hp-aside-label {
@@ -186,7 +191,8 @@
         font-weight: 700;
         letter-spacing: 0.14em;
         text-transform: uppercase;
-        opacity: 0.75;
+        color: #7dd3fc;
+        opacity: 0.95;
         margin-bottom: 0.75rem;
         position: relative;
         z-index: 1;
@@ -203,7 +209,7 @@
     }
     .hp-aside-caption {
         font-size: 0.9rem;
-        opacity: 0.88;
+        color: rgba(224, 242, 254, 0.88);
         max-width: 16rem;
         line-height: 1.45;
         position: relative;
@@ -250,7 +256,7 @@
         background: rgba(255, 255, 255, 0.5);
     }
     .hp-aside-dot.is-active {
-        background: rgba(45, 212, 191, 0.95);
+        background: #38bdf8;
         transform: scale(1.2);
     }
 
@@ -268,8 +274,8 @@
         .hp-stats-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     }
     .hp-stat-card {
-        background: #f7f7f7;
-        border: 1px solid var(--hp-line);
+        background: #ffffff;
+        border: 1px solid rgba(56, 189, 248, 0.18);
         border-radius: 18px;
         padding: 1.1rem 1rem;
         text-align: center;
@@ -308,7 +314,7 @@
         font-weight: 700;
         letter-spacing: 0.14em;
         text-transform: uppercase;
-        color: var(--hp-rose);
+        color: var(--hp-accent);
         margin-bottom: 0.4rem;
     }
     .hp-sec-title {
@@ -332,7 +338,7 @@
         padding: 0.85rem 1rem;
         border-radius: 14px;
         border: 1px dashed var(--hp-line);
-        background: rgba(20, 184, 166, 0.06);
+        background: rgba(56, 189, 248, 0.06);
         max-width: 720px;
     }
     .hp-disclaimer a {
@@ -362,12 +368,12 @@
     }
     .hp-post-card:hover {
         transform: translateY(-4px);
-        border-color: rgba(20, 184, 166, 0.22);
-        box-shadow: 0 24px 50px -28px rgba(20, 184, 166, 0.24);
+        border-color: rgba(56, 189, 248, 0.3);
+        box-shadow: 0 24px 50px -28px rgba(56, 189, 248, 0.2);
     }
     .hp-post-media {
         aspect-ratio: 16 / 10;
-        background: #ccfbf1;
+        background: #e0f2fe;
         overflow: hidden;
     }
     .hp-post-media img {
@@ -410,10 +416,10 @@
         font-weight: 700;
         color: var(--hp-violet);
         text-decoration: none;
-        border-bottom: 2px solid rgba(20, 184, 166, 0.25);
+        border-bottom: 2px solid rgba(56, 189, 248, 0.35);
         padding-bottom: 2px;
     }
-    .hp-all-posts a:hover { color: var(--hp-rose); border-bottom-color: rgba(37, 99, 235, 0.35); }
+    .hp-all-posts a:hover { color: var(--hp-accent-deep); border-bottom-color: rgba(56, 189, 248, 0.5); }
 
     .hp-stores-panel {
         background: var(--hp-surface);
@@ -464,12 +470,12 @@
         align-items: center;
         justify-content: center;
         margin-bottom: 0.55rem;
-        box-shadow: 0 10px 24px -14px rgba(20, 184, 166, 0.35);
+        box-shadow: 0 10px 24px -14px rgba(56, 189, 248, 0.25);
         transition: border-color 0.2s, box-shadow 0.2s;
     }
     .store-carousel-item:hover .store-carousel-img-wrap {
-        border-color: rgba(20, 184, 166, 0.35);
-        box-shadow: 0 14px 28px -12px rgba(37, 99, 235, 0.2);
+        border-color: rgba(56, 189, 248, 0.45);
+        box-shadow: 0 14px 28px -12px rgba(56, 189, 248, 0.22);
     }
     .store-carousel-img-wrap img {
         width: 100%;
@@ -498,44 +504,70 @@
     }
     .coupon-card {
         display: grid;
-        grid-template-columns: 76px 1fr;
-        background: var(--hp-surface);
-        border: 1px solid var(--hp-line);
-        border-radius: 20px;
+        grid-template-columns: 68px 1fr;
+        background: #ffffff;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 16px;
         overflow: hidden;
-        box-shadow: 0 14px 36px -24px rgba(12, 10, 18, 0.22);
-        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        box-shadow: 0 6px 24px -10px rgba(56, 189, 248, 0.16);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
         animation: hpFadeUp 0.55s ease backwards;
     }
     .coupon-card:hover {
         transform: translateY(-3px);
-        border-color: rgba(20, 184, 166, 0.2);
-        box-shadow: 0 22px 44px -22px rgba(20, 184, 166, 0.22);
+        border-color: rgba(56, 189, 248, 0.42);
+        box-shadow: 0 14px 36px -12px rgba(56, 189, 248, 0.24);
     }
     .coupon-card-strip {
-        background: linear-gradient(180deg, #0f766e 0%, #0ea5e9 55%, #2563eb 100%);
-        color: #fff;
+        position: relative;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 0.75rem 0.4rem;
-        text-align: center;
+        gap: 0.4rem;
+        padding: 0.75rem 0.35rem;
+        background: linear-gradient(180deg, #0284c7 0%, #0ea5e9 50%, #38bdf8 100%);
+        border-right: 2px dashed rgba(56, 189, 248, 0.45);
+    }
+    .coupon-card-strip::before,
+    .coupon-card-strip::after {
+        content: '';
+        position: absolute;
+        right: -7px;
+        width: 14px;
+        height: 14px;
+        background: #ffffff;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 50%;
+        z-index: 1;
+    }
+    .coupon-card-strip::before { top: -7px; border-bottom-color: transparent; }
+    .coupon-card-strip::after { bottom: -7px; border-top-color: transparent; }
+    .coupon-card-strip-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: var(--hp-accent);
+        color: #fff;
+        font-size: 0.95rem;
         font-weight: 800;
-        font-size: 0.62rem;
+        line-height: 1;
+        box-shadow: 0 4px 12px -4px rgba(56, 189, 248, 0.6);
+    }
+    .coupon-card-strip-label {
+        font-size: 0.58rem;
+        font-weight: 800;
         letter-spacing: 0.1em;
         text-transform: uppercase;
+        color: #fff;
+        text-align: center;
         line-height: 1.2;
-        gap: 0.25rem;
-    }
-    .coupon-card-strip-icon {
-        font-size: 1.4rem;
-        font-weight: 800;
-        letter-spacing: 0;
-        text-transform: none;
     }
     .coupon-card-main {
-        padding: 1rem 1rem 1rem 0.9rem;
+        padding: 0.95rem 1rem 1rem;
         display: flex;
         flex-direction: column;
         min-width: 0;
@@ -543,22 +575,22 @@
     .coupon-card-header {
         display: flex;
         align-items: center;
-        gap: 0.65rem;
-        margin-bottom: 0.45rem;
+        gap: 0.6rem;
+        margin-bottom: 0.4rem;
     }
     .coupon-card-logo {
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
         object-fit: contain;
-        border-radius: 12px;
-        background: #ecfeff;
+        border-radius: 10px;
+        background: #f8fcff;
         padding: 4px;
-        border: 1px solid var(--hp-line);
+        border: 1px solid rgba(56, 189, 248, 0.15);
         flex-shrink: 0;
     }
     .coupon-card-brand {
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         color: var(--hp-ink);
         overflow: hidden;
         text-overflow: ellipsis;
@@ -566,8 +598,9 @@
     }
     .coupon-card-offer {
         font-size: 0.84rem;
+        font-weight: 600;
         color: var(--hp-muted);
-        margin: 0 0 0.75rem;
+        margin: 0 0 0.7rem;
         line-height: 1.45;
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -585,69 +618,88 @@
         display: inline-flex;
         align-items: center;
         gap: 0.35rem;
-        padding: 0.45rem 0.7rem;
-        background: #ecfdf5;
-        border: 1px dashed var(--hp-violet);
+        flex: 1;
+        min-width: 0;
+        padding: 0.48rem 0.65rem;
+        background: #f8fcff;
+        border: 1.5px dashed var(--hp-accent);
         border-radius: 10px;
-        font-size: 0.78rem;
+        font-size: 0.74rem;
         font-weight: 700;
-        color: var(--hp-violet-deep);
+        color: var(--hp-accent-deep);
         cursor: pointer;
         transition: background 0.2s, border-color 0.2s;
         font-family: ui-monospace, monospace;
     }
     .coupon-card-code:hover {
-        background: #ccfbf1;
-        border-color: var(--hp-violet-deep);
+        background: #e0f2fe;
+        border-color: var(--hp-accent-deep);
     }
     .coupon-card-code.copied {
-        background: #ccfbf1;
-        border-color: var(--hp-violet);
-        color: #0f766e;
+        background: #e0f2fe;
+        border-color: var(--hp-accent);
+        color: var(--hp-accent-deep);
     }
     .coupon-card-code-label {
-        font-size: 0.62rem;
+        font-size: 0.6rem;
         text-transform: uppercase;
         letter-spacing: 0.06em;
         opacity: 0.85;
+        flex-shrink: 0;
     }
-    .coupon-card-code-value { letter-spacing: 0.02em; }
-    .coupon-card-code-copy { font-size: 0.62rem; opacity: 0.85; }
+    .coupon-card-code-value {
+        letter-spacing: 0.02em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .coupon-card-code-copy {
+        font-size: 0.6rem;
+        opacity: 0.8;
+        flex-shrink: 0;
+        margin-left: auto;
+    }
     .coupon-card-code.copied .coupon-card-code-copy { display: none; }
     .coupon-card-code.copied::after {
         content: '✓';
-        margin-left: 0.25rem;
-        color: var(--hp-violet);
+        margin-left: 0.2rem;
+        color: var(--hp-accent);
+        flex-shrink: 0;
     }
     .coupon-card-cta {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 0.48rem 1rem;
-        background: linear-gradient(135deg, var(--hp-violet) 0%, var(--hp-rose) 100%);
+        padding: 0.5rem 0.95rem;
+        background: var(--hp-accent);
         color: #fff;
-        font-size: 0.7rem;
+        font-size: 0.68rem;
         font-weight: 800;
         letter-spacing: 0.07em;
         text-transform: uppercase;
-        border-radius: 11px;
+        border-radius: 10px;
         text-decoration: none;
-        transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 6px 18px -6px rgba(20, 184, 166, 0.55);
+        transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 14px -6px rgba(56, 189, 248, 0.55);
+        flex-shrink: 0;
     }
     .coupon-card-cta:hover {
         transform: translateY(-1px);
-        box-shadow: 0 10px 22px -6px rgba(37, 99, 235, 0.45);
+        background: var(--hp-accent-deep);
+        box-shadow: 0 8px 18px -6px rgba(56, 189, 248, 0.45);
         color: #fff;
+    }
+    .coupon-card--no-code .coupon-card-cta {
+        flex: 1;
     }
 
     .hp-cats {
         padding: clamp(2.75rem, 5vw, 3.75rem) 0;
         background:
-            radial-gradient(80% 90% at 8% 10%, rgba(14, 116, 144, 0.2) 0%, transparent 58%),
-            radial-gradient(70% 90% at 92% 88%, rgba(30, 64, 175, 0.2) 0%, transparent 55%),
-            linear-gradient(140deg, #0f172a 0%, #134e4a 48%, #1e3a8a 100%);
-        border-top: 1px solid rgba(148, 163, 184, 0.25);
+            radial-gradient(80% 90% at 8% 10%, rgba(56, 189, 248, 0.1) 0%, transparent 58%),
+            radial-gradient(70% 90% at 92% 88%, rgba(56, 189, 248, 0.08) 0%, transparent 55%),
+            linear-gradient(140deg, #ffffff 0%, #f8fcff 48%, #f0f9ff 100%);
+        border-top: 1px solid rgba(56, 189, 248, 0.15);
         position: relative;
         overflow: hidden;
     }
@@ -656,15 +708,14 @@
         position: absolute;
         inset: 0;
         background:
-            linear-gradient(180deg, rgba(15, 23, 42, 0.15) 0%, rgba(15, 23, 42, 0.32) 100%),
-            repeating-linear-gradient(-18deg, transparent, transparent 42px, rgba(148, 163, 184, 0.08) 42px, rgba(148, 163, 184, 0.08) 43px);
+            repeating-linear-gradient(-18deg, transparent, transparent 42px, rgba(56, 189, 248, 0.04) 42px, rgba(56, 189, 248, 0.04) 43px);
         pointer-events: none;
     }
     .hp-cats .hp-shell { position: relative; z-index: 1; }
     .hp-cats .hp-sec-head { max-width: 760px; }
-    .hp-cats .hp-sec-eyebrow { color: #67e8f9; }
-    .hp-cats .hp-sec-title { color: #f8fafc; }
-    .hp-cats .hp-sec-desc { color: rgba(226, 232, 240, 0.88); }
+    .hp-cats .hp-sec-eyebrow { color: var(--hp-accent); }
+    .hp-cats .hp-sec-title { color: var(--hp-ink); }
+    .hp-cats .hp-sec-desc { color: var(--hp-muted); }
     .hp-cat-row {
         display: flex;
         flex-wrap: wrap;
@@ -681,17 +732,17 @@
         text-decoration: none;
         font-size: 0.86rem;
         font-weight: 700;
-        color: #e2e8f0;
-        background: rgba(15, 23, 42, 0.42);
-        border: 1px solid rgba(148, 163, 184, 0.38);
+        color: var(--hp-ink);
+        background: #ffffff;
+        border: 1px solid rgba(56, 189, 248, 0.35);
         backdrop-filter: blur(8px);
-        box-shadow: 0 8px 22px -14px rgba(2, 6, 23, 0.6);
+        box-shadow: 0 8px 22px -14px rgba(56, 189, 248, 0.15);
         transition: background 0.2s, border-color 0.2s, transform 0.2s, color 0.2s;
     }
     .hp-cat-pill:hover {
-        background: rgba(15, 118, 110, 0.45);
+        background: var(--hp-accent);
         color: #ffffff;
-        border-color: rgba(103, 232, 249, 0.65);
+        border-color: var(--hp-accent);
         transform: translateY(-2px);
     }
 
@@ -735,13 +786,29 @@
         .hp-coupons { grid-template-columns: 1fr; }
     }
     @media (max-width: 520px) {
-        .coupon-card { grid-template-columns: 1fr; }
+        .coupon-card {
+            grid-template-columns: 1fr;
+        }
         .coupon-card-strip {
             flex-direction: row;
-            gap: 0.5rem;
+            border-right: none;
+            border-bottom: 2px dashed rgba(56, 189, 248, 0.45);
             padding: 0.65rem 1rem;
         }
-        .coupon-card-main { padding: 1rem 1rem 1.1rem; }
+        .coupon-card-strip::before,
+        .coupon-card-strip::after {
+            top: auto;
+            bottom: -7px;
+            right: auto;
+        }
+        .coupon-card-strip::before { left: -7px; border-bottom-color: transparent; border-right-color: transparent; }
+        .coupon-card-strip::after { right: -7px; left: auto; border-bottom-color: transparent; border-left-color: transparent; }
+        .coupon-card-actions {
+            flex-direction: column;
+        }
+        .coupon-card-cta {
+            width: 100%;
+        }
     }
 </style>
 @endpush
@@ -897,31 +964,31 @@
                 @foreach($hotCoupons as $coupon)
                     @php $campaign = $coupon->campaign; $brand = $campaign?->brand; @endphp
                     @if($brand)
-                    <article class="coupon-card">
+                    <article class="coupon-card{{ $coupon->code ? '' : ' coupon-card--no-code' }}">
                         <div class="coupon-card-strip" aria-hidden="true">
                             <span class="coupon-card-strip-icon">%</span>
-                            <span>{{ $coupon->code ? 'Code' : 'Deal' }}</span>
+                            <span class="coupon-card-strip-label">{{ $coupon->code ? 'Code' : 'Deal' }}</span>
                         </div>
                         <div class="coupon-card-main">
-                        <div class="coupon-card-header">
-                            <img src="{{ $brand->image_url }}" alt="{{ $brand->name }}" class="coupon-card-logo" loading="lazy">
-                            <div class="coupon-card-brand">{{ $brand->name }}</div>
-                        </div>
-                        @if($coupon->offer)
-                            <p class="coupon-card-offer">{{ $coupon->offer }}</p>
-                        @endif
-                        <div class="coupon-card-actions">
-                            @if($coupon->code)
-                                <button type="button" class="coupon-card-code" onclick="navigator.clipboard.writeText('{{ $coupon->code }}'); this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 1200);" title="Click to copy">
-                                    <span class="coupon-card-code-label">Code</span>
-                                    <span class="coupon-card-code-value">{{ $coupon->code }}</span>
-                                    <span class="coupon-card-code-copy">Copy</span>
-                                </button>
+                            <div class="coupon-card-header">
+                                <img src="{{ $brand->image_url }}" alt="{{ $brand->name }}" class="coupon-card-logo" loading="lazy">
+                                <div class="coupon-card-brand">{{ $brand->name }}</div>
+                            </div>
+                            @if($coupon->offer)
+                                <p class="coupon-card-offer">{{ $coupon->offer }}</p>
                             @endif
-                            @if($campaign && $campaign->affiliate_url)
-                                <a href="{{ route('click.redirect', ['slug' => $campaign->slug]) }}" class="coupon-card-cta" target="_blank" rel="noopener">Get deal</a>
-                            @endif
-                        </div>
+                            <div class="coupon-card-actions">
+                                @if($coupon->code)
+                                    <button type="button" class="coupon-card-code" onclick="navigator.clipboard.writeText('{{ $coupon->code }}'); this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 1200);" title="Click to copy">
+                                        <span class="coupon-card-code-label">Code</span>
+                                        <span class="coupon-card-code-value">{{ $coupon->code }}</span>
+                                        <span class="coupon-card-code-copy">Copy</span>
+                                    </button>
+                                @endif
+                                @if($campaign && $campaign->affiliate_url)
+                                    <a href="{{ route('click.redirect', ['slug' => $campaign->slug]) }}" class="coupon-card-cta" target="_blank" rel="noopener">Get deal</a>
+                                @endif
+                            </div>
                         </div>
                     </article>
                     @endif

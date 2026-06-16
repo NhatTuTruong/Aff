@@ -7,14 +7,17 @@
 <style>
     .blog-page {
         --bp-ink: #0f172a;
-        --bp-muted: #475569;
-        --bp-line: rgba(15, 23, 42, 0.14);
-        --bp-violet: #0f766e;
-        --bp-violet-deep: #115e59;
-        --bp-rose: #1d4ed8;
+        --bp-muted: #64748b;
+        --bp-line: rgba(15, 23, 42, 0.08);
+        --bp-violet: #38bdf8;
+        --bp-violet-deep: #0ea5e9;
+        --bp-rose: #0284c7;
         --bp-surface: #ffffff;
-        --bp-cream: #e8edf3;
-        background: linear-gradient(180deg, #eef2f7 0%, #e2e8f0 100%);
+        --bp-cream: #f5f5f5;
+        background: #f5f5f5;
+        background-image:
+            radial-gradient(120% 80% at 80% 0%, rgba(56, 189, 248, 0.2) 0%, transparent 58%),
+            radial-gradient(90% 60% at 10% 100%, rgba(56, 189, 248, 0.14) 0%, transparent 55%);
         color: var(--bp-ink);
     }
     .blog-page .bp-shell {
@@ -30,7 +33,7 @@
         overflow: hidden;
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         background:
-            linear-gradient(135deg, #0f172a 0%, #0f766e 50%, #1d4ed8 100%);
+            linear-gradient(145deg, #0c4a6e 0%, #0369a1 48%, #0284c7 100%);
         backdrop-filter: blur(4px);
         color: #f8fafc;
     }
@@ -99,8 +102,8 @@
         transition: border-color 0.2s, box-shadow 0.2s;
     }
     .bp-search-form input:focus {
-        border-color: rgba(20, 184, 166, 0.35);
-        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
+        border-color: rgba(56, 189, 248, 0.45);
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
         background: #fff;
     }
     .bp-search-form button {
@@ -110,15 +113,15 @@
         font-weight: 700;
         cursor: pointer;
         color: #fff;
-        background: linear-gradient(135deg, var(--bp-violet) 0%, var(--bp-rose) 100%);
+        background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
         white-space: nowrap;
-        box-shadow: 0 10px 26px -10px rgba(20, 184, 166, 0.55);
+        box-shadow: 0 10px 26px -10px rgba(56, 189, 248, 0.5);
         transition: transform 0.2s, box-shadow 0.2s;
     }
     .bp-search-form button:hover {
         transform: translateY(-1px);
         filter: brightness(1.06) saturate(1.02);
-        box-shadow: 0 14px 30px -10px rgba(37, 99, 235, 0.45);
+        box-shadow: 0 14px 30px -10px rgba(56, 189, 248, 0.45);
     }
 
     .bp-chips {
@@ -189,8 +192,8 @@
     }
     .bp-card:hover {
         transform: translateY(-3px);
-        border-color: rgba(15, 118, 110, 0.36);
-        box-shadow: 0 18px 34px -18px rgba(15, 118, 110, 0.3);
+        border-color: rgba(56, 189, 248, 0.38);
+        box-shadow: 0 18px 34px -18px rgba(56, 189, 248, 0.28);
     }
     .bp-card--feature {
         grid-column: 1 / -1;
@@ -277,8 +280,8 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: var(--bp-violet-deep);
-        background: rgba(20, 184, 166, 0.1);
-        border: 1px solid rgba(20, 184, 166, 0.2);
+        background: rgba(56, 189, 248, 0.1);
+        border: 1px solid rgba(56, 189, 248, 0.22);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -325,7 +328,7 @@
         gap: 0.35rem;
         font-weight: 700;
         font-size: 0.9rem;
-        color: #0f766e;
+        color: var(--bp-violet-deep);
         text-decoration: underline;
         text-underline-offset: 3px;
     }
@@ -348,12 +351,12 @@
         font-weight: 600 !important;
     }
     .bp-pagination .pagination-item:hover:not(.pagination-disabled):not(.pagination-current) {
-        border-color: rgba(20, 184, 166, 0.35) !important;
-        color: var(--bp-violet) !important;
+        border-color: rgba(56, 189, 248, 0.35) !important;
+        color: var(--bp-violet-deep) !important;
     }
     .bp-pagination .pagination-current {
-        border-color: rgba(20, 184, 166, 0.45) !important;
-        color: var(--bp-violet) !important;
+        border-color: rgba(56, 189, 248, 0.45) !important;
+        color: var(--bp-violet-deep) !important;
     }
     .bp-pagination .pagination-info {
         color: var(--bp-muted) !important;

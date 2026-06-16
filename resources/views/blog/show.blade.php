@@ -6,18 +6,21 @@
 @push('styles')
 <style>
     :root {
-        --blog-bg: #e8edf3;
+        --blog-bg: #f5f5f5;
         --blog-surface: #ffffff;
-        --blog-border: rgba(15, 23, 42, 0.14);
+        --blog-border: rgba(15, 23, 42, 0.08);
         --blog-text: #0f172a;
-        --blog-muted: #475569;
-        --blog-accent: #0f766e;
-        --blog-accent-rose: #1d4ed8;
-        --blog-accent-soft: rgba(15, 118, 110, 0.12);
+        --blog-muted: #64748b;
+        --blog-accent: #38bdf8;
+        --blog-accent-rose: #0ea5e9;
+        --blog-accent-soft: rgba(56, 189, 248, 0.12);
     }
 
     body {
-        background: #e8edf3;
+        background: #f5f5f5;
+        background-image:
+            radial-gradient(120% 80% at 80% 0%, rgba(56, 189, 248, 0.2) 0%, transparent 58%),
+            radial-gradient(90% 60% at 10% 100%, rgba(56, 189, 248, 0.14) 0%, transparent 55%);
     }
 
     .blog-shell {
@@ -54,7 +57,7 @@
         border-radius: 1.75rem;
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.22);
-        background: linear-gradient(135deg, #0f172a 0%, #115e59 48%, #1e40af 100%);
+        background: linear-gradient(145deg, #0c4a6e 0%, #0369a1 48%, #0284c7 100%);
         box-shadow: 0 20px 38px -20px rgba(15, 23, 42, 0.6);
         display: grid;
         grid-template-columns: minmax(0, 3fr) minmax(0, 2.5fr);
@@ -110,14 +113,14 @@
     }
 
     .blog-meta a {
-        color: #99f6e4;
+        color: #7dd3fc;
         text-decoration: underline;
     }
 
     .blog-hero-media {
         position: relative;
         min-height: 200px;
-        background: radial-gradient(circle at center, rgba(15, 118, 110, 0.1), rgba(29, 78, 216, 0.06));
+        background: radial-gradient(circle at center, rgba(56, 189, 248, 0.12), rgba(14, 165, 233, 0.06));
         overflow: hidden;
     }
 
@@ -229,9 +232,9 @@
     }
 
     .blog-chip-accent {
-        border-color: rgba(20, 184, 166, 0.35);
+        border-color: rgba(56, 189, 248, 0.35);
         background: var(--blog-accent-soft);
-        color: #0f766e;
+        color: #0284c7;
     }
 
     .blog-share-button {
@@ -365,7 +368,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, rgba(20, 184, 166, 0.12), transparent 55%);
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), transparent 55%);
         opacity: 0;
         transition: opacity 0.18s;
         pointer-events: none;
@@ -457,7 +460,7 @@
     .blog-deal-code.copied {
         background: var(--blog-accent-soft);
         border-color: var(--blog-accent);
-        color: #0f766e;
+        color: #0284c7;
     }
 
     .blog-deal-cta {
@@ -466,7 +469,7 @@
         gap: 0.25rem;
         padding: 0.35rem 0.75rem;
         border-radius: 999px;
-        background: linear-gradient(135deg, var(--blog-accent), var(--blog-accent-rose));
+        background: linear-gradient(135deg, #38bdf8, #0ea5e9);
         color: #ffffff;
         font-size: 0.78rem;
         font-weight: 600;

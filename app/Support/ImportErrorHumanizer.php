@@ -74,6 +74,10 @@ class ImportErrorHumanizer
             return 'Dữ liệu không thỏa ràng buộc trong cơ sở dữ liệu (trùng lặp hoặc tham chiếu sai). Kiểm tra lại các dòng trong file.';
         }
 
+        if (preg_match('/1471/i', $raw) || preg_match('/not insertable-into/i', $raw)) {
+            return 'Không thể ghi vào bảng chiến dịch: cơ sở dữ liệu đang dùng VIEW thay cho bảng campaigns. Liên hệ quản trị để khôi phục bảng (chạy migration khôi phục), sau đó import lại.';
+        }
+
         if (preg_match('/Connection refused|Connection timed out|server has gone away/i', $raw)) {
             return 'Không kết nối được tới cơ sở dữ liệu tạm thời. Thử import lại sau; nếu vẫn lỗi, liên hệ quản trị.';
         }
