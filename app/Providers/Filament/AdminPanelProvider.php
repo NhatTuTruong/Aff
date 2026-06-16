@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Http\Middleware\RememberAdminIpMiddleware;
+use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -33,9 +34,15 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([Authenticate::class])
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
+            ->darkMode(true, isForced: true)
+            ->defaultThemeMode(ThemeMode::Dark)
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Blue,
+                'gray' => Color::Zinc,
             ])
+            ->font('Inter')
+            ->brandName(config('app.name'))
+            ->sidebarWidth('14rem')
             ->favicon(asset('favicon.svg'))
             ->maxContentWidth(\Filament\Support\Enums\MaxWidth::Full)
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\\Filament\\Admin\\Resources')
@@ -65,6 +72,10 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
                 RememberAdminIpMiddleware::class,
             ])
+            ->renderHook(
+                PanelsRenderHook::STYLES_AFTER,
+                fn () => '<link rel="stylesheet" href="' . asset('css/filament/filament/admin-theme.css') . '">'
+            )
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn () => view('components.filament-rich-editor-hide-attachment-caption')

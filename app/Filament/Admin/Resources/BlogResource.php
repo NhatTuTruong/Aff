@@ -166,7 +166,7 @@ class BlogResource extends Resource
                     ->color('info')
                     ->default(0),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Ngày tạo')
+                    ->label('Ngày đăng')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
             ])
@@ -187,7 +187,7 @@ class BlogResource extends Resource
                     ->url(fn (Blog $record) => route('blog.show', $record->slug))
                     ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make()
-                    ->label('')
+                    ->label('Chỉnh sửa')
                     ->icon('heroicon-o-pencil-square')
                     ->tooltip('Sửa'),
                 Tables\Actions\ReplicateAction::make()
@@ -214,7 +214,7 @@ class BlogResource extends Resource
                         return $data;
                     }),
                 Tables\Actions\DeleteAction::make()
-                    ->label('')
+                    ->label('Xóa')
                     ->icon('heroicon-o-trash')
                     ->tooltip('Xóa'),
                 Tables\Actions\RestoreAction::make()

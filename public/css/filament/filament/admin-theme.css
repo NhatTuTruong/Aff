@@ -1,0 +1,214 @@
+/* CampAff admin — dark theme (forced, no light mode) */
+
+:root {
+    --ca-admin-bg: #1a1d21;
+    --ca-admin-sidebar: #16181c;
+    --ca-admin-surface: #212529;
+    --ca-admin-surface-alt: #2c3034;
+    --ca-admin-border: rgba(255, 255, 255, 0.08);
+    --ca-admin-accent: #0d6efd;
+    --ca-admin-accent-hover: #0b5ed7;
+}
+
+/* Base */
+html.dark .fi-body {
+    background-color: var(--ca-admin-bg) !important;
+    color: #e9ecef;
+}
+
+html.dark .fi-main-ctn,
+html.dark .fi-main {
+    background-color: var(--ca-admin-bg) !important;
+}
+
+/* Sidebar */
+html.dark .fi-sidebar {
+    background-color: var(--ca-admin-sidebar) !important;
+    border-right: 1px solid var(--ca-admin-border);
+    box-shadow: none !important;
+}
+
+html.dark .fi-sidebar-header {
+    background-color: var(--ca-admin-sidebar) !important;
+    border-bottom: 1px solid var(--ca-admin-border);
+    box-shadow: none !important;
+}
+
+html.dark .fi-sidebar-header .fi-logo,
+html.dark .fi-sidebar-header a {
+    color: #f8f9fa !important;
+    font-weight: 700;
+}
+
+html.dark .fi-sidebar-group-label {
+    color: #6c757d !important;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+html.dark .fi-sidebar-item-button {
+    border-radius: 0 999px 999px 0 !important;
+    margin-right: 0.65rem;
+}
+
+html.dark .fi-sidebar-item:not(.fi-active) .fi-sidebar-item-button:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    background-color: var(--ca-admin-accent) !important;
+}
+
+html.dark .fi-sidebar-item.fi-active .fi-sidebar-item-icon,
+html.dark .fi-sidebar-item.fi-active .fi-sidebar-item-label {
+    color: #ffffff !important;
+}
+
+html.dark .fi-sidebar-item:not(.fi-active) .fi-sidebar-item-icon {
+    color: #adb5bd !important;
+}
+
+html.dark .fi-sidebar-item:not(.fi-active) .fi-sidebar-item-label {
+    color: #dee2e6 !important;
+}
+
+/* Topbar */
+html.dark .fi-topbar {
+    background-color: var(--ca-admin-sidebar) !important;
+    border-bottom: 1px solid var(--ca-admin-border);
+    box-shadow: none !important;
+}
+
+html.dark .fi-topbar nav {
+    background-color: transparent !important;
+}
+
+html.dark .fi-global-search-field input {
+    background-color: var(--ca-admin-surface) !important;
+    border-color: var(--ca-admin-border) !important;
+    color: #f8f9fa !important;
+}
+
+html.dark .fi-global-search-field input::placeholder {
+    color: #6c757d !important;
+}
+
+/* Cards, sections, tables container */
+html.dark .fi-section,
+html.dark .fi-ta-ctn,
+html.dark .fi-fo-section,
+html.dark .fi-wi-stats-overview-stat,
+html.dark .fi-wi-chart {
+    background-color: var(--ca-admin-surface) !important;
+    border-color: var(--ca-admin-border) !important;
+    box-shadow: none !important;
+}
+
+html.dark .fi-section-header-heading,
+html.dark .fi-ta-header-heading {
+    color: #f8f9fa !important;
+}
+
+/* Table zebra rows */
+html.dark .fi-ta-table tbody tr:nth-child(odd) td {
+    background-color: var(--ca-admin-surface) !important;
+}
+
+html.dark .fi-ta-table tbody tr:nth-child(even) td {
+    background-color: var(--ca-admin-surface-alt) !important;
+}
+
+html.dark .fi-ta-table thead th {
+    background-color: #1e2226 !important;
+    border-color: var(--ca-admin-border) !important;
+    color: #adb5bd !important;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+html.dark .fi-ta-table td,
+html.dark .fi-ta-table th {
+    border-color: var(--ca-admin-border) !important;
+}
+
+html.dark .fi-ta-table tbody tr:hover td {
+    background-color: rgba(13, 110, 253, 0.08) !important;
+}
+
+/* Inputs */
+html.dark .fi-input,
+html.dark .fi-select-input,
+html.dark .fi-textarea,
+html.dark input:not([type='checkbox']):not([type='radio']),
+html.dark textarea,
+html.dark select {
+    background-color: #2b3035 !important;
+    border-color: var(--ca-admin-border) !important;
+    color: #f8f9fa !important;
+}
+
+html.dark .fi-input:focus-within,
+html.dark input:focus,
+html.dark textarea:focus,
+html.dark select:focus {
+    border-color: var(--ca-admin-accent) !important;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.2) !important;
+}
+
+/* Primary buttons */
+html.dark .fi-btn.fi-color-primary:not(.fi-btn-outlined) {
+    background-color: var(--ca-admin-accent) !important;
+}
+
+html.dark .fi-btn.fi-color-primary:not(.fi-btn-outlined):hover {
+    background-color: var(--ca-admin-accent-hover) !important;
+}
+
+/* Action links in tables */
+html.dark .fi-ta-actions .fi-link {
+    font-weight: 600;
+}
+
+/* Pagination */
+html.dark .fi-pagination-item {
+    background-color: var(--ca-admin-surface) !important;
+    border-color: var(--ca-admin-border) !important;
+    color: #dee2e6 !important;
+}
+
+/* Modals & dropdowns */
+html.dark .fi-modal-window,
+html.dark .fi-dropdown-panel {
+    background-color: var(--ca-admin-surface) !important;
+    border-color: var(--ca-admin-border) !important;
+}
+
+/* Login page */
+html.dark .fi-simple-layout {
+    background-color: var(--ca-admin-bg) !important;
+}
+
+html.dark .fi-simple-main-ctn {
+    background-color: var(--ca-admin-surface) !important;
+    border: 1px solid var(--ca-admin-border);
+}
+
+/* Hide any leftover theme switcher */
+.fi-theme-switcher {
+    display: none !important;
+}
+
+/* Table text selection */
+html.dark .fi-ta-table tbody tr td:not(.fi-ta-column-actions) {
+    cursor: text;
+    user-select: text;
+}
+
+@media (min-width: 1024px) {
+    html.dark .fi-sidebar {
+        width: 16rem !important;
+    }
+}
