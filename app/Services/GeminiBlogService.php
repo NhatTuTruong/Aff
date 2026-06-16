@@ -14,7 +14,10 @@ class GeminiBlogService
     /** @var string|null Lưu lỗi gần nhất để debug */
     public ?string $lastError = null;
 
-    public function generateBlog(string $category, string $variant): ?array
+    /**
+     * @param array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
+     */
+    public function generateBlog(string $category, string $variant, array $extras = []): ?array
     {
         $apiKey = AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'));
         $model = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
@@ -41,6 +44,8 @@ Yêu cầu bài viết:
 - Nội dung hữu ích, không quảng cáo thương hiệu cụ thể.
 - Trả về HTML hoàn chỉnh: <h1>, <p>, <ul>/<ol>, <h2>, <h3>. Không bọc <html>/<body>.
 
+{$this->buildEditorExtrasBlock($extras)}
+
 Danh mục: {$category}
 Loại bài: {$variant}
 {$topicPrompt}
@@ -54,7 +59,10 @@ PROMPT;
      *
      * @return array{title: string, content: string, featured_image: ?string}|null
      */
-    public function generateBrandSpotlightFromHint(string $hint): ?array
+    /**
+     * @param array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
+     */
+    public function generateBrandSpotlightFromHint(string $hint, array $extras = []): ?array
     {
         $apiKey = AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'));
         $model = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
@@ -75,6 +83,7 @@ PROMPT;
 
         $hint = Str::limit($hint, 240, '');
         $hintSafe = htmlspecialchars($hint, ENT_QUOTES, 'UTF-8');
+        $extrasBlock = $this->buildEditorExtrasBlock($extras, forEnglish: true);
 
         $prompt = <<<PROMPT
 You are an expert English copywriter for a deals and shopping blog.
@@ -82,6 +91,8 @@ You are an expert English copywriter for a deals and shopping blog.
 The editor typed this brand or store identifier (it may be a company name OR a domain like example.com). Use it only as the **subject label** — you have **no access** to our internal database, coupons, or verified facts about this merchant.
 
 **Subject (verbatim from editor):** {$hintSafe}
+
+{$extrasBlock}
 
 ## Your task
 Write ONE **short** editorial-style article in **English** about this brand/store as a general shopping subject.
@@ -122,7 +133,10 @@ PROMPT;
      *
      * @return array{title: string, content: string, featured_image: ?string}|null
      */
-    public function generateBrandIntroBlog(Brand $brand, Campaign $campaign, string $categoryName): ?array
+    /**
+     * @param array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
+     */
+    public function generateBrandIntroBlog(Brand $brand, Campaign $campaign, string $categoryName, array $extras = []): ?array
     {
         $apiKey = AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'));
         $model = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
@@ -171,6 +185,7 @@ PROMPT;
 
         $year = (int) now()->format('Y');
         $linkExample = '<a href="' . $affiliateTrackingUrl . '" rel="nofollow sponsored">' . htmlspecialchars($brandName, ENT_QUOTES, 'UTF-8') . '</a>';
+        $extrasBlock = $this->buildEditorExtrasBlock($extras, forEnglish: true, forcePromoSection: true);
 
         $prompt = <<<PROMPT
 You are an expert English SEO copywriter for affiliate coupon sites.
@@ -188,6 +203,8 @@ Write ONE long-form blog article introducing the store/brand below. Language: **
 - Stated benefits / highlights: {$benefitsText}
 - Sample coupons / offers (lines):
 {$couponLines}
+
+{$extrasBlock}
 
 ## Required HTML output rules
 - Return **complete HTML fragment** only: use `<h1>` once for the main title, then `<h2>`, `<h3>`, `<p>`, `<ul>`, `<ol>`, `<strong>` as needed. **Do not** wrap in `<html>` or `<body>`.
@@ -220,6 +237,67 @@ PROMPT;
         }
 
         return $result;
+    }
+
+    /**
+     * @param array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
+     */
+    protected function buildEditorExtrasBlock(array $extras, bool $forEnglish = false, bool $forcePromoSection = false): string
+    {
+        $idea = trim((string) ($extras['idea'] ?? ''));
+        $affiliateUrl = trim((string) ($extras['affiliate_url'] ?? ''));
+        $couponCode = trim((string) ($extras['coupon_code'] ?? ''));
+
+        // Hard limits to keep prompt stable.
+        $idea = Str::limit($idea, 1800, '');
+        $affiliateUrl = Str::limit($affiliateUrl, 1800, '');
+        $couponCode = Str::limit($couponCode, 120, '');
+
+        $hasAny = ($idea !== '') || ($affiliateUrl !== '') || ($couponCode !== '');
+        if (! $hasAny && ! $forcePromoSection) {
+            return '';
+        }
+
+        $ideaSafe = htmlspecialchars($idea, ENT_QUOTES, 'UTF-8');
+        $affiliateSafe = htmlspecialchars($affiliateUrl, ENT_QUOTES, 'UTF-8');
+        $couponSafe = htmlspecialchars($couponCode, ENT_QUOTES, 'UTF-8');
+
+        if ($forEnglish) {
+            $lines = [];
+            $lines[] = "## Editor requirements (follow these as hard constraints, do not ignore)";
+            if ($ideaSafe !== '') {
+                $lines[] = "- Core article idea / outline (the article MUST closely follow this; do not change the topic or structure unless impossible): {$ideaSafe}";
+            }
+            if ($affiliateSafe !== '') {
+                $lines[] = "- Affiliate link to include (use exactly; do not modify): {$affiliateSafe}";
+            }
+            if ($couponSafe !== '') {
+                $lines[] = "- Coupon code to show exactly as typed (do not invent conditions or extra discounts): {$couponSafe}";
+            }
+            $lines[] = "- The article should stay tightly aligned with the idea above (section flow, focus points). Only adjust for grammar and global coherence.";
+            $lines[] = "- If an affiliate link is provided, include ONE clear CTA link near the end using `<a href=\"...\" rel=\"nofollow sponsored noopener\" target=\"_blank\">`.";
+            $lines[] = "- If a coupon code is provided, include a short section titled `<h2>Coupon code</h2>` containing the code in HTML (e.g. `<p><strong>Code:</strong> CODE</p>`).";
+            $lines[] = "- Do not invent extra codes, discount percentages, or time-limited claims beyond what is explicitly provided above.";
+
+            return implode("\n", $lines) . "\n";
+        }
+
+        $lines = [];
+        $lines[] = "Yêu cầu bổ sung từ người nhập (bắt buộc, coi như ràng buộc chính):";
+        if ($ideaSafe !== '') {
+            $lines[] = "- Ý tưởng / outline: {$ideaSafe}";
+        }
+        if ($affiliateSafe !== '') {
+            $lines[] = "- Link affiliate cần chèn (dùng đúng link): {$affiliateSafe}";
+        }
+        if ($couponSafe !== '') {
+            $lines[] = "- Mã coupon cần hiển thị (giữ nguyên, không bịa thêm điều kiện/discount): {$couponSafe}";
+        }
+        $lines[] = "- Nội dung bài viết phải bám sát ý tưởng/outline trên (chỉ được chỉnh nhẹ để mạch lạc hơn, không đổi chủ đề).";
+        $lines[] = "- Nếu có link affiliate: chèn 1 CTA rõ ràng gần cuối bài với rel=\"nofollow sponsored noopener\" và target=\"_blank\".";
+        $lines[] = "- Nếu có mã coupon: tạo 1 mục `<h2>` riêng để hiển thị mã (không bịa thêm điều kiện).";
+
+        return implode("\n", $lines) . "\n";
     }
 
     /**

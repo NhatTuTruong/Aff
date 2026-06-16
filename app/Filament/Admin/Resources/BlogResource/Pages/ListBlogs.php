@@ -11,6 +11,8 @@ use App\Services\GeminiBlogService;
 use App\Support\AdminSettings;
 use App\Support\AutoBlogSettings;
 use Filament\Actions;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -52,11 +54,33 @@ class ListBlogs extends ListRecords
                 })
                 ->modalSubmitActionLabel('Tạo ngay')
                 ->form([
+                    Select::make('category_id')
+                        ->label('Danh mục')
+                        ->placeholder('Tự động')
+                        ->options(fn (): array => Category::query()->orderBy('name')->pluck('name', 'id')->toArray())
+                        ->searchable()
+                        ->preload(),
                     TextInput::make('brand_or_domain')
                         ->label('Nhập brand hay domain')
                         ->placeholder('VD: Barbell Jack, barbelljack.com')
                         ->helperText('Để trống: theo logic ngẫu nhiên.')
                         ->maxLength(255),
+                    Textarea::make('idea')
+                        ->label('Ý tưởng / yêu cầu bài viết')
+                        ->placeholder('VD: Viết theo phong cách review ngắn, nhấn mạnh shipping/return, thêm FAQ... (có thể dán outline hoặc gạch đầu dòng)')
+                        ->rows(5)
+                        ->maxLength(2000),
+                    TextInput::make('affiliate_url')
+                        ->label('Link Affiliate (tuỳ chọn)')
+                        ->placeholder('https://...')
+                        ->url()
+                        ->maxLength(2048)
+                        ->helperText('Nếu nhập, AI sẽ chèn CTA/link trong bài viết.'),
+                    TextInput::make('coupon_code')
+                        ->label('Mã coupon (tuỳ chọn)')
+                        ->placeholder('VD: SAVE10')
+                        ->maxLength(80)
+                        ->helperText('Nếu nhập, AI sẽ hiển thị mã trong bài viết (không tự bịa thêm điều kiện).'),
                 ])
                 ->action(function (array $data): void {
                     $gemini = app(GeminiBlogService::class);
@@ -71,10 +95,21 @@ class ListBlogs extends ListRecords
                     }
 
                     $brandHint = trim((string) ($data['brand_or_domain'] ?? ''));
+                    $extras = [
+                        'idea' => trim((string) ($data['idea'] ?? '')),
+                        'affiliate_url' => trim((string) ($data['affiliate_url'] ?? '')),
+                        'coupon_code' => trim((string) ($data['coupon_code'] ?? '')),
+                    ];
+                    $pickedCategoryId = $data['category_id'] ?? null;
+                    $pickedCategoryName = null;
+                    if (! empty($pickedCategoryId)) {
+                        $pickedCategoryName = Category::query()->whereKey($pickedCategoryId)->value('name');
+                        $pickedCategoryName = $pickedCategoryName ? trim((string) $pickedCategoryName) : null;
+                    }
 
                     if ($brandHint !== '') {
                         $categoryLabel = 'Brand spotlight';
-                        $result = $gemini->generateBrandSpotlightFromHint($brandHint);
+                        $result = $gemini->generateBrandSpotlightFromHint($brandHint, $extras);
                     } else {
                         $modes = AutoBlogSettings::enabledManualAiModes();
                         if ($modes === []) {
@@ -110,12 +145,17 @@ class ListBlogs extends ListRecords
                             }
                             [$brand, $campaign] = $picked;
                             $categoryLabel = $this->resolveBrandCategoryLabel($brand);
-                            $result = $gemini->generateBrandIntroBlog($brand, $campaign, $categoryLabel);
+                            $result = $gemini->generateBrandIntroBlog($brand, $campaign, $categoryLabel, $extras);
                         } else {
                             $category = $categoryNames[array_rand($categoryNames)];
-                            $result = $gemini->generateBlog($category, $mode);
+                            $result = $gemini->generateBlog($category, $mode, $extras);
                             $categoryLabel = $category;
                         }
+                    }
+
+                    // Override category only for classification, not for AI prompt.
+                    if (filled($pickedCategoryName)) {
+                        $categoryLabel = $pickedCategoryName;
                     }
 
                     if (! $result) {

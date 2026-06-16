@@ -12,6 +12,13 @@
     --chrome-white: #ffffff;
     --chrome-footer-0: #0f172a;
     --chrome-footer-1: #1e293b;
+
+    /* Public form controls */
+    --chrome-radius-input: 14px;
+    --chrome-input-bg: #ffffff;
+    --chrome-input-border: rgba(15, 23, 42, 0.14);
+    --chrome-input-border-focus: rgba(56, 189, 248, 0.65);
+    --chrome-input-ring: rgba(56, 189, 248, 0.18);
 }
 
 .site-chrome-topbar {
@@ -217,6 +224,42 @@
         border-bottom-color: rgba(11, 23, 36, 0.06);
     }
     .site-header .nav-links a:last-child { border-bottom: none; }
+}
+
+/* Public inputs — make them rounded consistently */
+input[type="text"],
+input[type="email"],
+input[type="url"],
+input[type="search"],
+input[type="tel"],
+input[type="number"],
+input[type="password"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+textarea,
+select {
+    border-radius: var(--chrome-radius-input);
+    background: var(--chrome-input-bg);
+    border: 1px solid var(--chrome-input-border);
+    padding: 0.65rem 0.85rem;
+    color: var(--chrome-ink);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+textarea { min-height: 110px; resize: vertical; }
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--chrome-input-border-focus);
+    box-shadow: 0 0 0 4px var(--chrome-input-ring);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: rgba(100, 116, 139, 0.85);
 }
 
 .site-footer {

@@ -292,8 +292,23 @@
         text-decoration: underline;
     }
 
-    .blog-content.prose img {
+    /* Ảnh chèn trong bài: full width, chiều cao tự co theo tỷ lệ gốc */
+    .blog-content.prose figure.attachment {
+        width: 100% !important;
         max-width: 100%;
+        margin: 1.25rem 0;
+    }
+
+    .blog-content.prose figure.attachment a {
+        display: block;
+    }
+
+    .blog-content.prose img {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        object-fit: contain;
         border-radius: 0.9rem;
         border: 1px solid var(--blog-border);
     }

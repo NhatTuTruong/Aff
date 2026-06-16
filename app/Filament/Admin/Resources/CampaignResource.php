@@ -9,6 +9,7 @@ use App\Filament\Exports\CampaignExporter;
 use App\Models\Campaign;
 use App\Models\Brand;
 use App\Models\User;
+use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -340,6 +341,15 @@ class CampaignResource extends Resource
                     ->job(\App\Jobs\ImportCsvWithNullUser::class)
                     ->label('Import CSV')
                     ->icon('heroicon-o-arrow-up-tray'),
+                Tables\Actions\ExportAction::make()
+                    ->exporter(CampaignExporter::class)
+                    ->job(\App\Jobs\PrepareCsvExportPreserveSession::class)
+                    ->label('Xuất CSV')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('gray')
+                    ->formats([ExportFormat::Csv])
+                    ->columnMapping(false)
+                    ->fileName(fn (): string => 'campaigns-' . now()->format('Y-m-d-His')),
             ])
             ->columns([
                 Tables\Columns\ImageColumn::make('brand.image')
@@ -501,6 +511,22 @@ class CampaignResource extends Resource
 
                         return $data;
                     }),
+                Tables\Actions\Action::make('copy_landing_link')
+                    ->label('')
+                    ->icon('heroicon-o-clipboard-document')
+                    ->color('gray')
+                    ->tooltip('Copy link landing')
+                    ->visible(fn (Campaign $record): bool => filled($record->slug))
+                    ->action(function (Campaign $record, $livewire): void {
+                        $fullUrl = url(route('landing.show', ['slug' => $record->slug]));
+
+                        $livewire->js('navigator.clipboard.writeText('.json_encode($fullUrl).')');
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Đã copy link landing')
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\Action::make('view_landing')
                     ->label('')
                     ->url(fn ($record) => $record->slug ? route('landing.show', ['slug' => $record->slug]) : '#')
@@ -529,8 +555,12 @@ class CampaignResource extends Resource
                     Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\ExportBulkAction::make()
                         ->exporter(CampaignExporter::class)
-                        ->label('Xuất dữ liệu')
-                        ->icon('heroicon-o-document-arrow-down'),
+                        ->job(\App\Jobs\PrepareCsvExportPreserveSession::class)
+                        ->label('Xuất CSV')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->formats([ExportFormat::Csv])
+                        ->columnMapping(false)
+                        ->fileName(fn (): string => 'campaigns-' . now()->format('Y-m-d-His')),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');

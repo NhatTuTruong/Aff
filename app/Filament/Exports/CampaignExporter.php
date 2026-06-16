@@ -3,13 +3,31 @@
 namespace App\Filament\Exports;
 
 use App\Models\Campaign;
+use App\Models\Category;
+use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use Illuminate\Database\Eloquent\Builder;
 
 class CampaignExporter extends Exporter
 {
     protected static ?string $model = Campaign::class;
+
+    public function getJobConnection(): ?string
+    {
+        return 'sync';
+    }
+
+    public function getFormats(): array
+    {
+        return [ExportFormat::Csv];
+    }
+
+    public static function modifyQuery(Builder $query): Builder
+    {
+        return $query->with(['brand.category', 'couponItems']);
+    }
 
     public static function getColumns(): array
     {
@@ -17,7 +35,20 @@ class CampaignExporter extends Exporter
             ExportColumn::make('category')
                 ->label('Danh mục')
                 ->state(function (Campaign $record) {
-                    return $record->brand?->category?->name;
+                    $brand = $record->brand;
+                    if (! $brand) {
+                        return null;
+                    }
+
+                    if ($brand->category?->name) {
+                        return $brand->category->name;
+                    }
+
+                    if ($brand->category_id) {
+                        return Category::withTrashed()->find($brand->category_id)?->name;
+                    }
+
+                    return null;
                 }),
             ExportColumn::make('brand')
                 ->label('Cửa hàng')
@@ -53,33 +84,36 @@ class CampaignExporter extends Exporter
             ExportColumn::make('coupon_codes')
                 ->label('Mã giảm giá (phân cách bằng xuống hàng)')
                 ->state(function (Campaign $record) {
-                    $items = $record->couponItems()->get(['code']);
-                    if ($items->isEmpty()) {
+                    if ($record->couponItems->isEmpty()) {
                         return null;
                     }
-                    return $items->pluck('code')
+
+                    return $record->couponItems
+                        ->pluck('code')
                         ->filter(fn (?string $code) => $code !== null && $code !== '')
                         ->implode("\n");
                 }),
             ExportColumn::make('coupon_offers')
                 ->label('Offer (phân cách bằng xuống hàng)')
                 ->state(function (Campaign $record) {
-                    $items = $record->couponItems()->get(['offer']);
-                    if ($items->isEmpty()) {
+                    if ($record->couponItems->isEmpty()) {
                         return null;
                     }
-                    return $items->pluck('offer')
+
+                    return $record->couponItems
+                        ->pluck('offer')
                         ->filter(fn (?string $offer) => $offer !== null && $offer !== '')
                         ->implode("\n");
                 }),
             ExportColumn::make('coupon_descriptions')
                 ->label('Mô tả mã giảm giá (phân cách bằng xuống hàng)')
                 ->state(function (Campaign $record) {
-                    $items = $record->couponItems()->get(['description']);
-                    if ($items->isEmpty()) {
+                    if ($record->couponItems->isEmpty()) {
                         return null;
                     }
-                    return $items->pluck('description')
+
+                    return $record->couponItems
+                        ->pluck('description')
                         ->filter(fn (?string $desc) => $desc !== null && $desc !== '')
                         ->implode("\n");
                 }),
