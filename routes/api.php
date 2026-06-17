@@ -18,3 +18,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('/campaigns', [\App\Http\Controllers\Api\CampaignController::class, 'index'])
+    ->name('api.campaigns.index');
+
