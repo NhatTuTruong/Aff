@@ -4,7 +4,6 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\ClickResource\Pages;
 use App\Filament\Admin\Resources\ClickResource\RelationManagers;
-use App\Filament\Exports\ClickExporter;
 use App\Models\BlockedIp;
 use App\Models\Click;
 use App\Models\User;
@@ -15,7 +14,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -298,14 +296,7 @@ class ClickResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->defaultSort('created_at', 'desc')
-            ->headerActions([
-                ExportAction::make()
-                    ->exporter(ClickExporter::class)
-                    ->label('')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->tooltip('Xuất XLSX (yêu cầu đăng nhập & queue)')
-                    ->visible(fn () => auth()->check()),
-            ])
+            ->headerActions([])
             ->actions([
                 Action::make('blockIp')
                     ->label('')
@@ -353,8 +344,6 @@ class ClickResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\ExportBulkAction::make()
-                        ->exporter(ClickExporter::class),
                 ]),
             ]);
     }

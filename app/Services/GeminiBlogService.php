@@ -43,6 +43,7 @@ Yêu cầu bài viết:
 - Cấu trúc: 1 thẻ <h1> duy nhất, các phần chính dùng <h2>, có thể thêm <h3>.
 - Nội dung hữu ích, không quảng cáo thương hiệu cụ thể.
 - Trả về HTML hoàn chỉnh: <h1>, <p>, <ul>/<ol>, <h2>, <h3>. Không bọc <html>/<body>.
+- KHÔNG dùng Markdown, KHÔNG bọc nội dung trong code fence như ```html ... ```.
 
 {$this->buildEditorExtrasBlock($extras)}
 
@@ -105,6 +106,7 @@ Write ONE **short** editorial-style article in **English** about this brand/stor
 
 ## HTML rules
 - Return a **complete HTML fragment** only: one `<h1>`, several `<h2>`, `<p>`, optional `<ul>`. No `<html>` / `<body>`.
+- Do NOT use Markdown. Do NOT wrap output in code fences like ```html ... ```.
 - The `<h1>` should naturally include the brand/store subject.
 
 ## Structure (suggested)
@@ -208,6 +210,7 @@ Write ONE long-form blog article introducing the store/brand below. Language: **
 
 ## Required HTML output rules
 - Return **complete HTML fragment** only: use `<h1>` once for the main title, then `<h2>`, `<h3>`, `<p>`, `<ul>`, `<ol>`, `<strong>` as needed. **Do not** wrap in `<html>` or `<body>`.
+- Do NOT use Markdown. Do NOT wrap output in code fences like ```html ... ```.
 - **Every time** the brand name "{$brandName}" appears in body copy (headings or paragraphs), it MUST be this exact link (adjust only if the name appears in possessive/plural form—still link the brand token):
   {$linkExample}
 - Use `rel="nofollow sponsored"` on every affiliate link to the brand name.
@@ -367,6 +370,8 @@ PROMPT;
             }
         }
 
+        $text = $this->normalizeGeneratedHtml($text);
+
         if (trim($text) === '') {
             $this->lastError = 'Response không có nội dung text.';
 
@@ -387,5 +392,26 @@ PROMPT;
             'content' => $text,
             'featured_image' => null,
         ];
+    }
+
+    /**
+     * Gemini đôi khi trả HTML dưới dạng Markdown code fence (```html ... ```).
+     * Normalization này đảm bảo editor nhận đúng HTML fragment.
+     */
+    private function normalizeGeneratedHtml(string $text): string
+    {
+        $t = trim($text);
+
+        // Full fenced block
+        if (preg_match('/^\s*```(?:html)?\s*\R([\s\S]*?)\R```\s*$/i', $t, $m)) {
+            return trim((string) $m[1]);
+        }
+
+        // Leading fence only
+        $t = preg_replace('/^\s*```(?:html)?\s*\R?/i', '', $t) ?? $t;
+        // Trailing fence only
+        $t = preg_replace('/\R?```\s*$/', '', $t) ?? $t;
+
+        return trim($t);
     }
 }

@@ -142,12 +142,24 @@ html.dark .fi-ta-table tbody tr:hover td {
 html.dark .fi-input,
 html.dark .fi-select-input,
 html.dark .fi-textarea,
+html.dark .fi-input-wrp,
 html.dark input:not([type='checkbox']):not([type='radio']),
 html.dark textarea,
 html.dark select {
     background-color: #2b3035 !important;
     border-color: var(--ca-admin-border) !important;
     color: #f8f9fa !important;
+}
+
+/* Match rounded corners across inputs & selects */
+html.dark .fi-input,
+html.dark .fi-select-input,
+html.dark .fi-textarea,
+html.dark .fi-input-wrp,
+html.dark input:not([type='checkbox']):not([type='radio']),
+html.dark textarea,
+html.dark select {
+    border-radius: 0.75rem !important;
 }
 
 html.dark .fi-input:focus-within,
