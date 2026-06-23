@@ -364,4 +364,63 @@ textarea::placeholder {
     font-size: 0.8125rem;
     line-height: 1.5;
 }
+
+/* Back to top — circular floating button */
+.back-to-top {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 990;
+    width: 3rem;
+    height: 3rem;
+    border: none;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    background: linear-gradient(145deg, #2fc2a9 0%, #24a892 100%);
+    box-shadow: 0 8px 24px -6px rgba(47, 194, 169, 0.55);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(12px) scale(0.92);
+    transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease, background 0.2s ease, box-shadow 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.back-to-top.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+.back-to-top:hover {
+    background: linear-gradient(145deg, #24a892 0%, #1e9680 100%);
+    box-shadow: 0 12px 28px -6px rgba(47, 194, 169, 0.6);
+    transform: translateY(-2px) scale(1);
+}
+.back-to-top:focus-visible {
+    outline: 2px solid #2fc2a9;
+    outline-offset: 3px;
+}
+.back-to-top svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    display: block;
+}
+body:has(#cookie-consent:not([hidden])) .back-to-top.is-visible {
+    bottom: 5.5rem;
+}
+@media (max-width: 640px) {
+    .back-to-top {
+        right: 1rem;
+        bottom: 1rem;
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+    body:has(#cookie-consent:not([hidden])) .back-to-top.is-visible {
+        bottom: 5rem;
+    }
+}
 </style>

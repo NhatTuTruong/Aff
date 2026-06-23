@@ -330,5 +330,7 @@
             }
         });
     </script>
+
+    @include('partials.back-to-top')
 </body>
 </html>

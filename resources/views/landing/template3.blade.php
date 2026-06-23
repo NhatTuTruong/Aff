@@ -2078,5 +2078,8 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 @endif
 </script>
+
+@include('partials.back-to-top')
+
 </body>
 </html>

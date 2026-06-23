@@ -3583,7 +3583,7 @@
         @endif
     </script>
 
-
+    @include('partials.back-to-top')
 
 </body>
 

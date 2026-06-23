@@ -252,6 +252,8 @@
         })();
     </script>
 
+    @include('partials.back-to-top')
+
     @stack('scripts')
 </body>
 </html>
