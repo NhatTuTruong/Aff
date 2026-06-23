@@ -37,12 +37,16 @@
     }
 
     .blog-breadcrumb {
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 0.5rem;
         font-size: 0.8rem;
         color: var(--blog-muted);
         margin-bottom: 1.25rem;
+        padding: 0.4rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid var(--blog-border);
     }
 
     .blog-breadcrumb a {
@@ -57,12 +61,23 @@
         position: relative;
         border-radius: 1.75rem;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.22);
-        background: linear-gradient(145deg, #1e9680 0%, #24a892 48%, #2fc2a9 100%);
-        box-shadow: 0 20px 38px -20px rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(47, 194, 169, 0.18);
+        background:
+            linear-gradient(155deg, #ffffff 0%, #f8fffd 45%, #eefaf6 100%);
+        box-shadow: 0 24px 48px -28px rgba(47, 194, 169, 0.28);
         display: grid;
         grid-template-columns: minmax(0, 3fr) minmax(0, 2.5fr);
         gap: 0;
+    }
+    .blog-hero::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #2fc2a9 0%, #24a892 100%);
+        z-index: 2;
     }
 
     @media (max-width: 900px) {
@@ -80,21 +95,21 @@
     .blog-hero-eyebrow {
         display: inline-flex;
         align-items: center;
-        gap: 0.4rem;
-        padding: 0.2rem 0.75rem;
-        border-radius: 999px;
-        background: rgba(15, 23, 42, 0.35);
-        border: 1px solid rgba(186, 230, 253, 0.35);
-        font-size: 0.75rem;
-        color: #dbeafe;
+        flex-wrap: wrap;
+        gap: 0.45rem;
         margin-bottom: 0.85rem;
-        backdrop-filter: blur(10px);
     }
-
-    .blog-hero-eyebrow span {
+    .blog-hero-eyebrow > span {
         display: inline-flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.3rem;
+        padding: 0.28rem 0.65rem;
+        border-radius: 999px;
+        background: rgba(47, 194, 169, 0.1);
+        border: 1px solid rgba(47, 194, 169, 0.18);
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--blog-accent-rose);
     }
 
     .blog-title {
@@ -103,25 +118,28 @@
         font-weight: 750;
         letter-spacing: -0.03em;
         line-height: 1.25;
-        color: #ffffff;
+        color: var(--blog-text);
         margin-bottom: 0.85rem;
     }
 
     .blog-meta {
         font-size: 0.9rem;
-        color: rgba(226, 232, 240, 0.92);
+        color: var(--blog-muted);
         max-width: 38rem;
+        line-height: 1.6;
     }
 
     .blog-meta a {
-        color: #7dd3fc;
+        color: var(--blog-accent);
         text-decoration: underline;
+        text-underline-offset: 2px;
+        font-weight: 600;
     }
 
     .blog-hero-media {
         position: relative;
-        min-height: 200px;
-        background: radial-gradient(circle at center, rgba(47, 194, 169, 0.12), rgba(14, 165, 233, 0.06));
+        min-height: 220px;
+        background: linear-gradient(145deg, #eefaf6, #dbece8);
         overflow: hidden;
     }
 
@@ -137,15 +155,16 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transform: scale(1.03);
-        filter: saturate(1.1);
+        transform: scale(1.02);
+        filter: saturate(1.05);
     }
 
     .blog-hero-media-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(to right, rgba(15, 23, 42, 0.5), transparent 55%),
-                    linear-gradient(to top, rgba(15, 23, 42, 0.25), transparent 45%);
+        background:
+            linear-gradient(to right, rgba(255, 255, 255, 0.08), transparent 40%),
+            linear-gradient(to top, rgba(15, 23, 42, 0.12), transparent 45%);
     }
 
     .blog-hero-media-fallback {
@@ -178,7 +197,18 @@
         border-radius: 1.5rem;
         border: 1px solid var(--blog-border);
         padding: 1.75rem 1.75rem 2rem;
-        box-shadow: 0 18px 36px -18px rgba(15, 23, 42, 0.28);
+        box-shadow: 0 18px 36px -18px rgba(15, 23, 42, 0.12);
+        position: relative;
+        overflow: hidden;
+    }
+    .blog-main::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #2fc2a9, #24a892);
     }
 
     @media (max-width: 640px) {
@@ -201,11 +231,13 @@
         width: 18px;
         height: 18px;
         border-radius: 999px;
-        border: 1px solid var(--blog-border);
+        border: 1px solid rgba(47, 194, 169, 0.25);
+        background: rgba(47, 194, 169, 0.08);
         display: inline-flex;
         align-items: center;
         justify-content: center;
         font-size: 0.65rem;
+        color: var(--blog-accent);
     }
 
     .blog-back:hover {
@@ -342,10 +374,11 @@
     .blog-aside {
         min-width: 0;
         border-radius: 1.5rem;
-        border: 1px solid var(--blog-border);
-        background: #ffffff;
+        border: 1px solid rgba(47, 194, 169, 0.16);
+        background:
+            linear-gradient(180deg, rgba(47, 194, 169, 0.06) 0%, #ffffff 28%);
         padding: 1.5rem 1.5rem 1.75rem;
-        box-shadow: 0 18px 32px -20px rgba(15, 23, 42, 0.3);
+        box-shadow: 0 18px 32px -20px rgba(47, 194, 169, 0.18);
         position: sticky;
         top: 1.5rem;
         height: fit-content;
@@ -362,6 +395,8 @@
         font-size: 1rem;
         font-weight: 700;
         margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(47, 194, 169, 0.14);
         color: var(--blog-text);
     }
 
@@ -372,12 +407,17 @@
     }
 
     .blog-deal-card {
-        background: #f8fafc;
-        border: 1px solid var(--blog-border);
+        background: #ffffff;
+        border: 1px solid rgba(47, 194, 169, 0.14);
         border-radius: 0.9rem;
         padding: 0.85rem 0.95rem;
         position: relative;
         overflow: hidden;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .blog-deal-card:hover {
+        border-color: rgba(47, 194, 169, 0.28);
+        box-shadow: 0 10px 24px -16px rgba(47, 194, 169, 0.25);
     }
 
     .blog-deal-card::before {
@@ -485,7 +525,7 @@
     .related-blogs {
         margin-top: 2.75rem;
         padding-top: 2.25rem;
-        border-top: 1px solid rgba(125, 211, 252, 0.35);
+        border-top: 1px solid rgba(47, 194, 169, 0.16);
     }
 
     .related-blogs-title {
@@ -494,6 +534,16 @@
         font-weight: 700;
         margin-bottom: 1.25rem;
         color: var(--blog-text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .related-blogs-title::before {
+        content: '';
+        width: 2rem;
+        height: 3px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #2fc2a9, #24a892);
     }
 
     .related-blogs-grid {
@@ -515,9 +565,9 @@
     }
 
     .related-blog-card:hover {
-        border-color: var(--blog-accent);
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
-        transform: translateY(-1px);
+        border-color: rgba(47, 194, 169, 0.35);
+        box-shadow: 0 12px 30px rgba(47, 194, 169, 0.14);
+        transform: translateY(-2px);
     }
 
     .related-blog-card-thumb,
@@ -572,10 +622,10 @@
             <div class="blog-hero-main">
                 <div class="blog-hero-eyebrow">
                     @if($post->category)
-                        <span><span>🗂</span><span>{{ $post->category }}</span></span>
+                        <span>🗂 {{ $post->category }}</span>
                     @endif
-                    <span><span>📅</span><span>{{ $post->created_at?->format('d/m/Y') }}</span></span>
-                    <span><span>⏱</span><span>{{ $readingMinutes }} min read</span></span>
+                    <span>📅 {{ $post->created_at?->format('d/m/Y') }}</span>
+                    <span>⏱ {{ $readingMinutes }} min read</span>
                 </div>
                 <h1 class="blog-title">{{ $post->title }}</h1>
                 <p class="blog-meta">
@@ -669,11 +719,11 @@
                                                 onclick="navigator.clipboard.writeText('{{ $coupon->code }}'); this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 1200);"
                                                 title="Click to copy code">
                                                 <span class="peel-inner">
-                                                    <span class="peel-reveal" aria-hidden="true">{{ strtoupper(substr($coupon->code,-2)) }}</span>
+                                                    <span class="peel-reveal" aria-hidden="true">{{ strtoupper(substr($coupon->code, 0, 2)) }}</span>
                                                     <span class="peel-sheet">
                                                         <span class="peel-text">Get Code</span>
                                                     </span>
-                                         
+                                                    <span class="peel-flap" aria-hidden="true"></span>
                                                 </span>
                                             </button>
                                         @endif

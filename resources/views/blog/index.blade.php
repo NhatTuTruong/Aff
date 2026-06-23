@@ -32,11 +32,21 @@
         position: relative;
         padding: clamp(2.5rem, 5vw, 4rem) 0 clamp(1.75rem, 3vw, 2.5rem);
         overflow: hidden;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        border-bottom: 1px solid rgba(47, 194, 169, 0.12);
         background:
-            linear-gradient(145deg, #1e9680 0%, #24a892 48%, #2fc2a9 100%);
-        backdrop-filter: blur(4px);
-        color: #f8fafc;
+            radial-gradient(80% 90% at 8% 0%, rgba(47, 194, 169, 0.16) 0%, transparent 78%),
+            radial-gradient(68% 78% at 92% 12%, rgba(47, 194, 169, 0.1) 0%, transparent 80%),
+            linear-gradient(160deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 250, 248, 0.94) 100%);
+        color: var(--bp-ink);
+    }
+    .bp-hero::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 5px;
+        background: linear-gradient(180deg, #2fc2a9 0%, #24a892 50%, #1e9680 100%);
     }
     .bp-hero-grid {
         display: grid;
@@ -51,12 +61,26 @@
         }
     }
     .bp-hero-kicker {
-        font-size: 0.7rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.68rem;
         font-weight: 700;
         letter-spacing: 0.16em;
         text-transform: uppercase;
-        color: #bae6fd;
-        margin-bottom: 0.65rem;
+        color: #fff;
+        margin-bottom: 0.85rem;
+        padding: 0.38rem 0.8rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #2fc2a9 0%, #24a892 100%);
+        box-shadow: 0 6px 18px -8px rgba(47, 194, 169, 0.55);
+    }
+    .bp-hero-kicker::before {
+        content: '';
+        width: 1.5rem;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.75);
+        border-radius: 2px;
     }
     .bp-hero h1 {
         font-family: 'Space Grotesk', sans-serif;
@@ -65,23 +89,27 @@
         letter-spacing: -0.045em;
         line-height: 1.05;
         margin: 0 0 0.9rem;
-        max-width: 12ch;
-        color: #ffffff;
+        max-width: 14ch;
+        color: var(--bp-ink);
+    }
+    .bp-hero h1 span {
+        color: var(--bp-violet);
     }
     .bp-hero-lead {
         margin: 0;
         font-size: clamp(1rem, 1.25vw, 1.1rem);
-        color: rgba(241, 245, 249, 0.92);
-        line-height: 1.6;
+        color: var(--bp-muted);
+        line-height: 1.65;
         max-width: 36rem;
     }
 
     .bp-search-card {
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(148, 163, 184, 0.35);
-        border-radius: 14px;
-        padding: 1rem;
-        box-shadow: 0 16px 36px -22px rgba(2, 6, 23, 0.5);
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(47, 194, 169, 0.18);
+        border-radius: 20px;
+        padding: 1.1rem;
+        box-shadow: 0 20px 40px -26px rgba(47, 194, 169, 0.28);
+        backdrop-filter: blur(12px);
     }
     .bp-search-form {
         display: flex;
@@ -143,20 +171,52 @@
         text-decoration: none;
         font-size: 0.875rem;
         font-weight: 600;
-        color: var(--bp-ink);
-        background: rgba(15, 23, 42, 0.38);
-        border: 1px solid rgba(186, 230, 253, 0.28);
-        color: #e2e8f0;
-        transition: border-color 0.2s, background 0.2s, color 0.2s;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(47, 194, 169, 0.18);
+        color: var(--bp-muted);
+        transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.2s;
     }
     .bp-chip:hover {
-        border-color: rgba(186, 230, 253, 0.7);
-        color: #ffffff;
+        border-color: rgba(47, 194, 169, 0.45);
+        color: var(--bp-violet-deep);
+        transform: translateY(-1px);
     }
     .bp-chip--on {
-        background: rgba(255, 255, 255, 0.9);
-        border-color: rgba(186, 230, 253, 0.8);
-        color: #0f172a;
+        background: linear-gradient(135deg, #2fc2a9 0%, #24a892 100%);
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 8px 20px -10px rgba(47, 194, 169, 0.55);
+    }
+
+    .bp-section-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 0.75rem 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    .bp-section-eyebrow {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--bp-violet-deep);
+        margin-bottom: 0.35rem;
+    }
+    .bp-section-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        margin: 0;
+        color: var(--bp-ink);
+    }
+    .bp-section-desc {
+        margin: 0;
+        font-size: 0.92rem;
+        color: var(--bp-muted);
+        max-width: 28rem;
     }
 
     .bp-main {
@@ -181,20 +241,36 @@
     .bp-card {
         display: flex;
         flex-direction: column;
-        border-radius: 18px;
+        border-radius: 20px;
         overflow: hidden;
         text-decoration: none;
         color: inherit;
         background: var(--bp-surface);
         border: 1px solid var(--bp-line);
-        box-shadow: 0 14px 28px -18px rgba(15, 23, 42, 0.32);
+        box-shadow: 0 14px 28px -18px rgba(15, 23, 42, 0.18);
         min-height: 100%;
+        position: relative;
         transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.2s;
     }
+    .bp-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #2fc2a9, #24a892);
+        opacity: 0;
+        transition: opacity 0.22s ease;
+        z-index: 2;
+    }
     .bp-card:hover {
-        transform: translateY(-3px);
-        border-color: rgba(47, 194, 169, 0.38);
-        box-shadow: 0 18px 34px -18px rgba(47, 194, 169, 0.28);
+        transform: translateY(-4px);
+        border-color: rgba(47, 194, 169, 0.32);
+        box-shadow: 0 22px 40px -20px rgba(47, 194, 169, 0.22);
+    }
+    .bp-card:hover::before {
+        opacity: 1;
     }
     .bp-card--feature {
         grid-column: 1 / -1;
@@ -209,7 +285,7 @@
     }
     .bp-card-media {
         position: relative;
-        background: #dbe7f4;
+        background: linear-gradient(145deg, #eefaf6, #dbece8);
         min-height: 200px;
     }
     @media (min-width: 800px) {
@@ -328,12 +404,20 @@
         align-items: center;
         gap: 0.35rem;
         font-weight: 700;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+        letter-spacing: 0.02em;
         color: var(--bp-violet-deep);
-        text-decoration: underline;
-        text-underline-offset: 3px;
+        padding: 0.45rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(47, 194, 169, 0.08);
+        border: 1px solid rgba(47, 194, 169, 0.14);
+        width: fit-content;
+        transition: background 0.2s, color 0.2s;
     }
-    .bp-card:hover .bp-card-cta { color: var(--bp-rose); }
+    .bp-card:hover .bp-card-cta {
+        background: rgba(47, 194, 169, 0.14);
+        color: var(--bp-rose);
+    }
 
     .bp-pagination {
         margin-top: 2.25rem;
@@ -389,7 +473,7 @@
         <div class="bp-shell bp-hero-grid">
             <div>
                 <p class="bp-hero-kicker">Insights &amp; updates</p>
-                <h1 class="font-heading">Savings Journal</h1>
+                <h1 class="font-heading"><span>Savings</span> Journal</h1>
                 <p class="bp-hero-lead">Actionable deal breakdowns, shopping tactics, and weekly updates to help you save with less guesswork.</p>
             </div>
             <div>
@@ -426,6 +510,13 @@
     <div class="bp-main">
         <div class="bp-shell">
             @if($posts->count() > 0)
+                <header class="bp-section-head">
+                    <div>
+                        <p class="bp-section-eyebrow">Latest stories</p>
+                        <h2 class="bp-section-title">Fresh reads for smarter shopping</h2>
+                    </div>
+                    <p class="bp-section-desc">Browse editor picks, category filters, and quick summaries before you dive in.</p>
+                </header>
                 <div class="bp-grid">
                     @foreach($posts as $post)
                         <a href="{{ route('blog.show', $post->slug) }}" class="bp-card {{ $loop->first ? 'bp-card--feature' : '' }}">

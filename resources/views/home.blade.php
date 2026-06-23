@@ -179,66 +179,104 @@
 
     .hp-hero-aside {
         position: relative;
-        min-height: 220px;
-        border-radius: 24px;
+        min-height: 280px;
+        border-radius: 28px;
         background:
-            rgba(255, 255, 255, 0.82);
-        backdrop-filter: blur(16px);
-        padding: 1.75rem;
+            linear-gradient(155deg, #ffffff 0%, #f8fffd 42%, #eefaf6 100%);
+        padding: 0;
         color: var(--hp-ink);
         overflow: hidden;
-        border: 1px solid rgba(47, 194, 169, 0.28);
-        box-shadow: 0 26px 44px -24px rgba(47, 194, 169, 0.25);
+        border: 1px solid rgba(47, 194, 169, 0.22);
+        box-shadow:
+            0 28px 50px -28px rgba(47, 194, 169, 0.35),
+            0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    }
+    .hp-hero-aside::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(120% 80% at 100% 0%, rgba(47, 194, 169, 0.14) 0%, transparent 55%),
+            radial-gradient(80% 60% at 0% 100%, rgba(47, 194, 169, 0.08) 0%, transparent 50%);
+        pointer-events: none;
     }
     .hp-hero-aside::after {
         content: '';
         position: absolute;
-        right: -20%;
-        top: -30%;
-        width: 70%;
-        height: 90%;
-        background: radial-gradient(circle, rgba(47, 194, 169, 0.15) 0%, transparent 70%);
+        right: -2.5rem;
+        top: -2.5rem;
+        width: 9rem;
+        height: 9rem;
+        border-radius: 50%;
+        border: 1px solid rgba(47, 194, 169, 0.12);
         pointer-events: none;
     }
+    .hp-aside-deco {
+        position: absolute;
+        right: 1.25rem;
+        top: 1.25rem;
+        width: 4.5rem;
+        height: 4.5rem;
+        border-radius: 50%;
+        background: linear-gradient(145deg, rgba(47, 194, 169, 0.18) 0%, rgba(47, 194, 169, 0.04) 100%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    .hp-aside-deco::after {
+        content: '';
+        position: absolute;
+        inset: 0.65rem;
+        border-radius: 50%;
+        border: 1px dashed rgba(47, 194, 169, 0.35);
+    }
     .hp-aside-label {
-        font-size: 0.7rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.68rem;
         font-weight: 700;
         letter-spacing: 0.14em;
         text-transform: uppercase;
         color: var(--hp-accent-deep);
-        opacity: 0.95;
-        margin-bottom: 0.75rem;
-        position: relative;
-        z-index: 1;
+        margin-bottom: 0.85rem;
+        padding: 0.32rem 0.65rem;
+        border-radius: 999px;
+        background: rgba(47, 194, 169, 0.1);
+        border: 1px solid rgba(47, 194, 169, 0.18);
     }
     .hp-aside-stat {
         font-family: 'Space Grotesk', sans-serif;
-        font-size: clamp(2.25rem, 4vw, 2.85rem);
+        font-size: clamp(2rem, 4vw, 2.65rem);
         font-weight: 700;
-        letter-spacing: -0.03em;
-        line-height: 1;
-        margin-bottom: 0.35rem;
-        position: relative;
-        z-index: 1;
+        letter-spacing: -0.04em;
+        line-height: 1.05;
+        margin: 0 0 0.65rem;
+        color: var(--hp-ink);
+        max-width: 14ch;
     }
     .hp-aside-caption {
-        font-size: 0.9rem;
+        font-size: 0.92rem;
         color: var(--hp-muted);
-        max-width: 16rem;
-        line-height: 1.45;
-        position: relative;
-        z-index: 1;
+        max-width: 22rem;
+        line-height: 1.6;
+        margin: 0;
     }
     .hp-aside-slider {
         position: relative;
         z-index: 1;
-        min-height: 200px;
+        min-height: 280px;
+        display: flex;
+        flex-direction: column;
+    }
+    .hp-aside-track-wrap {
+        flex: 1;
         overflow: hidden;
+        padding: 1.65rem 1.65rem 0.5rem;
     }
     .hp-aside-track {
         display: flex;
         width: 100%;
-        transition: transform 0.45s ease;
+        transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         will-change: transform;
     }
     .hp-aside-slide {
@@ -246,32 +284,83 @@
         min-width: 0;
         box-sizing: border-box;
     }
-    .hp-aside-dots {
-        position: absolute;
-        bottom: 1.25rem;
-        right: 1.25rem;
-        display: flex;
-        gap: 0.4rem;
-        z-index: 2;
+    .hp-aside-slide-inner {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.85rem 1rem;
+        align-items: start;
+    }
+    .hp-aside-icon {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 16px;
+        display: inline-flex;
         align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #fff;
+        background: linear-gradient(145deg, #2fc2a9 0%, #24a892 100%);
+        box-shadow: 0 10px 22px -10px rgba(47, 194, 169, 0.65);
+    }
+    .hp-aside-icon svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        display: block;
+    }
+    .hp-aside-slide-body {
+        min-width: 0;
+        padding-top: 0.1rem;
+    }
+    .hp-aside-footer {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.85rem 1.25rem 1.15rem;
+        border-top: 1px solid rgba(47, 194, 169, 0.12);
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(10px);
+    }
+    .hp-aside-counter {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: var(--hp-accent-deep);
+    }
+    .hp-aside-counter-sep {
+        color: rgba(47, 194, 169, 0.45);
+        margin: 0 0.15rem;
+    }
+    .hp-aside-dots {
+        display: flex;
+        gap: 0.35rem;
+        align-items: center;
+        padding: 0.35rem 0.45rem;
+        border-radius: 999px;
+        background: rgba(47, 194, 169, 0.08);
+        border: 1px solid rgba(47, 194, 169, 0.12);
     }
     .hp-aside-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
         padding: 0;
         border: none;
         cursor: pointer;
-        background: rgba(47, 194, 169, 0.25);
-        transition: transform 0.2s, background 0.2s;
+        background: rgba(47, 194, 169, 0.28);
+        transition: width 0.25s ease, background 0.25s ease, transform 0.2s ease;
         -webkit-tap-highlight-color: transparent;
     }
     .hp-aside-dot:hover {
-        background: rgba(47, 194, 169, 0.45);
+        background: rgba(47, 194, 169, 0.5);
     }
     .hp-aside-dot.is-active {
-        background: #2fc2a9;
-        transform: scale(1.2);
+        width: 1.35rem;
+        background: linear-gradient(90deg, #2fc2a9, #24a892);
+        transform: none;
     }
 
     .hp-stats {
@@ -843,29 +932,58 @@
                 </form>
             </div>
             <aside class="hp-hero-aside" aria-label="Site highlights">
+                <div class="hp-aside-deco" aria-hidden="true"></div>
                 <div class="hp-aside-slider" id="hp-hero-aside-slider">
-                    <div class="hp-aside-track" id="hp-aside-track">
-                        <div class="hp-aside-slide">
-                            <p class="hp-aside-label">Why shoppers stay</p>
-                            <p class="hp-aside-stat">Curated</p>
-                            <p class="hp-aside-caption">Human-reviewed paths to real savings — fewer dead codes, clearer next steps.</p>
-                        </div>
-                        <div class="hp-aside-slide">
-                            <p class="hp-aside-label">Always in motion</p>
-                            <p class="hp-aside-stat">Updated</p>
-                            <p class="hp-aside-caption">We refresh offers and landing details often so you see what still works — not yesterday’s leftovers.</p>
-                        </div>
-                        <div class="hp-aside-slide">
-                            <p class="hp-aside-label">Built for trust</p>
-                            <p class="hp-aside-stat">Verified</p>
-                            <p class="hp-aside-caption">Clear affiliate disclosure, honest pros &amp; cons on store pages, and CTAs that take you straight to the deal.</p>
+                    <div class="hp-aside-track-wrap">
+                        <div class="hp-aside-track" id="hp-aside-track">
+                            <div class="hp-aside-slide">
+                                <div class="hp-aside-slide-inner">
+                                    <span class="hp-aside-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 19l1 3 1-3 3-1-3-1-1-3-1 3-3 1 3 1z"/></svg>
+                                    </span>
+                                    <div class="hp-aside-slide-body">
+                                        <p class="hp-aside-label">Why shoppers stay</p>
+                                        <p class="hp-aside-stat">Curated</p>
+                                        <p class="hp-aside-caption">Human-reviewed paths to real savings — fewer dead codes, clearer next steps.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="hp-aside-slide">
+                                <div class="hp-aside-slide-inner">
+                                    <span class="hp-aside-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+                                    </span>
+                                    <div class="hp-aside-slide-body">
+                                        <p class="hp-aside-label">Always in motion</p>
+                                        <p class="hp-aside-stat">Updated</p>
+                                        <p class="hp-aside-caption">We refresh offers and landing details often so you see what still works — not yesterday’s leftovers.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="hp-aside-slide">
+                                <div class="hp-aside-slide-inner">
+                                    <span class="hp-aside-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                                    </span>
+                                    <div class="hp-aside-slide-body">
+                                        <p class="hp-aside-label">Built for trust</p>
+                                        <p class="hp-aside-stat">Verified</p>
+                                        <p class="hp-aside-caption">Clear affiliate disclosure, honest pros &amp; cons on store pages, and CTAs that take you straight to the deal.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <nav class="hp-aside-dots" id="hp-aside-dots" aria-label="Highlight slides">
-                        <button type="button" class="hp-aside-dot is-active" aria-label="Slide 1" aria-current="true" data-slide="0"></button>
-                        <button type="button" class="hp-aside-dot" aria-label="Slide 2" data-slide="1"></button>
-                        <button type="button" class="hp-aside-dot" aria-label="Slide 3" data-slide="2"></button>
-                    </nav>
+                    <div class="hp-aside-footer">
+                        <p class="hp-aside-counter" id="hp-aside-counter" aria-live="polite">
+                            <span id="hp-aside-current">01</span><span class="hp-aside-counter-sep">/</span><span>03</span>
+                        </p>
+                        <nav class="hp-aside-dots" id="hp-aside-dots" aria-label="Highlight slides">
+                            <button type="button" class="hp-aside-dot is-active" aria-label="Slide 1" aria-current="true" data-slide="0"></button>
+                            <button type="button" class="hp-aside-dot" aria-label="Slide 2" data-slide="1"></button>
+                            <button type="button" class="hp-aside-dot" aria-label="Slide 3" data-slide="2"></button>
+                        </nav>
+                    </div>
                 </div>
             </aside>
         </div>
@@ -880,12 +998,17 @@
         if (!slider || !track || !dotsWrap) return;
 
         var dots = dotsWrap.querySelectorAll('.hp-aside-dot');
+        var counterCurrent = document.getElementById('hp-aside-current');
         var n = dots.length;
         if (n === 0) return;
 
         var i = 0;
         var timer = null;
         var delay = 3000;
+
+        function padSlide(num) {
+            return String(num + 1).padStart(2, '0');
+        }
 
         function setActive() {
             track.style.transform = 'translateX(' + (-i * 100) + '%)';
@@ -894,6 +1017,9 @@
                 d.classList.toggle('is-active', on);
                 d.setAttribute('aria-current', on ? 'true' : 'false');
             });
+            if (counterCurrent) {
+                counterCurrent.textContent = padSlide(i);
+            }
         }
 
         function go(to) {

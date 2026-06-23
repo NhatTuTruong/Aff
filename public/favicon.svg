@@ -1,4 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#ffffff"/>
-  <text x="32" y="43" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="34" font-weight="700" fill="#38952B">S</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2fc2a9"/>
+      <stop offset="1" stop-color="#24a892"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <text x="32" y="44" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="36" font-weight="700" fill="#ffffff">B</text>
 </svg>
