@@ -4,24 +4,25 @@
 @section('description', 'Find coupon codes, promotions and trusted store reviews. Updated daily.')
 
 @push('styles')
+@include('partials.peel-sticker-styles')
 <style>
-    body:has(.home-page) { background: #ffffff; }
+    body:has(.home-page) { background: #f0faf8; }
     .home-page {
         --hp-ink: #0f172a;
         --hp-muted: #64748b;
         --hp-line: rgba(15, 23, 42, 0.08);
-        --hp-accent: #38bdf8;
-        --hp-accent-deep: #0ea5e9;
-        --hp-accent-darker: #0284c7;
-        --hp-violet: #38bdf8;
-        --hp-violet-deep: #0ea5e9;
-        --hp-rose: #0ea5e9;
-        --hp-rose-deep: #0284c7;
+        --hp-accent: #2fc2a9;
+        --hp-accent-deep: #24a892;
+        --hp-accent-darker: #1e9680;
+        --hp-violet: #2fc2a9;
+        --hp-violet-deep: #24a892;
+        --hp-rose: #2fc2a9;
+        --hp-rose-deep: #1e9680;
         --hp-surface: #ffffff;
-        --hp-cream: #ffffff;
-        --hp-glow: radial-gradient(120% 80% at 80% 0%, rgba(56, 189, 248, 0.2) 0%, transparent 58%),
-            radial-gradient(90% 60% at 10% 100%, rgba(56, 189, 248, 0.14) 0%, transparent 55%);
-        background: #f5f5f5;
+        --hp-cream: #f0faf8;
+        --hp-glow: radial-gradient(120% 80% at 80% 0%, rgba(47, 194, 169, 0.18) 0%, transparent 58%),
+            radial-gradient(90% 60% at 10% 100%, rgba(47, 194, 169, 0.12) 0%, transparent 55%);
+        background: #f0faf8;
         background-image: var(--hp-glow);
         color: var(--hp-ink);
     }
@@ -36,17 +37,28 @@
         position: relative;
         padding: clamp(2.5rem, 6vw, 4.25rem) 0 clamp(2rem, 4vw, 3rem);
         overflow: hidden;
+        border-bottom: 1px solid rgba(47, 194, 169, 0.12);
     }
     .hp-hero::before {
         content: '';
         position: absolute;
         inset: 0;
         background:
-            radial-gradient(80% 90% at 8% 0%, rgba(56, 189, 248, 0.22) 0%, transparent 78%),
-            radial-gradient(68% 78% at 92% 12%, rgba(56, 189, 248, 0.18) 0%, transparent 80%),
-            radial-gradient(55% 65% at 50% 85%, rgba(56, 189, 248, 0.1) 0%, transparent 70%),
-            linear-gradient(160deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.88) 100%);
+            radial-gradient(80% 90% at 8% 0%, rgba(47, 194, 169, 0.2) 0%, transparent 78%),
+            radial-gradient(68% 78% at 92% 12%, rgba(47, 194, 169, 0.14) 0%, transparent 80%),
+            radial-gradient(55% 65% at 50% 85%, rgba(47, 194, 169, 0.08) 0%, transparent 70%),
+            linear-gradient(160deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 250, 248, 0.92) 100%);
         pointer-events: none;
+    }
+    .hp-hero::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 5px;
+        background: linear-gradient(180deg, #2fc2a9 0%, #24a892 50%, #1e9680 100%);
+        z-index: 2;
     }
     .hp-hero-grid {
         position: relative;
@@ -70,19 +82,19 @@
         font-weight: 700;
         letter-spacing: 0.16em;
         text-transform: uppercase;
-        color: var(--hp-accent-deep);
+        color: #fff;
         margin-bottom: 1rem;
-        padding: 0.35rem 0.7rem;
+        padding: 0.4rem 0.85rem;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(56, 189, 248, 0.35);
-        backdrop-filter: blur(8px);
+        background: linear-gradient(135deg, #2fc2a9 0%, #24a892 100%);
+        border: none;
+        box-shadow: 0 6px 18px -8px rgba(47, 194, 169, 0.55);
     }
     .hp-kicker::before {
         content: '';
         width: 2rem;
         height: 2px;
-        background: linear-gradient(90deg, var(--hp-accent), var(--hp-accent-deep));
+        background: rgba(255, 255, 255, 0.7);
         border-radius: 2px;
     }
     .hp-hero h1 {
@@ -93,7 +105,7 @@
         line-height: 1.05;
         color: var(--hp-ink);
         margin: 0 0 1.1rem;
-        max-width: 16ch;
+        max-width: 18ch;
     }
     .hp-hero-lead {
         font-size: clamp(1rem, 1.35vw, 1.125rem);
@@ -107,6 +119,9 @@
         color: var(--hp-muted);
         margin-bottom: 1.75rem;
         max-width: 36rem;
+    }
+    .hp-hero-accent {
+        color: var(--hp-accent);
     }
     .hp-trust a {
         color: var(--hp-violet);
@@ -129,8 +144,8 @@
         backdrop-filter: blur(9px);
     }
     .hp-search:focus-within {
-        border-color: rgba(56, 189, 248, 0.55);
-        box-shadow: 0 18px 40px -24px rgba(56, 189, 248, 0.28);
+        border-color: rgba(47, 194, 169, 0.55);
+        box-shadow: 0 18px 40px -24px rgba(47, 194, 169, 0.28);
     }
     .hp-search input {
         flex: 1;
@@ -153,13 +168,13 @@
         letter-spacing: 0.04em;
         text-transform: uppercase;
         color: #fff;
-        background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+        background: linear-gradient(135deg, #2fc2a9 0%, #24a892 100%);
         transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 10px 24px -10px rgba(56, 189, 248, 0.5);
+        box-shadow: 0 10px 24px -10px rgba(47, 194, 169, 0.5);
     }
     .hp-search button:hover {
         transform: translateY(-1px);
-        box-shadow: 0 12px 28px -8px rgba(56, 189, 248, 0.45);
+        box-shadow: 0 12px 28px -8px rgba(47, 194, 169, 0.45);
     }
 
     .hp-hero-aside {
@@ -167,14 +182,13 @@
         min-height: 220px;
         border-radius: 24px;
         background:
-            radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.28), transparent 45%),
-            radial-gradient(circle at 85% 80%, rgba(14, 165, 233, 0.22), transparent 40%),
-            linear-gradient(145deg, #0c4a6e 0%, #0369a1 48%, #0284c7 100%);
+            rgba(255, 255, 255, 0.82);
+        backdrop-filter: blur(16px);
         padding: 1.75rem;
-        color: #f0f9ff;
+        color: var(--hp-ink);
         overflow: hidden;
-        border: 1px solid rgba(56, 189, 248, 0.38);
-        box-shadow: 0 26px 44px -24px rgba(2, 132, 199, 0.5);
+        border: 1px solid rgba(47, 194, 169, 0.28);
+        box-shadow: 0 26px 44px -24px rgba(47, 194, 169, 0.25);
     }
     .hp-hero-aside::after {
         content: '';
@@ -183,7 +197,7 @@
         top: -30%;
         width: 70%;
         height: 90%;
-        background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(47, 194, 169, 0.15) 0%, transparent 70%);
         pointer-events: none;
     }
     .hp-aside-label {
@@ -191,7 +205,7 @@
         font-weight: 700;
         letter-spacing: 0.14em;
         text-transform: uppercase;
-        color: #7dd3fc;
+        color: var(--hp-accent-deep);
         opacity: 0.95;
         margin-bottom: 0.75rem;
         position: relative;
@@ -209,7 +223,7 @@
     }
     .hp-aside-caption {
         font-size: 0.9rem;
-        color: rgba(224, 242, 254, 0.88);
+        color: var(--hp-muted);
         max-width: 16rem;
         line-height: 1.45;
         position: relative;
@@ -248,15 +262,15 @@
         padding: 0;
         border: none;
         cursor: pointer;
-        background: rgba(255, 255, 255, 0.32);
+        background: rgba(47, 194, 169, 0.25);
         transition: transform 0.2s, background 0.2s;
         -webkit-tap-highlight-color: transparent;
     }
     .hp-aside-dot:hover {
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(47, 194, 169, 0.45);
     }
     .hp-aside-dot.is-active {
-        background: #38bdf8;
+        background: #2fc2a9;
         transform: scale(1.2);
     }
 
@@ -275,10 +289,11 @@
     }
     .hp-stat-card {
         background: #ffffff;
-        border: 1px solid rgba(56, 189, 248, 0.18);
+        border: 1px solid rgba(47, 194, 169, 0.15);
+        border-left: 4px solid #2fc2a9;
         border-radius: 18px;
         padding: 1.1rem 1rem;
-        text-align: center;
+        text-align: left;
         box-shadow: 0 12px 32px -22px rgba(12, 10, 18, 0.2);
     }
     .hp-stat-num {
@@ -286,7 +301,7 @@
         font-size: 1.65rem;
         font-weight: 700;
         letter-spacing: -0.03em;
-        color: var(--hp-ink);
+        color: var(--hp-accent-deep);
     }
     .hp-stat-label {
         font-size: 0.68rem;
@@ -338,7 +353,7 @@
         padding: 0.85rem 1rem;
         border-radius: 14px;
         border: 1px dashed var(--hp-line);
-        background: rgba(56, 189, 248, 0.06);
+        background: rgba(47, 194, 169, 0.06);
         max-width: 720px;
     }
     .hp-disclaimer a {
@@ -368,8 +383,8 @@
     }
     .hp-post-card:hover {
         transform: translateY(-4px);
-        border-color: rgba(56, 189, 248, 0.3);
-        box-shadow: 0 24px 50px -28px rgba(56, 189, 248, 0.2);
+        border-color: rgba(47, 194, 169, 0.3);
+        box-shadow: 0 24px 50px -28px rgba(47, 194, 169, 0.2);
     }
     .hp-post-media {
         aspect-ratio: 16 / 10;
@@ -416,10 +431,10 @@
         font-weight: 700;
         color: var(--hp-violet);
         text-decoration: none;
-        border-bottom: 2px solid rgba(56, 189, 248, 0.35);
+        border-bottom: 2px solid rgba(47, 194, 169, 0.35);
         padding-bottom: 2px;
     }
-    .hp-all-posts a:hover { color: var(--hp-accent-deep); border-bottom-color: rgba(56, 189, 248, 0.5); }
+    .hp-all-posts a:hover { color: var(--hp-accent-deep); border-bottom-color: rgba(47, 194, 169, 0.5); }
 
     .hp-stores-panel {
         background: var(--hp-surface);
@@ -470,12 +485,12 @@
         align-items: center;
         justify-content: center;
         margin-bottom: 0.55rem;
-        box-shadow: 0 10px 24px -14px rgba(56, 189, 248, 0.25);
+        box-shadow: 0 10px 24px -14px rgba(47, 194, 169, 0.25);
         transition: border-color 0.2s, box-shadow 0.2s;
     }
     .store-carousel-item:hover .store-carousel-img-wrap {
-        border-color: rgba(56, 189, 248, 0.45);
-        box-shadow: 0 14px 28px -12px rgba(56, 189, 248, 0.22);
+        border-color: rgba(47, 194, 169, 0.45);
+        box-shadow: 0 14px 28px -12px rgba(47, 194, 169, 0.22);
     }
     .store-carousel-img-wrap img {
         width: 100%;
@@ -506,17 +521,17 @@
         display: grid;
         grid-template-columns: 68px 1fr;
         background: #ffffff;
-        border: 1px solid rgba(56, 189, 248, 0.2);
+        border: 1px solid rgba(47, 194, 169, 0.2);
         border-radius: 16px;
         overflow: hidden;
-        box-shadow: 0 6px 24px -10px rgba(56, 189, 248, 0.16);
+        box-shadow: 0 6px 24px -10px rgba(47, 194, 169, 0.16);
         transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
         animation: hpFadeUp 0.55s ease backwards;
     }
     .coupon-card:hover {
         transform: translateY(-3px);
-        border-color: rgba(56, 189, 248, 0.42);
-        box-shadow: 0 14px 36px -12px rgba(56, 189, 248, 0.24);
+        border-color: rgba(47, 194, 169, 0.42);
+        box-shadow: 0 14px 36px -12px rgba(47, 194, 169, 0.24);
     }
     .coupon-card-strip {
         position: relative;
@@ -526,8 +541,8 @@
         justify-content: center;
         gap: 0.4rem;
         padding: 0.75rem 0.35rem;
-        background: linear-gradient(180deg, #0284c7 0%, #0ea5e9 50%, #38bdf8 100%);
-        border-right: 2px dashed rgba(56, 189, 248, 0.45);
+        background: linear-gradient(180deg, #1e9680 0%, #24a892 50%, #2fc2a9 100%);
+        border-right: 2px dashed rgba(47, 194, 169, 0.45);
     }
     .coupon-card-strip::before,
     .coupon-card-strip::after {
@@ -537,7 +552,7 @@
         width: 14px;
         height: 14px;
         background: #ffffff;
-        border: 1px solid rgba(56, 189, 248, 0.2);
+        border: 1px solid rgba(47, 194, 169, 0.2);
         border-radius: 50%;
         z-index: 1;
     }
@@ -555,7 +570,7 @@
         font-size: 0.95rem;
         font-weight: 800;
         line-height: 1;
-        box-shadow: 0 4px 12px -4px rgba(56, 189, 248, 0.6);
+        box-shadow: 0 4px 12px -4px rgba(47, 194, 169, 0.6);
     }
     .coupon-card-strip-label {
         font-size: 0.58rem;
@@ -583,9 +598,9 @@
         height: 40px;
         object-fit: contain;
         border-radius: 10px;
-        background: #f8fcff;
+        background: #f5fdfb;
         padding: 4px;
-        border: 1px solid rgba(56, 189, 248, 0.15);
+        border: 1px solid rgba(47, 194, 169, 0.15);
         flex-shrink: 0;
     }
     .coupon-card-brand {
@@ -621,7 +636,7 @@
         flex: 1;
         min-width: 0;
         padding: 0.48rem 0.65rem;
-        background: #f8fcff;
+        background: #f5fdfb;
         border: 1.5px dashed var(--hp-accent);
         border-radius: 10px;
         font-size: 0.74rem;
@@ -680,13 +695,13 @@
         border-radius: 10px;
         text-decoration: none;
         transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
-        box-shadow: 0 4px 14px -6px rgba(56, 189, 248, 0.55);
+        box-shadow: 0 4px 14px -6px rgba(47, 194, 169, 0.55);
         flex-shrink: 0;
     }
     .coupon-card-cta:hover {
         transform: translateY(-1px);
         background: var(--hp-accent-deep);
-        box-shadow: 0 8px 18px -6px rgba(56, 189, 248, 0.45);
+        box-shadow: 0 8px 18px -6px rgba(47, 194, 169, 0.45);
         color: #fff;
     }
     .coupon-card--no-code .coupon-card-cta {
@@ -696,10 +711,10 @@
     .hp-cats {
         padding: clamp(2.75rem, 5vw, 3.75rem) 0;
         background:
-            radial-gradient(80% 90% at 8% 10%, rgba(56, 189, 248, 0.1) 0%, transparent 58%),
-            radial-gradient(70% 90% at 92% 88%, rgba(56, 189, 248, 0.08) 0%, transparent 55%),
-            linear-gradient(140deg, #ffffff 0%, #f8fcff 48%, #f0f9ff 100%);
-        border-top: 1px solid rgba(56, 189, 248, 0.15);
+            radial-gradient(80% 90% at 8% 10%, rgba(47, 194, 169, 0.1) 0%, transparent 58%),
+            radial-gradient(70% 90% at 92% 88%, rgba(47, 194, 169, 0.08) 0%, transparent 55%),
+            linear-gradient(140deg, #ffffff 0%, #f5fdfb 48%, #f0faf8 100%);
+        border-top: 1px solid rgba(47, 194, 169, 0.15);
         position: relative;
         overflow: hidden;
     }
@@ -708,7 +723,7 @@
         position: absolute;
         inset: 0;
         background:
-            repeating-linear-gradient(-18deg, transparent, transparent 42px, rgba(56, 189, 248, 0.04) 42px, rgba(56, 189, 248, 0.04) 43px);
+            repeating-linear-gradient(-18deg, transparent, transparent 42px, rgba(47, 194, 169, 0.04) 42px, rgba(47, 194, 169, 0.04) 43px);
         pointer-events: none;
     }
     .hp-cats .hp-shell { position: relative; z-index: 1; }
@@ -734,9 +749,9 @@
         font-weight: 700;
         color: var(--hp-ink);
         background: #ffffff;
-        border: 1px solid rgba(56, 189, 248, 0.35);
+        border: 1px solid rgba(47, 194, 169, 0.35);
         backdrop-filter: blur(8px);
-        box-shadow: 0 8px 22px -14px rgba(56, 189, 248, 0.15);
+        box-shadow: 0 8px 22px -14px rgba(47, 194, 169, 0.15);
         transition: background 0.2s, border-color 0.2s, transform 0.2s, color 0.2s;
     }
     .hp-cat-pill:hover {
@@ -759,7 +774,7 @@
         height: 72px;
         margin: 0 auto 1.25rem;
         opacity: 0.4;
-        color: #38bdf8;
+        color: #2fc2a9;
     }
     .hp-empty h3 {
         font-family: 'Space Grotesk', sans-serif;
@@ -792,7 +807,7 @@
         .coupon-card-strip {
             flex-direction: row;
             border-right: none;
-            border-bottom: 2px dashed rgba(56, 189, 248, 0.45);
+            border-bottom: 2px dashed rgba(47, 194, 169, 0.45);
             padding: 0.65rem 1rem;
         }
         .coupon-card-strip::before,
@@ -819,7 +834,7 @@
         <div class="hp-shell hp-hero-grid">
             <div>
                 <p class="hp-kicker">Deals you can trust</p>
-                <h1 class="font-heading">Save smarter with curated coupons &amp; honest store picks</h1>
+                <h1 class="font-heading">Save smarter with <span class="hp-hero-accent">curated coupons</span> &amp; honest store picks</h1>
                 <p class="hp-hero-lead">Search verified promotions, explore top stores, and read updates from our blog — refreshed often so you never miss a strong offer.</p>
                 <p class="hp-trust">We are an independent deal finder. We may earn from qualifying purchases. <a href="{{ url('/affiliate-disclosure') }}">Read our disclosure</a>.</p>
                 <form action="{{ url('/') }}" method="get" class="hp-search">

@@ -124,22 +124,24 @@
     </script>
     @endif
 
+    @include('partials.peel-sticker-styles')
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --t3-primary: #059669;
-            --t3-primary-dark: #047857;
-            --t3-primary-soft: #d1fae5;
-            --t3-accent: #ea580c;
-            --t3-accent-hover: #c2410c;
-            --t3-hero-bg: linear-gradient(135deg, #0f766e 0%, #059669 55%, #10b981 100%);
+            --t3-primary: #2fc2a9;
+            --t3-primary-dark: #24a892;
+            --t3-primary-soft: #d8f7f2;
+            --t3-accent: #2fc2a9;
+            --t3-accent-hover: #24a892;
+            --t3-hero-bg: linear-gradient(135deg, #1e9680 0%, #2fc2a9 55%, #5fd4bf 100%);
             --t3-text: #0f172a;
             --t3-text-muted: #64748b;
             --t3-bg: #f1f5f9;
             --t3-card: #ffffff;
             --t3-border: #e2e8f0;
             --t3-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 10px 20px -5px rgba(15, 23, 42, 0.08);
-            --t3-ribbon: linear-gradient(180deg, #0d9488 0%, #059669 50%, #047857 100%);
+            --t3-ribbon: linear-gradient(180deg, #24a892 0%, #2fc2a9 50%, #1e9680 100%);
         }
         body {
             font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -401,7 +403,7 @@
             background: linear-gradient(180deg, transparent, rgba(255,255,255,0.45), transparent);
         }
         .t3-offer-strip--deal {
-            background: linear-gradient(180deg, #0369a1 0%, #0284c7 100%);
+            background: linear-gradient(180deg, #24a892 0%, #2fc2a9 100%);
         }
         .t3-offer-num {
             font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
@@ -512,36 +514,11 @@
         }
         .coupon-verified-badge { width: 20px; height: 20px; flex-shrink: 0; }
         .coupon-verified-badge img { width: 100%; height: 100%; object-fit: contain; }
-        .btn-get-code {
-            background: var(--t3-accent);
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            padding: 14px 16px;
-            font-size: 0.82rem;
-            font-weight: 800;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-            width: 100%;
-            text-align: center;
-            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
-        }
-        .btn-get-code:hover {
-            background: var(--t3-accent-hover);
-            transform: translateY(-1px);
-            color: #fff;
-            box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35);
-        }
         .coupon-revealed-code {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 12px 16px;
+            padding: 0px 16px;
             font-size: 0.9rem;
             font-weight: 700;
             font-family: ui-monospace, monospace;
@@ -995,7 +972,7 @@
                 border-top: 1px dashed var(--t3-border);
                 padding: 14px 16px;
             }
-            .btn-get-code { max-width: 280px; margin: 0 auto; }
+            .btn-peel-sticker { max-width: 280px; margin: 0 auto; }
         }
         @media (max-width: 768px) {
             .t3-store-banner { padding: 14px 18px; }
@@ -1211,16 +1188,13 @@
                 </div>
                 </div>
                 <div class="t3-coupon-cta">
-                <button class="btn-get-code"
-                    type="button"
-                    data-type="{{ $hasCode ? 'code' : 'deal' }}"
-                    data-code="{{ $coupon->code }}"
-                    data-coupon-id="{{ $coupon->id }}"
-                    data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
-                    aria-label="{{ $hasCode ? 'Get coupon code and go to store' : 'Open deal and go to store' }}"
-                    onclick="return handleCouponClick(this)">
-                    {{ $hasCode ? 'GET CODE' : 'GET DEAL' }}
-                </button>
+                @include('partials.coupon-get-code-btn', [
+                    'hasCode' => $hasCode,
+                    'code' => $coupon->code,
+                    'couponId' => $coupon->id,
+                    'url' => route('click.redirect', ['slug' => $campaignSlug]),
+                    'wide' => true,
+                ])
                 </div>
             </article>
             @empty
@@ -1266,16 +1240,13 @@
                 </div>
                 </div>
                 <div class="t3-coupon-cta">
-                <button class="btn-get-code"
-                    type="button"
-                    data-type="code"
-                    data-all-codes="1"
-                    data-coupon-id="all-codes"
-                    data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
-                    aria-label="View all coupon codes"
-                    onclick="return handleCouponClick(this)">
-                    GET CODE
-                </button>
+                @include('partials.coupon-get-code-btn', [
+                    'hasCode' => true,
+                    'allCodes' => true,
+                    'couponId' => 'all-codes',
+                    'url' => route('click.redirect', ['slug' => $campaignSlug]),
+                    'wide' => true,
+                ])
                 </div>
             </article>
             @endif

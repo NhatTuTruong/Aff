@@ -4,20 +4,21 @@
 @section('description', 'Insights, coupon updates, and practical saving tactics.')
 
 @push('styles')
+@include('partials.peel-sticker-styles')
 <style>
     .blog-page {
         --bp-ink: #0f172a;
         --bp-muted: #64748b;
         --bp-line: rgba(15, 23, 42, 0.08);
-        --bp-violet: #38bdf8;
-        --bp-violet-deep: #0ea5e9;
-        --bp-rose: #0284c7;
+        --bp-violet: #2fc2a9;
+        --bp-violet-deep: #24a892;
+        --bp-rose: #1e9680;
         --bp-surface: #ffffff;
-        --bp-cream: #f5f5f5;
-        background: #f5f5f5;
+        --bp-cream: #f0faf8;
+        background: #f0faf8;
         background-image:
-            radial-gradient(120% 80% at 80% 0%, rgba(56, 189, 248, 0.2) 0%, transparent 58%),
-            radial-gradient(90% 60% at 10% 100%, rgba(56, 189, 248, 0.14) 0%, transparent 55%);
+            radial-gradient(120% 80% at 80% 0%, rgba(47, 194, 169, 0.18) 0%, transparent 58%),
+            radial-gradient(90% 60% at 10% 100%, rgba(47, 194, 169, 0.12) 0%, transparent 55%);
         color: var(--bp-ink);
     }
     .blog-page .bp-shell {
@@ -33,7 +34,7 @@
         overflow: hidden;
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         background:
-            linear-gradient(145deg, #0c4a6e 0%, #0369a1 48%, #0284c7 100%);
+            linear-gradient(145deg, #1e9680 0%, #24a892 48%, #2fc2a9 100%);
         backdrop-filter: blur(4px);
         color: #f8fafc;
     }
@@ -102,8 +103,8 @@
         transition: border-color 0.2s, box-shadow 0.2s;
     }
     .bp-search-form input:focus {
-        border-color: rgba(56, 189, 248, 0.45);
-        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+        border-color: rgba(47, 194, 169, 0.45);
+        box-shadow: 0 0 0 3px rgba(47, 194, 169, 0.12);
         background: #fff;
     }
     .bp-search-form button {
@@ -113,15 +114,15 @@
         font-weight: 700;
         cursor: pointer;
         color: #fff;
-        background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+        background: linear-gradient(135deg, #2fc2a9 0%, #24a892 100%);
         white-space: nowrap;
-        box-shadow: 0 10px 26px -10px rgba(56, 189, 248, 0.5);
+        box-shadow: 0 10px 26px -10px rgba(47, 194, 169, 0.5);
         transition: transform 0.2s, box-shadow 0.2s;
     }
     .bp-search-form button:hover {
         transform: translateY(-1px);
         filter: brightness(1.06) saturate(1.02);
-        box-shadow: 0 14px 30px -10px rgba(56, 189, 248, 0.45);
+        box-shadow: 0 14px 30px -10px rgba(47, 194, 169, 0.45);
     }
 
     .bp-chips {
@@ -192,8 +193,8 @@
     }
     .bp-card:hover {
         transform: translateY(-3px);
-        border-color: rgba(56, 189, 248, 0.38);
-        box-shadow: 0 18px 34px -18px rgba(56, 189, 248, 0.28);
+        border-color: rgba(47, 194, 169, 0.38);
+        box-shadow: 0 18px 34px -18px rgba(47, 194, 169, 0.28);
     }
     .bp-card--feature {
         grid-column: 1 / -1;
@@ -280,8 +281,8 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: var(--bp-violet-deep);
-        background: rgba(56, 189, 248, 0.1);
-        border: 1px solid rgba(56, 189, 248, 0.22);
+        background: rgba(47, 194, 169, 0.1);
+        border: 1px solid rgba(47, 194, 169, 0.22);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -351,11 +352,11 @@
         font-weight: 600 !important;
     }
     .bp-pagination .pagination-item:hover:not(.pagination-disabled):not(.pagination-current) {
-        border-color: rgba(56, 189, 248, 0.35) !important;
+        border-color: rgba(47, 194, 169, 0.35) !important;
         color: var(--bp-violet-deep) !important;
     }
     .bp-pagination .pagination-current {
-        border-color: rgba(56, 189, 248, 0.45) !important;
+        border-color: rgba(47, 194, 169, 0.45) !important;
         color: var(--bp-violet-deep) !important;
     }
     .bp-pagination .pagination-info {

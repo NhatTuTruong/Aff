@@ -84,15 +84,15 @@
         :root {
             --bg: #f5f5f5;
             --surface: #ffffff;
-            --surface-hover: #e0f2fe;
+            --surface-hover: #d8f7f2;
             --text: #0f172a;
             --text-dark: #0f172a;
             --text-muted: #64748b;
-            --primary: #0f172a;
-            --primary-dark: #020617;
-            --accent: #38bdf8;
-            --accent-hover: #0ea5e9;
-            --accent-rose: #0284c7;
+            --primary: #2fc2a9;
+            --primary-dark: #24a892;
+            --accent: #2fc2a9;
+            --accent-hover: #24a892;
+            --accent-rose: #1e9680;
             --border: rgba(15, 23, 42, 0.08);
             --radius: 12px;
             --radius-sm: 8px;

@@ -153,6 +153,8 @@
         </script>
     @endif
 
+    @include('partials.peel-sticker-styles')
+
     <style>
         /* ===== BASE ===== */
         * {
@@ -162,10 +164,10 @@
         }
 
         :root {
-            --primary: #0ea5e9;
-            --primary-dark: #0284c7;
-            --primary-soft: #e0f2fe;
-            --accent: #0284c7;
+            --primary: #2fc2a9;
+            --primary-dark: #24a892;
+            --primary-soft: #d8f7f2;
+            --accent: #1e9680;
             --text-dark: #0f172a;
             --text-light: #64748b;
             --bg-page: #f5f5f5;
@@ -205,7 +207,7 @@
             border-radius: 28px;
             box-shadow: 0 24px 65px -30px rgba(15, 23, 42, 0.32);
             padding: 36px 36px 44px;
-            border: 1px solid rgba(56, 189, 248, 0.16);
+            border: 1px solid rgba(47, 194, 169, 0.16);
             position: relative;
             overflow: hidden;
         }
@@ -216,7 +218,7 @@
             inset: 0;
             pointer-events: none;
             background:
-                radial-gradient(55% 40% at 6% 0%, rgba(56, 189, 248, 0.08) 0%, transparent 70%),
+                radial-gradient(55% 40% at 6% 0%, rgba(47, 194, 169, 0.08) 0%, transparent 70%),
                 radial-gradient(45% 35% at 100% 100%, rgba(14, 165, 233, 0.08) 0%, transparent 70%);
         }
 
@@ -225,7 +227,7 @@
             text-align: center;
             margin-bottom: 36px;
             padding: 22px 18px 30px;
-            border: 1px solid rgba(56, 189, 248, 0.18);
+            border: 1px solid rgba(47, 194, 169, 0.18);
             border-radius: 20px;
             background: linear-gradient(135deg, #ecfeff 0%, #e0f2fe 55%, #ffffff 100%);
         }
@@ -268,7 +270,7 @@
             border-radius: 22px;
             padding: 28px 24px 28px;
             box-shadow: var(--shadow-md);
-            border: 1px solid rgba(56, 189, 248, 0.18);
+            border: 1px solid rgba(47, 194, 169, 0.18);
             position: relative;
             display: flex;
             flex-direction: column;
@@ -284,7 +286,7 @@
             border-radius: 16px;
             background: #fff;
             padding: 12px;
-            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.22);
+            box-shadow: 0 10px 30px rgba(47, 194, 169, 0.22);
             transition: none;
         }
 
@@ -323,7 +325,7 @@
             border-radius: 14px;
             padding: 14px 16px;
             margin-top: 12px;
-            border: 1px solid rgba(56, 189, 248, 0.2);
+            border: 1px solid rgba(47, 194, 169, 0.2);
         }
 
         .stats-list {
@@ -336,7 +338,7 @@
             justify-content: space-between;
             padding: 10px 0;
             gap: 10px;
-            border-bottom: 1px solid rgba(56, 189, 248, 0.16);
+            border-bottom: 1px solid rgba(47, 194, 169, 0.16);
         }
 
         .stats-row:last-child {
@@ -418,7 +420,7 @@
             cursor: pointer;
             text-decoration: none;
             transition: background 0.2s, transform 0.2s;
-            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 4px 12px rgba(47, 194, 169, 0.3);
         }
 
         .quick-menu-shop-now:hover {
@@ -441,7 +443,7 @@
             border-radius: 12px;
             padding: 12px 18px;
             margin-bottom: 16px;
-            border: 1px solid rgba(56, 189, 248, 0.2);
+            border: 1px solid rgba(47, 194, 169, 0.2);
             line-height: 1.6;
         }
 
@@ -492,7 +494,7 @@
             border-color: var(--primary);
             color: #fff;
             font-weight: 500;
-            box-shadow: 0 2px 8px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 2px 8px rgba(47, 194, 169, 0.3);
         }
 
         .coupon-list {
@@ -506,20 +508,20 @@
         .coupon-row {
             background: #fff;
             border-radius: 20px;
-            box-shadow: 0 14px 30px -24px rgba(56, 189, 248, 0.35);
+            box-shadow: 0 14px 30px -24px rgba(47, 194, 169, 0.35);
             padding: 0;
             display: grid;
             grid-template-columns: 180px 1fr;
             gap: 0;
             align-items: stretch;
             transition: none;
-            border: 1px solid rgba(56, 189, 248, 0.16);
+            border: 1px solid rgba(47, 194, 169, 0.16);
             overflow: hidden;
             position: relative;
         }
 
         .coupon-row:hover {
-            box-shadow: 0 18px 34px -22px rgba(56, 189, 248, 0.4);
+            box-shadow: 0 18px 34px -22px rgba(47, 194, 169, 0.4);
             transform: none;
         }
 
@@ -550,7 +552,7 @@
         }
 
         .discount-up-to {
-            font-size: 0.7rem;
+            font-size: 1rem;
             font-weight: 600;
             color: var(--accent);
             text-transform: uppercase;
@@ -605,38 +607,10 @@
             color: var(--text-dark);
         }
 
-        .btn-get-code {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            color: #fff;
-            border: none;
-            border-radius: 999px;
-            padding: 10px 20px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(56, 189, 248, 0.3);
-        }
-
-        .btn-get-code:hover {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent) 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
-        }
-
-        .btn-get-code::after {
-            content: '↗';
-            font-size: 0.85rem;
-        }
-
         .coupon-revealed-code {
             display: inline-flex;
             align-items: center;
-            padding: 10px 16px;
+            padding: 0px 16px;
             font-size: 0.95rem;
             font-weight: 700;
             font-family: ui-monospace, monospace;
@@ -654,7 +628,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #0ea5e9;
+            background: #2fc2a9;
             color: #fff;
             padding: 3px 8px;
             border-radius: 6px;
@@ -672,7 +646,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #0ea5e9;
+            background: #2fc2a9;
             color: #fff;
             padding: 3px 8px;
             border-radius: 6px;
@@ -717,13 +691,13 @@
             align-items: center;
             gap: 6px;
             background: #ecfeff;
-            color: #0284c7;
+            color: #24a892;
             padding: 4px 10px;
             border-radius: 999px;
             font-size: 0.75rem;
             font-weight: 800;
             margin-top: 10px;
-            border: 1px solid rgba(56, 189, 248, 0.3);
+            border: 1px solid rgba(47, 194, 169, 0.3);
         }
 
         .all-verified-badge::before {
@@ -769,7 +743,7 @@
             align-items: center;
             gap: 4px;
             font-weight: 600;
-            color: #0284c7;
+            color: #24a892;
         }
 
         .coupon-verified-badge {
@@ -970,7 +944,7 @@
             padding: 20px;
             text-align: center;
             position: relative;
-            border: 1px solid rgba(56, 189, 248, 0.22);
+            border: 1px solid rgba(47, 194, 169, 0.22);
             box-shadow: 0 24px 50px -24px rgba(15, 23, 42, 0.45);
         }
 
@@ -1014,7 +988,7 @@
         }
 
         .modal-link {
-            color: #0ea5e9;
+            color: #2fc2a9;
             font-weight: 600;
         }
 
@@ -1163,7 +1137,7 @@
         .coupon-copy-toast-progress {
             width: 100%;
             height: 3px;
-            background: #0ea5e9;
+            background: #2fc2a9;
             transform-origin: left center;
             animation: couponCopyToastProgress 2s linear forwards;
         }
@@ -1193,7 +1167,7 @@
         }
 
         .popup-banner {
-            background: linear-gradient(145deg, #0c4a6e 0%, #0369a1 58%, #0284c7 100%);
+            background: linear-gradient(145deg, #1e9680 0%, #24a892 58%, #2fc2a9 100%);
             padding: 32px 28px 40px;
             text-align: center;
             position: relative;
@@ -1390,7 +1364,7 @@
         .coupon-code-icon {
             width: 24px;
             height: 24px;
-            background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+            background: linear-gradient(135deg, #5fd4bf 0%, #2fc2a9 100%);
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -1414,7 +1388,7 @@
         }
 
         .btn-copy-code-modal {
-            background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+            background: linear-gradient(135deg, #5fd4bf 0%, #2fc2a9 100%);
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -1424,13 +1398,13 @@
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
-            box-shadow: 0 6px 18px rgba(56, 189, 248, 0.32);
+            box-shadow: 0 6px 18px rgba(47, 194, 169, 0.32);
         }
 
         .btn-copy-code-modal:hover {
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            background: linear-gradient(135deg, #24a892 0%, #1e9680 100%);
             transform: translateY(-1px);
-            box-shadow: 0 10px 24px rgba(56, 189, 248, 0.4);
+            box-shadow: 0 10px 24px rgba(47, 194, 169, 0.4);
         }
 
         .btn-copy-code-modal:active {
@@ -1456,14 +1430,14 @@
 
         .verification-item::before {
             content: '✓';
-            color: #0ea5e9;
+            color: #2fc2a9;
             font-weight: 700;
             font-size: 0.9rem;
         }
 
         .verification-item.success::before {
             content: '●';
-            color: #0ea5e9;
+            color: #2fc2a9;
         }
 
         .coupon-modal-actions {
@@ -1542,7 +1516,7 @@
         .lead-capture-input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+            box-shadow: 0 0 0 3px rgba(47, 194, 169, 0.2);
         }
         .lead-capture-btn {
             height: 42px;
@@ -1565,7 +1539,7 @@
             font-size: 0.78rem;
             color: #6b7280;
         }
-        .lead-capture-msg.success { color: #0284c7; }
+        .lead-capture-msg.success { color: #24a892; }
         .lead-capture-msg.error { color: #dc2626; }
 
         .feedback-btn {
@@ -1597,8 +1571,8 @@
         }
 
         .feedback-btn.worked {
-            border-color: #0ea5e9;
-            color: #0ea5e9;
+            border-color: #2fc2a9;
+            color: #2fc2a9;
         }
 
         .feedback-btn.failed {
@@ -1639,7 +1613,7 @@
 
         .btn-copy-all-codes:active,
         .btn-copy-all-codes.copied {
-            background: #0284c7 !important;
+            background: #24a892 !important;
         }
 
         /* Q&A Section */
@@ -1781,19 +1755,19 @@
             gap: 6px;
             padding: 10px 18px;
             border-radius: 999px;
-            background: #0ea5e9;
+            background: #2fc2a9;
             color: #fff;
             font-weight: 700;
             font-size: 0.85rem;
             cursor: pointer;
             border: none;
             transition: all 0.2s ease;
-            box-shadow: 0 10px 24px rgba(56, 189, 248, 0.35);
+            box-shadow: 0 10px 24px rgba(47, 194, 169, 0.35);
         }
 
         .btn-get-coupon:hover {
             transform: translateY(-1px);
-            background: #0284c7;
+            background: #24a892;
             cursor: pointer;
         }
 
@@ -1818,17 +1792,17 @@
         /* Go to Store highlight animation */
         @keyframes pulseGlow {
             0% {
-                box-shadow: 0 0 0 rgba(56, 189, 248, 0.0);
+                box-shadow: 0 0 0 rgba(47, 194, 169, 0.0);
                 transform: scale(1);
             }
 
             50% {
-                box-shadow: 0 0 25px rgba(56, 189, 248, 0.55);
+                box-shadow: 0 0 25px rgba(47, 194, 169, 0.55);
                 transform: scale(1.05);
             }
 
             100% {
-                box-shadow: 0 0 0 rgba(56, 189, 248, 0.0);
+                box-shadow: 0 0 0 rgba(47, 194, 169, 0.0);
                 transform: scale(1);
             }
         }
@@ -1878,7 +1852,7 @@
                 border-radius: 20px;
                 padding: 24px 20px;
                 box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-                border: 1px solid rgba(56, 189, 248, 0.16);
+                border: 1px solid rgba(47, 194, 169, 0.16);
             }
 
             .right-column-coupon-section {
@@ -1895,7 +1869,7 @@
                 border-radius: 20px;
                 padding: 24px 20px;
                 box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-                border: 1px solid rgba(56, 189, 248, 0.16);
+                border: 1px solid rgba(47, 194, 169, 0.16);
                 margin-top: 8px;
             }
 
@@ -1939,10 +1913,8 @@
                 gap: 10px;
             }
 
-            .btn-get-code {
-                width: auto;
-                min-width: 100px;
-                padding: 10px 16px;
+            .btn-peel-sticker .peel-inner {
+                min-width: 120px;
             }
 
             .coupon-title {
@@ -2050,7 +2022,7 @@
             }
 
             .discount-up-to {
-                font-size: 0.65rem;
+                font-size: 1rem;
                 margin-bottom: 4px;
             }
 
@@ -2092,9 +2064,8 @@
                 display: none;
             }
 
-            .btn-get-code {
-                font-size: 0.85rem;
-                padding: 10px 16px;
+            .btn-peel-sticker .peel-text {
+                font-size: 0.82rem;
             }
 
             .filter-tabs {
@@ -2281,7 +2252,7 @@
                 font-weight: 600;
                 font-size: 0.95rem;
                 text-decoration: none;
-                box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+                box-shadow: 0 4px 12px rgba(47, 194, 169, 0.3);
             }
 
             .mobile-shop-now-bottom:hover {
@@ -2501,7 +2472,7 @@
                                     <div class="coupon-discount-visual">
                                         @if ($offerType === 'text' && $offerValue === 'FREE')
                                             <div class="discount-up-to"
-                                                style="font-size: 0.7rem; margin-bottom: 6px; color: #f97316;">FREE
+                                                style="font-size: 1rem; margin-bottom: 6px; color: #f97316;">FREE
                                             </div>
                                             <div class="discount-percent"
                                                 style="font-size: 2rem; margin-bottom: 8px; color: #111827;">SHIPPING
@@ -2556,14 +2527,12 @@
                                                     <div class="meta-item uses">{{ number_format($uses) }} Uses</div>
                                                 </div>
                                             </div>
-                                            <button class="btn-get-code" type="button"
-                                                data-type="{{ $hasCode ? 'code' : 'deal' }}"
-                                                data-code="{{ $coupon->code }}" data-coupon-id="{{ $coupon->id }}"
-                                                data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
-                                                aria-label="{{ $hasCode ? 'Get coupon code and go to store' : 'Open deal and go to store' }}"
-                                                onclick="return handleCouponClick(this)">
-                                                {{ $hasCode ? 'GET CODE' : 'GET DEAL' }}
-                                            </button>
+                                            @include('partials.coupon-get-code-btn', [
+                                                'hasCode' => $hasCode,
+                                                'code' => $coupon->code,
+                                                'couponId' => $coupon->id,
+                                                'url' => route('click.redirect', ['slug' => $campaignSlug]),
+                                            ])
                                         </div>
 
                                         <div class="coupon-desc coupon-verified" aria-label="Coupon status">
@@ -2625,13 +2594,12 @@
                                                         Uses</div>
                                                 </div>
                                             </div>
-                                            <button class="btn-get-code" type="button" data-type="code"
-                                                data-all-codes="1" data-coupon-id="all-codes"
-                                                data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
-                                                aria-label="View all coupon codes"
-                                                onclick="return handleCouponClick(this)">
-                                                GET CODE
-                                            </button>
+                                            @include('partials.coupon-get-code-btn', [
+                                                'hasCode' => true,
+                                                'allCodes' => true,
+                                                'couponId' => 'all-codes',
+                                                'url' => route('click.redirect', ['slug' => $campaignSlug]),
+                                            ])
                                         </div>
                                     </div>
                                 </article>
@@ -3039,7 +3007,7 @@
                 copyCodeToClipboard(code);
                 const t = this.textContent;
                 this.textContent = 'Copied ✓';
-                this.style.background = '#0ea5e9';
+                this.style.background = '#2fc2a9';
                 this.style.color = '#fff';
                 setTimeout(() => {
                     this.textContent = t;
@@ -3410,7 +3378,7 @@
             // Highlight selected button
             if (worked) {
                 btn.style.background = '#dcfce7';
-                btn.style.borderColor = '#0ea5e9';
+                btn.style.borderColor = '#2fc2a9';
                 btn.innerHTML = '<span class="feedback-icon">✓</span><span>Thank you!</span>';
             } else {
                 btn.style.background = '#fef2f2';

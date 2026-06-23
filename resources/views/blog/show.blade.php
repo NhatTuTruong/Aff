@@ -4,23 +4,24 @@
 @section('description', Str::limit(strip_tags($post->content ?? ''), 160))
 
 @push('styles')
+@include('partials.peel-sticker-styles')
 <style>
     :root {
-        --blog-bg: #f5f5f5;
+        --blog-bg: #f0faf8;
         --blog-surface: #ffffff;
         --blog-border: rgba(15, 23, 42, 0.08);
         --blog-text: #0f172a;
         --blog-muted: #64748b;
-        --blog-accent: #38bdf8;
-        --blog-accent-rose: #0ea5e9;
-        --blog-accent-soft: rgba(56, 189, 248, 0.12);
+        --blog-accent: #2fc2a9;
+        --blog-accent-rose: #24a892;
+        --blog-accent-soft: rgba(47, 194, 169, 0.12);
     }
 
     body {
-        background: #f5f5f5;
+        background: #f0faf8;
         background-image:
-            radial-gradient(120% 80% at 80% 0%, rgba(56, 189, 248, 0.2) 0%, transparent 58%),
-            radial-gradient(90% 60% at 10% 100%, rgba(56, 189, 248, 0.14) 0%, transparent 55%);
+            radial-gradient(120% 80% at 80% 0%, rgba(47, 194, 169, 0.18) 0%, transparent 58%),
+            radial-gradient(90% 60% at 10% 100%, rgba(47, 194, 169, 0.12) 0%, transparent 55%);
     }
 
     .blog-shell {
@@ -57,7 +58,7 @@
         border-radius: 1.75rem;
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.22);
-        background: linear-gradient(145deg, #0c4a6e 0%, #0369a1 48%, #0284c7 100%);
+        background: linear-gradient(145deg, #1e9680 0%, #24a892 48%, #2fc2a9 100%);
         box-shadow: 0 20px 38px -20px rgba(15, 23, 42, 0.6);
         display: grid;
         grid-template-columns: minmax(0, 3fr) minmax(0, 2.5fr);
@@ -120,7 +121,7 @@
     .blog-hero-media {
         position: relative;
         min-height: 200px;
-        background: radial-gradient(circle at center, rgba(56, 189, 248, 0.12), rgba(14, 165, 233, 0.06));
+        background: radial-gradient(circle at center, rgba(47, 194, 169, 0.12), rgba(14, 165, 233, 0.06));
         overflow: hidden;
     }
 
@@ -232,9 +233,9 @@
     }
 
     .blog-chip-accent {
-        border-color: rgba(56, 189, 248, 0.35);
+        border-color: rgba(47, 194, 169, 0.35);
         background: var(--blog-accent-soft);
-        color: #0284c7;
+        color: #24a892;
     }
 
     .blog-share-button {
@@ -383,7 +384,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), transparent 55%);
+        background: linear-gradient(135deg, rgba(47, 194, 169, 0.12), transparent 55%);
         opacity: 0;
         transition: opacity 0.18s;
         pointer-events: none;
@@ -451,31 +452,11 @@
         gap: 0.5rem;
     }
 
-    .blog-deal-code {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        padding: 0.3rem 0.6rem;
-        border-radius: 0.45rem;
-        border: 1px dashed rgba(253, 224, 71, 0.9);
-        background: rgba(250, 250, 46, 0.10);
-        font-size: 0.75rem;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-        color: #facc15;
-        cursor: pointer;
+    .blog-deal-peel {
+        /* uses peel-sticker partial */
     }
-
-    .blog-deal-code-label {
-        font-size: 0.65rem;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        opacity: 0.9;
-    }
-
-    .blog-deal-code.copied {
-        background: var(--blog-accent-soft);
-        border-color: var(--blog-accent);
-        color: #0284c7;
+    .blog-deal-peel.copied .peel-text::after {
+        content: ' ✓';
     }
 
     .blog-deal-cta {
@@ -484,7 +465,7 @@
         gap: 0.25rem;
         padding: 0.35rem 0.75rem;
         border-radius: 999px;
-        background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+        background: linear-gradient(135deg, #2fc2a9, #24a892);
         color: #ffffff;
         font-size: 0.78rem;
         font-weight: 600;
@@ -684,11 +665,16 @@
                                     @endif
                                     <div class="blog-deal-actions">
                                         @if($coupon->code)
-                                            <button type="button" class="blog-deal-code"
+                                            <button type="button" class="btn-peel-sticker blog-deal-peel"
                                                 onclick="navigator.clipboard.writeText('{{ $coupon->code }}'); this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 1200);"
-                                                title="Click to copy">
-                                                <span class="blog-deal-code-label">Code</span>
-                                                <span class="blog-deal-code-value">{{ $coupon->code }}</span>
+                                                title="Click to copy code">
+                                                <span class="peel-inner">
+                                                    <span class="peel-reveal" aria-hidden="true">{{ strtoupper(substr($coupon->code,-2)) }}</span>
+                                                    <span class="peel-sheet">
+                                                        <span class="peel-text">Get Code</span>
+                                                    </span>
+                                         
+                                                </span>
                                             </button>
                                         @endif
                                         @if($dealUrl !== '#')

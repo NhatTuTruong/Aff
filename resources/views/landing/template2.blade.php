@@ -127,12 +127,14 @@
     </script>
     @endif
 
+    @include('partials.peel-sticker-styles')
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --t2-primary: #f59e0b;
-            --t2-primary-dark: #d97706;
-            --t2-primary-soft: #fef3c7;
+            --t2-primary: #2fc2a9;
+            --t2-primary-dark: #24a892;
+            --t2-primary-soft: #d8f7f2;
             --t2-banner: #1e293b;
             --t2-banner-dark: #0f172a;
             --t2-text: #1e293b;
@@ -374,29 +376,10 @@
         }
         .coupon-verified-badge { width: 20px; height: 20px; flex-shrink: 0; }
         .coupon-verified-badge img { width: 100%; height: 100%; object-fit: contain; }
-        .btn-get-code {
-            background: var(--t2-primary);
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 12px 24px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-            font-family: inherit;
-        }
-        .btn-get-code:hover {
-            background: var(--t2-primary-dark);
-            transform: translateY(-1px);
-            color: #fff;
-        }
         .coupon-revealed-code {
             display: inline-flex;
             align-items: center;
-            padding: 10px 16px;
+            padding: 0px 16px;
             font-size: 0.95rem;
             font-weight: 700;
             font-family: ui-monospace, monospace;
@@ -833,7 +816,8 @@
             .t2-main { padding: 20px 16px 40px; }
             .t2-hero-title { font-size: 1.5rem; }
             .coupon-row { flex-direction: column; align-items: flex-start; gap: 14px; }
-            .btn-get-code { width: 100%; justify-content: center; }
+            .btn-peel-sticker.btn-peel-sticker--wide,
+            .btn-peel-sticker { width: 100%; justify-content: center; }
             .t2-mobile-shop { display: block; margin: 20px 0; text-align: center; }
             .t2-mobile-shop a {
                 display: inline-block;
@@ -1018,16 +1002,12 @@
                         <span class="coupon-verified-text">Verified recently</span>
                     </div>
                 </div>
-                <button class="btn-get-code"
-                    type="button"
-                    data-type="{{ $hasCode ? 'code' : 'deal' }}"
-                    data-code="{{ $coupon->code }}"
-                    data-coupon-id="{{ $coupon->id }}"
-                    data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
-                    aria-label="{{ $hasCode ? 'Get coupon code and go to store' : 'Open deal and go to store' }}"
-                    onclick="return handleCouponClick(this)">
-                    {{ $hasCode ? 'GET CODE' : 'GET DEAL' }}
-                </button>
+                @include('partials.coupon-get-code-btn', [
+                    'hasCode' => $hasCode,
+                    'code' => $coupon->code,
+                    'couponId' => $coupon->id,
+                    'url' => route('click.redirect', ['slug' => $campaignSlug]),
+                ])
             </article>
             @empty
             <article class="section">
@@ -1060,16 +1040,12 @@
                         <div class="meta-item uses">{{ number_format(($campaignSeed * 13 + 999) % 4900 + 100) }} Uses</div>
                     </div>
                 </div>
-                <button class="btn-get-code"
-                    type="button"
-                    data-type="code"
-                    data-all-codes="1"
-                    data-coupon-id="all-codes"
-                    data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
-                    aria-label="View all coupon codes"
-                    onclick="return handleCouponClick(this)">
-                    GET CODE
-                </button>
+                @include('partials.coupon-get-code-btn', [
+                    'hasCode' => true,
+                    'allCodes' => true,
+                    'couponId' => 'all-codes',
+                    'url' => route('click.redirect', ['slug' => $campaignSlug]),
+                ])
             </article>
             @endif
         </div>
