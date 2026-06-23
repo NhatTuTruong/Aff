@@ -182,7 +182,7 @@
         min-height: 280px;
         border-radius: 28px;
         background:
-            linear-gradient(155deg, #ffffff 0%, #f8fffd 42%, #eefaf6 100%);
+            linear-gradient(155deg, #ffffff 0%, #bce6da 42%, #eefaf6 100%);
         padding: 0;
         color: var(--hp-ink);
         overflow: hidden;
@@ -606,6 +606,34 @@
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 1rem;
     }
+    .coupon-card.is-coupon-hidden {
+        display: none;
+    }
+    .hp-coupons-load-more-wrap {
+        display: flex;
+        justify-content: center;
+        margin-top: 1.35rem;
+    }
+    .hp-coupons-load-more {
+        border: none;
+        cursor: pointer;
+        padding: 0.75rem 1.5rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.875rem;
+        letter-spacing: 0.02em;
+        color: #fff;
+        background: linear-gradient(135deg, #2fc2a9 0%, #24a892 100%);
+        box-shadow: 0 10px 24px -10px rgba(47, 194, 169, 0.45);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hp-coupons-load-more:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 28px -8px rgba(47, 194, 169, 0.5);
+    }
+    .hp-coupons-load-more[hidden] {
+        display: none;
+    }
     .coupon-card {
         display: grid;
         grid-template-columns: 68px 1fr;
@@ -887,11 +915,51 @@
         .stores-carousel { gap: 1.25rem; }
         .store-carousel-item { width: 88px; }
         .store-carousel-img-wrap { width: 72px; height: 72px; }
-        .hp-coupons { grid-template-columns: 1fr; }
+        .hp-coupons {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
     }
     @media (max-width: 520px) {
         .coupon-card {
             grid-template-columns: 1fr;
+        }
+        .coupon-card-main {
+            padding: 0.75rem 0.65rem 0.8rem;
+        }
+        .coupon-card-header {
+            gap: 0.45rem;
+            margin-bottom: 0.3rem;
+        }
+        .coupon-card-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            padding: 3px;
+        }
+        .coupon-card-brand {
+            font-size: 0.78rem;
+        }
+        .coupon-card-offer {
+            font-size: 0.75rem;
+            margin-bottom: 0.55rem;
+            -webkit-line-clamp: 2;
+        }
+        .coupon-card-strip-icon {
+            width: 28px;
+            height: 28px;
+            font-size: 0.8rem;
+        }
+        .coupon-card-strip-label {
+            font-size: 0.52rem;
+        }
+        .coupon-card-cta {
+            padding: 0.45rem 0.65rem;
+            font-size: 0.62rem;
+        }
+        .coupon-card-code {
+            padding: 0.4rem 0.5rem;
+            font-size: 0.68rem;
         }
         .coupon-card-strip {
             flex-direction: row;
@@ -1101,19 +1169,24 @@
                 <p class="hp-sec-desc">High-signal picks from brands we track — copy a code or open the offer in one tap.</p>
             </header>
             <p class="hp-disclaimer">Promotions can change or expire at any time. Always confirm at checkout. We may earn a commission when you use our links — <a href="{{ url('/affiliate-disclosure') }}">see disclosure</a>.</p>
-            <div class="hp-coupons">
-                @foreach($hotCoupons as $coupon)
-                    @php $campaign = $coupon->campaign; $brand = $campaign?->brand; @endphp
-                    @if($brand)
-                    <article class="coupon-card{{ $coupon->code ? '' : ' coupon-card--no-code' }}">
+            @php
+                $hotCouponCards = $hotCoupons
+                    ->filter(fn ($c) => $c->campaign?->brand)
+                    ->take(12)
+                    ->values();
+            @endphp
+            <div class="hp-coupons" id="hp-coupons-grid">
+                @foreach($hotCouponCards as $index => $coupon)
+                    @php $campaign = $coupon->campaign; $brand = $campaign->brand; @endphp
+                    <article class="coupon-card{{ $coupon->code ? '' : ' coupon-card--no-code' }}{{ $index >= 4 ? ' is-coupon-hidden' : '' }}" data-coupon-card>
                         <div class="coupon-card-strip" aria-hidden="true">
                             <span class="coupon-card-strip-icon">%</span>
                             <span class="coupon-card-strip-label">{{ $coupon->code ? 'Code' : 'Deal' }}</span>
                         </div>
                         <div class="coupon-card-main">
                             <div class="coupon-card-header">
-                                <img src="{{ $brand->image_url }}" alt="{{ $brand->name }}" class="coupon-card-logo" loading="lazy">
-                                <div class="coupon-card-brand">{{ $brand->name }}</div>
+                                <img src="{{ $brand->image_url }}" alt="{{ $campaign->title }}" class="coupon-card-logo" loading="lazy">
+                                <div class="coupon-card-brand">{{ $campaign->title }}</div>
                             </div>
                             @if($coupon->offer)
                                 <p class="coupon-card-offer">{{ $coupon->offer }}</p>
@@ -1132,11 +1205,52 @@
                             </div>
                         </div>
                     </article>
-                    @endif
                 @endforeach
             </div>
+            @if($hotCouponCards->count() > 4)
+                <div class="hp-coupons-load-more-wrap">
+                    <button type="button" class="hp-coupons-load-more" id="hp-coupons-load-more" aria-controls="hp-coupons-grid">
+                        See more
+                    </button>
+                </div>
+            @endif
         </div>
     </section>
+    @push('scripts')
+    <script>
+    (function () {
+        var btn = document.getElementById('hp-coupons-load-more');
+        var cards = document.querySelectorAll('#hp-coupons-grid [data-coupon-card]');
+        if (cards.length === 0) return;
+
+        var desktopMq = window.matchMedia('(min-width: 769px)');
+        var max = Math.min(12, cards.length);
+        var visible = desktopMq.matches ? 6 : 4;
+
+        function getStep() {
+            return desktopMq.matches ? 6 : 4;
+        }
+
+        function syncCards() {
+            cards.forEach(function (card, index) {
+                card.classList.toggle('is-coupon-hidden', index >= visible);
+            });
+            if (btn) {
+                btn.hidden = visible >= max;
+            }
+        }
+
+        if (btn) {
+            btn.addEventListener('click', function () {
+                visible = Math.min(visible + getStep(), max);
+                syncCards();
+            });
+        }
+
+        syncCards();
+    })();
+    </script>
+    @endpush
     @endif
 
     @if(isset($latestPosts) && $latestPosts->isNotEmpty())

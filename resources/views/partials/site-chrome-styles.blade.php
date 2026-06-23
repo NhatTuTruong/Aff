@@ -280,10 +280,42 @@ textarea::placeholder {
     margin-bottom: 1.75rem;
 }
 @media (max-width: 900px) {
-    .site-footer .footer-grid { grid-template-columns: 1fr 1fr; }
+    .site-footer .footer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.75rem 1.25rem;
+    }
+    .site-footer .footer-brand {
+        grid-column: 1 / -1;
+    }
 }
 @media (max-width: 520px) {
-    .site-footer .footer-grid { grid-template-columns: 1fr; }
+    .site-footer .footer-inner {
+        padding: 2.25rem 1rem 1.5rem;
+    }
+    .site-footer .footer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.35rem 0.85rem;
+        margin-bottom: 1.35rem;
+    }
+    .site-footer .footer-brand {
+        grid-column: 1 / -1;
+        padding-bottom: 0.25rem;
+    }
+    .site-footer .footer-brand p {
+        max-width: none;
+        font-size: 0.875rem;
+    }
+    .site-footer .footer-col h4 {
+        font-size: 0.68rem;
+        margin-bottom: 0.65rem;
+    }
+    .site-footer .footer-col li {
+        margin-bottom: 0.4rem;
+    }
+    .site-footer .footer-col a {
+        font-size: 0.875rem;
+        line-height: 1.35;
+    }
 }
 .site-footer .footer-brand .logo {
     font-family: 'Space Grotesk', 'DM Sans', sans-serif;

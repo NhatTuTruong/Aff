@@ -118,7 +118,6 @@ class Campaign extends Model
             $raw = is_array($campaign->slug) ? implode('/', $campaign->slug) : (string) $campaign->slug;
             $segments = array_values(array_filter(explode('/', $raw)));
             $needsNormalize = $campaign->isDirty('slug')
-                || $campaign->isDirty('title')
                 || count($segments) !== 1
                 || str_contains($raw, '/');
             if ($needsNormalize) {

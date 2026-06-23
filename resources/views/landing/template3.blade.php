@@ -79,7 +79,7 @@
         
         $campaignSlug = $campaign->slug;
 
-        $brandName = $campaign->brand->name ?? $campaign->title;
+        $brandName = $campaign->title;
         $rawIntro = (string) ($campaign->subtitle ?? $campaign->intro ?? '');
         $metaTitle = $brandName . ' Coupons & Promo Codes – ' . now()->format('F Y');
         $metaDescription = \Illuminate\Support\Str::limit(strip_tags($rawIntro), 160);
@@ -1014,7 +1014,7 @@
 <div class="t3-store-banner">
     <div class="t3-banner-brand">
         @if($campaign->brand)
-            <img src="{{ $campaign->brand->image_url }}" alt="{{ $campaign->brand->name }}" class="t3-banner-logo" loading="lazy">
+            <img src="{{ $campaign->brand->image_url }}" alt="{{ $brandName }}" class="t3-banner-logo" loading="lazy">
         @elseif($campaign->logo)
             <img src="{{ asset('storage/' . $campaign->logo) }}" alt="{{ $campaign->title }}" class="t3-banner-logo" loading="lazy">
         @else
@@ -1028,7 +1028,7 @@
 <div class="t3-main">
     <header class="t3-hero">
         <h1 class="t3-hero-title">
-            {{ $campaign->brand->name ?? $campaign->title }} Coupons & Promo Codes – {{ now()->format('F Y') }}
+            {{ $brandName }} Coupons & Promo Codes – {{ now()->format('F Y') }}
         </h1>
         <p class="t3-hero-sub">
             Save up to <strong>{{ $maxPercent }}% off</strong> with verified discount codes &amp; exclusive deals.
@@ -1068,7 +1068,7 @@
 
     <section class="t3-coupon-section">
         <div class="t3-coupon-header-title">
-            Active {{ $campaign->brand->name ?? $campaign->title }} coupons
+            Active {{ $brandName }} coupons
         </div>
         <div class="t3-coupon-header-meta">
             Last checked: 18 hours ago • Tracking coupons in the last 7 days.
@@ -1159,11 +1159,11 @@
                             {{ $coupon->description }}
                         @else
                             @if($offerType === 'currency')
-                                Save {{ $currencySymbol }}{{ number_format((float)str_replace([',', ' '], ['', ''], $offerValue), 0, '.', '') }} on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                                Save {{ $currencySymbol }}{{ number_format((float)str_replace([',', ' '], ['', ''], $offerValue), 0, '.', '') }} on your order with this {{ $brandName }} promo code
                             @elseif($offerType === 'text' && $offerValue === 'FREE')
-                                Get Free Shipping on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                                Get Free Shipping on your order with this {{ $brandName }} promo code
                             @else
-                                Save {{ $offerValue }}% on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                                Save {{ $offerValue }}% on your order with this {{ $brandName }} promo code
                             @endif
                         @endif
                     </div>
@@ -1225,9 +1225,9 @@
                 <div class="t3-coupon-content">
                     <div class="coupon-title">
                         @if($defaultCouponOfferType === 'currency')
-                            Save {{ $defaultCouponCurrencySymbol }}{{ number_format($defaultCouponOfferValue, 0, '.', '') }} on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                            Save {{ $defaultCouponCurrencySymbol }}{{ number_format($defaultCouponOfferValue, 0, '.', '') }} on your order with this {{ $brandName }} promo code
                         @else
-                            Save {{ $defaultCouponOfferValue }}% on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                            Save {{ $defaultCouponOfferValue }}% on your order with this {{ $brandName }} promo code
                         @endif
                     </div>
                     <div class="badge-row">
@@ -1272,7 +1272,7 @@
                 @endif
             @else
             <p>
-                Discover exclusive deals from {{ $campaign->brand->name ?? $campaign->title }} designed to help you save more every time you shop online. We carefully curate the latest discounts, special offers, and limited-time promotions so you can enjoy the best value on your favorite products. Whether you're looking for everyday essentials or trending items, {{ $campaign->brand->name ?? $campaign->title }} makes it easier to shop smarter and spend less.
+                Discover exclusive deals from {{ $brandName }} designed to help you save more every time you shop online. We carefully curate the latest discounts, special offers, and limited-time promotions so you can enjoy the best value on your favorite products. Whether you're looking for everyday essentials or trending items, {{ $brandName }} makes it easier to shop smarter and spend less.
             </p>
             @endif
         </div>
@@ -1360,17 +1360,17 @@
         <div class="t3-popup-banner">
             <div>
                 @if($campaign->brand)
-                    <img src="{{ $campaign->brand->image_url }}" alt="{{ $campaign->brand->name }}" class="t3-popup-logo" loading="lazy">
+                    <img src="{{ $campaign->brand->image_url }}" alt="{{ $brandName }}" class="t3-popup-logo" loading="lazy">
                 @elseif($campaign->logo)
                     <img src="{{ asset('storage/' . $campaign->logo) }}" alt="{{ $campaign->title }}" class="t3-popup-logo" loading="lazy">
                 @else
                     <img src="{{ asset('images/default-brand.svg') }}" alt="{{ $brandName }}" class="t3-popup-logo" loading="lazy">
                 @endif
                 <h3 class="t3-popup-title" id="coupon-modal-title">
-                    {{ $campaign->brand->name ?? $campaign->title }} Promotion
+                    {{ $brandName }} Promotion
                 </h3>
                 <p class="t3-popup-subtitle">
-                    A Little Discount, A Lot of Joy—Save Now with {{ $campaign->brand->name ?? $campaign->title }} Promotion.
+                    A Little Discount, A Lot of Joy—Save Now with {{ $brandName }} Promotion.
                 </p>
             </div>
         </div>
@@ -1426,13 +1426,13 @@
         <div class="t3-popup-banner">
             <div>
                 @if($campaign->brand)
-                    <img src="{{ $campaign->brand->image_url }}" alt="{{ $campaign->brand->name }}" class="t3-popup-logo" loading="lazy">
+                    <img src="{{ $campaign->brand->image_url }}" alt="{{ $brandName }}" class="t3-popup-logo" loading="lazy">
                 @elseif($campaign->logo)
                     <img src="{{ asset('storage/' . $campaign->logo) }}" alt="{{ $campaign->title }}" class="t3-popup-logo" loading="lazy">
                 @else
                     <img src="{{ asset('images/default-brand.svg') }}" alt="{{ $brandName }}" class="t3-popup-logo" loading="lazy">
                 @endif
-                <h3 class="t3-popup-title" id="all-codes-modal-title">All {{ $campaign->brand->name ?? $campaign->title }} Coupon Codes</h3>
+                <h3 class="t3-popup-title" id="all-codes-modal-title">All {{ $brandName }} Coupon Codes</h3>
                 <p class="t3-popup-subtitle">Copy any code below and apply at checkout.</p>
             </div>
         </div>
@@ -1493,13 +1493,13 @@
                         @if($coupon->description)
                             {{ Str::limit($coupon->description, 80) }}
                         @elseif($offerType === 'currency' && $offerValue !== null)
-                            Save {{ $currencySymbol }}{{ number_format((float)str_replace([',', ' '], ['', ''], $offerValue), 0, '.', '') }} on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                            Save {{ $currencySymbol }}{{ number_format((float)str_replace([',', ' '], ['', ''], $offerValue), 0, '.', '') }} on your order with this {{ $brandName }} promo code
                         @elseif($offerType === 'text' && $offerValue === 'FREE')
-                            Get Free Shipping on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                            Get Free Shipping on your order with this {{ $brandName }} promo code
                         @elseif($offerValue !== null)
-                            Save {{ $offerValue }}% on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                            Save {{ $offerValue }}% on your order with this {{ $brandName }} promo code
                         @else
-                            Save with this coupon code when you shop at {{ $campaign->brand->name ?? $campaign->title }} and apply it at checkout.
+                            Save with this coupon code when you shop at {{ $brandName }} and apply it at checkout.
                         @endif
                     </div>
                 </div>

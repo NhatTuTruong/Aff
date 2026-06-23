@@ -103,7 +103,7 @@
 
         $campaignSlug = $campaign->slug;
 
-        $brandName = $campaign->brand->name ?? $campaign->title;
+        $brandName = $campaign->title;
         $rawIntro = (string) ($campaign->subtitle ?? ($campaign->intro ?? ''));
         $metaTitle = $brandName . ' Coupons & Promo Codes – ' . now()->format('F Y');
         $metaDescription = \Illuminate\Support\Str::limit(strip_tags($rawIntro), 160);
@@ -2274,7 +2274,7 @@
         <div class="page-panel">
             <header class="hero">
                 <h1 class="hero-title">
-                    {{ $campaign->brand->name ?? $campaign->title }} Coupons & Promo Codes – {{ now()->format('F Y') }}
+                    {{ $brandName }} Coupons & Promo Codes – {{ now()->format('F Y') }}
                 </h1>
                 <p class="hero-sub">
                     Save up to <strong>{{ $maxPercent }}% off</strong> with verified discount codes &amp; exclusive
@@ -2290,19 +2290,19 @@
                 <aside class="left-card">
                     <div class="left-card-header">
                         @if ($campaign->brand)
-                            <img src="{{ $campaign->brand->image_url }}" alt="{{ $campaign->brand->name }}"
+                            <img src="{{ $campaign->brand->image_url }}" alt="{{ $brandName }}"
                                 class="brand-logo" loading="lazy">
                         @elseif($campaign->logo)
                             <img src="{{ asset('storage/' . $campaign->logo) }}" alt="{{ $campaign->title }}"
                                 class="brand-logo" loading="lazy">
                         @else
                             <img src="{{ asset('images/default-brand.svg') }}"
-                                alt="{{ $campaign->brand->name ?? $campaign->title }}" class="brand-logo"
+                                alt="{{ $brandName }}" class="brand-logo"
                                 loading="lazy">
                         @endif
 
                         <div class="brand-name">
-                            {{ $campaign->brand->name ?? $campaign->title }}
+                            {{ $brandName }}
                         </div>
                         <div class="brand-rating">
                             <span class="stars">★★★★★</span>
@@ -2355,7 +2355,7 @@
                     <section class="right-column-coupon-section">
                         <div class="coupon-header">
                             <div class="coupon-header-title">
-                                Active {{ $campaign->brand->name ?? $campaign->title }} coupons
+                                Active {{ $brandName }} coupons
                             </div>
                             <div class="coupon-header-meta">
                                 Last checked: 18 hours ago • Tracking coupons in the last 7 days.
@@ -2504,13 +2504,13 @@
                                                             Save
                                                             {{ $currencySymbol }}{{ number_format((float) str_replace([',', ' '], ['', ''], $offerValue), 0, '.', '') }}
                                                             on your order with this
-                                                            {{ $campaign->brand->name ?? $campaign->title }} promo code
+                                                            {{ $brandName }} promo code
                                                         @elseif($offerType === 'text' && $offerValue === 'FREE')
                                                             Get Free Shipping on your order with this
-                                                            {{ $campaign->brand->name ?? $campaign->title }} promo code
+                                                            {{ $brandName }} promo code
                                                         @else
                                                             Save {{ $offerValue }}% on your order with this
-                                                            {{ $campaign->brand->name ?? $campaign->title }} promo code
+                                                            {{ $brandName }} promo code
                                                         @endif
                                                     @endif
                                                 </div>
@@ -2578,10 +2578,10 @@
                                                         Save
                                                         {{ $defaultCouponCurrencySymbol }}{{ number_format($defaultCouponOfferValue, 0, '.', '') }}
                                                         on your order with this
-                                                        {{ $campaign->brand->name ?? $campaign->title }} promo code
+                                                        {{ $brandName }} promo code
                                                     @else
                                                         Save {{ $defaultCouponOfferValue }}% on your order with this
-                                                        {{ $campaign->brand->name ?? $campaign->title }} promo code
+                                                        {{ $brandName }} promo code
                                                     @endif
                                                 </div>
                                                 <div class="badge-row">
@@ -2628,7 +2628,7 @@
                                     @endif
                                 @else
                                     <p>
-                                        Discover exclusive deals from {{ $campaign->brand->name ?? $campaign->title }} designed to help you save more every time you shop online. We carefully curate the latest discounts, special offers, and limited-time promotions so you can enjoy the best value on your favorite products. Whether you're looking for everyday essentials or trending items, {{ $campaign->brand->name ?? $campaign->title }} makes it easier to shop smarter and spend less.
+                                        Discover exclusive deals from {{ $brandName }} designed to help you save more every time you shop online. We carefully curate the latest discounts, special offers, and limited-time promotions so you can enjoy the best value on your favorite products. Whether you're looking for everyday essentials or trending items, {{ $brandName }} makes it easier to shop smarter and spend less.
                                     </p>
                                 @endif
                             </div>
@@ -2724,7 +2724,7 @@
                 <div class="coupon-copy-toast-row">
                     <span class="coupon-copy-toast-icon" aria-hidden="true">✓</span>
                     <p class="coupon-copy-toast-text">Code copied! Go to
-                        <strong>{{ e($campaign->brand->name ?? $campaign->title) }}</strong>
+                        <strong>{{ e($brandName) }}</strong>
                     </p>
                     <button type="button" class="coupon-copy-toast-close" aria-label="Đóng"
                         onclick="dismissCouponCopyToast()">✕</button>
@@ -2750,23 +2750,23 @@
                 </div>
                 <div class="popup-header">
                     @if ($campaign->brand)
-                        <img src="{{ $campaign->brand->image_url }}" alt="{{ $campaign->brand->name }}"
+                        <img src="{{ $campaign->brand->image_url }}" alt="{{ $brandName }}"
                             class="popup-logo" loading="lazy">
                     @elseif($campaign->logo)
                         <img src="{{ asset('storage/' . $campaign->logo) }}" alt="{{ $campaign->title }}"
                             class="popup-logo" loading="lazy">
                     @else
                         <img src="{{ asset('images/default-brand.svg') }}"
-                            alt="{{ $campaign->brand->name ?? $campaign->title }}" class="popup-logo"
+                            alt="{{ $brandName }}" class="popup-logo"
                             loading="lazy">
                     @endif
 
                     <h3 class="popup-title" id="coupon-modal-title">
-                        {{ $campaign->brand->name ?? $campaign->title }} Promotion
+                        {{ $brandName }} Promotion
                     </h3>
 
                     <p class="popup-subtitle">
-                        A Little Discount, A Lot of Joy—Save Now with {{ $campaign->brand->name ?? $campaign->title }}
+                        A Little Discount, A Lot of Joy—Save Now with {{ $brandName }}
                         Promotion.
                     </p>
                 </div>
@@ -2800,7 +2800,7 @@
                     <a href="#" target="_blank" rel="nofollow sponsored noopener"
                         class="coupon-btn store go-to-store-btn" aria-label="Open store in new tab"
                         onclick="event.preventDefault(); const url = this.getAttribute('data-url'); if(url) { window.open(url, '_blank'); } return false;">
-                        Go To {{ $campaign->brand->name ?? $campaign->title }}
+                        Go To {{ $brandName }}
                     </a>
                 </div>
                 <div class="lead-capture">
@@ -2840,18 +2840,18 @@
             <div class="popup-banner">
                 <div class="popup-header">
                     @if ($campaign->brand)
-                        <img src="{{ $campaign->brand->image_url }}" alt="{{ $campaign->brand->name }}"
+                        <img src="{{ $campaign->brand->image_url }}" alt="{{ $brandName }}"
                             class="popup-logo" loading="lazy">
                     @elseif($campaign->logo)
                         <img src="{{ asset('storage/' . $campaign->logo) }}" alt="{{ $campaign->title }}"
                             class="popup-logo" loading="lazy">
                     @else
                         <img src="{{ asset('images/default-brand.svg') }}"
-                            alt="{{ $campaign->brand->name ?? $campaign->title }}" class="popup-logo"
+                            alt="{{ $brandName }}" class="popup-logo"
                             loading="lazy">
                     @endif
                     <h3 class="popup-title" id="all-codes-modal-title">All
-                        {{ $campaign->brand->name ?? $campaign->title }} Coupon Codes</h3>
+                        {{ $brandName }} Coupon Codes</h3>
                     <p class="popup-subtitle">Copy any code below and apply at checkout.</p>
                 </div>
             </div>
@@ -2935,16 +2935,16 @@
                                 @elseif($offerType === 'currency' && $offerValue !== null)
                                     Save
                                     {{ $currencySymbol }}{{ number_format((float) str_replace([',', ' '], ['', ''], $offerValue), 0, '.', '') }}
-                                    on your order with this {{ $campaign->brand->name ?? $campaign->title }} promo code
+                                    on your order with this {{ $brandName }} promo code
                                 @elseif($offerType === 'text' && $offerValue === 'FREE')
                                     Get Free Shipping on your order with this
-                                    {{ $campaign->brand->name ?? $campaign->title }} promo code
+                                    {{ $brandName }} promo code
                                 @elseif($offerValue !== null)
                                     Save {{ $offerValue }}% on your order with this
-                                    {{ $campaign->brand->name ?? $campaign->title }} promo code
+                                    {{ $brandName }} promo code
                                 @else
                                     Save with this coupon code when you shop at
-                                    {{ $campaign->brand->name ?? $campaign->title }} and apply it at checkout.
+                                    {{ $brandName }} and apply it at checkout.
                                 @endif
                             </div>
                         </div>
@@ -2953,7 +2953,7 @@
                 <div class="coupon-modal-actions" style="margin-top: 20px;">
                     <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
                         target="_blank" rel="nofollow sponsored noopener" class="coupon-btn store">
-                        Go To {{ $campaign->brand->name ?? $campaign->title }}
+                        Go To {{ $brandName }}
                     </a>
                 </div>
                 <div class="lead-capture">

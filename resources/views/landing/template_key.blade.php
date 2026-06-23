@@ -272,7 +272,7 @@
     <div class="page-wrapper">
         <div class="container">
             <header class="header">
-                <img src="{{ $logoUrl }}" alt="{{ $campaign->brand?->name ?? $campaign->title }}" class="logo">
+                <img src="{{ $logoUrl }}" alt="{{ $campaign->title }}" class="logo">
                 <h1 class="title">{{ $campaign->title }}</h1>
                 @if($campaign->subtitle)
                 <p class="subtitle">{{ $campaign->subtitle }}</p>

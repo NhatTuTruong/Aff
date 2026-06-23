@@ -62,17 +62,15 @@ class CampaignResource extends Resource
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                            ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get, string $operation) {
                                 if ($state) {
                                     $brand = Brand::find($state);
                                     if ($brand) {
-                                        // Tự động điền title nếu đang trống
                                         if (empty($get('title'))) {
                                             $set('title', $brand->name);
                                         }
-                                        // Slug dùng user_code của cửa hàng (brand), tránh slug 3 phần 21419/55628/...
-                                        if (empty($get('slug'))) {
-                                            $set('slug', \Illuminate\Support\Str::slug($brand->name));
+                                        if ($operation === 'create' && empty($get('slug'))) {
+                                            $set('slug', \Illuminate\Support\Str::slug($get('title') ?: $brand->name));
                                         }
                                     }
                                 }
@@ -94,8 +92,10 @@ class CampaignResource extends Resource
                             ->label('Tiêu đề')
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(function ($state, Forms\Set $set) {
-                                $set('slug', \Illuminate\Support\Str::slug($state));
+                            ->afterStateUpdated(function ($state, Forms\Set $set, string $operation) {
+                                if ($operation === 'create') {
+                                    $set('slug', \Illuminate\Support\Str::slug($state));
+                                }
                             }),
                         Forms\Components\TextInput::make('slug')
                             ->label('Slug')
@@ -104,7 +104,7 @@ class CampaignResource extends Resource
                                 ignoreRecord: true,
                                 modifyRuleUsing: fn (\Illuminate\Validation\Rules\Unique $rule) => $rule->whereNull('deleted_at')
                             )
-                            ->helperText('Duy nhất toàn hệ thống. URL landing: /visit/{slug}'),
+                            ->helperText('Duy nhất toàn hệ thống. URL landing: /visit/{slug}. Slug chỉ tự tạo khi thêm chiến dịch mới.'),
                         Forms\Components\TextInput::make('affiliate_url')
                             ->label('URL Affiliate')
                             ->required()
