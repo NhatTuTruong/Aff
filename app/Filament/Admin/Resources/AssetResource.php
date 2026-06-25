@@ -74,14 +74,17 @@ class AssetResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->label('')
                     ->icon('heroicon-o-pencil-square')
+                    ->color('info')
                     ->tooltip('Sửa'),
                 Tables\Actions\DeleteAction::make()
                     ->label('')
                     ->icon('heroicon-o-trash')
+                    ->color('danger')
                     ->tooltip('Xóa'),
                 Tables\Actions\RestoreAction::make()
                     ->label('')
                     ->icon('heroicon-o-arrow-uturn-left')
+                    ->color('warning')
                     ->tooltip('Khôi phục'),
                 Tables\Actions\ForceDeleteAction::make()
                     ->label('')

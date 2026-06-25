@@ -341,15 +341,6 @@ class CampaignResource extends Resource
                     ->job(\App\Jobs\ImportCsvWithNullUser::class)
                     ->label('Import CSV')
                     ->icon('heroicon-o-arrow-up-tray'),
-                Tables\Actions\ExportAction::make()
-                    ->exporter(CampaignExporter::class)
-                    ->job(\App\Jobs\PrepareCsvExportPreserveSession::class)
-                    ->label('Xuất CSV')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->color('gray')
-                    ->formats([ExportFormat::Csv])
-                    ->columnMapping(false)
-                    ->fileName(fn (): string => 'campaigns-' . now()->format('Y-m-d-His')),
             ])
             ->columns([
                 Tables\Columns\ImageColumn::make('brand.image')
@@ -484,11 +475,13 @@ class CampaignResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->label('')
                     ->icon('heroicon-o-pencil-square')
-                    ->tooltip('Sửa'),
+                    ->tooltip('Sửa')
+                    ->color('primary'),
                 Tables\Actions\ReplicateAction::make()
                     ->label('')
                     ->icon('heroicon-o-document-duplicate')
                     ->tooltip('Nhân bản')
+                    ->color('warning')
                     ->mutateRecordDataUsing(function (array $data, Campaign $record): array {
                         $baseTitle = $record->title;
                         $slugPart = $record->slug;
@@ -514,8 +507,8 @@ class CampaignResource extends Resource
                 Tables\Actions\Action::make('copy_landing_link')
                     ->label('')
                     ->icon('heroicon-o-clipboard-document')
-                    ->color('gray')
                     ->tooltip('Copy link landing')
+                    ->color('gray')
                     ->visible(fn (Campaign $record): bool => filled($record->slug))
                     ->action(function (Campaign $record, $livewire): void {
                         $fullUrl = url(route('landing.show', ['slug' => $record->slug]));
@@ -532,21 +525,23 @@ class CampaignResource extends Resource
                     ->url(fn ($record) => $record->slug ? route('landing.show', ['slug' => $record->slug]) : '#')
                     ->openUrlInNewTab()
                     ->icon('heroicon-o-arrow-top-right-on-square')
-                    ->color('success')
-                    ->tooltip('Xem landing page'),
+                    ->tooltip('Xem landing page')
+                    ->color('success'),
                 Tables\Actions\DeleteAction::make()
                     ->label('')
                     ->icon('heroicon-o-trash')
-                    ->tooltip('Xóa chiến dịch'),
+                    ->tooltip('Xóa chiến dịch')
+                    ->color('danger'),
                 Tables\Actions\RestoreAction::make()
                     ->label('')
                     ->icon('heroicon-o-arrow-uturn-left')
-                    ->tooltip('Khôi phục'),
+                    ->tooltip('Khôi phục')
+                    ->color('info'),
                 Tables\Actions\ForceDeleteAction::make()
                     ->label('')
                     ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->tooltip('Xóa vĩnh viễn'),
+                    ->tooltip('Xóa vĩnh viễn')
+                    ->color('danger'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

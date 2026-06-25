@@ -301,8 +301,8 @@ class ClickResource extends Resource
                 Action::make('blockIp')
                     ->label('')
                     ->icon('heroicon-o-shield-exclamation')
-                    ->color('danger')
                     ->tooltip('Chặn IP')
+                    ->color('danger')
                     ->requiresConfirmation()
                     ->modalHeading('Chặn IP này?')
                     ->modalDescription(fn (Click $record): string => "IP {$record->ip} sẽ bị chặn. Các click/view từ IP này sẽ không được thống kê.")
@@ -320,24 +320,28 @@ class ClickResource extends Resource
                 Tables\Actions\ViewAction::make()
                     ->label('')
                     ->icon('heroicon-o-eye')
-                    ->tooltip('Xem'),
+                    ->tooltip('Xem')
+                    ->color('info'),
                 Tables\Actions\EditAction::make()
                     ->label('')
                     ->icon('heroicon-o-pencil-square')
-                    ->tooltip('Sửa'),
+                    ->tooltip('Sửa')
+                    ->color('primary'),
                 Tables\Actions\DeleteAction::make()
                     ->label('')
                     ->icon('heroicon-o-trash')
-                    ->tooltip('Xóa'),
+                    ->tooltip('Xóa')
+                    ->color('danger'),
                 Tables\Actions\RestoreAction::make()
                     ->label('')
                     ->icon('heroicon-o-arrow-uturn-left')
-                    ->tooltip('Khôi phục'),
+                    ->tooltip('Khôi phục')
+                    ->color('info'),
                 Tables\Actions\ForceDeleteAction::make()
                     ->label('')
                     ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->tooltip('Xóa vĩnh viễn'),
+                    ->tooltip('Xóa vĩnh viễn')
+                    ->color('danger'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

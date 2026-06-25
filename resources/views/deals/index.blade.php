@@ -10,7 +10,7 @@
     .deals-hero {
         padding: 3.5rem 0 2.5rem;
         background:
-            radial-gradient(900px 350px at 50% 0%, rgba(15,118,110,0.14) 0%, rgba(15,118,110,0.00) 70%),
+            radial-gradient(900px 350px at 50% 0%, rgba(124, 58, 237, 0.12) 0%, rgba(124, 58, 237, 0.00) 70%),
             linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(226,232,240,0.7) 100%);
         border-bottom: 1px solid var(--border);
     }
@@ -175,7 +175,7 @@
         max-width: 100%;
     }
     .deal-code-btn strong { font-weight: 800; overflow: hidden; text-overflow: ellipsis; }
-    .deal-code-btn.copied { border-color: var(--accent); background: #ccfbf1; color: #0f766e; }
+    .deal-code-btn.copied { border-color: var(--accent); background: #eef1f5; color: #7c3aed; }
     .deal-code-btn.copied::after {
         content: '✓';
         margin-left: 0.35rem;

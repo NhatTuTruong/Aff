@@ -19,7 +19,26 @@
     }
 
     btn.addEventListener('click', function () {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        var start = window.pageYOffset || document.documentElement.scrollTop;
+        var distance = start;
+        var duration = 600;
+        var startTime = null;
+
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var elapsed = timestamp - startTime;
+            var progress = Math.min(elapsed / duration, 1);
+
+            var ease = 1 - Math.pow(1 - progress, 3);
+
+            window.scrollTo(0, distance * (1 - ease));
+
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            }
+        }
+
+        requestAnimationFrame(step);
     });
 
     window.addEventListener('scroll', toggle, { passive: true });

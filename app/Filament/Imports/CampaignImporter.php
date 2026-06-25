@@ -341,13 +341,12 @@ class CampaignImporter extends Importer
         $userId = \Illuminate\Support\Facades\Auth::id();
         $user = \App\Models\User::find($userId);
         $userCode = $user?->code ?? '00000';
-        
+
         $baseSlug = Str::slug($name);
-        $fullSlug = "{$userCode}/{$baseSlug}";
-        
+
         // Tìm brand theo slug đầy đủ hoặc name trong cùng user
-        $brand = Brand::where(function ($q) use ($fullSlug, $name, $userId) {
-            $q->where('slug', $fullSlug)
+        $brand = Brand::where(function ($q) use ($baseSlug, $name, $userId, $userCode) {
+            $q->where('slug', "{$userCode}/{$baseSlug}")
               ->orWhere(function ($q2) use ($name, $userId) {
                   $q2->where('name', $name)->where('user_id', $userId);
               });
@@ -368,21 +367,14 @@ class CampaignImporter extends Importer
             }
         }
 
-        // Kiểm tra trùng trong cùng user
-        if (Brand::where(function ($q) use ($fullSlug, $name, $userId) {
-            $q->where('slug', $fullSlug)
-              ->orWhere(function ($q2) use ($name, $userId) {
-                  $q2->where('name', $name)->where('user_id', $userId);
-              });
-        })->exists()) {
-            throw new RowImportFailedException("Tên cửa hàng đã tồn tại: {$name}");
-        }
-
         $importId = app()->bound('current_import_id') ? app('current_import_id') : null;
+
+        // Tạo slug không trùng
+        $uniqueSlug = Brand::ensureUniqueBrandSlug($baseSlug);
 
         return Brand::create([
             'name' => $name,
-            'slug' => $fullSlug,
+            'slug' => "{$userCode}/{$uniqueSlug}",
             'domain' => $cleanDomain,
             'category_id' => $category->id,
             'image' => $imagePath,
@@ -425,7 +417,7 @@ class CampaignImporter extends Importer
         return [
             Placeholder::make('import_preview')
                 ->label('')
-                ->content(function (Get $get): string {
+                ->content(function (Get $get) {
                     $file = Arr::first((array) ($get('file') ?? []));
                     if (! $file instanceof TemporaryUploadedFile) {
                         return 'Chọn file CSV để xem trước số lượng record chuẩn bị import.';
@@ -444,12 +436,53 @@ class CampaignImporter extends Importer
                                 $delimiter = $best;
                             }
                         }
-                        $reader2 = CsvReader::createFromPath($path)->setDelimiter($delimiter)->setHeaderOffset(0);
-                        $count = (new Statement)->process($reader2)->count();
 
-                        return 'Số chiến dịch chuẩn bị import: ' . number_format($count);
-                    } catch (\Throwable) {
-                        return 'Không thể đọc file CSV.';
+                        $reader1 = CsvReader::createFromPath($path)->setDelimiter($delimiter)->setHeaderOffset(0);
+                        $result = (new Statement)->process($reader1);
+                        $rows = iterator_to_array($result);
+                        $count = count($rows);
+
+                        $seenTitles = [];
+                        $seenSlugs = [];
+                        $duplicateCount = 0;
+                        $titleKey = null;
+                        $slugKey = null;
+                        $headers = $reader1->getHeader();
+
+                        foreach ($headers as $header) {
+                            $headerLower = strtolower($header);
+                            if ($headerLower === 'tiêu đề' || $headerLower === 'title') {
+                                $titleKey = $header;
+                            }
+                            if ($headerLower === 'slug') {
+                                $slugKey = $header;
+                            }
+                        }
+
+                        foreach ($rows as $row) {
+                            $title = trim((string) ($titleKey ? ($row[$titleKey] ?? '') : ''));
+                            $slug = trim((string) ($slugKey ? ($row[$slugKey] ?? '') : Str::slug($title)));
+
+                            $titleLower = strtolower($title);
+                            $slugLower = strtolower($slug);
+
+                            $slugCount = $seenSlugs[$slugLower] ?? 0;
+                            $titleCount = $seenTitles[$titleLower] ?? 0;
+
+                            if ($slugCount > 0 || $titleCount > 0) {
+                                $duplicateCount++;
+                            }
+
+                            $seenTitles[$titleLower] = $titleCount + 1;
+                            $seenSlugs[$slugLower] = $slugCount + 1;
+                        }
+
+                        return view('filament.imports.import-preview', [
+                            'count' => $count,
+                            'duplicateCount' => $duplicateCount,
+                        ])->render();
+                    } catch (\Throwable $e) {
+                        return 'Không thể đọc file CSV. ' . $e->getMessage();
                     }
                 })
                 ->visible(fn (Get $get): bool => Arr::first((array) ($get('file') ?? [])) instanceof TemporaryUploadedFile),

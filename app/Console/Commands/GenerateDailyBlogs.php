@@ -19,7 +19,7 @@ class GenerateDailyBlogs extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'blogs:generate-daily {--count=0 : Số bài cần tạo cho lần chạy này (0 = lấy theo cài đặt)} {--respect-daily-limit : Không vượt quá số bài/ngày đã cấu hình}';
+    protected $signature = 'blogs:generate-daily {--count=1 : Số bài cần tạo cho lần chạy này}';
 
     /**
      * The console command description.
@@ -48,31 +48,11 @@ class GenerateDailyBlogs extends Command
             $this->warn('Chưa bật variant nào — bỏ qua bài blog theo danh mục (vẫn có thể tạo blog giới thiệu brand).');
         }
 
-        $respectDailyLimit = (bool) $this->option('respect-daily-limit');
         $count = (int) $this->option('count');
-        if ($count <= 0) {
-            // Khi chạy bởi scheduler với chế độ giới hạn ngày, mỗi tick tạo 1 bài
-            // để phân bổ đều trong khung giờ; tổng số bài vẫn bị chặn bởi daily limit.
-            $count = $respectDailyLimit ? 1 : (int) AdminSettings::get('auto_blog_daily_count', 2);
-        }
-
-        if ($variants === []) {
-            $count = 0;
-        } else {
+        if ($variants !== []) {
             $count = max(1, $count);
-            if ($respectDailyLimit) {
-                $dailyLimit = max(1, (int) AdminSettings::get('auto_blog_daily_count', 2));
-                $todayKey = 'auto_blog.generated.' . now()->format('Y-m-d');
-                $generatedToday = (int) AdminSettings::get($todayKey, 0);
-                $remaining = $dailyLimit - $generatedToday;
-
-                if ($remaining <= 0) {
-                    $this->info('Đã đạt giới hạn số bài blog theo danh mục/ngày; vẫn kiểm tra blog giới thiệu brand.');
-                    $count = 0;
-                } else {
-                    $count = min($count, $remaining);
-                }
-            }
+        } else {
+            $count = 0;
         }
 
         $author = User::where('is_admin', true)->first() ?? User::first();
@@ -103,12 +83,6 @@ class GenerateDailyBlogs extends Command
             $blog->views_count = 0;
             $blog->save();
 
-            if ($respectDailyLimit) {
-                $todayKey = 'auto_blog.generated.' . now()->format('Y-m-d');
-                $generatedToday = (int) AdminSettings::get($todayKey, 0);
-                AdminSettings::set($todayKey, $generatedToday + 1);
-            }
-
             $this->info("Đã tạo blog: {$blog->title}");
         }
 
@@ -124,21 +98,28 @@ class GenerateDailyBlogs extends Command
      */
     protected function maybeGenerateBrandIntroBlog(GeminiBlogService $gemini, array $categoryNames, ?User $author): void
     {
-        $day = now()->format('Y-m-d');
-        if ((int) AdminSettings::get("auto_blog.intro_done.{$day}", 0) >= 1) {
-            return;
+        $intervalHours = AutoBlogSettings::brandIntroIntervalHours();
+        $lastGeneratedAt = AdminSettings::get('auto_blog.brand_intro_last_generated_at');
+
+        if ($lastGeneratedAt !== null) {
+            $lastGenerated = \Carbon\Carbon::parse($lastGeneratedAt);
+            $nextAllowed = $lastGenerated->copy()->addHours($intervalHours);
+
+            if (now()->lessThan($nextAllowed)) {
+                $this->info('Bỏ qua blog giới thiệu brand: chưa hết khoảng cách đăng bài ('.($nextAllowed->diffInMinutes(now())).' phút nữa).');
+
+                return;
+            }
         }
 
-        $picked = app(BrandIntroBlogCandidateService::class)->findBrandAndCampaignForIntro();
-        if ($picked === null) {
+        $candidate = $this->pickNextBrandIntroCandidate();
+        if ($candidate === null) {
             $this->warn('Blog giới thiệu store: không có chiến dịch nào có affiliate_url phù hợp.');
 
             return;
         }
 
-        /** @var Brand $brand */
-        /** @var Campaign $campaign */
-        [$brand, $campaign] = $picked;
+        [$brand, $campaign] = $candidate;
         $categoryLabel = $this->resolveBrandCategoryLabel($brand);
 
         $this->info("Generating brand intro blog for store: {$brand->name} (campaign #{$campaign->id})");
@@ -155,6 +136,8 @@ class GenerateDailyBlogs extends Command
         if ($author) {
             $blog->user_id = $author->id;
         }
+        $blog->campaign_id = $campaign->id;
+        $blog->intro_type = 'store';
         $blog->title = $result['title'];
         $blog->category = $categoryLabel;
         $blog->content = $result['content'];
@@ -163,8 +146,125 @@ class GenerateDailyBlogs extends Command
         $blog->views_count = 0;
         $blog->save();
 
-        AdminSettings::set("auto_blog.intro_done.{$day}", 1);
+        AdminSettings::set('auto_blog.brand_intro_last_generated_at', now()->toDateTimeString());
         $this->info("Đã tạo blog giới thiệu brand: {$blog->title}");
+    }
+
+    /**
+     * Chọn brand + campaign tiếp theo theo vòng lặp:
+     * - Mỗi brand chỉ được chọn khi có ít nhất 1 campaign có affiliate_url
+     * - Campaign được chọn là campaign cũ nhất (created_at ASC) của brand đó
+     * - Xoay vòng qua các brand theo thứ tự đã sắp xếp để mỗi lần đăng là 1 brand khác nhau
+     * - Bỏ qua campaign đã có blog giới thiệu (trừ khi blog đã bị xóa)
+     *
+     * @return array{0: Brand, 1: Campaign}|null
+     */
+    protected function pickNextBrandIntroCandidate(): ?array
+    {
+        // Lấy danh sách campaign_id đã có blog giới thiệu (chưa xóa)
+        $usedCampaignIds = Blog::whereNotNull('campaign_id')
+            ->where('intro_type', 'store')
+            ->pluck('campaign_id')
+            ->toArray();
+
+        $brandRows = DB::table('brands')
+            ->join('campaigns', 'campaigns.brand_id', '=', 'brands.id')
+            ->whereNull('campaigns.deleted_at')
+            ->whereNotNull('campaigns.affiliate_url')
+            ->where('campaigns.affiliate_url', '!=', '')
+            ->whereNull('brands.deleted_at')
+            ->when(app()->environment('production'), fn ($q) => $q->where('campaigns.status', 'active'))
+            ->select('brands.id', 'brands.name', DB::raw('MIN(campaigns.created_at) as oldest_campaign_at'))
+            ->groupBy('brands.id', 'brands.name')
+            ->orderBy('oldest_campaign_at')
+            ->get();
+
+        if ($brandRows->isEmpty()) {
+            return null;
+        }
+
+        // Lọc bỏ brand mà tất cả campaign đã có blog
+        $availableBrandIds = [];
+        foreach ($brandRows as $row) {
+            $brandCampaigns = DB::table('campaigns')
+                ->where('brand_id', $row->id)
+                ->whereNull('deleted_at')
+                ->whereNotNull('affiliate_url')
+                ->where('affiliate_url', '!=', '')
+                ->when(app()->environment('production'), fn ($q) => $q->where('status', 'active'))
+                ->pluck('id')
+                ->toArray();
+
+            $hasAvailableCampaign = false;
+            foreach ($brandCampaigns as $cid) {
+                if (!in_array($cid, $usedCampaignIds)) {
+                    $hasAvailableCampaign = true;
+                    break;
+                }
+            }
+
+            if ($hasAvailableCampaign) {
+                $availableBrandIds[] = (int) $row->id;
+            }
+        }
+
+        // Nếu đã đăng hết tất cả campaigns, reset và bắt đầu lại từ đầu
+        if (empty($availableBrandIds)) {
+            $availableBrandIds = $brandRows->pluck('id')->map(fn ($id) => (int) $id)->toArray();
+        }
+
+        $lastBrandId = AdminSettings::get('auto_blog.brand_intro_last_brand_id');
+
+        $index = 0;
+        if ($lastBrandId !== null) {
+            $found = false;
+            foreach ($brandRows as $i => $row) {
+                if ((int) $row->id === (int) $lastBrandId) {
+                    $index = ($i + 1) % $brandRows->count();
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (! $found) {
+                $index = 0;
+            }
+        }
+
+        // Tìm brand tiếp theo có campaign chưa có blog
+        $maxAttempts = $brandRows->count();
+        for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
+            $nextIndex = ($index + $attempt) % $brandRows->count();
+            $candidateBrandId = (int) $brandRows[$nextIndex]->id;
+
+            if (!in_array($candidateBrandId, $availableBrandIds)) {
+                continue;
+            }
+
+            $brand = Brand::query()->whereKey($candidateBrandId)->first();
+            if (!$brand) {
+                continue;
+            }
+
+            // Tìm campaign cũ nhất của brand chưa có blog
+            $campaign = Campaign::query()
+                ->where('campaigns.brand_id', $brand->id)
+                ->whereNull('campaigns.deleted_at')
+                ->whereNotNull('campaigns.affiliate_url')
+                ->where('campaigns.affiliate_url', '!=', '')
+                ->when(app()->environment('production'), fn ($q) => $q->where('campaigns.status', 'active'))
+                ->whereNotIn('campaigns.id', $usedCampaignIds)
+                ->orderBy('campaigns.created_at')
+                ->orderBy('campaigns.id')
+                ->first();
+
+            if ($campaign) {
+                AdminSettings::set('auto_blog.brand_intro_last_brand_id', $brand->id);
+                return [$brand, $campaign];
+            }
+        }
+
+        return null;
     }
 
     /** Đếm số cửa hàng theo tên category, ghép với default categories. */

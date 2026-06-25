@@ -152,20 +152,23 @@ class CouponResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->label('')
                     ->icon('heroicon-o-pencil-square')
-                    ->tooltip('Sửa'),
+                    ->tooltip('Sửa')
+                    ->color('primary'),
                 Tables\Actions\DeleteAction::make()
                     ->label('')
                     ->icon('heroicon-o-trash')
-                    ->tooltip('Xóa'),
+                    ->tooltip('Xóa')
+                    ->color('danger'),
                 Tables\Actions\RestoreAction::make()
                     ->label('')
                     ->icon('heroicon-o-arrow-uturn-left')
-                    ->tooltip('Khôi phục'),
+                    ->tooltip('Khôi phục')
+                    ->color('info'),
                 Tables\Actions\ForceDeleteAction::make()
                     ->label('')
                     ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->tooltip('Xóa vĩnh viễn'),
+                    ->tooltip('Xóa vĩnh viễn')
+                    ->color('danger'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

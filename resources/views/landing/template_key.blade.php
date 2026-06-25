@@ -30,10 +30,10 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary: #0f766e;
-            --primary-dark: #115e59;
-            --primary-light: #2dd4bf;
-            --accent: #1d4ed8;
+            --primary: #7c3aed;
+            --primary-dark: #a78bfa;
+            --primary-light: #6d28d9;
+            --accent: #6d28d9;
             --text-dark: #0f172a;
             --text-light: #475569;
             --bg-page: #e8edf3;
@@ -61,9 +61,9 @@
             background-attachment: fixed;
             @else
             background:
-                radial-gradient(70% 90% at 8% 10%, rgba(45, 212, 191, 0.22) 0%, transparent 55%),
+                radial-gradient(70% 90% at 8% 10%, rgba(124, 58, 237, 0.22) 0%, transparent 55%),
                 radial-gradient(70% 90% at 92% 88%, rgba(96, 165, 250, 0.22) 0%, transparent 55%),
-                linear-gradient(135deg, #0f172a 0%, #115e59 48%, #1e40af 100%);
+                linear-gradient(135deg, #0f172a 0%, #5b21b6 48%, #1e1b4b 100%);
             @endif
         }
         .page-wrapper::before {

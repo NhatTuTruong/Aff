@@ -4,9 +4,10 @@ namespace App\Filament\Admin\Resources\BlogResource\Pages;
 
 use App\Filament\Admin\Resources\BlogResource;
 use App\Models\Blog;
+use App\Models\Brand;
+use App\Models\Campaign;
 use App\Models\Category;
 use App\Models\User;
-use App\Services\BrandIntroBlogCandidateService;
 use App\Services\GeminiBlogService;
 use App\Support\AdminSettings;
 use App\Support\AutoBlogSettings;
@@ -16,6 +17,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ListBlogs extends ListRecords
@@ -110,6 +112,8 @@ class ListBlogs extends ListRecords
                     if ($brandHint !== '') {
                         $categoryLabel = 'Brand spotlight';
                         $result = $gemini->generateBrandSpotlightFromHint($brandHint, $extras);
+                        $campaignId = null;
+                        $introType = null;
                     } else {
                         $modes = AutoBlogSettings::enabledManualAiModes();
                         if ($modes === []) {
@@ -134,22 +138,31 @@ class ListBlogs extends ListRecords
                         }
 
                         if ($mode === 'intro') {
-                            $picked = app(BrandIntroBlogCandidateService::class)->findBrandAndCampaignForIntro();
+                            $picked = $this->findNextBrandIntroCandidate();
                             if ($picked === null) {
-                                Notification::make()
-                                    ->title('Không tạo được blog giới thiệu store')
-                                    ->body('Cần ít nhất một chiến dịch có affiliate_url hợp lệ (và chưa bị xóa).')
-                                    ->danger()
-                                    ->send();
-                                return;
+                                // Reset vòng lặp: xóa trạng thái last_brand_id và thử lại
+                                AdminSettings::forget('auto_blog.brand_intro_last_brand_id');
+                                $picked = $this->findNextBrandIntroCandidate();
+                                if ($picked === null) {
+                                    Notification::make()
+                                        ->title('Không tạo được blog giới thiệu store')
+                                        ->body('Không có chiến dịch phù hợp nào.')
+                                        ->warning()
+                                        ->send();
+                                    return;
+                                }
                             }
                             [$brand, $campaign] = $picked;
                             $categoryLabel = $this->resolveBrandCategoryLabel($brand);
                             $result = $gemini->generateBrandIntroBlog($brand, $campaign, $categoryLabel, $extras);
+                            $campaignId = $campaign->id;
+                            $introType = 'store';
                         } else {
                             $category = $categoryNames[array_rand($categoryNames)];
                             $result = $gemini->generateBlog($category, $mode, $extras);
                             $categoryLabel = $category;
+                            $campaignId = null;
+                            $introType = $mode;
                         }
                     }
 
@@ -171,6 +184,8 @@ class ListBlogs extends ListRecords
 
                     $blog = Blog::create([
                         'user_id' => $author?->id,
+                        'campaign_id' => $campaignId ?? null,
+                        'intro_type' => $introType ?? null,
                         'title' => $result['title'],
                         'category' => $categoryLabel ?? 'General',
                         'content' => $result['content'],
@@ -190,6 +205,114 @@ class ListBlogs extends ListRecords
             Actions\CreateAction::make()
                 ->label('Thêm blog'),
         ];
+    }
+
+    /**
+     * Tìm brand + campaign tiếp theo cho blog giới thiệu store.
+     * Không tạo trùng campaign đã có blog.
+     *
+     * @return array{0: Brand, 1: Campaign}|null
+     */
+    protected function findNextBrandIntroCandidate(): ?array
+    {
+        // Lấy danh sách campaign_id đã có blog giới thiệu (chưa xóa)
+        $usedCampaignIds = Blog::whereNotNull('campaign_id')
+            ->where('intro_type', 'store')
+            ->pluck('campaign_id')
+            ->toArray();
+
+        $brandRows = DB::table('brands')
+            ->join('campaigns', 'campaigns.brand_id', '=', 'brands.id')
+            ->whereNull('campaigns.deleted_at')
+            ->whereNotNull('campaigns.affiliate_url')
+            ->where('campaigns.affiliate_url', '!=', '')
+            ->whereNull('brands.deleted_at')
+            ->when(app()->environment('production'), fn ($q) => $q->where('campaigns.status', 'active'))
+            ->select('brands.id', 'brands.name', DB::raw('MIN(campaigns.created_at) as oldest_campaign_at'))
+            ->groupBy('brands.id', 'brands.name')
+            ->orderBy('oldest_campaign_at')
+            ->get();
+
+        if ($brandRows->isEmpty()) {
+            return null;
+        }
+
+        // Lọc bỏ brand mà tất cả campaign đã có blog
+        $availableBrandIds = [];
+        foreach ($brandRows as $row) {
+            $brandCampaigns = DB::table('campaigns')
+                ->where('brand_id', $row->id)
+                ->whereNull('deleted_at')
+                ->whereNotNull('affiliate_url')
+                ->where('affiliate_url', '!=', '')
+                ->when(app()->environment('production'), fn ($q) => $q->where('status', 'active'))
+                ->pluck('id')
+                ->toArray();
+
+            $hasAvailableCampaign = false;
+            foreach ($brandCampaigns as $cid) {
+                if (!in_array($cid, $usedCampaignIds)) {
+                    $hasAvailableCampaign = true;
+                    break;
+                }
+            }
+
+            if ($hasAvailableCampaign) {
+                $availableBrandIds[] = (int) $row->id;
+            }
+        }
+
+        // Nếu đã đăng hết tất cả campaigns, reset và bắt đầu lại từ đầu
+        if (empty($availableBrandIds)) {
+            $availableBrandIds = $brandRows->pluck('id')->map(fn ($id) => (int) $id)->toArray();
+        }
+
+        $lastBrandId = AdminSettings::get('auto_blog.brand_intro_last_brand_id');
+
+        // Tìm brand tiếp theo có campaign chưa có blog
+        $maxAttempts = $brandRows->count();
+        $startIndex = 0;
+        if ($lastBrandId !== null) {
+            foreach ($brandRows as $i => $row) {
+                if ((int) $row->id === (int) $lastBrandId) {
+                    $startIndex = ($i + 1) % $brandRows->count();
+                    break;
+                }
+            }
+        }
+
+        for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
+            $nextIndex = ($startIndex + $attempt) % $brandRows->count();
+            $candidateBrandId = (int) $brandRows[$nextIndex]->id;
+
+            if (!in_array($candidateBrandId, $availableBrandIds)) {
+                continue;
+            }
+
+            $brand = Brand::query()->whereKey($candidateBrandId)->first();
+            if (!$brand) {
+                continue;
+            }
+
+            // Tìm campaign cũ nhất của brand chưa có blog
+            $campaign = Campaign::query()
+                ->where('campaigns.brand_id', $brand->id)
+                ->whereNull('campaigns.deleted_at')
+                ->whereNotNull('campaigns.affiliate_url')
+                ->where('campaigns.affiliate_url', '!=', '')
+                ->when(app()->environment('production'), fn ($q) => $q->where('campaigns.status', 'active'))
+                ->whereNotIn('campaigns.id', $usedCampaignIds)
+                ->orderBy('campaigns.created_at')
+                ->orderBy('campaigns.id')
+                ->first();
+
+            if ($campaign) {
+                AdminSettings::set('auto_blog.brand_intro_last_brand_id', $brand->id);
+                return [$brand, $campaign];
+            }
+        }
+
+        return null;
     }
 
     protected function resolveBrandCategoryLabel(\App\Models\Brand $brand): string

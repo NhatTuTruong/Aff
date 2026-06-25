@@ -37,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->darkMode(true, isForced: true)
             ->defaultThemeMode(ThemeMode::Dark)
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => Color::hex('#0a1525'),
                 'gray' => Color::Zinc,
             ])
             ->font('Inter')

@@ -166,8 +166,7 @@ html.dark .fi-input:focus-within,
 html.dark input:focus,
 html.dark textarea:focus,
 html.dark select:focus {
-    border-color: var(--ca-admin-accent) !important;
-    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.2) !important;
+    outline: none !important;
 }
 
 /* Primary buttons */

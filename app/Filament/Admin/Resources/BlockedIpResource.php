@@ -83,7 +83,7 @@ class BlockedIpResource extends Resource
                     ->visible(fn () => static::userIsAdmin())
                     ->label('')
                     ->icon(fn (BlockedIp $record): string => $record->block_public ? 'heroicon-o-shield-check' : 'heroicon-o-shield-exclamation')
-                    ->color(fn (BlockedIp $record): string => $record->block_public ? 'danger' : 'gray')
+                    ->color(fn (BlockedIp $record): string => $record->block_public ? 'danger' : 'warning')
                     ->tooltip(fn (BlockedIp $record): string => $record->block_public ? 'Đang chặn public (bấm để bỏ)' : 'Chặn hẳn public')
                     ->requiresConfirmation()
                     ->modalHeading(fn (BlockedIp $record): string => $record->block_public ? 'Bỏ chặn truy cập public?' : 'Chặn hẳn IP truy cập trang public?')
@@ -93,8 +93,10 @@ class BlockedIpResource extends Resource
                     ->action(function (BlockedIp $record): void {
                         $record->update(['block_public' => ! $record->block_public]);
                     }),
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->color('info'),
+                Tables\Actions\EditAction::make()
+                    ->color('primary'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

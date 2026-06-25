@@ -31,6 +31,13 @@ class AutoBlogSettings
         return (bool) AdminSettings::get('auto_blog_brand_intro_enabled', true);
     }
 
+    public static function brandIntroIntervalHours(): float
+    {
+        $hours = (float) AdminSettings::get('auto_blog_brand_intro_interval_hours', 1);
+
+        return $hours > 0 ? $hours : 1;
+    }
+
     /**
      * Các chế độ nút "Tạo bài bằng AI" / phân bổ nội dung: intro + các variant category đang bật.
      *

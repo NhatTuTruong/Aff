@@ -10,6 +10,17 @@
 
         return url(ltrim($url, '/'));
     };
+
+    $currentPath = '/' . trim(parse_url(url()->current(), PHP_URL_PATH) ?? '/', '/');
+
+    $isActive = function ($url) use ($normalizeUrl, $currentPath) {
+        $resolved = '/' . trim(parse_url($normalizeUrl($url), PHP_URL_PATH) ?? '/', '/');
+        if ($resolved === '/' || $resolved === '') {
+            return $currentPath === '/';
+        }
+
+        return $currentPath === $resolved || str_starts_with($currentPath, $resolved . '/');
+    };
 @endphp
 <div class="site-chrome-topbar">
     Verified deals &middot; Updated regularly &middot;
@@ -32,7 +43,13 @@
         </div>
         <nav class="nav-links" id="site-nav" aria-label="Điều hướng chính">
             @foreach ($navLinks as $link)
-                <a href="{{ $normalizeUrl($link['url'] ?? '/') }}">{{ $link['label'] ?? 'Link' }}</a>
+                @php
+                    $active = $isActive($link['url'] ?? '/');
+                @endphp
+                <a
+                    href="{{ $normalizeUrl($link['url'] ?? '/') }}"
+                    @if($active) class="is-active" @endif
+                >{{ $link['label'] ?? 'Link' }}</a>
             @endforeach
         </nav>
     </div>

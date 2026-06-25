@@ -129,19 +129,19 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --t3-primary: #2fc2a9;
-            --t3-primary-dark: #24a892;
-            --t3-primary-soft: #d8f7f2;
-            --t3-accent: #2fc2a9;
-            --t3-accent-hover: #24a892;
-            --t3-hero-bg: linear-gradient(135deg, #1e9680 0%, #2fc2a9 55%, #5fd4bf 100%);
+            --t3-primary: #7c3aed;
+            --t3-primary-dark: #6d28d9;
+            --t3-primary-soft: #eef1f5;
+            --t3-accent: #7c3aed;
+            --t3-accent-hover: #6d28d9;
+            --t3-hero-bg: linear-gradient(135deg, #a78bfa 0%, #7c3aed 55%, #1e293b 100%);
             --t3-text: #0f172a;
             --t3-text-muted: #64748b;
             --t3-bg: #f1f5f9;
             --t3-card: #ffffff;
             --t3-border: #e2e8f0;
             --t3-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 10px 20px -5px rgba(15, 23, 42, 0.08);
-            --t3-ribbon: linear-gradient(180deg, #24a892 0%, #2fc2a9 50%, #1e9680 100%);
+            --t3-ribbon: linear-gradient(180deg, #6d28d9 0%, #7c3aed 50%, #a78bfa 100%);
         }
         body {
             font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -403,7 +403,7 @@
             background: linear-gradient(180deg, transparent, rgba(255,255,255,0.45), transparent);
         }
         .t3-offer-strip--deal {
-            background: linear-gradient(180deg, #24a892 0%, #2fc2a9 100%);
+            background: linear-gradient(180deg, #6d28d9 0%, #7c3aed 100%);
         }
         .t3-offer-num {
             font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;

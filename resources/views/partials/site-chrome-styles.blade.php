@@ -5,9 +5,9 @@
     --chrome-muted: #64748b;
     --chrome-muted-soft: #94a3b8;
     --chrome-line: rgba(15, 23, 42, 0.08);
-    --chrome-violet: #2fc2a9;
-    --chrome-violet-deep: #24a892;
-    --chrome-rose: #1e9680;
+    --chrome-violet: #7c3aed;
+    --chrome-violet-deep: #6d28d9;
+    --chrome-rose: #6d28d9;
     --chrome-cream: #f5f5f5;
     --chrome-white: #ffffff;
     --chrome-footer-0: #0f172a;
@@ -17,8 +17,8 @@
     --chrome-radius-input: 14px;
     --chrome-input-bg: #ffffff;
     --chrome-input-border: rgba(15, 23, 42, 0.14);
-    --chrome-input-border-focus: rgba(47, 194, 169, 0.65);
-    --chrome-input-ring: rgba(47, 194, 169, 0.18);
+    --chrome-input-border-focus: rgba(124, 58, 237, 0.65);
+    --chrome-input-ring: rgba(124, 58, 237, 0.18);
 }
 
 .site-chrome-topbar {
@@ -31,13 +31,13 @@
     letter-spacing: 0.01em;
 }
 .site-chrome-topbar a {
-    color: #7ee8d6;
+    color: #a78bfa;
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 3px;
 }
 .site-chrome-topbar a:hover {
-    color: #b8efe6;
+    color: #e0e7ff;
 }
 
 .site-header {
@@ -170,7 +170,11 @@
 }
 .site-header .nav-links a:hover {
     color: var(--chrome-violet-deep) !important;
-    border-bottom-color: rgba(47, 194, 169, 0.45);
+    border-bottom-color: #834bdd;
+}
+.site-header .nav-links a.is-active {
+    color: var(--chrome-violet) !important;
+    border-bottom-color: var(--chrome-violet);
 }
 
 @media (min-width: 769px) {
@@ -263,7 +267,7 @@ textarea::placeholder {
 }
 
 .site-footer {
-    background: linear-gradient(180deg, var(--chrome-footer-0) 0%, var(--chrome-footer-1) 55%, #0b1220 100%);
+    background: #0a1525;
     border-top: 1px solid rgba(148, 163, 184, 0.24);
     margin-top: auto;
     color: #e0f2fe;
@@ -324,11 +328,11 @@ textarea::placeholder {
     color: #f0f9ff !important;
 }
 .site-footer .footer-brand .logo span {
-    background: linear-gradient(135deg, #2fc2a9 0%, #24a892 100%) !important;
+    background: linear-gradient(135deg, #a78bfa 0%, #6d28d9 100%) !important;
     -webkit-background-clip: text !important;
     background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
-    color: #2fc2a9 !important;
+    color: #a78bfa !important;
 }
 .site-footer .footer-brand p {
     margin-top: 0.875rem;
@@ -379,7 +383,7 @@ textarea::placeholder {
     max-width: 760px;
 }
 .site-footer .footer-disclosure-text a {
-    color: #b8efe6;
+    color: #e0e7ff;
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -412,8 +416,8 @@ textarea::placeholder {
     justify-content: center;
     cursor: pointer;
     color: #fff;
-    background: linear-gradient(145deg, #2fc2a9 0%, #24a892 100%);
-    box-shadow: 0 8px 24px -6px rgba(47, 194, 169, 0.55);
+    background: linear-gradient(145deg, #7c3aed 0%, #6d28d9 100%);
+    box-shadow: 0 8px 24px -6px rgba(124, 58, 237, 0.55);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -428,12 +432,12 @@ textarea::placeholder {
     transform: translateY(0) scale(1);
 }
 .back-to-top:hover {
-    background: linear-gradient(145deg, #24a892 0%, #1e9680 100%);
-    box-shadow: 0 12px 28px -6px rgba(47, 194, 169, 0.6);
+    background: linear-gradient(145deg, #6d28d9 0%, #7c3aed 100%);
+    box-shadow: 0 12px 28px -6px rgba(124, 58, 237, 0.6);
     transform: translateY(-2px) scale(1);
 }
 .back-to-top:focus-visible {
-    outline: 2px solid #2fc2a9;
+    outline: 2px solid #7c3aed;
     outline-offset: 3px;
 }
 .back-to-top svg {

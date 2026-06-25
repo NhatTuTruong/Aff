@@ -63,6 +63,32 @@ class Brand extends Model
         return $this->hasMany(Campaign::class);
     }
 
+    /**
+     * Tạo slug không trùng cho Brand.
+     */
+    public static function ensureUniqueBrandSlug(string $base, ?int $ignoreBrandId = null): string
+    {
+        $base = Str::slug($base) ?: 'brand';
+        $candidate = $base;
+        $n = 2;
+
+        $conflicts = static::query()
+            ->where('slug', $candidate)
+            ->whereNull('deleted_at')
+            ->when($ignoreBrandId !== null, fn ($q) => $q->where('id', '!=', $ignoreBrandId));
+
+        while ($conflicts->exists()) {
+            $candidate = $base . '-' . $n;
+            $n++;
+            $conflicts = static::query()
+                ->where('slug', $candidate)
+                ->whereNull('deleted_at')
+                ->when($ignoreBrandId !== null, fn ($q) => $q->where('id', '!=', $ignoreBrandId));
+        }
+
+        return $candidate;
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -71,7 +97,7 @@ class Brand extends Model
             if (empty($brand->user_id)) {
                 $brand->user_id = Auth::id();
             }
-            
+
             // Lấy user_code an toàn, tránh lỗi khi user chưa có code
             $userCode = '00000';
             if ($brand->user_id) {
@@ -85,10 +111,11 @@ class Brand extends Model
                     $userCode = '00000';
                 }
             }
-            
+
             if (empty($brand->slug)) {
                 $baseSlug = Str::slug($brand->name);
-                $brand->slug = "{$userCode}/{$baseSlug}";
+                $slug = static::ensureUniqueBrandSlug($baseSlug);
+                $brand->slug = "{$userCode}/{$slug}";
             } elseif (!str_starts_with($brand->slug, $userCode . '/')) {
                 // Nếu slug đã có nhưng không có user_code prefix, thêm vào
                 $brand->slug = "{$userCode}/{$brand->slug}";
@@ -108,21 +135,26 @@ class Brand extends Model
                     $userCode = '00000';
                 }
             }
-            
-            // Đảm bảo slug luôn có user_code prefix
-            if ($brand->isDirty('slug') && !str_starts_with($brand->slug, $userCode . '/')) {
-                $brand->slug = "{$userCode}/{$brand->slug}";
+
+            // Nếu slug thay đổi, đảm bảo không trùng
+            if ($brand->isDirty('slug')) {
+                $slugParts = array_values(array_filter(explode('/', $brand->slug)));
+                $lastPart = end($slugParts) ?: Str::slug($brand->name) ?: 'brand';
+                $uniqueSlug = static::ensureUniqueBrandSlug($lastPart, $brand->id);
+                $brand->slug = str_contains($brand->slug, '/')
+                    ? "{$userCode}/{$uniqueSlug}"
+                    : "{$userCode}/{$uniqueSlug}";
             }
-            
+
             // Nếu name thay đổi và slug chưa có user_code prefix, cập nhật lại
             if ($brand->isDirty('name') && !$brand->isDirty('slug')) {
                 $baseSlug = Str::slug($brand->name);
-                if (!str_starts_with($brand->slug, $userCode . '/')) {
-                    $brand->slug = "{$userCode}/{$baseSlug}";
-                } else {
-                    // Giữ user_code, chỉ cập nhật phần sau
-                    $brand->slug = "{$userCode}/{$baseSlug}";
-                }
+                $slugParts = array_values(array_filter(explode('/', $brand->slug)));
+                $lastPart = end($slugParts) ?: $baseSlug;
+                $uniqueSlug = static::ensureUniqueBrandSlug($lastPart, $brand->id);
+                $brand->slug = str_contains($brand->slug, '/')
+                    ? "{$userCode}/{$uniqueSlug}"
+                    : "{$userCode}/{$uniqueSlug}";
             }
         });
     }

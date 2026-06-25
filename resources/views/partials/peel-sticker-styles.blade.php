@@ -1,8 +1,8 @@
 <style>
 .btn-get-code.btn-peel-sticker {
-    --peel-primary: #2fc2a9;
-    --peel-primary-light: #a8ebe0;
-    --peel-primary-dark: #24a892;
+    --peel-primary: #7c3aed;
+    --peel-primary-light: #ddd6fe;
+    --peel-primary-dark: #6d28d9;
     position: relative;
     display: inline-flex;
     padding: 0;
@@ -18,7 +18,7 @@
     display: block;
     min-width: 148px;
     height: 40px;
-    border: 2px dashed var(--peel-primary);
+    border: 2px dashed var(--primary-dark);
     border-radius: 6px;
     background: #fff;
     transition: box-shadow 0.2s ease;
@@ -31,7 +31,7 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-weight: 700;
     font-size: 0.95rem;
-    color: var(--peel-primary);
+    color: var(--primary-dark);
     letter-spacing: 0.08em;
     z-index: 0;
     pointer-events: none;
@@ -44,7 +44,7 @@
     bottom: -3px;
     height: 42px;
     width: calc(100% - 15px);
-    background: var(--peel-primary);
+    background: var(--primary-dark);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -73,18 +73,15 @@
     pointer-events: none;
     background: linear-gradient(
         225deg,
-        #d4f7f1 0%,
-        #b8efe6 42%,
+        #ede9fe 0%,
+        #ddd6fe 42%,
         var(--peel-primary-light) 43%,
-        var(--peel-primary) 44%
+        var(--primary-dark) 44%
     );
     clip-path: polygon(100% 0, 0 0, 100% 100%);
 }
-.btn-peel-sticker:hover .peel-sheet {
-    background: var(--peel-primary-dark);
-}
 .btn-peel-sticker:hover .peel-inner {
-    box-shadow: 0 4px 14px rgba(47, 194, 169, 0.32);
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.32);
 }
 .btn-peel-sticker:active .peel-inner {
     transform: scale(0.98);

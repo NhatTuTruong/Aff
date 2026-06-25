@@ -70,6 +70,17 @@ class BlogResource extends Resource
                             ->required()
                             ->unique(ignoreRecord: true, modifyRuleUsing: fn ($rule) => $rule->whereNull('deleted_at'))
                             ->helperText('URL thân thiện, tự động tạo từ tiêu đề'),
+                        Forms\Components\Select::make('campaign_id')
+                            ->label('Chiến dịch (Store)')
+                            ->relationship('campaign', 'title')
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('Chọn chiến dịch (tùy chọn)')
+                            ->helperText('Gắn bài viết với chiến dịch để tránh tạo trùng'),
+                        Forms\Components\TextInput::make('intro_type')
+                            ->label('Loại bài viết')
+                            ->placeholder('store, best, guide...')
+                            ->helperText('Phân loại bài viết (dùng cho auto blog)'),
                         Forms\Components\Toggle::make('is_published')
                             ->label('Xuất bản')
                             ->default(true)
@@ -149,6 +160,10 @@ class BlogResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->limit(40),
+                Tables\Columns\TextColumn::make('campaign.title')
+                    ->label('Store/Chiến dịch')
+                    ->limit(20)
+                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('category')
                     ->label('Danh mục')
                     ->limit(20),
@@ -185,20 +200,22 @@ class BlogResource extends Resource
                     ->icon('heroicon-o-eye')
                     ->tooltip('Xem trước')
                     ->url(fn (Blog $record) => route('blog.show', $record->slug))
-                    ->openUrlInNewTab(),
+                    ->openUrlInNewTab()
+                    ->color('info'),
                 Tables\Actions\EditAction::make()
-                    ->label('Chỉnh sửa')
+                    ->label('')
                     ->icon('heroicon-o-pencil-square')
-                    ->tooltip('Sửa'),
+                    ->tooltip('Sửa')
+                    ->color('primary'),
                 Tables\Actions\ReplicateAction::make()
                     ->label('')
                     ->icon('heroicon-o-document-duplicate')
                     ->tooltip('Sao chép')
+                    ->color('warning')
                     ->mutateRecordDataUsing(function (array $data, Blog $record): array {
                         $baseTitle = $record->title;
                         $baseSlug = $record->slug;
                         $n = 1;
-                        // Luôn thêm số vào slug để tránh trùng với slug gốc
                         do {
                             $title = $baseTitle . ' - Copy' . ($n > 1 ? ' ' . $n : '');
                             $slug = $baseSlug . '-copy' . $n;
@@ -210,22 +227,24 @@ class BlogResource extends Resource
                         } while ($exists);
                         $data['title'] = $title;
                         $data['slug'] = $slug;
-                        $data['is_published'] = false; // Mặc định là bản nháp khi sao chép
+                        $data['is_published'] = false;
                         return $data;
                     }),
                 Tables\Actions\DeleteAction::make()
-                    ->label('Xóa')
+                    ->label('')
                     ->icon('heroicon-o-trash')
-                    ->tooltip('Xóa'),
+                    ->tooltip('Xóa')
+                    ->color('danger'),
                 Tables\Actions\RestoreAction::make()
                     ->label('')
                     ->icon('heroicon-o-arrow-uturn-left')
-                    ->tooltip('Khôi phục'),
+                    ->tooltip('Khôi phục')
+                    ->color('info'),
                 Tables\Actions\ForceDeleteAction::make()
                     ->label('')
                     ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->tooltip('Xóa vĩnh viễn'),
+                    ->tooltip('Xóa vĩnh viễn')
+                    ->color('danger'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

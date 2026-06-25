@@ -15,6 +15,8 @@ class Blog extends Model
 
     protected $fillable = [
         'user_id',
+        'campaign_id',
+        'intro_type',
         'title',
         'category',
         'slug',
@@ -36,6 +38,11 @@ class Blog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function campaign(): BelongsTo
+    {
+        return $this->belongsTo(Campaign::class);
     }
 
     /** URL ảnh featured; ưu tiên featured_image, fallback ảnh mặc định theo category. */

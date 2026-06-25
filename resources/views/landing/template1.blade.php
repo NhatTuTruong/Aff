@@ -164,10 +164,10 @@
         }
 
         :root {
-            --primary: #2fc2a9;
-            --primary-dark: #24a892;
-            --primary-soft: #d8f7f2;
-            --accent: #1e9680;
+            --primary: #7c3aed;
+            --primary-dark: #6d28d9;
+            --primary-soft: #eef1f5;
+            --accent: #6d28d9;
             --text-dark: #0f172a;
             --text-light: #64748b;
             --bg-page: #f5f5f5;
@@ -628,7 +628,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #2fc2a9;
+            background: #7c3aed;
             color: #fff;
             padding: 3px 8px;
             border-radius: 6px;
@@ -646,7 +646,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #2fc2a9;
+            background: #7c3aed;
             color: #fff;
             padding: 3px 8px;
             border-radius: 6px;
@@ -691,7 +691,7 @@
             align-items: center;
             gap: 6px;
             background: #ecfeff;
-            color: #24a892;
+            color: #6d28d9;
             padding: 4px 10px;
             border-radius: 999px;
             font-size: 0.75rem;
@@ -743,7 +743,7 @@
             align-items: center;
             gap: 4px;
             font-weight: 600;
-            color: #24a892;
+            color: #6d28d9;
         }
 
         .coupon-verified-badge {
@@ -988,7 +988,7 @@
         }
 
         .modal-link {
-            color: #2fc2a9;
+            color: #7c3aed;
             font-weight: 600;
         }
 
@@ -1137,7 +1137,7 @@
         .coupon-copy-toast-progress {
             width: 100%;
             height: 3px;
-            background: #2fc2a9;
+            background: #7c3aed;
             transform-origin: left center;
             animation: couponCopyToastProgress 2s linear forwards;
         }
@@ -1167,7 +1167,7 @@
         }
 
         .popup-banner {
-            background: linear-gradient(145deg, #1e9680 0%, #24a892 58%, #2fc2a9 100%);
+            background: linear-gradient(145deg, #a78bfa 0%, #6d28d9 58%, #7c3aed 100%);
             padding: 32px 28px 40px;
             text-align: center;
             position: relative;
@@ -1364,7 +1364,7 @@
         .coupon-code-icon {
             width: 24px;
             height: 24px;
-            background: linear-gradient(135deg, #5fd4bf 0%, #2fc2a9 100%);
+            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -1388,7 +1388,7 @@
         }
 
         .btn-copy-code-modal {
-            background: linear-gradient(135deg, #5fd4bf 0%, #2fc2a9 100%);
+            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -1398,13 +1398,13 @@
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
-            box-shadow: 0 6px 18px rgba(47, 194, 169, 0.32);
+            box-shadow: 0 6px 18px #7c3aed;
         }
 
         .btn-copy-code-modal:hover {
-            background: linear-gradient(135deg, #24a892 0%, #1e9680 100%);
+            background: linear-gradient(135deg, #6d28d9 0%, #a78bfa 100%);
             transform: translateY(-1px);
-            box-shadow: 0 10px 24px rgba(47, 194, 169, 0.4);
+            box-shadow: 0 10px 24px #7c3aed;
         }
 
         .btn-copy-code-modal:active {
@@ -1430,14 +1430,14 @@
 
         .verification-item::before {
             content: '✓';
-            color: #2fc2a9;
+            color: #7c3aed;
             font-weight: 700;
             font-size: 0.9rem;
         }
 
         .verification-item.success::before {
             content: '●';
-            color: #2fc2a9;
+            color: #7c3aed;
         }
 
         .coupon-modal-actions {
@@ -1539,7 +1539,7 @@
             font-size: 0.78rem;
             color: #6b7280;
         }
-        .lead-capture-msg.success { color: #24a892; }
+        .lead-capture-msg.success { color: #6d28d9; }
         .lead-capture-msg.error { color: #dc2626; }
 
         .feedback-btn {
@@ -1571,8 +1571,8 @@
         }
 
         .feedback-btn.worked {
-            border-color: #2fc2a9;
-            color: #2fc2a9;
+            border-color: #7c3aed;
+            color: #7c3aed;
         }
 
         .feedback-btn.failed {
@@ -1613,7 +1613,7 @@
 
         .btn-copy-all-codes:active,
         .btn-copy-all-codes.copied {
-            background: #24a892 !important;
+            background: #6d28d9 !important;
         }
 
         /* Q&A Section */
@@ -1755,19 +1755,19 @@
             gap: 6px;
             padding: 10px 18px;
             border-radius: 999px;
-            background: #2fc2a9;
+            background: #7c3aed;
             color: #fff;
             font-weight: 700;
             font-size: 0.85rem;
             cursor: pointer;
             border: none;
             transition: all 0.2s ease;
-            box-shadow: 0 10px 24px rgba(47, 194, 169, 0.35);
+            box-shadow: 0 10px 24px rgba(124, 58, 237, 0.35);
         }
 
         .btn-get-coupon:hover {
             transform: translateY(-1px);
-            background: #24a892;
+            background: #6d28d9;
             cursor: pointer;
         }
 
@@ -3007,7 +3007,7 @@
                 copyCodeToClipboard(code);
                 const t = this.textContent;
                 this.textContent = 'Copied ✓';
-                this.style.background = '#2fc2a9';
+                this.style.background = '#7c3aed';
                 this.style.color = '#fff';
                 setTimeout(() => {
                     this.textContent = t;
@@ -3378,7 +3378,7 @@
             // Highlight selected button
             if (worked) {
                 btn.style.background = '#dcfce7';
-                btn.style.borderColor = '#2fc2a9';
+                btn.style.borderColor = '#7c3aed';
                 btn.innerHTML = '<span class="feedback-icon">✓</span><span>Thank you!</span>';
             } else {
                 btn.style.background = '#fef2f2';

@@ -39,7 +39,7 @@ class GeminiBlogService
 Bạn là copywriter SEO tiếng Anh chuyên nghiệp.
 
 Yêu cầu bài viết:
-- Ngôn ngữ: tiếng Anh, chuẩn SEO, độ dài 1,500–2,200 từ.
+- Ngôn ngữ: tiếng Anh, chuẩn SEO, độ dài 1,500-2,200 từ.
 - Cấu trúc: 1 thẻ <h1> duy nhất, các phần chính dùng <h2>, có thể thêm <h3>.
 - Nội dung hữu ích, không quảng cáo thương hiệu cụ thể.
 - Trả về HTML hoàn chỉnh: <h1>, <p>, <ul>/<ol>, <h2>, <h3>. Không bọc <html>/<body>.
@@ -71,14 +71,12 @@ PROMPT;
 
         if (empty($apiKey)) {
             $this->lastError = 'GEMINI_API_KEY chưa được cấu hình.';
-
             return null;
         }
 
         $hint = trim($hint);
         if ($hint === '') {
             $this->lastError = 'Thiếu tên brand hoặc domain.';
-
             return null;
         }
 
@@ -99,7 +97,7 @@ The editor typed this brand or store identifier (it may be a company name OR a d
 Write ONE **short** editorial-style article in **English** about this brand/store as a general shopping subject.
 
 ## Length & tone
-- Target **450–700 words** (shorter than a full review; scannable).
+- Target **450-700 words** (shorter than a full review; scannable).
 - Helpful, neutral-to-positive, **not** salesy. Do **not** invent specific prices, coupon codes, percentages, or time-limited promotions.
 - You may use **high-level, generic** industry knowledge only; if unsure, stay vague and recommend readers check the official site.
 - If the subject looks like a **domain**, you may mention it as the likely official web presence. Add **at most one** link to `https://` + that host only if it is clearly a domain (use `rel="nofollow noopener"`). If it is only a brand name with no clear domain, **do not** invent URLs.
@@ -131,7 +129,9 @@ PROMPT;
     }
 
     /**
-     * Blog giới thiệu brand + coupon landing, có CTA và link affiliate khi nhắc tên brand.
+     * Blog giới thiệu brand + coupon landing, có CTA và link affiliate.
+     * Tên brand KHÔNG gắn link trong nội dung - link chỉ ở đầu và cuối bài.
+     * Coupon codes được nhúng vào nội dung.
      *
      * @return array{title: string, content: string, featured_image: ?string}|null
      */
@@ -146,7 +146,6 @@ PROMPT;
 
         if (empty($apiKey)) {
             $this->lastError = 'GEMINI_API_KEY chưa được cấu hình.';
-
             return null;
         }
 
@@ -167,71 +166,69 @@ PROMPT;
             ? implode('; ', array_filter(array_map('strval', $benefits)))
             : (string) $benefits;
 
-        $couponLines = $campaign->couponItems
-            ->take(12)
+        // Lấy tối đa 5 coupon codes để nhúng vào nội dung
+        $couponCodes = $campaign->couponItems
+            ->take(5)
             ->map(function ($c) {
                 $parts = array_filter([
-                    $c->offer ?? null,
-                    $c->code ? "code: {$c->code}" : null,
-                    $c->description ? Str::limit(strip_tags((string) $c->description), 120) : null,
+                    $c->offer ? "<strong>{$c->offer}</strong>" : null,
+                    $c->code ? "Code: <code>{$c->code}</code>" : null,
+                    $c->description ? Str::limit(strip_tags((string) $c->description), 100) : null,
                 ]);
-
                 return $parts ? implode(' — ', $parts) : null;
             })
             ->filter()
-            ->join("\n");
+            ->values()
+            ->toArray();
 
-        if ($couponLines === '') {
-            $couponLines = '(No separate coupon rows; focus on store deals and the landing page.)';
+        $couponListHtml = '';
+        if (!empty($couponCodes)) {
+            $couponItems = [];
+            foreach ($couponCodes as $code) {
+                $couponItems[] = "<li>{$code}</li>";
+            }
+            $couponListHtml = "<h2>Available Coupons</h2>\n<ul>\n" . implode("\n", $couponItems) . "\n</ul>";
         }
 
-        $year = (int) now()->format('Y');
-        $linkExample = '<a href="' . $affiliateTrackingUrl . '" rel="nofollow sponsored">' . htmlspecialchars($brandName, ENT_QUOTES, 'UTF-8') . '</a>';
         $extrasBlock = $this->buildEditorExtrasBlock($extras, forEnglish: true, forcePromoSection: true);
 
         $prompt = <<<PROMPT
 You are an expert English SEO copywriter for affiliate coupon sites.
 
-Write ONE long-form blog article introducing the store/brand below. Language: **English**. Target length **1,800–2,600 words**. Tone: helpful, trustworthy, conversion-oriented but honest.
+Write ONE blog article introducing the store/brand below. Language: **English**. Target length **900-1,200 words**. Tone: helpful, trustworthy, conversion-oriented but honest.
 
 ## Brand & campaign facts (use only as facts; do not invent unavailable data)
-- This row is a campaign in our system. The **store name** in the article must be the Brand name below (same store as on the campaign landing / coupon page).
 - Category niche: {$categoryName}
-- Brand / store name (exact spelling): {$brandName}
+- Brand / store name: {$brandName}
 - Domain (if any): {$domain}
 - Short brand description: {$shortDesc}
-- Campaign / store page title: {$campaignTitle}
-- Campaign intro (may be HTML stripped): {$campaignIntro}
-- Stated benefits / highlights: {$benefitsText}
-- Sample coupons / offers (lines):
-{$couponLines}
+- Campaign title: {$campaignTitle}
+- Campaign intro: {$campaignIntro}
+- Benefits / highlights: {$benefitsText}
 
 {$extrasBlock}
 
 ## Required HTML output rules
 - Return **complete HTML fragment** only: use `<h1>` once for the main title, then `<h2>`, `<h3>`, `<p>`, `<ul>`, `<ol>`, `<strong>` as needed. **Do not** wrap in `<html>` or `<body>`.
 - Do NOT use Markdown. Do NOT wrap output in code fences like ```html ... ```.
-- **Every time** the brand name "{$brandName}" appears in body copy (headings or paragraphs), it MUST be this exact link (adjust only if the name appears in possessive/plural form—still link the brand token):
-  {$linkExample}
-- Use `rel="nofollow sponsored"` on every affiliate link to the brand name.
-- Primary **CTA** at the end: a clear button-style sentence linking to the **coupon/deals landing page** (not the raw merchant site) using this exact URL only: {$couponLandingUrl}
-  Example: `<p><a href="{$couponLandingUrl}" rel="nofollow">View latest coupons &amp; deals</a></p>`
+- **DO NOT link** the brand name "{$brandName}" anywhere in the article content (headings or paragraphs). Just write it as plain text.
+- **ONLY link** when using these CTA buttons at the BEGINNING and END of the article.
 
-## Required article structure (use these section ideas; use clear `<h2>` titles in English)
-1. **Title (`<h1>`)**: Include brand name + main category keyword + conversion angle. You may naturally add one of: Review, Coupon, Discount, or {$year} where it fits (do not stuff).
-2. **Opening hook (`<h2>`)**: Problem the reader faces; transition to this brand and the main benefit.
-3. **What is {$brandName} (`<h2>`)**: What the brand is, what it sells, unique selling points (USP).
-4. **Main products or services (`<h2>`)**: Main lines; optional `<h3>` by category if it fits the facts.
-5. **Pros and cons (`<h2>`) — MANDATORY**: Two subsections or bullet lists — **Pros** and **Cons** (balanced, builds trust). Do not skip cons.
-6. **In-depth review (`<h2>`)**: Experience/features, who it is for, optional short comparison with typical alternatives (only if generic, no fake competitor names/data).
-7. **Closing + CTA (`<h2>` or final `<p>`)**: Summarize and drive to the coupon landing link above.
+## Article structure
+1. **Title (`<h1>`)**: Include brand name + main category keyword.
+2. **Opening CTA (`<p>` at top)**: `<a href="{$affiliateTrackingUrl}" rel="nofollow sponsored">Shop now at {$brandName}</a>` — put this link in the first paragraph.
+3. **Brief intro (`<h2>`)**: What the brand is, main benefit.
+4. **Products/Services (`<h2>`)**: Main offerings.
+5. **Pros and Cons (`<h2>`)**: Two subsections or bullet lists.
+6. **Available Coupons**: {$couponListHtml}
+7. **Closing CTA (`<p>` at bottom)**: `<a href="{$couponLandingUrl}" rel="nofollow">View all coupons & deals</a>` — put this link in the last paragraph.
 
-Do not claim discounts or codes that are not in the facts; you may say readers can find current offers on your deals page.
+Do not claim discounts or codes that are not in the facts.
 PROMPT;
 
         $result = $this->callGemini($apiKey, $model, $prompt, $timeout, [
-            'maxOutputTokens' => 8192,
-            'temperature' => 0.85,
+            'maxOutputTokens' => 6144,
+            'temperature' => 0.8,
         ]);
 
         // Không gán ảnh brand: để featured_image null → Blog dùng ảnh mặc định theo category (slug danh mục).
@@ -334,7 +331,6 @@ PROMPT;
         } catch (\Throwable $e) {
             $this->lastError = $e->getMessage();
             Log::warning('GeminiBlogService HTTP error', ['error' => $e->getMessage(), 'model' => $model]);
-
             return null;
         }
 
@@ -343,7 +339,6 @@ PROMPT;
             $msg = data_get($body, 'error.message', $response->body());
             $this->lastError = "HTTP {$response->status()}: {$msg}";
             Log::warning('GeminiBlogService API error', ['status' => $response->status(), 'body' => $body]);
-
             return null;
         }
 
@@ -352,14 +347,12 @@ PROMPT;
         $blockReason = data_get($data, 'candidates.0.finishReason');
         if (in_array($blockReason, ['SAFETY', 'RECITATION', 'OTHER'], true)) {
             $this->lastError = "Response blocked: {$blockReason}";
-
             return null;
         }
 
         $parts = data_get($data, 'candidates.0.content.parts', []);
         if (empty($parts)) {
             $this->lastError = 'Response không có parts.';
-
             return null;
         }
 
@@ -374,7 +367,6 @@ PROMPT;
 
         if (trim($text) === '') {
             $this->lastError = 'Response không có nội dung text.';
-
             return null;
         }
 

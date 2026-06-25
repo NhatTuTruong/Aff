@@ -55,13 +55,11 @@ class SystemSettings extends Page implements HasForms
             'gemini_timeout' => (int) AdminSettings::get('gemini_timeout', config('gemini.timeout', 60)),
             'site_contact_email' => (string) AdminSettings::get('site_contact_email', config('mail.from.address', 'contact@example.com')),
             'auto_blog_enabled' => (bool) AdminSettings::get('auto_blog_enabled', true),
-            'auto_blog_daily_count' => (int) AdminSettings::get('auto_blog_daily_count', 2),
-            'auto_blog_window_start_hour' => (int) AdminSettings::get('auto_blog_window_start_hour', 6),
-            'auto_blog_window_end_hour' => (int) AdminSettings::get('auto_blog_window_end_hour', 18),
             'auto_blog_variant_best' => (bool) AdminSettings::get('auto_blog_variant_best', true),
             'auto_blog_variant_guide' => (bool) AdminSettings::get('auto_blog_variant_guide', true),
             'auto_blog_variant_comparison' => (bool) AdminSettings::get('auto_blog_variant_comparison', true),
             'auto_blog_brand_intro_enabled' => (bool) AdminSettings::get('auto_blog_brand_intro_enabled', true),
+            'auto_blog_brand_intro_interval_hours' => (float) AdminSettings::get('auto_blog_brand_intro_interval_hours', 1),
             'seo_title_suffix' => (string) AdminSettings::get('seo_title_suffix', '- ' . config('app.name')),
             'seo_meta_description_default' => (string) AdminSettings::get('seo_meta_description_default', 'Best coupons, deals and store reviews.'),
             'seo_og_image_default' => (string) AdminSettings::get('seo_og_image_default', ''),
@@ -118,23 +116,6 @@ class SystemSettings extends Page implements HasForms
                         Toggle::make('auto_blog_enabled')
                             ->label('Bật Auto Blog')
                             ->inline(false),
-                        TextInput::make('auto_blog_daily_count')
-                            ->label('Số bài/ngày')
-                            ->numeric()
-                            ->minValue(1)
-                            ->required(),
-                        TextInput::make('auto_blog_window_start_hour')
-                            ->label('Giờ bắt đầu (0-23)')
-                            ->numeric()
-                            ->minValue(0)
-                            ->maxValue(23)
-                            ->required(),
-                        TextInput::make('auto_blog_window_end_hour')
-                            ->label('Giờ kết thúc (0-23)')
-                            ->numeric()
-                            ->minValue(0)
-                            ->maxValue(23)
-                            ->required(),
                         Toggle::make('auto_blog_variant_best')
                             ->label('Bật variant: Bài viết lựa chọn tốt nhất')
                             ->inline(false),
@@ -145,8 +126,14 @@ class SystemSettings extends Page implements HasForms
                             ->label('Bật variant: Bài viết so sánh')
                             ->inline(false),
                         Toggle::make('auto_blog_brand_intro_enabled')
-                            ->label('Bật variant:Bài viết về cửa hàng đang có')
+                            ->label('Bật variant: Bài viết về cửa hàng đang có')
                             ->inline(false),
+                        TextInput::make('auto_blog_brand_intro_interval_hours')
+                            ->label('Khoảng cách đăng bài (giờ)')
+                            ->numeric()
+                            ->minValue(0.1)
+                            ->step(0.1)
+                            ->required(),
                     ])
                     ->columns(3),
                 Section::make('SEO mặc định')
@@ -207,13 +194,11 @@ class SystemSettings extends Page implements HasForms
         AdminSettings::set('gemini_timeout', max(5, (int) ($data['gemini_timeout'] ?? config('gemini.timeout', 60))));
         AdminSettings::set('site_contact_email', trim((string) ($data['site_contact_email'] ?? config('mail.from.address', 'contact@example.com'))));
         AdminSettings::set('auto_blog_enabled', (bool) ($data['auto_blog_enabled'] ?? true));
-        AdminSettings::set('auto_blog_daily_count', max(1, (int) ($data['auto_blog_daily_count'] ?? 2)));
-        AdminSettings::set('auto_blog_window_start_hour', max(0, min(23, (int) ($data['auto_blog_window_start_hour'] ?? 6))));
-        AdminSettings::set('auto_blog_window_end_hour', max(0, min(23, (int) ($data['auto_blog_window_end_hour'] ?? 18))));
         AdminSettings::set('auto_blog_variant_best', (bool) ($data['auto_blog_variant_best'] ?? true));
         AdminSettings::set('auto_blog_variant_guide', (bool) ($data['auto_blog_variant_guide'] ?? true));
         AdminSettings::set('auto_blog_variant_comparison', (bool) ($data['auto_blog_variant_comparison'] ?? true));
         AdminSettings::set('auto_blog_brand_intro_enabled', (bool) ($data['auto_blog_brand_intro_enabled'] ?? true));
+        AdminSettings::set('auto_blog_brand_intro_interval_hours', (float) ($data['auto_blog_brand_intro_interval_hours'] ?? 1));
         AdminSettings::set('seo_title_suffix', trim((string) ($data['seo_title_suffix'] ?? ('- ' . config('app.name')))));
         AdminSettings::set('seo_meta_description_default', trim((string) ($data['seo_meta_description_default'] ?? 'Best coupons, deals and store reviews.')));
         AdminSettings::set('seo_og_image_default', trim((string) ($data['seo_og_image_default'] ?? '')));

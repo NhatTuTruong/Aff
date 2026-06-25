@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Blog;
 use App\Models\Brand;
 use App\Models\Campaign;
 use Illuminate\Support\Facades\DB;
@@ -97,35 +98,60 @@ class BrandIntroBlogCandidateService
     }
 
     /**
+     * Tìm brand + campaign tiếp theo theo vòng lặp, bỏ qua campaign đã có blog.
+     *
      * @return array{0: Brand, 1: Campaign}|null
      */
     public function findBrandAndCampaignForIntro(): ?array
     {
-        $pvSub = DB::table('page_views')
-            ->select('campaign_id', DB::raw('COUNT(*) as cnt'))
-            ->groupBy('campaign_id');
+        // Lấy danh sách campaign_id đã có blog giới thiệu (chưa xóa)
+        $usedCampaignIds = Blog::whereNotNull('campaign_id')
+            ->where('intro_type', 'store')
+            ->pluck('campaign_id')
+            ->toArray();
 
-        $ckSub = DB::table('clicks')
-            ->whereNull('deleted_at')
-            ->select('campaign_id', DB::raw('COUNT(*) as cnt'))
-            ->groupBy('campaign_id');
-
-        $brandRows = DB::table('campaigns')
-            ->leftJoinSub($pvSub, 'pv', 'pv.campaign_id', '=', 'campaigns.id')
-            ->leftJoinSub($ckSub, 'ck', 'ck.campaign_id', '=', 'campaigns.id')
-            ->join('brands', 'brands.id', '=', 'campaigns.brand_id')
+        $brandRows = DB::table('brands')
+            ->join('campaigns', 'campaigns.brand_id', '=', 'brands.id')
             ->whereNull('campaigns.deleted_at')
             ->whereNotNull('campaigns.affiliate_url')
             ->where('campaigns.affiliate_url', '!=', '')
             ->whereNull('brands.deleted_at')
             ->when(app()->environment('production'), fn ($q) => $q->where('campaigns.status', 'active'))
-            ->select('campaigns.brand_id', DB::raw('SUM(COALESCE(pv.cnt, 0) + COALESCE(ck.cnt, 0)) AS total_eng'))
-            ->groupBy('campaigns.brand_id')
-            ->orderByDesc('total_eng')
-            ->orderBy('campaigns.brand_id')
+            ->select('brands.id', 'brands.name', DB::raw('MIN(campaigns.created_at) as oldest_campaign_at'))
+            ->groupBy('brands.id', 'brands.name')
+            ->orderBy('oldest_campaign_at')
             ->get();
 
         if ($brandRows->isEmpty()) {
+            return null;
+        }
+
+        // Lọc bỏ brand mà tất cả campaign đã có blog
+        $availableBrandIds = [];
+        foreach ($brandRows as $row) {
+            $brandCampaigns = DB::table('campaigns')
+                ->where('brand_id', $row->id)
+                ->whereNull('deleted_at')
+                ->whereNotNull('affiliate_url')
+                ->where('affiliate_url', '!=', '')
+                ->when(app()->environment('production'), fn ($q) => $q->where('status', 'active'))
+                ->pluck('id')
+                ->toArray();
+
+            $hasAvailableCampaign = false;
+            foreach ($brandCampaigns as $cid) {
+                if (!in_array($cid, $usedCampaignIds)) {
+                    $hasAvailableCampaign = true;
+                    break;
+                }
+            }
+
+            if ($hasAvailableCampaign) {
+                $availableBrandIds[] = (int) $row->id;
+            }
+        }
+
+        if (empty($availableBrandIds)) {
             return null;
         }
 
@@ -139,7 +165,18 @@ class BrandIntroBlogCandidateService
             return null;
         }
 
-        $campaign = $this->pickTopImportedCampaignForBrand($brand);
+        // Tìm campaign cũ nhất của brand chưa có blog
+        $campaign = Campaign::query()
+            ->where('campaigns.brand_id', $brand->id)
+            ->whereNull('campaigns.deleted_at')
+            ->whereNotNull('campaigns.affiliate_url')
+            ->where('campaigns.affiliate_url', '!=', '')
+            ->when(app()->environment('production'), fn ($q) => $q->where('campaigns.status', 'active'))
+            ->whereNotIn('campaigns.id', $usedCampaignIds)
+            ->orderBy('campaigns.created_at')
+            ->orderBy('campaigns.id')
+            ->first();
+
         if (! $campaign) {
             return null;
         }

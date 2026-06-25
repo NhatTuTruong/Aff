@@ -76,10 +76,23 @@ class BrandResource extends Resource
                             ->label('Tên cửa hàng')
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, Forms\Set $set) => $set(
-                                'slug',
-                                \Illuminate\Support\Str::slug($state)
-                            )),
+                            ->afterStateUpdated(function ($state, Forms\Set $set, $livewire, ?Brand $record) {
+                                $baseSlug = \Illuminate\Support\Str::slug($state);
+                                $user = \Filament\Facades\Filament::auth()->user();
+                                $userCode = $user?->code ?? '00000';
+
+                                // Nếu đang edit và brand có slug, giữ nguyên phần userCode prefix
+                                if ($record && $record->slug) {
+                                    $parts = explode('/', $record->slug, 2);
+                                    if (count($parts) === 2) {
+                                        $userCode = $parts[0];
+                                        $baseSlug = $parts[1];
+                                    }
+                                }
+
+                                $uniqueSlug = Brand::ensureUniqueBrandSlug($baseSlug, $record?->id);
+                                $set('slug', "{$userCode}/{$uniqueSlug}");
+                            }),
                         Forms\Components\TextInput::make('slug')
                             ->label('Slug')
                             ->required()
@@ -301,16 +314,17 @@ class BrandResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->label('')
                     ->icon('heroicon-o-pencil-square')
-                    ->tooltip('Sửa'),
+                    ->tooltip('Sửa')
+                    ->color('primary'),
                 Tables\Actions\ReplicateAction::make()
                     ->label('')
                     ->icon('heroicon-o-document-duplicate')
                     ->tooltip('Nhân bản')
+                    ->color('warning')
                     ->mutateRecordDataUsing(function (array $data, Brand $record): array {
                         $baseName = $record->name;
                         $baseSlug = $record->slug;
                         
-                        // Tách user_code và slug
                         $parts = explode('/', $baseSlug, 2);
                         $userCode = count($parts) === 2 ? $parts[0] : (\Filament\Facades\Filament::auth()->user()?->code ?? '00000');
                         $slugPart = count($parts) === 2 ? $parts[1] : $baseSlug;
@@ -332,16 +346,18 @@ class BrandResource extends Resource
                 Tables\Actions\DeleteAction::make()
                     ->label('')
                     ->icon('heroicon-o-trash')
-                    ->tooltip('Xóa'),
+                    ->tooltip('Xóa')
+                    ->color('danger'),
                 Tables\Actions\RestoreAction::make()
                     ->label('')
                     ->icon('heroicon-o-arrow-uturn-left')
-                    ->tooltip('Khôi phục'),
+                    ->tooltip('Khôi phục')
+                    ->color('info'),
                 Tables\Actions\ForceDeleteAction::make()
                     ->label('')
                     ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->tooltip('Xóa vĩnh viễn'),
+                    ->tooltip('Xóa vĩnh viễn')
+                    ->color('danger'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

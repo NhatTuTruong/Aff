@@ -132,9 +132,9 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --t2-primary: #2fc2a9;
-            --t2-primary-dark: #24a892;
-            --t2-primary-soft: #d8f7f2;
+            --t2-primary: #7c3aed;
+            --t2-primary-dark: #6d28d9;
+            --t2-primary-soft: #eef1f5;
             --t2-banner: #1e293b;
             --t2-banner-dark: #0f172a;
             --t2-text: #1e293b;
