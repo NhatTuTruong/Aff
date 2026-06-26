@@ -37,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->darkMode(true, isForced: true)
             ->defaultThemeMode(ThemeMode::Dark)
             ->colors([
-                'primary' => Color::hex('#0a1525'),
+                'primary' => Color::hex('#0d6efd'),
                 'gray' => Color::Zinc,
             ])
             ->font('Inter')
@@ -75,6 +75,10 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::STYLES_AFTER,
                 fn () => '<link rel="stylesheet" href="' . asset('css/filament/filament/admin-theme.css') . '">'
+            )
+            ->renderHook(
+                PanelsRenderHook::STYLES_AFTER,
+                fn () => '<style>:root { --admin-bg: lab(2.51107% 0.242703 -0.886115); } body { background-color: var(--admin-bg) !important; }</style>'
             )
             ->renderHook(
                 PanelsRenderHook::HEAD_END,

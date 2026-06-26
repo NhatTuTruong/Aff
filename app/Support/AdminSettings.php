@@ -17,6 +17,11 @@ class AdminSettings
         SiteContent::set('settings.' . $key, $value);
     }
 
+    public static function forget(string $key): void
+    {
+        SiteContent::set('settings.' . $key, null);
+    }
+
     public static function getEncrypted(string $key, ?string $default = null): ?string
     {
         $raw = SiteContent::get('settings.secure.' . $key);

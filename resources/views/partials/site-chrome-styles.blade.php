@@ -17,8 +17,8 @@
     --chrome-radius-input: 14px;
     --chrome-input-bg: #ffffff;
     --chrome-input-border: rgba(15, 23, 42, 0.14);
-    --chrome-input-border-focus: rgba(124, 58, 237, 0.65);
-    --chrome-input-ring: rgba(124, 58, 237, 0.18);
+    --chrome-input-border-focus: rgba(13, 110, 253, 0.65);
+    --chrome-input-ring: rgba(13, 110, 253, 0.18);
 }
 
 .site-chrome-topbar {
