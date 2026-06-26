@@ -25,6 +25,10 @@
 
 @section('content')
 <div class="legal-container">
-    {!! \App\Models\SiteContent::get('page_about_us', \App\Models\SiteContent::defaultPageAboutUs()) !!}
+    @php
+        $content = \App\Models\SiteContent::get('page_about_us', \App\Models\SiteContent::defaultPageAboutUs());
+        $content = str_replace('[SITE_NAME]', e(config('app.name')), $content);
+    @endphp
+    {!! $content !!}
 </div>
 @endsection

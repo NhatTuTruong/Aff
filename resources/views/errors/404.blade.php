@@ -2,7 +2,7 @@
     $content = \App\Models\SiteContent::get('error_404', \App\Models\SiteContent::defaultErrorContent('404'));
 @endphp
 @extends('layouts.app')
-@section('title', ($content['title'] ?? 'Trang không tồn tại') . ' - ' . config('app.name'))
+@section('title', ($content['title'] ?? 'Page Not Found') . ' - ' . config('app.name'))
 @push('styles')
 <style>
     .error-page { text-align: center; padding: 4rem 1.5rem; max-width: 560px; margin: 0 auto; }
@@ -16,8 +16,8 @@
 @section('content')
     <div class="error-page">
         <div class="error-code">404</div>
-        <h1 class="error-title">{{ $content['title'] ?? 'Trang không tồn tại' }}</h1>
-        <p class="error-message">{{ $content['message'] ?? 'Trang bạn tìm kiếm không tồn tại hoặc đã bị di chuyển.' }}</p>
+        <h1 class="error-title">{{ $content['title'] ?? 'Page Not Found' }}</h1>
+        <p class="error-message">{{ $content['message'] ?? 'The page you are looking for does not exist or has been moved.' }}</p>
         <div class="error-actions">
             <a href="{{ url('/') }}">Back to home page</a>
         </div>

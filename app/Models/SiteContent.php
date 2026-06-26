@@ -90,10 +90,10 @@ class SiteContent extends Model
     public static function defaultErrorContent(string $code): array
     {
         return match ($code) {
-            '404' => ['title' => 'Trang không tồn tại', 'message' => 'Trang bạn tìm kiếm không tồn tại hoặc đã bị di chuyển.'],
-            '403' => ['title' => 'Không có quyền truy cập', 'message' => 'Bạn không có quyền truy cập trang này.'],
-            '500' => ['title' => 'Lỗi máy chủ', 'message' => 'Đã xảy ra lỗi. Chúng tôi đang khắc phục.'],
-            '503' => ['title' => 'Bảo trì', 'message' => 'Hệ thống đang bảo trì. Vui lòng quay lại sau.'],
+            '404' => ['title' => 'Page Not Found', 'message' => 'The page you are looking for does not exist or has been moved.'],
+            '403' => ['title' => 'Forbidden', 'message' => 'You do not have permission to access this page.'],
+            '500' => ['title' => 'Server Error', 'message' => 'An error occurred. We are fixing it.'],
+            '503' => ['title' => 'Under Maintenance', 'message' => 'The system is under maintenance. Please come back later.'],
             default => ['title' => 'Lỗi', 'message' => 'Đã xảy ra lỗi.'],
         };
     }
@@ -102,14 +102,14 @@ class SiteContent extends Model
     public static function defaultPageAboutUs(): string
     {
         return <<<'HTML'
-<h1 class="font-heading">About ReviewHays</h1>
+<h1 class="font-heading">About [SITE_NAME]</h1>
 
-<p><strong>ReviewHays</strong> is an independent review and deal discovery platform designed to help consumers make smarter purchasing decisions online.</p>
+<p><strong>[SITE_NAME]</strong> is an independent review and deal discovery platform designed to help consumers make smarter purchasing decisions online.</p>
 
 <p>In a digital landscape crowded with promotions, discount codes, and sponsored content, our goal is simple: to provide clear, honest, and well-researched reviews alongside verified offers that genuinely add value.</p>
 
 <h2 class="font-heading">Our Mission</h2>
-<p>At ReviewHays, our mission is to:</p>
+<p>At [SITE_NAME], our mission is to:</p>
 <ul>
 <li>Deliver transparent and unbiased product reviews</li>
 <li>Compare products, services, and brands based on real value, not hype</li>
@@ -129,11 +129,11 @@ class SiteContent extends Model
 </ul>
 
 <h2 class="font-heading">Affiliate Disclosure &amp; Transparency</h2>
-<p>ReviewHays participates in various affiliate marketing programs. This means some links on our website may be affiliate links.</p>
+<p>[SITE_NAME] participates in various affiliate marketing programs. This means some links on our website may be affiliate links.</p>
 <p>If you make a purchase through these links, we may earn a small commission at no additional cost to you. Affiliate relationships do not influence our editorial decisions.</p>
 <p>We prioritize accuracy, transparency, and user trust above all else.</p>
 
-<h2 class="font-heading">Why Trust ReviewHays?</h2>
+<h2 class="font-heading">Why Trust [SITE_NAME]?</h2>
 <ul>
 <li>Independent and research-driven content</li>
 <li>Regularly updated reviews and deals</li>
@@ -144,7 +144,7 @@ class SiteContent extends Model
 
 <h2 class="font-heading">Get in Touch</h2>
 <p>We welcome feedback, questions, and collaboration inquiries. Please visit our Contact page to reach out to us.</p>
-<p>Thank you for choosing <strong>ReviewHays</strong> as your trusted source for reviews, comparisons, and savings.</p>
+<p>Thank you for choosing <strong>[SITE_NAME]</strong> as your trusted source for reviews, comparisons, and savings.</p>
 HTML;
     }
 
@@ -166,7 +166,7 @@ HTML;
 <h1 class="font-heading">Privacy Policy</h1>
 <p class="updated">Last updated: [PRIVACY_DATE]</p>
 
-<p>At <strong>ReviewHays</strong>, we value your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data when you visit our website.</p>
+<p>At <strong>[SITE_NAME]</strong>, we value your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data when you visit our website.</p>
 <p>By using this website, you agree to the practices described in this Privacy Policy.</p>
 
 <h2>Information We Collect</h2>
@@ -187,12 +187,12 @@ HTML;
 </ul>
 
 <h2>Cookies and Tracking Technologies</h2>
-<p>ReviewHays uses cookies and similar tracking technologies to enhance user experience and analyze website traffic.</p>
+<p>[SITE_NAME] uses cookies and similar tracking technologies to enhance user experience and analyze website traffic.</p>
 <p>Cookies may be used by third-party services such as analytics providers and affiliate networks to track referrals and conversions.</p>
 <p>You can choose to disable cookies through your browser settings. Please note that doing so may affect certain website functionalities.</p>
 
 <h2>Affiliate Links and Third-Party Services</h2>
-<p>ReviewHays participates in affiliate marketing programs. Some links on this website are affiliate links, which may track clicks or purchases for commission purposes.</p>
+<p>[SITE_NAME] participates in affiliate marketing programs. Some links on this website are affiliate links, which may track clicks or purchases for commission purposes.</p>
 <p>We do not control how third-party websites collect or use your data. We encourage you to review the privacy policies of any external sites you visit through our links.</p>
 
 <h2>Third-Party Advertising</h2>
@@ -213,7 +213,7 @@ HTML;
 <p>To exercise these rights, please contact us through the information provided on our Contact page.</p>
 
 <h2>Children's Information</h2>
-<p>ReviewHays does not knowingly collect personal information from children under the age of 13. If you believe that a child has provided personal information on our website, please contact us so we can promptly remove such data.</p>
+<p>[SITE_NAME] does not knowingly collect personal information from children under the age of 13. If you believe that a child has provided personal information on our website, please contact us so we can promptly remove such data.</p>
 
 <h2>Changes to This Privacy Policy</h2>
 <p>We may update this Privacy Policy from time to time to reflect changes in legal requirements or website practices. Any updates will be posted on this page with a revised effective date.</p>

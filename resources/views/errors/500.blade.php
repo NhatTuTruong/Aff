@@ -2,7 +2,7 @@
     $content = \App\Models\SiteContent::get('error_500', \App\Models\SiteContent::defaultErrorContent('500'));
 @endphp
 @extends('layouts.app')
-@section('title', ($content['title'] ?? 'Lỗi máy chủ') . ' - ' . config('app.name'))
+@section('title', ($content['title'] ?? 'Server Error') . ' - ' . config('app.name'))
 @push('styles')
 <style>
     .error-page { text-align: center; padding: 4rem 1.5rem; max-width: 560px; margin: 0 auto; }
@@ -16,8 +16,8 @@
 @section('content')
     <div class="error-page">
         <div class="error-code">500</div>
-        <h1 class="error-title">{{ $content['title'] ?? 'Lỗi máy chủ' }}</h1>
-        <p class="error-message">{{ $content['message'] ?? 'Đã xảy ra lỗi. Chúng tôi đang khắc phục.' }}</p>
+        <h1 class="error-title">{{ $content['title'] ?? 'Server Error' }}</h1>
+        <p class="error-message">{{ $content['message'] ?? 'An error occurred. We are fixing it.' }}</p>
         <div class="error-actions">
             <a href="{{ url('/') }}">Back to home page</a>
         </div>

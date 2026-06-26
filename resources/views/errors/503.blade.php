@@ -2,7 +2,7 @@
     $content = \App\Models\SiteContent::get('error_503', \App\Models\SiteContent::defaultErrorContent('503'));
 @endphp
 @extends('layouts.app')
-@section('title', ($content['title'] ?? 'Bảo trì') . ' - ' . config('app.name'))
+@section('title', ($content['title'] ?? 'Under Maintenance') . ' - ' . config('app.name'))
 @push('styles')
 <style>
     .error-page { text-align: center; padding: 4rem 1.5rem; max-width: 560px; margin: 0 auto; }

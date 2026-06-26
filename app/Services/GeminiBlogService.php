@@ -15,12 +15,12 @@ class GeminiBlogService
     public ?string $lastError = null;
 
     /**
-     * @param array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
+     * @param  array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
      */
     public function generateBlog(string $category, string $variant, array $extras = []): ?array
     {
         $apiKey = AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'));
-        $model = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
+        $preferredModel = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
         $timeout = (int) AdminSettings::get('gemini_timeout', config('gemini.timeout', 60));
 
         if (empty($apiKey)) {
@@ -52,11 +52,11 @@ Loại bài: {$variant}
 {$topicPrompt}
 PROMPT;
 
-        return $this->callGemini($apiKey, $model, $prompt, $timeout);
+        return $this->callGeminiWithFallback($apiKey, $preferredModel, $prompt, $timeout);
     }
 
     /**
-     * Bài ngắn về một brand/store chỉ từ tên hoặc domain người dùng nhập — không dùng dữ liệu DB trên site.
+     * Bài ngắn về một brand/visit chỉ từ tên hoặc domain người dùng nhập — không dùng dữ liệu DB trên site.
      *
      * @return array{title: string, content: string, featured_image: ?string}|null
      */
@@ -66,7 +66,7 @@ PROMPT;
     public function generateBrandSpotlightFromHint(string $hint, array $extras = []): ?array
     {
         $apiKey = AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'));
-        $model = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
+        $preferredModel = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
         $timeout = (int) AdminSettings::get('gemini_timeout', config('gemini.timeout', 60));
 
         if (empty($apiKey)) {
@@ -94,7 +94,7 @@ The editor typed this brand or store identifier (it may be a company name OR a d
 {$extrasBlock}
 
 ## Your task
-Write ONE **short** editorial-style article in **English** about this brand/store as a general shopping subject.
+Write ONE **short** editorial-style article in **English** about this brand/visit as a general shopping subject.
 
 ## Length & tone
 - Target **450-700 words** (shorter than a full review; scannable).
@@ -105,7 +105,7 @@ Write ONE **short** editorial-style article in **English** about this brand/stor
 ## HTML rules
 - Return a **complete HTML fragment** only: one `<h1>`, several `<h2>`, `<p>`, optional `<ul>`. No `<html>` / `<body>`.
 - Do NOT use Markdown. Do NOT wrap output in code fences like ```html ... ```.
-- The `<h1>` should naturally include the brand/store subject.
+- The `<h1>` should naturally include the brand/visit subject.
 
 ## Structure (suggested)
 1. Brief intro: who/what readers might look for.
@@ -116,7 +116,7 @@ Write ONE **short** editorial-style article in **English** about this brand/stor
 Do not claim the brand partners with our site or that we verified offers.
 PROMPT;
 
-        $result = $this->callGemini($apiKey, $model, $prompt, max(60, $timeout), [
+        $result = $this->callGeminiWithFallback($apiKey, $preferredModel, $prompt, max(60, $timeout), [
             'maxOutputTokens' => 4096,
             'temperature' => 0.75,
         ]);
@@ -141,7 +141,7 @@ PROMPT;
     public function generateBrandIntroBlog(Brand $brand, Campaign $campaign, string $categoryName, array $extras = []): ?array
     {
         $apiKey = AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'));
-        $model = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
+        $preferredModel = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
         $timeout = max(120, (int) AdminSettings::get('gemini_timeout', config('gemini.timeout', 60)));
 
         if (empty($apiKey)) {
@@ -226,7 +226,7 @@ Write ONE blog article introducing the store/brand below. Language: **English**.
 Do not claim discounts or codes that are not in the facts.
 PROMPT;
 
-        $result = $this->callGemini($apiKey, $model, $prompt, $timeout, [
+        $result = $this->callGeminiWithFallback($apiKey, $preferredModel, $prompt, $timeout, [
             'maxOutputTokens' => 6144,
             'temperature' => 0.8,
         ]);
@@ -384,6 +384,46 @@ PROMPT;
             'content' => $text,
             'featured_image' => null,
         ];
+    }
+
+    /**
+     * Gọi Gemini với fallback: nếu model ưu tiên lỗi → thử lần lượt các model khác.
+     * Nếu tất cả đều lỗi → trả lỗi cuối cùng.
+     *
+     * @param  array<string, mixed>  $generationConfigOverrides
+     */
+    protected function callGeminiWithFallback(string $apiKey, string $preferredModel, string $prompt, int $timeout, array $generationConfigOverrides = []): ?array
+    {
+        $supportedModels = config('gemini.supported_models', []);
+
+        // Build fallback list: preferred first, then rest
+        $modelOrder = array_filter([
+            $preferredModel,
+            ...$supportedModels,
+        ], fn ($m) => $m !== $preferredModel);
+
+        // Deduplicate
+        $modelOrder = array_values(array_unique($modelOrder));
+
+        $lastError = null;
+
+        foreach ($modelOrder as $model) {
+            $result = $this->callGemini($apiKey, (string) $model, $prompt, $timeout, $generationConfigOverrides);
+
+            if ($result !== null) {
+                return $result;
+            }
+
+            $lastError = $this->lastError;
+            Log::debug('GeminiBlogService model failed, trying next', [
+                'model' => $model,
+                'error' => $this->lastError,
+            ]);
+        }
+
+        $this->lastError = $lastError ?? 'Không thể tạo bài viết, vui lòng thử lại sau.';
+
+        return null;
     }
 
     /**

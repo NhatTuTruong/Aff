@@ -1,3 +1,1 @@
-
-Số chiến dịch chuẩn bị import: {{ number_format($count) }}.
-
+File CSV có {{ $count }} dòng dữ liệu. Có {{ $existingCount }} chiến dịch trùng tên/đã tồn tại trong hệ thống.

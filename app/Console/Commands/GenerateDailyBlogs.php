@@ -12,6 +12,8 @@ use App\Services\GeminiBlogService;
 use App\Support\AdminSettings;
 use App\Support\AutoBlogSettings;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class GenerateDailyBlogs extends Command

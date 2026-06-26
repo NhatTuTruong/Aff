@@ -445,6 +445,8 @@ class CampaignImporter extends Importer
                         $seenTitles = [];
                         $seenSlugs = [];
                         $duplicateCount = 0;
+                        $existingTitleCount = 0;
+                        $existingSlugCount = 0;
                         $titleKey = null;
                         $slugKey = null;
                         $headers = $reader1->getHeader();
@@ -456,6 +458,18 @@ class CampaignImporter extends Importer
                             }
                             if ($headerLower === 'slug') {
                                 $slugKey = $header;
+                            }
+                        }
+
+                        $existingTitles = [];
+                        $existingSlugs = [];
+                        if ($titleKey || $slugKey) {
+                            $query = Campaign::query();
+                            if ($titleKey) {
+                                $existingTitles = $query->pluck('title')->map(fn ($t) => strtolower(trim((string) $t)))->filter()->unique()->values()->all();
+                            }
+                            if ($slugKey) {
+                                $existingSlugs = Campaign::pluck('slug')->map(fn ($s) => strtolower(trim((string) $s)))->filter()->unique()->values()->all();
                             }
                         }
 
@@ -475,11 +489,21 @@ class CampaignImporter extends Importer
 
                             $seenTitles[$titleLower] = $titleCount + 1;
                             $seenSlugs[$slugLower] = $slugCount + 1;
+
+                            if ($titleLower !== '' && in_array($titleLower, $existingTitles, true)) {
+                                $existingTitleCount++;
+                            }
+                            if ($slugLower !== '' && in_array($slugLower, $existingSlugs, true)) {
+                                $existingSlugCount++;
+                            }
                         }
+
+                        $existingCount = max($existingTitleCount, $existingSlugCount);
 
                         return view('filament.imports.import-preview', [
                             'count' => $count,
                             'duplicateCount' => $duplicateCount,
+                            'existingCount' => $existingCount,
                         ])->render();
                     } catch (\Throwable $e) {
                         return 'Không thể đọc file CSV. ' . $e->getMessage();

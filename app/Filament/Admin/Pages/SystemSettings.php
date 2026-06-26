@@ -6,6 +6,7 @@ use App\Support\AdminSettings;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -99,10 +100,22 @@ class SystemSettings extends Page implements HasForms
                             ->revealable()
                             ->helperText('Nhập key mới để lưu. Nếu để "********" thì giữ key hiện tại.')
                             ->maxLength(255),
-                        TextInput::make('gemini_model')
-                            ->label('Gemini model')
+                        Select::make('gemini_model')
+                            ->label('Gemini model (ưu tiên)')
+                            ->options(function (): array {
+                                $models = config('gemini.supported_models', []);
+                                $selected = AdminSettings::get('gemini_model', config('gemini.model'));
+
+                                if ($selected !== null && ! in_array((string) $selected, $models, true)) {
+                                    $models = array_merge([(string) $selected => (string) $selected], $models);
+                                }
+
+                                return array_combine($models, $models);
+                            })
                             ->required()
-                            ->maxLength(120),
+                            ->searchable()
+                            ->preload()
+                            ->helperText('Model ưu tiên. Nếu lỗi sẽ tự thử model khác trong danh sách.'),
                         TextInput::make('gemini_timeout')
                             ->label('Timeout (giây)')
                             ->numeric()

@@ -2,7 +2,7 @@
     $content = \App\Models\SiteContent::get('error_403', \App\Models\SiteContent::defaultErrorContent('403'));
 @endphp
 @extends('layouts.app')
-@section('title', ($content['title'] ?? 'Không có quyền') . ' - ' . config('app.name'))
+@section('title', ($content['title'] ?? 'Forbidden') . ' - ' . config('app.name'))
 @push('styles')
 <style>
     .error-page { text-align: center; padding: 4rem 1.5rem; max-width: 560px; margin: 0 auto; }
@@ -16,8 +16,8 @@
 @section('content')
     <div class="error-page">
         <div class="error-code">403</div>
-        <h1 class="error-title">{{ $content['title'] ?? 'Không có quyền truy cập' }}</h1>
-        <p class="error-message">{{ $content['message'] ?? 'Bạn không có quyền truy cập trang này.' }}</p>
+        <h1 class="error-title">{{ $content['title'] ?? 'Forbidden' }}</h1>
+        <p class="error-message">{{ $content['message'] ?? 'You do not have permission to access this page.' }}</p>
         <div class="error-actions">
             <a href="{{ url('/') }}">Back to home page</a>
         </div>
