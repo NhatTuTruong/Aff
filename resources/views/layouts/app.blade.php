@@ -79,27 +79,27 @@
     @stack('head')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f5f5f5;
+            --bg: #f2f6f8;
             --surface: #ffffff;
-            --surface-hover: #eef1f5;
-            --text: #0f172a;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --primary: #7c3aed;
-            --primary-dark: #6d28d9;
-            --accent: #7c3aed;
-            --accent-hover: #6d28d9;
-            --accent-rose: #a78bfa;
-            --border: rgba(15, 23, 42, 0.08);
+            --surface-hover: #e8eef2;
+            --text: #0c1924;
+            --text-dark: #0c1924;
+            --text-muted: #5a7184;
+            --primary: #00405d;
+            --primary-dark: #003347;
+            --accent: #00405d;
+            --accent-hover: #003347;
+            --accent-rose: #4da8c4;
+            --border: rgba(12, 25, 36, 0.09);
             --radius: 12px;
             --radius-sm: 8px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'DM Sans', system-ui, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
@@ -107,10 +107,10 @@
             display: flex;
             flex-direction: column;
         }
-        .font-heading { font-family: 'Space Grotesk', sans-serif; }
+        .font-heading { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 
         .logo {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-weight: 700;
             font-size: 1.35rem;
             color: var(--text);
@@ -218,7 +218,7 @@
         }
         .cookie-consent-btn:hover {
             filter: brightness(1.06);
-            box-shadow: 0 4px 14px rgba(20, 184, 166, 0.35);
+            box-shadow: 0 4px 14px rgba(0, 64, 93, 0.35);
         }
     </style>
     @include('partials.site-chrome-styles')

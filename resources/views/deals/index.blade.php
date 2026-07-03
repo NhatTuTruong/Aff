@@ -16,7 +16,7 @@
     }
     .deals-hero-inner { text-align: center; }
     .deals-hero h1 {
-        font-family: 'Space Grotesk', sans-serif;
+        font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
         font-size: clamp(2rem, 4vw, 3rem);
         font-weight: 800;
         letter-spacing: -0.03em;
@@ -131,7 +131,7 @@
     }
     .deal-date { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
     .deal-title {
-        font-family: 'Space Grotesk', sans-serif;
+        font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
         font-size: 1.15rem;
         font-weight: 800;
         line-height: 1.3;
@@ -175,7 +175,7 @@
         max-width: 100%;
     }
     .deal-code-btn strong { font-weight: 800; overflow: hidden; text-overflow: ellipsis; }
-    .deal-code-btn.copied { border-color: var(--accent); background: #eef1f5; color: #7c3aed; }
+    .deal-code-btn.copied { border-color: var(--accent); background: #eef1f5; color: #00405d; }
     .deal-code-btn.copied::after {
         content: '✓';
         margin-left: 0.35rem;

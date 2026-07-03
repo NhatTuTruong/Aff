@@ -4,9 +4,6 @@
 @section('description', 'Find coupon codes, promotions and trusted store reviews. Updated daily.')
 
 @push('styles')
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 @include('partials.peel-sticker-styles')
 @include('partials.styles.public-modern-base')
 @include('partials.styles.home-modern')
@@ -15,172 +12,68 @@
 @section('content')
 <div class="home-page">
     <section class="hp-hero">
-        <div class="hp-shell hp-hero-grid">
-            <div>
-                <p class="hp-kicker">Deals you can trust</p>
-                <h1 class="font-heading">Save smarter with <span class="hp-hero-accent">curated coupons</span> &amp; honest store picks</h1>
-                <p class="hp-hero-lead">Search verified promotions, explore top stores, and read updates from our blog — refreshed often so you never miss a strong offer.</p>
-                <p class="hp-trust">We are an independent deal finder. We may earn from qualifying purchases. <a href="{{ url('/affiliate-disclosure') }}">Read our disclosure</a>.</p>
-                <form action="{{ url('/') }}" method="get" class="hp-search">
-                    <input type="search" name="q" value="{{ $searchQuery ?? '' }}" placeholder="Search brands, stores, or offers…" autocomplete="off">
-                    <button type="submit">Search</button>
-                </form>
-            </div>
-            <aside class="hp-hero-aside" aria-label="Site highlights">
-                <div class="hp-aside-deco" aria-hidden="true"></div>
-                <div class="hp-aside-slider" id="hp-hero-aside-slider">
-                    <div class="hp-aside-track-wrap">
-                        <div class="hp-aside-track" id="hp-aside-track">
-                            <div class="hp-aside-slide">
-                                <div class="hp-aside-slide-inner">
-                                    <span class="hp-aside-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 19l1 3 1-3 3-1-3-1-1-3-1 3-3 1 3 1z"/></svg>
-                                    </span>
-                                    <div class="hp-aside-slide-body">
-                                        <p class="hp-aside-label">Why shoppers stay</p>
-                                        <p class="hp-aside-stat">Curated</p>
-                                        <p class="hp-aside-caption">Human-reviewed paths to real savings — fewer dead codes, clearer next steps.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="hp-aside-slide">
-                                <div class="hp-aside-slide-inner">
-                                    <span class="hp-aside-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
-                                    </span>
-                                    <div class="hp-aside-slide-body">
-                                        <p class="hp-aside-label">Always in motion</p>
-                                        <p class="hp-aside-stat">Updated</p>
-                                        <p class="hp-aside-caption">We refresh offers and landing details often so you see what still works — not yesterday’s leftovers.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="hp-aside-slide">
-                                <div class="hp-aside-slide-inner">
-                                    <span class="hp-aside-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                                    </span>
-                                    <div class="hp-aside-slide-body">
-                                        <p class="hp-aside-label">Built for trust</p>
-                                        <p class="hp-aside-stat">Verified</p>
-                                        <p class="hp-aside-caption">Clear affiliate disclosure, honest pros &amp; cons on store pages, and CTAs that take you straight to the deal.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="hp-aside-footer">
-                        <p class="hp-aside-counter" id="hp-aside-counter" aria-live="polite">
-                            <span id="hp-aside-current">01</span><span class="hp-aside-counter-sep">/</span><span>03</span>
-                        </p>
-                        <nav class="hp-aside-dots" id="hp-aside-dots" aria-label="Highlight slides">
-                            <button type="button" class="hp-aside-dot is-active" aria-label="Slide 1" aria-current="true" data-slide="0"></button>
-                            <button type="button" class="hp-aside-dot" aria-label="Slide 2" data-slide="1"></button>
-                            <button type="button" class="hp-aside-dot" aria-label="Slide 3" data-slide="2"></button>
-                        </nav>
-                    </div>
+        <div class="hp-shell">
+            <div class="hp-hero-layout">
+                <div class="hp-hero-main">
+                    <span class="hp-eyebrow">Deals you can trust</span>
+                    <h1 class="font-heading">Curated coupons &amp; <em>honest</em> store picks</h1>
+                    <p class="hp-lead">Search verified promotions, explore top stores, and read updates from our blog — refreshed often so you never miss a strong offer.</p>
+                    <form action="{{ url('/') }}" method="get" class="hp-search">
+                        <svg class="hp-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                        <input type="search" name="q" value="{{ $searchQuery ?? '' }}" placeholder="Search brands, stores, or offers…" autocomplete="off">
+                        <button type="submit">Search</button>
+                    </form>
+                    <p class="hp-trust">We are an independent deal finder. We may earn from qualifying purchases. <a href="{{ url('/affiliate-disclosure') }}">Read our disclosure</a>.</p>
                 </div>
-            </aside>
+                <div class="hp-hero-cards" aria-label="Why shoppers stay">
+                    <article class="hp-mini-card">
+                        <span class="hp-mini-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </span>
+                        <h3>Verified paths</h3>
+                        <p>Human-reviewed savings — fewer dead codes, clearer next steps.</p>
+                    </article>
+                    <article class="hp-mini-card">
+                        <span class="hp-mini-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+                        </span>
+                        <h3>Always updated</h3>
+                        <p>Offers and landing details refreshed often — not yesterday's leftovers.</p>
+                    </article>
+                    <article class="hp-mini-card">
+                        <span class="hp-mini-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/></svg>
+                        </span>
+                        <h3>Built for trust</h3>
+                        <p>Clear disclosure, honest pros &amp; cons, CTAs that take you straight to the deal.</p>
+                    </article>
+                </div>
+            </div>
         </div>
     </section>
 
-    @push('scripts')
-    <script>
-    (function () {
-        var slider = document.getElementById('hp-hero-aside-slider');
-        var track = document.getElementById('hp-aside-track');
-        var dotsWrap = document.getElementById('hp-aside-dots');
-        if (!slider || !track || !dotsWrap) return;
-
-        var dots = dotsWrap.querySelectorAll('.hp-aside-dot');
-        var counterCurrent = document.getElementById('hp-aside-current');
-        var n = dots.length;
-        if (n === 0) return;
-
-        var i = 0;
-        var timer = null;
-        var delay = 3000;
-
-        function padSlide(num) {
-            return String(num + 1).padStart(2, '0');
-        }
-
-        function setActive() {
-            track.style.transform = 'translateX(' + (-i * 100) + '%)';
-            dots.forEach(function (d, j) {
-                var on = j === i;
-                d.classList.toggle('is-active', on);
-                d.setAttribute('aria-current', on ? 'true' : 'false');
-            });
-            if (counterCurrent) {
-                counterCurrent.textContent = padSlide(i);
-            }
-        }
-
-        function go(to) {
-            i = (to % n + n) % n;
-            setActive();
-        }
-
-        function start() {
-            stop();
-            timer = setInterval(function () {
-                if (document.hidden) return;
-                if (slider.matches(':hover')) return;
-                go(i + 1);
-            }, delay);
-        }
-
-        function stop() {
-            if (timer) {
-                clearInterval(timer);
-                timer = null;
-            }
-        }
-
-        dots.forEach(function (d) {
-            d.addEventListener('click', function () {
-                var idx = parseInt(d.getAttribute('data-slide') || '0', 10);
-                if (!isNaN(idx)) {
-                    go(idx);
-                    stop();
-                    start();
-                }
-            });
-        });
-
-        slider.addEventListener('mouseenter', stop);
-        slider.addEventListener('mouseleave', start);
-        document.addEventListener('visibilitychange', function () {
-            if (document.hidden) stop();
-            else start();
-        });
-
-        setActive();
-        start();
-    })();
-    </script>
-    @endpush
-
     @if(($verifiedBrandsCount ?? 0) > 0 || $hotCoupons->isNotEmpty())
-    <section class="hp-stats">
+    <section class="hp-band">
         <div class="hp-shell">
-            <div class="hp-stats-row">
-                <div class="hp-stat-card">
-                    <div class="hp-stat-num">{{ $verifiedBrandsCount ?? 0 }}+</div>
-                    <div class="hp-stat-label">Verified brands</div>
+            <div class="hp-band-inner">
+                <div class="hp-band-item">
+                    <strong>{{ $verifiedBrandsCount ?? 0 }}+</strong>
+                    <span>Verified brands</span>
                 </div>
-                <div class="hp-stat-card">
-                    <div class="hp-stat-num">{{ $activeCouponsCount ?? $hotCoupons->count() }}+</div>
-                    <div class="hp-stat-label">Active coupons</div>
+                <div class="hp-band-divider" aria-hidden="true"></div>
+                <div class="hp-band-item">
+                    <strong>{{ $activeCouponsCount ?? $hotCoupons->count() }}+</strong>
+                    <span>Active coupons</span>
                 </div>
-                <div class="hp-stat-card">
-                    <div class="hp-stat-num">Editorial</div>
-                    <div class="hp-stat-label">Guides &amp; picks</div>
+                <div class="hp-band-divider" aria-hidden="true"></div>
+                <div class="hp-band-item">
+                    <strong>Editorial</strong>
+                    <span>Guides &amp; picks</span>
                 </div>
-                <div class="hp-stat-card">
-                    <div class="hp-stat-num">Daily</div>
-                    <div class="hp-stat-label">Fresh checks</div>
+                <div class="hp-band-divider" aria-hidden="true"></div>
+                <div class="hp-band-item">
+                    <strong>Daily</strong>
+                    <span>Fresh checks</span>
                 </div>
             </div>
         </div>
@@ -188,97 +81,57 @@
     @endif
 
     @if(isset($latestPosts) && $latestPosts->isNotEmpty())
-    @php
-        $posts = $latestPosts->values();
-        $leftPosts = $posts->slice(0, 2);
-        $rightPosts = $posts->slice(0, 6);
-    @endphp
-    <section class="hp-section hp-section--tint" id="blog">
+    <section class="hp-section" id="blog">
         <div class="hp-shell">
-            <header class="hp-sec-head">
-                <p class="hp-sec-eyebrow">Editorial</p>
-                <h2 class="hp-sec-title">Latest from the blog</h2>
-                <p class="hp-sec-desc">Short reads on saving tactics, store notes, and what changed this week.</p>
+            <header class="hp-head">
+                <div>
+                    <span class="hp-head-tag">Editorial</span>
+                    <h2 class="hp-head-title">Latest from the blog</h2>
+                </div>
+                <p class="hp-head-desc">Short reads on saving tactics, store notes, and what changed this week.</p>
             </header>
 
-            <div class="hp-blog-modern">
-                <div class="hp-blog-col hp-blog-col--left">
-                    @foreach($leftPosts as $post)
-                        <a href="{{ route('blog.show', $post->slug) }}" class="hp-blog-featured">
-                            <div class="hp-blog-featured-media">
-                                <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy">
-                            </div>
-                            <div class="hp-blog-featured-body">
-                                <span class="hp-blog-featured-label">Featured</span>
-                                <h3 class="hp-blog-featured-title">{{ $post->title }}</h3>
-                                <p class="hp-blog-featured-meta">{{ $post->created_at?->format('d M Y') }}</p>
-                                <span class="hp-blog-featured-link">Read article <span aria-hidden="true">→</span></span>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
-
-                <div class="hp-blog-col hp-blog-col--right">
-                    @if($rightPosts->isNotEmpty())
-                        {{-- Desktop: Grid layout (hidden on mobile) --}}
-                        <div class="hp-blog-grid" id="hp-blog-desktop-grid">
-                            @foreach($rightPosts as $post)
-                                <a href="{{ route('blog.show', $post->slug) }}" class="hp-blog-grid-card">
-                                    <div class="hp-blog-grid-media">
+            <div class="hp-carousel hp-carousel--blog" id="hp-blog-carousel">
+                <div class="hp-carousel-viewport hp-carousel-viewport--inset" data-carousel-viewport>
+                    <div class="hp-carousel-track" data-carousel-track>
+                        @foreach($latestPosts->take(6) as $post)
+                            <div class="hp-carousel-slide" data-carousel-slide>
+                                <a href="{{ route('blog.show', $post->slug) }}" class="hp-blog-card">
+                                    <div class="hp-blog-card-media">
                                         <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy">
                                     </div>
-                                    <div class="hp-blog-grid-body">
-                                        <h3 class="hp-blog-grid-title">{{ $post->title }}</h3>
-                                        <p class="hp-blog-grid-meta">{{ $post->created_at?->format('d M Y') }}</p>
+                                    <div class="hp-blog-card-body">
+                                        <time datetime="{{ $post->created_at?->toDateString() }}">{{ $post->created_at?->format('d M Y') }}</time>
+                                        <h3>{{ $post->title }}</h3>
+                                        <span class="hp-blog-card-link">Read article →</span>
                                     </div>
                                 </a>
-                            @endforeach
-                        </div>
-                    @endif
+                            </div>
+                        @endforeach
+                    </div>
+                    <button type="button" class="hp-carousel-arrow hp-carousel-arrow--inset hp-carousel-arrow--prev" aria-label="Previous article" data-carousel-prev>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <button type="button" class="hp-carousel-arrow hp-carousel-arrow--inset hp-carousel-arrow--next" aria-label="Next article" data-carousel-next>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
                 </div>
             </div>
 
-            {{-- Mobile: Carousel layout (only shown on mobile) --}}
-            @if($rightPosts->isNotEmpty())
-                <div class="hp-blog-mobile-carousel" id="hp-blog-mobile-carousel">
-                    <div class="hp-blog-carousel-track" id="hp-blog-carousel-track">
-                    @foreach($rightPosts as $post)
-                        <a href="{{ route('blog.show', $post->slug) }}" class="hp-blog-carousel-slide">
-                            <div class="hp-blog-grid-card">
-                                <div class="hp-blog-grid-media">
-                                    <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy">
-                                </div>
-                                <div class="hp-blog-grid-body">
-                                    <h3 class="hp-blog-grid-title">{{ $post->title }}</h3>
-                                    <p class="hp-blog-grid-meta">{{ $post->created_at?->format('d M Y') }}</p>
-                                </div>
-                            </div>
-                        </a>
-                    @endforeach
-                    </div>
-                    <div class="hp-blog-mobile-controls" id="hp-blog-mobile-controls" aria-label="Blog slides">
-                        <button type="button" class="hp-blog-mobile-dot is-active" aria-label="Slide 1" aria-current="true" data-slide="0"></button>
-                        <button type="button" class="hp-blog-mobile-dot" aria-label="Slide 2" data-slide="1"></button>
-                        <button type="button" class="hp-blog-mobile-dot" aria-label="Slide 3" data-slide="2"></button>
-                        <button type="button" class="hp-blog-mobile-dot" aria-label="Slide 4" data-slide="3"></button>
-                        <button type="button" class="hp-blog-mobile-dot" aria-label="Slide 5" data-slide="4"></button>
-                        <button type="button" class="hp-blog-mobile-dot" aria-label="Slide 6" data-slide="5"></button>
-                    </div>
-                </div>
-            @endif
-
-            <p class="hp-all-posts"><a href="{{ route('blog.index') }}">Browse the full archive</a></p>
+            <p class="hp-more-link"><a href="{{ route('blog.index') }}">Browse the full archive</a></p>
         </div>
     </section>
     @endif
 
     @if($hotCoupons->isNotEmpty())
-    <section class="hp-section hp-section--tint" id="coupons">
+    <section class="hp-section hp-section--alt" id="coupons">
         <div class="hp-shell">
-            <header class="hp-sec-head">
-                <p class="hp-sec-eyebrow">Limited windows</p>
-                <h2 class="hp-sec-title">Hot coupons &amp; standout deals</h2>
-                <p class="hp-sec-desc">High-signal picks from brands we track — copy a code or open the offer in one tap.</p>
+            <header class="hp-head">
+                <div>
+                    <span class="hp-head-tag">Limited windows</span>
+                    <h2 class="hp-head-title"><a href="{{ route('deals.index') }}">Hot coupons &amp; standout deals</a></h2>
+                </div>
+                <p class="hp-head-desc">High-signal picks from brands we track — copy a code or open the offer in one tap.</p>
             </header>
             <p class="hp-disclaimer">Promotions can change or expire at any time. Always confirm at checkout. We may earn a commission when you use our links — <a href="{{ url('/affiliate-disclosure') }}">see disclosure</a>.</p>
             @php
@@ -291,14 +144,14 @@
                 @foreach($hotCouponCards as $index => $coupon)
                     @php $campaign = $coupon->campaign; $brand = $campaign->brand; @endphp
                     <article class="coupon-card{{ $coupon->code ? '' : ' coupon-card--no-code' }}{{ $index >= 4 ? ' is-coupon-hidden' : '' }}" data-coupon-card>
-                        <div class="coupon-card-strip" aria-hidden="true">
-                            <span class="coupon-card-strip-icon">%</span>
-                            <span class="coupon-card-strip-label">{{ $coupon->code ? 'Code' : 'Deal' }}</span>
-                        </div>
+                        <div class="coupon-card-accent" aria-hidden="true"></div>
                         <div class="coupon-card-main">
                             <div class="coupon-card-header">
                                 <img src="{{ $brand->image_url }}" alt="{{ $campaign->title }}" class="coupon-card-logo" loading="lazy">
-                                <div class="coupon-card-brand">{{ $campaign->title }}</div>
+                                <div>
+                                    <div class="coupon-card-brand">{{ $campaign->title }}</div>
+                                    <span class="coupon-card-type">{{ $coupon->code ? 'Promo code' : 'Deal link' }}</span>
+                                </div>
                             </div>
                             @if($coupon->offer)
                                 <p class="coupon-card-offer">{{ $coupon->offer }}</p>
@@ -306,7 +159,6 @@
                             <div class="coupon-card-actions">
                                 @if($coupon->code)
                                     <button type="button" class="coupon-card-code" onclick="navigator.clipboard.writeText('{{ $coupon->code }}'); this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 1200);" title="Click to copy">
-                                        <span class="coupon-card-code-label">Code</span>
                                         <span class="coupon-card-code-value">{{ $coupon->code }}</span>
                                         <span class="coupon-card-code-copy">Copy</span>
                                     </button>
@@ -320,63 +172,31 @@
                 @endforeach
             </div>
             @if($hotCouponCards->count() > 4)
-                <div class="hp-coupons-load-more-wrap">
-                    <button type="button" class="hp-coupons-load-more" id="hp-coupons-load-more" aria-controls="hp-coupons-grid">
-                        See more
-                    </button>
+                <div class="hp-load-more-wrap hp-load-more-wrap--mobile">
+                    <button type="button" class="hp-load-more" id="hp-coupons-load-more" aria-controls="hp-coupons-grid">See more deals</button>
                 </div>
             @endif
+            <p class="hp-deals-more"><a href="{{ route('deals.index') }}">View all deals →</a></p>
         </div>
     </section>
-    @push('scripts')
-    <script>
-    (function () {
-        var btn = document.getElementById('hp-coupons-load-more');
-        var cards = document.querySelectorAll('#hp-coupons-grid [data-coupon-card]');
-        if (cards.length === 0) return;
-
-        var desktopMq = window.matchMedia('(min-width: 769px)');
-        var max = Math.min(12, cards.length);
-        var visible = desktopMq.matches ? 6 : 4;
-
-        function getStep() {
-            return desktopMq.matches ? 6 : 4;
-        }
-
-        function syncCards() {
-            cards.forEach(function (card, index) {
-                card.classList.toggle('is-coupon-hidden', index >= visible);
-            });
-            if (btn) {
-                btn.hidden = visible >= max;
-            }
-        }
-
-        if (btn) {
-            btn.addEventListener('click', function () {
-                visible = Math.min(visible + getStep(), max);
-                syncCards();
-            });
-        }
-
-        syncCards();
-    })();
-    </script>
-    @endpush
     @endif
 
     <section class="hp-section" id="stores">
         <div class="hp-shell">
-            <header class="hp-sec-head">
-                <p class="hp-sec-eyebrow">Stores in focus</p>
-                <h2 class="hp-sec-title">Featured destinations</h2>
-                <p class="hp-sec-desc">Tap a logo to jump straight into coupons and campaign details for that brand.</p>
+            <header class="hp-head">
+                <div>
+                    <span class="hp-head-tag">Stores in focus</span>
+                    <h2 class="hp-head-title">Featured destinations</h2>
+                </div>
+                <p class="hp-head-desc">Tap a logo to jump straight into coupons and campaign details for that brand.</p>
             </header>
             @if(isset($featuredCampaigns) && $featuredCampaigns->count() > 0)
-                <div class="hp-stores-panel">
-                <div class="stores-carousel-wrap">
-                    <div class="stores-carousel-track">
-                        <div class="stores-carousel">
+                <div class="hp-carousel hp-carousel--stores" id="hp-stores-carousel">
+                    <button type="button" class="hp-carousel-arrow hp-carousel-arrow--prev hp-stores-arrow" aria-label="Previous stores" data-carousel-prev>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <div class="hp-carousel-viewport hp-stores-viewport" data-carousel-viewport>
+                        <div class="hp-carousel-track hp-stores-track" data-carousel-track>
                             @foreach($featuredCampaigns as $campaign)
                                 @php
                                     $brand = $campaign->brand;
@@ -386,48 +206,26 @@
                                     } else {
                                         $reviewUrl = url('/') . '?q=' . urlencode($brand?->name ?? $campaign->title);
                                     }
+                                    $brandLabel = $brand?->name ?? $campaign->title;
                                 @endphp
-                                <a href="{{ $reviewUrl }}" class="store-carousel-item" title="{{ $campaign->title }}">
-                                    <span class="store-carousel-img-wrap">
-                                        @if($brand)
-                                            <img src="{{ $brand->image_url }}" alt="{{ $brand->name }}" loading="lazy">
-                                        @else
-                                            <img src="{{ asset('images/default-brand.svg') }}" alt="{{ $campaign->title }}" loading="lazy">
-                                        @endif
-                                    </span>
-                                    <span class="store-carousel-name">
-                                        {{ $brand?->name ?? $campaign->title }}
-                                    </span>
-                                </a>
-                            @endforeach
-                        </div>
-                        <div class="stores-carousel">
-                            @foreach($featuredCampaigns as $campaign)
-                                @php
-                                    $brand = $campaign->brand;
-                                    $reviewSlug = $campaign->slug;
-                                    if ($reviewSlug) {
-                                        $reviewUrl = route('landing.show', ['slug' => $reviewSlug]);
-                                    } else {
-                                        $reviewUrl = url('/') . '?q=' . urlencode($brand?->name ?? $campaign->title);
-                                    }
-                                @endphp
-                                <a href="{{ $reviewUrl }}" class="store-carousel-item" title="{{ $campaign->title }}">
-                                    <span class="store-carousel-img-wrap">
-                                        @if($brand)
-                                            <img src="{{ $brand->image_url }}" alt="{{ $brand->name }}" loading="lazy">
-                                        @else
-                                            <img src="{{ asset('images/default-brand.svg') }}" alt="{{ $campaign->title }}" loading="lazy">
-                                        @endif
-                                    </span>
-                                    <span class="store-carousel-name">
-                                        {{ $brand?->name ?? $campaign->title }}
-                                    </span>
-                                </a>
+                                <div class="hp-carousel-slide hp-store-slide" data-carousel-slide>
+                                    <a href="{{ $reviewUrl }}" class="hp-store-tile" title="{{ $campaign->title }}">
+                                        <span class="hp-store-tile-img">
+                                            @if($brand)
+                                                <img src="{{ $brand->image_url }}" alt="{{ $brandLabel }}" loading="lazy">
+                                            @else
+                                                <img src="{{ asset('images/default-brand.svg') }}" alt="{{ $campaign->title }}" loading="lazy">
+                                            @endif
+                                        </span>
+                                        <span class="hp-store-tile-name">{{ $brandLabel }}</span>
+                                    </a>
+                                </div>
                             @endforeach
                         </div>
                     </div>
-                </div>
+                    <button type="button" class="hp-carousel-arrow hp-carousel-arrow--next hp-stores-arrow" aria-label="Next stores" data-carousel-next>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
                 </div>
             @else
                 <div class="hp-empty">
@@ -444,167 +242,114 @@
     @if(isset($popularCategories) && $popularCategories->isNotEmpty())
     <section class="hp-cats" id="categories">
         <div class="hp-shell">
-            <header class="hp-sec-head" style="text-align:center;margin-left:auto;margin-right:auto;">
-                <p class="hp-sec-eyebrow">Topics</p>
-                <h2 class="hp-sec-title">Browse by category</h2>
-                <p class="hp-sec-desc" style="margin-left:auto;margin-right:auto;">Jump into the verticals we cover most — each link filters the featured strip.</p>
+            <header class="hp-head hp-head--center">
+                <div>
+                    <span class="hp-head-tag">Topics</span>
+                    <h2 class="hp-head-title">Browse by category</h2>
+                </div>
+                <p class="hp-head-desc">Jump into the verticals we cover most — each link filters the featured strip.</p>
             </header>
-            <div class="hp-cat-row">
+            <div class="hp-cat-grid">
                 @foreach($popularCategories as $cat)
                     @php
                         $catName = is_object($cat) ? $cat->name : $cat['name'];
                         $catSlug = is_object($cat) ? ($cat->slug ?? '') : ($cat['slug'] ?? '');
                         $url = $catSlug ? url('/?cat=' . $catSlug) . '#stores' : url('/') . '#stores';
                     @endphp
-                    <a href="{{ $url }}" class="hp-cat-pill">{{ $catName }}</a>
+                    <a href="{{ $url }}" class="hp-cat-chip">{{ $catName }}</a>
                 @endforeach
             </div>
         </div>
     </section>
     @endif
+</div>
+@endsection
 
-    @if(isset($featuredCampaigns) && $featuredCampaigns->count() > 0)
-    @push('scripts')
-    <script>
-    (function() {
-        var wrap = document.querySelector('.stores-carousel-wrap');
-        var track = document.querySelector('.stores-carousel-track');
-        if (!wrap || !track) return;
-        var currentTx = 0;
-        var startX = 0;
-        var startTx = 0;
-        var dragging = false;
-        var didDrag = false;
-        var direction = -1;
-        var step = 0.6;
-        var autoPlayTimer = null;
+@push('scripts')
+<script>
+(function () {
+    var mobileMq = window.matchMedia('(max-width: 768px)');
 
-        function clamp(x, min, max) { return Math.min(Math.max(x, min), max); }
+    function initCarousel(root, options) {
+        if (!root) return null;
 
-        function getBounds() {
-            var maxTx = 0;
-            var minTx = -(track.offsetWidth - wrap.offsetWidth);
-            if (minTx > 0) minTx = 0;
-            return { minTx: minTx, maxTx: maxTx };
-        }
+        var viewport = root.querySelector('[data-carousel-viewport]');
+        var track = root.querySelector('[data-carousel-track]');
+        var prevBtn = root.querySelector('[data-carousel-prev]');
+        var nextBtn = root.querySelector('[data-carousel-next]');
+        var slides = track ? track.querySelectorAll('[data-carousel-slide]') : [];
+        if (!viewport || !track || slides.length === 0) return null;
 
-        function applyTransform() {
-            track.style.transform = 'translateX(' + currentTx + 'px)';
-        }
-
-        function startAutoPlay() {
-            if (autoPlayTimer) return;
-            autoPlayTimer = setInterval(function() {
-                if (dragging) return;
-                if (wrap.matches(':hover')) return;
-                if (document.hidden) return;
-
-                var bounds = getBounds();
-                currentTx += direction * step;
-                if (currentTx <= bounds.minTx || currentTx >= bounds.maxTx) {
-                    direction *= -1;
-                    currentTx = clamp(currentTx, bounds.minTx, bounds.maxTx);
-                }
-                applyTransform();
-            }, 20);
-        }
-
-        function stopAutoPlay() {
-            if (!autoPlayTimer) return;
-            clearInterval(autoPlayTimer);
-            autoPlayTimer = null;
-        }
-
-        wrap.addEventListener('pointerdown', function(e) {
-            dragging = true;
-            didDrag = false;
-            startX = e.clientX;
-            startTx = currentTx;
-            wrap.classList.add('dragging');
-            stopAutoPlay();
-        });
-        document.addEventListener('pointermove', function(e) {
-            if (!dragging) return;
-            var dx = e.clientX - startX;
-            if (Math.abs(dx) > 4) didDrag = true;
-            e.preventDefault();
-            var bounds = getBounds();
-            currentTx = clamp(startTx + dx, bounds.minTx, bounds.maxTx);
-            applyTransform();
-        });
-        document.addEventListener('pointerup', function() {
-            dragging = false;
-            wrap.classList.remove('dragging');
-            startAutoPlay();
-        });
-        document.addEventListener('pointercancel', function() {
-            dragging = false;
-            wrap.classList.remove('dragging');
-            startAutoPlay();
-        });
-        wrap.addEventListener('click', function(e) {
-            if (didDrag) {
-                e.preventDefault();
-                e.stopPropagation();
-                didDrag = false;
-            }
-        }, true);
-
-        startAutoPlay();
-    })();
-    </script>
-    @endpush
-    @endif
-
-    @if(isset($latestPosts) && $latestPosts->isNotEmpty())
-    @push('scripts')
-    <script>
-    (function () {
-        var wrap = document.getElementById('hp-blog-mobile-carousel');
-        var track = document.getElementById('hp-blog-carousel-track');
-        var dotsWrap = document.getElementById('hp-blog-mobile-controls');
-        if (!wrap || !track || !dotsWrap) return;
-
-        var slides = track.querySelectorAll('.hp-blog-carousel-slide');
-        var dots = dotsWrap.querySelectorAll('.hp-blog-mobile-dot');
-        if (slides.length === 0) return;
-
-        var currentIndex = 0;
-        var autoTimer = null;
-        var delay = 3000;
+        var index = 0;
+        var timer = null;
         var dragging = false;
         var didDrag = false;
         var startX = 0;
         var currentX = 0;
+        var autoplayMs = options.autoplayMs || 0;
+        var mq = options.mq || null;
+        var destroyed = false;
 
-        function goTo(index) {
-            currentIndex = ((index % slides.length) + slides.length) % slides.length;
-            track.style.transform = 'translateX(' + (-currentIndex * 100) + '%)';
-            dots.forEach(function (d, i) {
-                d.classList.toggle('is-active', i === currentIndex);
-                d.setAttribute('aria-current', i === currentIndex ? 'true' : 'false');
-            });
-            resetAuto();
+        function enabled() {
+            return !destroyed && (!mq || mq.matches);
         }
 
-        function goNext() {
-            goTo(currentIndex + 1);
+        function perView() {
+            if (typeof options.perView === 'function') {
+                return options.perView();
+            }
+            return options.perView || 1;
+        }
+
+        function maxIndex() {
+            return Math.max(0, slides.length - perView());
+        }
+
+        function slideStepPx() {
+            var slide = slides[0];
+            if (!slide) return 0;
+            var style = window.getComputedStyle(track);
+            var gap = parseFloat(style.columnGap || style.gap || '0') || 0;
+            return slide.offsetWidth + gap;
+        }
+
+        function applyTransform() {
+            if (!enabled()) {
+                track.style.transform = '';
+                track.style.transition = '';
+                return;
+            }
+            track.style.transform = 'translateX(' + (-index * slideStepPx()) + 'px)';
+        }
+
+        function goTo(nextIndex) {
+            index = Math.max(0, Math.min(nextIndex, maxIndex()));
+            applyTransform();
+            syncButtons();
+        }
+
+        function syncButtons() {
+            if (!prevBtn || !nextBtn) return;
+            var on = enabled();
+            prevBtn.disabled = !on || index <= 0;
+            nextBtn.disabled = !on || index >= maxIndex();
+        }
+
+        function stopAuto() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
         }
 
         function startAuto() {
             stopAuto();
-            autoTimer = setInterval(function () {
-                if (dragging) return;
-                if (document.hidden) return;
-                goNext();
-            }, delay);
-        }
-
-        function stopAuto() {
-            if (autoTimer) {
-                clearInterval(autoTimer);
-                autoTimer = null;
-            }
+            if (!autoplayMs || !enabled()) return;
+            timer = setInterval(function () {
+                if (document.hidden || root.matches(':hover')) return;
+                if (index >= maxIndex()) goTo(0);
+                else goTo(index + 1);
+            }, autoplayMs);
         }
 
         function resetAuto() {
@@ -612,51 +357,245 @@
             startAuto();
         }
 
-        dots.forEach(function (dot) {
-            dot.addEventListener('click', function () {
-                var idx = parseInt(dot.getAttribute('data-slide') || '0', 10);
-                if (!isNaN(idx)) goTo(idx);
-            });
-        });
-
-        function getClientX(e) {
-            if (e.touches && e.touches.length > 0) return e.touches[0].clientX;
-            if (e.changedTouches && e.changedTouches.length > 0) return e.changedTouches[0].clientX;
-            return e.clientX;
+        function onPrev() {
+            goTo(index - 1);
+            resetAuto();
         }
 
-        track.addEventListener('touchstart', function (e) {
+        function onNext() {
+            goTo(index + 1);
+            resetAuto();
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', onPrev);
+        if (nextBtn) nextBtn.addEventListener('click', onNext);
+
+        function onPointerDown(clientX) {
+            if (!enabled()) return;
             dragging = true;
             didDrag = false;
-            startX = getClientX(e);
-            currentX = startX;
+            startX = clientX;
+            currentX = clientX;
             stopAuto();
             track.style.transition = 'none';
-        }, { passive: true });
+        }
 
-        track.addEventListener('touchmove', function (e) {
-            if (!dragging) return;
-            currentX = getClientX(e);
+        function onPointerMove(clientX) {
+            if (!dragging || !enabled()) return;
+            currentX = clientX;
             var delta = currentX - startX;
             if (Math.abs(delta) > 5) didDrag = true;
-            var base = -currentIndex * 100;
-            track.style.transform = 'translateX(calc(' + base + '% + ' + delta + 'px))';
-        }, { passive: true });
+            track.style.transform = 'translateX(' + (-index * slideStepPx() + delta) + 'px)';
+        }
 
-        track.addEventListener('touchend', function () {
-            if (!dragging) return;
+        function onPointerUp() {
+            if (!dragging || !enabled()) return;
             dragging = false;
             track.style.transition = 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
             var delta = currentX - startX;
-            if (Math.abs(delta) > wrap.offsetWidth * 0.2) {
-                if (delta > 0) goTo(currentIndex - 1);
-                else goTo(currentIndex + 1);
+            if (Math.abs(delta) > viewport.offsetWidth * 0.15) {
+                if (delta > 0) goTo(index - 1);
+                else goTo(index + 1);
             } else {
-                goTo(currentIndex);
+                applyTransform();
             }
+            resetAuto();
+        }
+
+        viewport.addEventListener('touchstart', function (e) {
+            onPointerDown(e.touches[0].clientX);
+        }, { passive: true });
+
+        viewport.addEventListener('touchmove', function (e) {
+            onPointerMove(e.touches[0].clientX);
+        }, { passive: true });
+
+        viewport.addEventListener('touchend', onPointerUp);
+
+        viewport.addEventListener('mousedown', function (e) {
+            if (e.button !== 0) return;
+            onPointerDown(e.clientX);
+            e.preventDefault();
         });
 
-        track.addEventListener('click', function (e) {
+        window.addEventListener('mousemove', function (e) {
+            if (!dragging) return;
+            onPointerMove(e.clientX);
+        });
+
+        window.addEventListener('mouseup', function () {
+            if (dragging) onPointerUp();
+        });
+
+        viewport.addEventListener('click', function (e) {
+            if (didDrag) {
+                e.preventDefault();
+                e.stopPropagation();
+                didDrag = false;
+            }
+        }, true);
+
+        function refresh() {
+            if (index > maxIndex()) index = maxIndex();
+            track.style.transition = 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+            applyTransform();
+            syncButtons();
+            if (enabled()) startAuto();
+            else stopAuto();
+        }
+
+        function onResize() { refresh(); }
+
+        window.addEventListener('resize', onResize);
+        if (mq && mq.addEventListener) mq.addEventListener('change', refresh);
+        else if (mq && mq.addListener) mq.addListener(refresh);
+
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) stopAuto();
+            else resetAuto();
+        });
+
+        refresh();
+
+        return {
+            refresh: refresh,
+            destroy: function () {
+                destroyed = true;
+                stopAuto();
+                track.style.transform = '';
+                track.style.transition = '';
+                window.removeEventListener('resize', onResize);
+            }
+        };
+    }
+
+    function initStoresMarquee(root) {
+        if (!root) return null;
+
+        var viewport = root.querySelector('[data-carousel-viewport]');
+        var track = root.querySelector('[data-carousel-track]');
+        if (!viewport || !track) return null;
+
+        var originalHtml = track.innerHTML;
+        var currentTx = 0;
+        var direction = -1;
+        var step = 0.55;
+        var dragging = false;
+        var didDrag = false;
+        var startX = 0;
+        var startTx = 0;
+        var timer = null;
+        var destroyed = false;
+        var loopWidth = 0;
+
+        function duplicateTrack() {
+            track.innerHTML = originalHtml + originalHtml;
+            loopWidth = track.scrollWidth / 2;
+        }
+
+        function restoreTrack() {
+            track.innerHTML = originalHtml;
+            track.style.transform = '';
+            track.style.transition = '';
+            loopWidth = 0;
+        }
+
+        function applyTransform() {
+            track.style.transform = 'translateX(' + currentTx + 'px)';
+        }
+
+        function normalizePosition() {
+            if (loopWidth <= 0) return;
+            if (currentTx <= -loopWidth) currentTx += loopWidth;
+            if (currentTx > 0) currentTx -= loopWidth;
+        }
+
+        function stopAuto() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+        }
+
+        function startAuto() {
+            stopAuto();
+            timer = setInterval(function () {
+                if (destroyed || dragging || document.hidden || root.matches(':hover')) return;
+                currentTx += direction * step;
+                normalizePosition();
+                applyTransform();
+            }, 20);
+        }
+
+        function enable() {
+            duplicateTrack();
+            currentTx = 0;
+            track.style.transition = 'none';
+            applyTransform();
+
+            function measureAndStart() {
+                loopWidth = track.scrollWidth / 2;
+                if (loopWidth <= 0 && track.children.length > 0) {
+                    requestAnimationFrame(measureAndStart);
+                    return;
+                }
+                startAuto();
+            }
+
+            requestAnimationFrame(measureAndStart);
+        }
+
+        function disable() {
+            stopAuto();
+            restoreTrack();
+            currentTx = 0;
+            dragging = false;
+        }
+
+        var pending = false;
+
+        viewport.addEventListener('pointerdown', function (e) {
+            if (destroyed) return;
+            pending = true;
+            didDrag = false;
+            dragging = false;
+            startX = e.clientX;
+            startTx = currentTx;
+            stopAuto();
+        }, { passive: true });
+
+        viewport.addEventListener('pointermove', function (e) {
+            if (!pending && !dragging) return;
+            var dx = e.clientX - startX;
+            if (!dragging && Math.abs(dx) > 10) {
+                dragging = true;
+                didDrag = true;
+                track.style.transition = 'none';
+            }
+            if (!dragging) return;
+            currentTx = startTx + dx;
+            applyTransform();
+        }, { passive: true });
+
+        viewport.addEventListener('pointerup', function () {
+            if (!pending && !dragging) return;
+            pending = false;
+            if (dragging) {
+                dragging = false;
+                track.style.transition = 'transform 0.15s ease-out';
+                normalizePosition();
+                applyTransform();
+            }
+            startAuto();
+        });
+
+        viewport.addEventListener('pointercancel', function () {
+            pending = false;
+            dragging = false;
+            startAuto();
+        });
+
+        viewport.addEventListener('click', function (e) {
             if (didDrag) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -666,13 +605,93 @@
 
         document.addEventListener('visibilitychange', function () {
             if (document.hidden) stopAuto();
-            else startAuto();
+            else if (!destroyed && mobileMq.matches) startAuto();
         });
 
-        startAuto();
-    })();
-    </script>
-    @endpush
-    @endif
-</div>
-@endsection
+        return {
+            enable: enable,
+            disable: disable,
+            destroy: function () {
+                destroyed = true;
+                disable();
+            }
+        };
+    }
+
+    var storesRoot = document.getElementById('hp-stores-carousel');
+    var storesCarousel = null;
+    var storesMarquee = initStoresMarquee(storesRoot);
+
+    function setupStores() {
+        if (!storesRoot) return;
+        if (storesCarousel) {
+            storesCarousel.destroy();
+            storesCarousel = null;
+        }
+        if (storesMarquee) storesMarquee.disable();
+
+        if (mobileMq.matches) {
+            if (storesMarquee) storesMarquee.enable();
+        } else {
+            storesCarousel = initCarousel(storesRoot, {
+                perView: function () {
+                    if (window.innerWidth >= 1200) return 7;
+                    if (window.innerWidth >= 960) return 6;
+                    return 5;
+                }
+            });
+        }
+    }
+
+    setupStores();
+    window.addEventListener('load', setupStores);
+    if (mobileMq.addEventListener) mobileMq.addEventListener('change', setupStores);
+    else if (mobileMq.addListener) mobileMq.addListener(setupStores);
+
+    initCarousel(document.getElementById('hp-blog-carousel'), {
+        mq: mobileMq,
+        perView: 1
+    });
+
+    var couponsBtn = document.getElementById('hp-coupons-load-more');
+    var couponCards = document.querySelectorAll('#hp-coupons-grid [data-coupon-card]');
+    if (couponCards.length > 0) {
+        var maxCoupons = Math.min(12, couponCards.length);
+        var visibleCoupons = mobileMq.matches ? 4 : 6;
+
+        function syncCoupons() {
+            if (!mobileMq.matches) {
+                couponCards.forEach(function (card) {
+                    card.classList.remove('is-coupon-hidden');
+                });
+                if (couponsBtn) couponsBtn.closest('.hp-load-more-wrap').style.display = 'none';
+                return;
+            }
+            couponCards.forEach(function (card, index) {
+                card.classList.toggle('is-coupon-hidden', index >= visibleCoupons);
+            });
+            if (couponsBtn) {
+                couponsBtn.hidden = visibleCoupons >= maxCoupons;
+                couponsBtn.closest('.hp-load-more-wrap').style.display = '';
+            }
+        }
+
+        if (couponsBtn) {
+            couponsBtn.addEventListener('click', function () {
+                visibleCoupons = Math.min(visibleCoupons + 4, maxCoupons);
+                syncCoupons();
+            });
+        }
+
+        function onCouponMqChange() {
+            visibleCoupons = mobileMq.matches ? 4 : 6;
+            syncCoupons();
+        }
+
+        syncCoupons();
+        if (mobileMq.addEventListener) mobileMq.addEventListener('change', onCouponMqChange);
+        else if (mobileMq.addListener) mobileMq.addListener(onCouponMqChange);
+    }
+})();
+</script>
+@endpush

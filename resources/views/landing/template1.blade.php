@@ -137,7 +137,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     @include('partials.site-chrome-styles')
     @if (config('app.ga4_id'))
@@ -164,10 +164,10 @@
         }
 
         :root {
-            --primary: #7c3aed;
-            --primary-dark: #6d28d9;
+            --primary: #00405d;
+            --primary-dark: #003347;
             --primary-soft: #eef1f5;
-            --accent: #6d28d9;
+            --accent: #003347;
             --text-dark: #0f172a;
             --text-light: #64748b;
             --bg-page: #f5f5f5;
@@ -179,8 +179,7 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont,
-                'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
             font-size: 15px;
             line-height: 1.7;
             color: var(--text-dark);
@@ -628,7 +627,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #7c3aed;
+            background: #00405d;
             color: #fff;
             padding: 3px 8px;
             border-radius: 6px;
@@ -646,7 +645,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #7c3aed;
+            background: #00405d;
             color: #fff;
             padding: 3px 8px;
             border-radius: 6px;
@@ -691,7 +690,7 @@
             align-items: center;
             gap: 6px;
             background: #ecfeff;
-            color: #6d28d9;
+            color: #003347;
             padding: 4px 10px;
             border-radius: 999px;
             font-size: 0.75rem;
@@ -743,7 +742,7 @@
             align-items: center;
             gap: 4px;
             font-weight: 600;
-            color: #6d28d9;
+            color: #003347;
         }
 
         .coupon-verified-badge {
@@ -988,7 +987,7 @@
         }
 
         .modal-link {
-            color: #7c3aed;
+            color: #00405d;
             font-weight: 600;
         }
 
@@ -1137,7 +1136,7 @@
         .coupon-copy-toast-progress {
             width: 100%;
             height: 3px;
-            background: #7c3aed;
+            background: #00405d;
             transform-origin: left center;
             animation: couponCopyToastProgress 2s linear forwards;
         }
@@ -1167,7 +1166,7 @@
         }
 
         .popup-banner {
-            background: linear-gradient(145deg, #a78bfa 0%, #6d28d9 58%, #7c3aed 100%);
+            background: linear-gradient(145deg, #4da8c4 0%, #003347 58%, #00405d 100%);
             padding: 32px 28px 40px;
             text-align: center;
             position: relative;
@@ -1208,7 +1207,7 @@
 
         .confetti-piece:nth-child(2) {
             left: 20%;
-            color: #a78bfa;
+            color: #4da8c4;
             animation-delay: 0.5s;
         }
 
@@ -1232,7 +1231,7 @@
 
         .confetti-piece:nth-child(6) {
             left: 60%;
-            color: #a78bfa;
+            color: #4da8c4;
             animation-delay: 0.8s;
         }
 
@@ -1364,7 +1363,7 @@
         .coupon-code-icon {
             width: 24px;
             height: 24px;
-            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, #4da8c4 0%, #00405d 100%);
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -1388,7 +1387,7 @@
         }
 
         .btn-copy-code-modal {
-            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, #4da8c4 0%, #00405d 100%);
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -1398,13 +1397,13 @@
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
-            box-shadow: 0 6px 18px #7c3aed;
+            box-shadow: 0 6px 18px #00405d;
         }
 
         .btn-copy-code-modal:hover {
-            background: linear-gradient(135deg, #6d28d9 0%, #a78bfa 100%);
+            background: linear-gradient(135deg, #003347 0%, #4da8c4 100%);
             transform: translateY(-1px);
-            box-shadow: 0 10px 24px #7c3aed;
+            box-shadow: 0 10px 24px #00405d;
         }
 
         .btn-copy-code-modal:active {
@@ -1430,14 +1429,14 @@
 
         .verification-item::before {
             content: '✓';
-            color: #7c3aed;
+            color: #00405d;
             font-weight: 700;
             font-size: 0.9rem;
         }
 
         .verification-item.success::before {
             content: '●';
-            color: #7c3aed;
+            color: #00405d;
         }
 
         .coupon-modal-actions {
@@ -1539,7 +1538,7 @@
             font-size: 0.78rem;
             color: #6b7280;
         }
-        .lead-capture-msg.success { color: #6d28d9; }
+        .lead-capture-msg.success { color: #003347; }
         .lead-capture-msg.error { color: #dc2626; }
 
         .feedback-btn {
@@ -1571,8 +1570,8 @@
         }
 
         .feedback-btn.worked {
-            border-color: #7c3aed;
-            color: #7c3aed;
+            border-color: #00405d;
+            color: #00405d;
         }
 
         .feedback-btn.failed {
@@ -1613,7 +1612,7 @@
 
         .btn-copy-all-codes:active,
         .btn-copy-all-codes.copied {
-            background: #6d28d9 !important;
+            background: #003347 !important;
         }
 
         /* Q&A Section */
@@ -1755,7 +1754,7 @@
             gap: 6px;
             padding: 10px 18px;
             border-radius: 999px;
-            background: #7c3aed;
+            background: #00405d;
             color: #fff;
             font-weight: 700;
             font-size: 0.85rem;
@@ -1767,7 +1766,7 @@
 
         .btn-get-coupon:hover {
             transform: translateY(-1px);
-            background: #6d28d9;
+            background: #003347;
             cursor: pointer;
         }
 
@@ -3007,7 +3006,7 @@
                 copyCodeToClipboard(code);
                 const t = this.textContent;
                 this.textContent = 'Copied ✓';
-                this.style.background = '#7c3aed';
+                this.style.background = '#00405d';
                 this.style.color = '#fff';
                 setTimeout(() => {
                     this.textContent = t;
@@ -3378,7 +3377,7 @@
             // Highlight selected button
             if (worked) {
                 btn.style.background = '#dcfce7';
-                btn.style.borderColor = '#7c3aed';
+                btn.style.borderColor = '#00405d';
                 btn.innerHTML = '<span class="feedback-icon">✓</span><span>Thank you!</span>';
             } else {
                 btn.style.background = '#fef2f2';

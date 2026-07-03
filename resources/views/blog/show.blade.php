@@ -4,9 +4,6 @@
 @section('description', Str::limit(strip_tags($post->content ?? ''), 160))
 
 @push('styles')
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 @include('partials.peel-sticker-styles')
 @include('partials.styles.public-modern-base')
 @include('partials.styles.blog-modern')

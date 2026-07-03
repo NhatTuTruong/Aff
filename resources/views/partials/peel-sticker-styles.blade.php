@@ -1,8 +1,8 @@
 <style>
 .btn-get-code.btn-peel-sticker {
-    --peel-primary: #7c3aed;
-    --peel-primary-light: #ddd6fe;
-    --peel-primary-dark: #6d28d9;
+    --peel-primary: #00405d;
+    --peel-primary-light: #b8e4ef;
+    --peel-primary-dark: #003347;
     position: relative;
     display: inline-flex;
     padding: 0;

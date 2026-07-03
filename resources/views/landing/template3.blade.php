@@ -112,7 +112,7 @@
     <meta name="twitter:image" content="{{ $ogImage }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @include('partials.site-chrome-styles')
     @if(config('app.ga4_id'))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('app.ga4_id') }}"></script>
@@ -129,22 +129,22 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --t3-primary: #7c3aed;
-            --t3-primary-dark: #6d28d9;
+            --t3-primary: #00405d;
+            --t3-primary-dark: #003347;
             --t3-primary-soft: #eef1f5;
-            --t3-accent: #7c3aed;
-            --t3-accent-hover: #6d28d9;
-            --t3-hero-bg: linear-gradient(135deg, #a78bfa 0%, #7c3aed 55%, #1e293b 100%);
+            --t3-accent: #00405d;
+            --t3-accent-hover: #003347;
+            --t3-hero-bg: linear-gradient(135deg, #4da8c4 0%, #00405d 55%, #1e293b 100%);
             --t3-text: #0f172a;
             --t3-text-muted: #64748b;
             --t3-bg: #f1f5f9;
             --t3-card: #ffffff;
             --t3-border: #e2e8f0;
             --t3-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 10px 20px -5px rgba(15, 23, 42, 0.08);
-            --t3-ribbon: linear-gradient(180deg, #6d28d9 0%, #7c3aed 50%, #a78bfa 100%);
+            --t3-ribbon: linear-gradient(180deg, #003347 0%, #00405d 50%, #4da8c4 100%);
         }
         body {
-            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
             font-size: 15px;
             line-height: 1.6;
             color: var(--t3-text);
@@ -185,7 +185,7 @@
             font-size: 1.35rem;
             letter-spacing: -0.02em;
             color: var(--t3-text);
-            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
         }
         .t3-banner-tagline {
             display: block;
@@ -207,7 +207,7 @@
             cursor: pointer;
             transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
             box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
-            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
         }
         .t3-banner-cta:hover {
             background: var(--t3-accent-hover);
@@ -248,7 +248,7 @@
             letter-spacing: -0.03em;
             margin-bottom: 10px;
             color: var(--t3-text);
-            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
             line-height: 1.2;
             max-width: 48rem;
         }
@@ -309,7 +309,7 @@
             font-weight: 800;
             font-size: 1.25rem;
             color: var(--t3-text);
-            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
         }
         .t3-stats-label {
             font-size: 0.8rem;
@@ -323,7 +323,7 @@
             font-size: 1.35rem;
             font-weight: 800;
             margin-bottom: 6px;
-            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
             letter-spacing: -0.02em;
         }
         .t3-coupon-header-meta {
@@ -403,10 +403,10 @@
             background: linear-gradient(180deg, transparent, rgba(255,255,255,0.45), transparent);
         }
         .t3-offer-strip--deal {
-            background: linear-gradient(180deg, #6d28d9 0%, #7c3aed 100%);
+            background: linear-gradient(180deg, #003347 0%, #00405d 100%);
         }
         .t3-offer-num {
-            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
             font-weight: 800;
             font-size: 1.65rem;
             line-height: 1;
@@ -547,7 +547,7 @@
             font-weight: 800;
             margin-bottom: 16px;
             color: var(--t3-text);
-            font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
             letter-spacing: -0.02em;
         }
         .section-body {

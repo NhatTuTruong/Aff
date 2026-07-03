@@ -15,7 +15,7 @@
     <meta name="robots" content="index, follow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @include('partials.site-chrome-styles')
     @if(config('app.ga4_id'))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('app.ga4_id') }}"></script>
@@ -30,10 +30,10 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary: #7c3aed;
-            --primary-dark: #a78bfa;
-            --primary-light: #6d28d9;
-            --accent: #6d28d9;
+            --primary: #00405d;
+            --primary-dark: #4da8c4;
+            --primary-light: #003347;
+            --accent: #003347;
             --text-dark: #0f172a;
             --text-light: #475569;
             --bg-page: #e8edf3;
@@ -42,7 +42,7 @@
             --shadow-lg: 0 26px 60px -34px rgba(2, 6, 23, 0.55);
         }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
             line-height: 1.6;
             color: var(--text-dark);
             overflow-x: hidden;
@@ -99,7 +99,7 @@
             filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
         }
         .title {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
             font-size: clamp(2.5rem, 5vw, 4rem);
             font-weight: 800;
             color: #ffffff;

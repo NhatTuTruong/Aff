@@ -115,7 +115,7 @@
     <meta name="twitter:image" content="{{ $ogImage }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @include('partials.site-chrome-styles')
     @if(config('app.ga4_id'))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('app.ga4_id') }}"></script>
@@ -132,8 +132,8 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --t2-primary: #7c3aed;
-            --t2-primary-dark: #6d28d9;
+            --t2-primary: #00405d;
+            --t2-primary-dark: #003347;
             --t2-primary-soft: #eef1f5;
             --t2-banner: #1e293b;
             --t2-banner-dark: #0f172a;
@@ -144,7 +144,7 @@
             --t2-border: #e2e8f0;
         }
         body {
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
             font-size: 15px;
             line-height: 1.6;
             color: var(--t2-text);
@@ -314,7 +314,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #7c3aed;
+            background: #00405d;
             color: #fff;
             padding: 3px 8px;
             border-radius: 4px;
@@ -346,7 +346,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #7c3aed;
+            background: #00405d;
             color: #fff;
             padding: 3px 8px;
             border-radius: 4px;
