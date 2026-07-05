@@ -9,6 +9,7 @@ use App\Filament\Exports\CampaignExporter;
 use App\Models\Campaign;
 use App\Models\Brand;
 use App\Models\User;
+use App\Services\CouponSyncService;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -17,6 +18,7 @@ use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -524,6 +526,34 @@ class CampaignResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('sync_posts')
+                        ->label('Đăng bài')
+                        ->icon('heroicon-o-paper-airplane')
+                        ->color('info')
+                        ->requiresConfirmation()
+                        ->modalHeading('Đăng bài hàng loạt')
+                        ->modalDescription('Gửi các chiến dịch đã chọn đến API đăng bài theo cấu hình trong Cài đặt hệ thống → Tự động đăng bài.')
+                        ->modalSubmitActionLabel('Đăng bài')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
+                            $result = app(CouponSyncService::class)->syncCampaigns($records);
+
+                            if ($result['success']) {
+                                Notification::make()
+                                    ->title('Đăng bài thành công')
+                                    ->body($result['message'])
+                                    ->success()
+                                    ->send();
+
+                                return;
+                            }
+
+                            Notification::make()
+                                ->title('Đăng bài thất bại')
+                                ->body($result['message'])
+                                ->danger()
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),

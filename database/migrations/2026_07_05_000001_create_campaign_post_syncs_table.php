@@ -1,0 +1,27 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('campaign_post_syncs', function (Blueprint $table) {
+            $table->id();
+            $table->string('domain')->index();
+            $table->foreignId('campaign_id')->nullable()->constrained('campaigns')->nullOnDelete();
+            $table->json('platforms')->nullable();
+            $table->string('type')->nullable();
+            $table->unsignedSmallInteger('response_status')->nullable();
+            $table->timestamp('posted_at')->useCurrent();
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('campaign_post_syncs');
+    }
+};

@@ -3,9 +3,12 @@
 namespace App\Filament\Admin\Pages;
 
 use App\Support\AdminSettings;
+use App\Support\AutoPostSettings;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -65,6 +68,11 @@ class SystemSettings extends Page implements HasForms
             'seo_title_suffix' => (string) AdminSettings::get('seo_title_suffix', '- ' . config('app.name')),
             'seo_meta_description_default' => (string) AdminSettings::get('seo_meta_description_default', 'Best coupons, deals and store reviews.'),
             'seo_og_image_default' => (string) AdminSettings::get('seo_og_image_default', ''),
+            'auto_post_api_url' => (string) AdminSettings::get('auto_post_api_url', 'http://localhost:8000/api/coupons/sync'),
+            'auto_post_bearer_token' => AdminSettings::getEncrypted('auto_post_bearer_token') ? '********' : '',
+            'auto_post_platforms' => AutoPostSettings::platforms(),
+            'auto_post_type' => AutoPostSettings::type(),
+            'auto_post_allow_repeat' => AutoPostSettings::allowRepeat(),
         ]);
     }
 
@@ -149,6 +157,37 @@ class SystemSettings extends Page implements HasForms
                             ->inline(false),
                     ])
                     ->columns(3),
+                Section::make('Tự động đăng bài')
+                    ->description('Cấu hình API đăng bài hàng loạt từ tab Chiến dịch.')
+                    ->schema([
+                        TextInput::make('auto_post_api_url')
+                            ->label('API URL')
+                            ->url()
+                            ->required()
+                            ->default('http://localhost:8000/api/coupons/sync')
+                            ->maxLength(500),
+                        TextInput::make('auto_post_bearer_token')
+                            ->label('Bearer Token')
+                            ->password()
+                            ->revealable()
+                            ->helperText('Nhập token mới để lưu. Nếu để "********" thì giữ token hiện tại.')
+                            ->maxLength(500),
+                        CheckboxList::make('auto_post_platforms')
+                            ->label('Nền tảng đăng bài')
+                            ->options(AutoPostSettings::PLATFORM_OPTIONS)
+                            ->columns(3)
+                            ->required(),
+                        Select::make('auto_post_type')
+                            ->label('Loại nội dung (type)')
+                            ->options(AutoPostSettings::TYPE_OPTIONS)
+                            ->required()
+                            ->default('video'),
+                        Toggle::make('auto_post_allow_repeat')
+                            ->label('Đăng lặp lại')
+                            ->helperText('Bật: đăng cả domain đã đăng trước đó. Tắt: bỏ qua domain đã có trong lịch sử đăng.')
+                            ->inline(false),
+                    ])
+                    ->columns(2),
                 Section::make('SEO mặc định')
                     ->description('Áp dụng cho các trang dùng layout chính.')
                     ->schema([
@@ -217,6 +256,16 @@ class SystemSettings extends Page implements HasForms
         AdminSettings::set('seo_title_suffix', trim((string) ($data['seo_title_suffix'] ?? ('- ' . config('app.name')))));
         AdminSettings::set('seo_meta_description_default', trim((string) ($data['seo_meta_description_default'] ?? 'Best coupons, deals and store reviews.')));
         AdminSettings::set('seo_og_image_default', trim((string) ($data['seo_og_image_default'] ?? '')));
+
+        $bearerToken = trim((string) ($data['auto_post_bearer_token'] ?? ''));
+        if ($bearerToken !== '' && $bearerToken !== '********') {
+            AdminSettings::setEncrypted('auto_post_bearer_token', $bearerToken);
+        }
+
+        AdminSettings::set('auto_post_api_url', trim((string) ($data['auto_post_api_url'] ?? 'http://localhost:8000/api/coupons/sync')));
+        AdminSettings::set('auto_post_platforms', array_values((array) ($data['auto_post_platforms'] ?? ['blog', 'instagram', 'facebook'])));
+        AdminSettings::set('auto_post_type', trim((string) ($data['auto_post_type'] ?? 'video')));
+        AdminSettings::set('auto_post_allow_repeat', (bool) ($data['auto_post_allow_repeat'] ?? false));
 
         $this->mount();
 

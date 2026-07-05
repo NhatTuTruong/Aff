@@ -39,7 +39,7 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => 'http://localhost:8000/storage',
+            'url' => 'http://localhost:8001/storage',
             'visibility' => 'public',
             'throw' => false,
         ],
