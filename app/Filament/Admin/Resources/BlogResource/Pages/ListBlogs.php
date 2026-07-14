@@ -39,20 +39,21 @@ class ListBlogs extends ListRecords
                 ->modalHeading('Tạo bài viết bằng AI')
                 ->modalDescription(function (): string {
                     $modes = AutoBlogSettings::enabledManualAiModes();
-                    $spotlight = 'Nếu nhập tên hoặc domain bất kỳ: AI viết bài ngắn tiếng Anh về subject đó — không cần brand hay campaign có trên hệ thống.';
                     if ($modes === []) {
-                        return $spotlight.' Nếu để trống ô đó, cần bật ít nhất một loại bài trong Cài đặt hệ thống → Auto Blog (best / guide / comparison / intro). Quá trình có thể mất 30–90 giây.';
+                        return 'Cần bật ít nhất một loại bài trong Cài đặt hệ thống → Auto Blog (best / guide / comparison / intro). Quá trình có thể mất 30–90 giây.';
                     }
                     $labels = array_map(fn (string $m): string => match ($m) {
-                        'intro' => 'blog giới thiệu store',
-                        'best' => 'best / deals theo danh mục',
-                        'guide' => 'hướng dẫn mua theo danh mục',
-                        'comparison' => 'so sánh theo danh mục',
+                        'intro' => 'blog giới thiệu cửa hàng (từ hệ thống)',
+                        'best' => 'best / lựa chọn tốt nhất',
+                        'guide' => 'hướng dẫn mua',
+                        'comparison' => 'so sánh',
                         default => $m,
                     }, $modes);
 
-                    return $spotlight.' Nếu để trống ô đó: AI chọn ngẫu nhiên một trong các dạng đang bật: '.implode(', ', $labels)
-                        .'. Quá trình có thể mất 30–90 giây.';
+                    return 'AI chọn ngẫu nhiên một dạng đang bật: '.implode(', ', $labels).'. '
+                        .'Không nhập brand/domain: bài best/guide/comparison viết theo danh mục đã chọn (hoặc ngẫu nhiên). '
+                        .'Có nhập brand/domain: bài best/guide/comparison viết về brand/domain, không theo danh mục. '
+                        .'Dạng giới thiệu cửa hàng giữ logic cũ. Quá trình có thể mất 30–90 giây.';
                 })
                 ->modalSubmitActionLabel('Tạo ngay')
                 ->form([
@@ -65,7 +66,7 @@ class ListBlogs extends ListRecords
                     TextInput::make('brand_or_domain')
                         ->label('Nhập brand hay domain')
                         ->placeholder('VD: Barbell Jack, barbelljack.com')
-                        ->helperText('Để trống: theo logic ngẫu nhiên.')
+                        ->helperText('Để trống: bài best/guide/comparison theo danh mục. Có nhập: bài best/guide/comparison về brand/domain (không theo danh mục).')
                         ->maxLength(255),
                     Textarea::make('idea')
                         ->label('Ý tưởng / yêu cầu bài viết')
@@ -109,73 +110,77 @@ class ListBlogs extends ListRecords
                         $pickedCategoryName = $pickedCategoryName ? trim((string) $pickedCategoryName) : null;
                     }
 
-                    if ($brandHint !== '') {
-                        $categoryLabel = 'Brand spotlight';
-                        $result = $gemini->generateBrandSpotlightFromHint($brandHint, $extras);
-                        $campaignId = null;
-                        $introType = null;
-                    } else {
-                        $modes = AutoBlogSettings::enabledManualAiModes();
-                        if ($modes === []) {
-                            Notification::make()
-                                ->title('Chưa bật loại bài AI')
-                                ->body('Vào Cài đặt hệ thống → Auto Blog và bật ít nhất một tùy chọn (giới thiệu store hoặc variant best / guide / comparison).')
-                                ->warning()
-                                ->send();
-                            return;
-                        }
+                    $modes = AutoBlogSettings::enabledManualAiModes();
+                    if ($modes === []) {
+                        Notification::make()
+                            ->title('Chưa bật loại bài AI')
+                            ->body('Vào Cài đặt hệ thống → Auto Blog và bật ít nhất một tùy chọn (giới thiệu store hoặc variant best / guide / comparison).')
+                            ->warning()
+                            ->send();
+                        return;
+                    }
 
-                        $mode = $modes[array_rand($modes)];
+                    $mode = $modes[array_rand($modes)];
+                    $result = null;
+                    $campaignId = null;
+                    $introType = null;
+                    $categoryLabel = null;
 
-                        $categoryNames = config('default_categories.names', User::defaultCategoryNames());
-                        if ($mode !== 'intro' && (empty($categoryNames) || ! is_array($categoryNames))) {
-                            Notification::make()
-                                ->title('Lỗi')
-                                ->body('Không có danh mục mặc định cho bài theo danh mục.')
-                                ->danger()
-                                ->send();
-                            return;
-                        }
+                    $categoryNames = config('default_categories.names', User::defaultCategoryNames());
+                    if ($mode !== 'intro' && (empty($categoryNames) || ! is_array($categoryNames))) {
+                        Notification::make()
+                            ->title('Lỗi')
+                            ->body('Không có danh mục mặc định cho bài theo danh mục.')
+                            ->danger()
+                            ->send();
+                        return;
+                    }
 
-                        if ($mode === 'intro') {
-                            $picked = $this->findNextBrandIntroCandidate();
-                            if ($picked === null) {
-                                // Đã tạo hết blog giới thiệu store cho tất cả campaigns
-                                // Chuyển sang tạo bài xoay vòng (best/guide/comparison)
-                                $fallbackModes = array_filter(['best', 'guide', 'comparison'], fn ($m) => in_array($m, AutoBlogSettings::enabledManualAiModes()));
-                                if (empty($fallbackModes)) {
-                                    Notification::make()
-                                        ->title('Không tạo được blog giới thiệu store')
-                                        ->body('Không có chiến dịch phù hợp nào và không có mode xoay vòng nào được bật.')
-                                        ->warning()
-                                        ->send();
-                                    return;
-                                }
-                                $mode = $fallbackModes[array_rand($fallbackModes)];
+                    $aiCategory = $pickedCategoryName
+                        ?? ($categoryNames[array_rand($categoryNames)] ?? 'General');
+
+                    if ($mode === 'intro') {
+                        $picked = $this->findNextBrandIntroCandidate();
+                        if ($picked === null) {
+                            $fallbackModes = array_values(array_filter(
+                                ['best', 'guide', 'comparison'],
+                                fn ($m) => in_array($m, AutoBlogSettings::enabledCategoryVariants(), true)
+                            ));
+                            if ($fallbackModes === []) {
                                 Notification::make()
-                                    ->title('Đã tạo hết blog giới thiệu store')
-                                    ->body("Chuyển sang tạo bài: {$mode}")
-                                    ->info()
+                                    ->title('Không tạo được blog giới thiệu store')
+                                    ->body('Không có chiến dịch phù hợp nào và không có variant best/guide/comparison nào được bật.')
+                                    ->warning()
                                     ->send();
-                            } else {
-                                [$brand, $campaign] = $picked;
-                                $categoryLabel = $this->resolveBrandCategoryLabel($brand);
-                                $result = $gemini->generateBrandIntroBlog($brand, $campaign, $categoryLabel, $extras);
-                                $campaignId = $campaign->id;
-                                $introType = 'store';
+                                return;
                             }
-                        }
-
-                        if (!isset($result)) {
-                            $category = $categoryNames[array_rand($categoryNames)];
-                            $result = $gemini->generateBlog($category, $mode, $extras);
-                            $categoryLabel = $category;
-                            $campaignId = null;
-                            $introType = $mode;
+                            $mode = $fallbackModes[array_rand($fallbackModes)];
+                            Notification::make()
+                                ->title('Đã tạo hết blog giới thiệu store')
+                                ->body("Chuyển sang tạo bài: {$mode}")
+                                ->info()
+                                ->send();
+                        } else {
+                            [$brand, $campaign] = $picked;
+                            $categoryLabel = $this->resolveBrandCategoryLabel($brand);
+                            $result = $gemini->generateBrandIntroBlog($brand, $campaign, $categoryLabel, $extras);
+                            $campaignId = $campaign->id;
+                            $introType = 'store';
                         }
                     }
 
-                    // Override category only for classification, not for AI prompt.
+                    if ($result === null && in_array($mode, ['best', 'guide', 'comparison'], true)) {
+                        if ($brandHint !== '') {
+                            $result = $gemini->generateBlog($aiCategory, $mode, $extras, $brandHint);
+                            $categoryLabel = $pickedCategoryName ?? 'General';
+                        } else {
+                            $result = $gemini->generateBlog($aiCategory, $mode, $extras);
+                            $categoryLabel = $aiCategory;
+                        }
+                        $campaignId = null;
+                        $introType = $mode;
+                    }
+
                     if (filled($pickedCategoryName)) {
                         $categoryLabel = $pickedCategoryName;
                     }

@@ -16,8 +16,9 @@ class GeminiBlogService
 
     /**
      * @param  array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
+     * @param  string|null  $brandSubject  Khi có: nội dung bài viết về brand/domain, không theo danh mục.
      */
-    public function generateBlog(string $category, string $variant, array $extras = []): ?array
+    public function generateBlog(string $category, string $variant, array $extras = [], ?string $brandSubject = null): ?array
     {
         $apiKey = AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'));
         $preferredModel = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
@@ -28,14 +29,56 @@ class GeminiBlogService
             return null;
         }
 
-        $topicPrompt = match ($variant) {
-            'best' => "Viết bài kiểu \"Best {$category}\" (vd: Best {$category} deals, Best {$category} products).",
-            'guide' => "Viết bài hướng dẫn chọn mua sản phẩm trong danh mục {$category} (Category buying guide).",
-            'comparison' => "Viết bài so sánh (comparison) giữa các nhóm sản phẩm/phương án phổ biến trong danh mục {$category}.",
-            default => "Viết bài blog chất lượng cao về chủ đề {$category}.",
-        };
+        $brandSubject = trim((string) $brandSubject);
+        $isBrandFocused = $brandSubject !== '';
 
-        $prompt = <<<PROMPT
+        if ($isBrandFocused) {
+            $brandSubject = Str::limit($brandSubject, 240, '');
+            $subjectSafe = htmlspecialchars($brandSubject, ENT_QUOTES, 'UTF-8');
+
+            $topicPrompt = match ($variant) {
+                'best' => "Write a \"Best of\" / top picks style article about the brand/store **{$subjectSafe}** — what shoppers should know, strengths, and why it stands out.",
+                'guide' => "Write a **buying guide** helping readers evaluate and shop at **{$subjectSafe}** (brand or store).",
+                'comparison' => "Write a **comparison** article positioning **{$subjectSafe}** against typical alternatives or competitors in its space.",
+                default => "Write a high-quality article about **{$subjectSafe}**.",
+            };
+
+            $focusBlock = <<<FOCUS
+## Subject focus (MANDATORY)
+- Primary subject: **{$subjectSafe}** (brand name or domain from the editor).
+- The **entire article** must be about this brand/store/domain.
+- **Do NOT** write a generic "{$category}" category article.
+- Ignore category "{$category}" for content — it is metadata only. Do not mention the category unless absolutely unavoidable.
+- Do not invent specific prices, coupon codes, or time-limited promotions unless provided in editor extras.
+- If the subject looks like a domain, you may mention it as the likely official site. Add at most one link to `https://` + that host only if clearly a domain (`rel="nofollow noopener"`).
+FOCUS;
+
+            $prompt = <<<PROMPT
+You are an expert English SEO copywriter for a deals and shopping blog.
+
+## Article requirements
+- Language: **English**, SEO-friendly, **1,500-2,200 words**.
+- Structure: exactly one `<h1>`, main sections with `<h2>`, optional `<h3>`.
+- Helpful, neutral-to-positive tone — not overly salesy.
+- Return a complete HTML fragment: `<h1>`, `<p>`, `<ul>`/`<ol>`, `<h2>`, `<h3>`. No `<html>`/`<body>`.
+- Do NOT use Markdown. Do NOT wrap output in code fences like ```html ... ```.
+
+{$this->buildEditorExtrasBlock($extras, forEnglish: true)}
+
+{$focusBlock}
+
+## Article type: {$variant}
+{$topicPrompt}
+PROMPT;
+        } else {
+            $topicPrompt = match ($variant) {
+                'best' => "Viết bài kiểu \"Best {$category}\" (vd: Best {$category} deals, Best {$category} products).",
+                'guide' => "Viết bài hướng dẫn chọn mua sản phẩm trong danh mục {$category} (Category buying guide).",
+                'comparison' => "Viết bài so sánh (comparison) giữa các nhóm sản phẩm/phương án phổ biến trong danh mục {$category}.",
+                default => "Viết bài blog chất lượng cao về chủ đề {$category}.",
+            };
+
+            $prompt = <<<PROMPT
 Bạn là copywriter SEO tiếng Anh chuyên nghiệp.
 
 Yêu cầu bài viết:
@@ -47,10 +90,15 @@ Yêu cầu bài viết:
 
 {$this->buildEditorExtrasBlock($extras)}
 
-Danh mục: {$category}
+## Trọng tâm nội dung (BẮT BUỘC)
+- Danh mục: **{$category}**
+- Toàn bộ bài viết phải xoay quanh danh mục **{$category}** — tips, sản phẩm, xu hướng, hướng dẫn mua trong niche này.
+- Không viết về một brand/cửa hàng cụ thể làm chủ đề chính.
+
 Loại bài: {$variant}
 {$topicPrompt}
 PROMPT;
+        }
 
         return $this->callGeminiWithFallback($apiKey, $preferredModel, $prompt, $timeout);
     }
