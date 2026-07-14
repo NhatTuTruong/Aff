@@ -111,18 +111,18 @@
         }
         body.magazine-site {
             font-size: 17px;
-            background: #0a0a0a;
-            color: #e8e8e8;
-            --bg: #0a0a0a;
-            --surface: #141414;
-            --surface-hover: #1a1a1a;
-            --text: #f5f5f5;
-            --text-muted: #9ca3af;
+            background: #ffffff;
+            color: #111827;
+            --bg: #ffffff;
+            --surface: #ffffff;
+            --surface-hover: #f3f4f6;
+            --text: #111827;
+            --text-muted: #6b7280;
             --primary: #e91e8c;
             --primary-dark: #c2185b;
             --accent: #e91e8c;
             --accent-hover: #c2185b;
-            --border: rgba(255, 255, 255, 0.08);
+            --border: rgba(15, 23, 42, 0.08);
         }
         .font-heading { font-family: 'DM Sans', system-ui, sans-serif; }
 

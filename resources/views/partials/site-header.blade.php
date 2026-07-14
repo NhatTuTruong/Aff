@@ -2,7 +2,7 @@
     @include('partials.site-header-magazine')
 @else
     @php
-        $navLinks = \App\Models\SiteContent::get('header_nav', \App\Models\SiteContent::defaultHeaderNav());
+        $navLinks = \App\Models\SiteContent::headerNav();
         $normalizeUrl = function ($url) {
             if (empty($url)) {
                 return url('/');

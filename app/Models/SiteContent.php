@@ -41,12 +41,32 @@ class SiteContent extends Model
         Cache::forget('site_content.' . $key);
     }
 
+    /** Nav header đã chuẩn hóa nhãn (vd. Blog → Review). */
+    public static function headerNav(): array
+    {
+        $links = self::get('header_nav', self::defaultHeaderNav());
+        if (! is_array($links)) {
+            return self::defaultHeaderNav();
+        }
+
+        return array_values(array_map(function ($link) {
+            if (! is_array($link)) {
+                return $link;
+            }
+            if (isset($link['label']) && is_string($link['label'])) {
+                $link['label'] = \App\Support\MagazineLayout::navLabel($link['label']);
+            }
+
+            return $link;
+        }, $links));
+    }
+
     /** Mặc định nav header: [{label, url}, ...] */
     public static function defaultHeaderNav(): array
     {
         return [
             ['label' => 'Home', 'url' => '/'],
-            ['label' => 'Blog', 'url' => '/blog'],
+            ['label' => 'Review', 'url' => '/blog'],
             ['label' => 'About Us', 'url' => '/about'],
             ['label' => 'Contact', 'url' => '/contact'],
         ];
@@ -60,7 +80,7 @@ class SiteContent extends Model
                 'title' => 'Explore',
                 'links' => [
                     ['label' => 'Home', 'url' => '/'],
-                    ['label' => 'Review Blog', 'url' => '/blog'],
+                    ['label' => 'Review', 'url' => '/blog'],
                     ['label' => 'Stores', 'url' => '/#stores'],
                     ['label' => 'Coupons', 'url' => '/#coupons'],
                 ],

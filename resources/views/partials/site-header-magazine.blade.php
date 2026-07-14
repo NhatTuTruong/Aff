@@ -14,7 +14,7 @@
         $blogCategories = collect(config('default_categories.names', []))->take(14);
     }
 
-    $headerNavLinks = \App\Models\SiteContent::get('header_nav', \App\Models\SiteContent::defaultHeaderNav());
+    $headerNavLinks = \App\Models\SiteContent::headerNav();
     $normalizeUrl = function ($url) {
         if (empty($url)) {
             return url('/');
@@ -58,6 +58,8 @@
 
         return $currentPath === $resolved || str_starts_with($currentPath, $resolved . '/');
     };
+
+    $breadcrumbTrail = MagazineLayout::breadcrumbTrail();
 @endphp
 
 <header class="magazine-header">
@@ -72,7 +74,7 @@
             <nav class="magazine-banner-nav magazine-banner-collapsible" aria-label="Quick links">
                 @foreach($headerNavLinks as $link)
                     @php $active = $isActive($link['url'] ?? '/'); @endphp
-                    <a href="{{ $normalizeUrl($link['url'] ?? '/') }}" @if($active) class="is-active" @endif>{{ strtoupper($link['label'] ?? 'Link') }}</a>
+                    <a href="{{ $normalizeUrl($link['url'] ?? '/') }}" @if($active) class="is-active" @endif>{{ strtoupper($link['label'] ?? 'LINK') }}</a>
                 @endforeach
             </nav>
         </div>
@@ -89,13 +91,30 @@
                 <span></span><span></span><span></span>
             </button>
 
+            <nav class="magazine-breadcrumb" aria-label="Breadcrumb">
+                <ol class="magazine-breadcrumb-list">
+                    @foreach($breadcrumbTrail as $index => $crumb)
+                        <li class="magazine-breadcrumb-item">
+                            @if($index > 0)
+                                <span class="magazine-breadcrumb-sep" aria-hidden="true">/</span>
+                            @endif
+                            @if(filled($crumb['url'] ?? null))
+                                <a href="{{ $crumb['url'] }}">{{ $crumb['label'] }}</a>
+                            @else
+                                <span class="magazine-breadcrumb-current" aria-current="page">{{ $crumb['label'] }}</span>
+                            @endif
+                        </li>
+                    @endforeach
+                </ol>
+            </nav>
+
             <nav class="magazine-nav" id="magazine-nav" aria-label="Site navigation">
                 <div class="magazine-nav-section magazine-nav-section--mobile">
                     <p class="magazine-nav-section-label">Menu</p>
                     <div class="magazine-nav-row">
                         @foreach($headerNavLinks as $link)
                             @php $active = $isActive($link['url'] ?? '/'); @endphp
-                            <a href="{{ $normalizeUrl($link['url'] ?? '/') }}" @if($active) class="is-active" @endif>{{ strtoupper($link['label'] ?? 'Link') }}</a>
+                            <a href="{{ $normalizeUrl($link['url'] ?? '/') }}" @if($active) class="is-active" @endif>{{ strtoupper($link['label'] ?? 'LINK') }}</a>
                         @endforeach
                     </div>
                 </div>

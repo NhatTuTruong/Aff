@@ -1,8 +1,24 @@
 <style>
+/* Hide category row under header (desktop + mobile) */
+.magazine-nav-section--categories {
+    display: none !important;
+}
+
+@media (min-width: 769px) {
+    .magazine-nav {
+        display: none !important;
+    }
+
+    .magazine-nav-inner {
+        align-items: center;
+        padding: 0.35rem 0;
+    }
+}
+
 /* Magazine header, footer, social — homepage */
 :root {
     --magazine-shell: min(1320px, calc(100% - 2rem));
-    --magazine-sticky-offset: 9rem;
+    --magazine-sticky-offset: 7.5rem;
 }
 
 body:has(.home-magazine) main,
@@ -40,10 +56,7 @@ body.magazine-site main {
 }
 
 .magazine-header.magazine-header--compact .magazine-banner-collapsible {
-    max-height: 0;
-    opacity: 0;
-    margin: 0;
-    pointer-events: none;
+
 }
 
 .magazine-header.magazine-header--compact .magazine-banner-grid {
@@ -190,6 +203,72 @@ body.magazine-site main {
 .magazine-nav {
     flex: 1;
     min-width: 0;
+}
+
+.magazine-breadcrumb {
+    flex: 1;
+    min-width: 0;
+    margin-right: 1rem;
+}
+
+.magazine-breadcrumb-list {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.magazine-breadcrumb-item {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    flex-shrink: 1;
+}
+
+.magazine-breadcrumb-item:last-child {
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.magazine-breadcrumb-sep {
+    margin: 0 0.45rem;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.72rem;
+    flex-shrink: 0;
+}
+
+.magazine-breadcrumb a,
+.magazine-breadcrumb-current {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+}
+
+.magazine-breadcrumb a {
+    color: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.magazine-breadcrumb a:hover {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.magazine-breadcrumb-current {
+    color: #fff;
 }
 
 @media (min-width: 769px) {
@@ -499,11 +578,6 @@ body.magazine-site main {
         display: none;
     }
 
-    .magazine-nav-section--categories {
-        flex: 1;
-        min-width: 0;
-    }
-
     .magazine-nav-inner {
         gap: 1.25rem;
     }
@@ -787,6 +861,17 @@ body.magazine-site main {
         flex-shrink: 0;
         grid-column: 1;
         border: none;
+    }
+
+    .magazine-breadcrumb {
+        grid-column: 2;
+        margin-right: 0;
+        min-width: 0;
+    }
+
+    .magazine-breadcrumb a,
+    .magazine-breadcrumb-current {
+        font-size: 0.72rem;
     }
 
     .magazine-search {

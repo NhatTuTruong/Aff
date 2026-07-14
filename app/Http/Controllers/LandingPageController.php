@@ -81,6 +81,7 @@ class LandingPageController extends Controller
         }
         
         request()->attributes->set('landing_template', $template);
+        request()->attributes->set('landing_campaign', $campaign);
 
         return view("landing.{$template}", compact('campaign', 'pageView'));
     }

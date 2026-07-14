@@ -1,20 +1,21 @@
 <style>
-/* Homepage magazine — black theme */
+/* Homepage magazine — light content theme */
 body:has(.home-magazine) {
-    background: #0a0a0a !important;
-    color: #e8e8e8;
+    background: #ffffff !important;
+    color: #111827;
 }
 
 .home-magazine {
-    --hm-bg: #0a0a0a;
-    --hm-surface: #141414;
-    --hm-surface-2: #1a1a1a;
-    --hm-line: rgba(255, 255, 255, 0.08);
-    --hm-text: #f5f5f5;
-    --hm-muted: #9ca3af;
+    --hm-bg: #ffffff;
+    --hm-surface: #ffffff;
+    --hm-surface-2: #f3f4f6;
+    --hm-line: rgba(15, 23, 42, 0.08);
+    --hm-text: #111827;
+    --hm-muted: #6b7280;
     --hm-accent: #e91e8c;
     --hm-radius: 6px;
     --hm-shell: min(1320px, calc(100% - 2rem));
+    --hm-card-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
     font-family: 'DM Sans', system-ui, sans-serif;
     background: var(--hm-bg);
     color: var(--hm-text);
@@ -207,6 +208,7 @@ body:has(.home-magazine) {
     background: var(--hm-surface);
     border-radius: var(--hm-radius);
     border: 1px solid var(--hm-line);
+    box-shadow: var(--hm-card-shadow);
     text-decoration: none;
     color: inherit;
     transition: background 0.2s, border-color 0.2s;
@@ -215,14 +217,14 @@ body:has(.home-magazine) {
 
 .home-magazine .hm-hero-mini:hover {
     background: var(--hm-surface-2);
-    border-color: rgba(255,255,255,0.14);
+    border-color: rgba(233, 30, 140, 0.25);
 }
 
 .home-magazine .hm-hero-mini-media {
     aspect-ratio: 4/3;
     border-radius: 4px;
     overflow: hidden;
-    background: #222;
+    background: var(--hm-surface-2);
 }
 
 .home-magazine .hm-hero-mini-media img {
@@ -252,7 +254,7 @@ body:has(.home-magazine) {
 /* Trending ticker */
 .home-magazine .hm-trending {
     border-bottom: 1px solid var(--hm-line);
-    background: #111;
+    background: var(--hm-surface-2);
     overflow: hidden;
 }
 
@@ -306,7 +308,7 @@ body:has(.home-magazine) {
 }
 
 .home-magazine .hm-trending-link:hover {
-    color: #fff;
+    color: var(--hm-accent);
 }
 
 @keyframes hm-ticker {
@@ -353,7 +355,7 @@ body:has(.home-magazine) {
     font-family: 'DM Sans', system-ui, sans-serif;
     font-size: 1.45rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--hm-text);
     margin: 0;
 }
 
@@ -485,15 +487,16 @@ body:has(.home-magazine) {
 }
 
 .home-magazine .hm-card:hover {
-    border-color: rgba(255,255,255,0.16);
+    border-color: rgba(233, 30, 140, 0.35);
     transform: translateY(-2px);
+    box-shadow: var(--hm-card-shadow);
 }
 
 .home-magazine .hm-card-media {
     position: relative;
     aspect-ratio: 16/10;
     overflow: hidden;
-    background: #222;
+    background: var(--hm-surface-2);
 }
 
 .home-magazine .hm-card-media img {
@@ -515,7 +518,7 @@ body:has(.home-magazine) {
     font-size: 1.08rem;
     font-weight: 600;
     line-height: 1.35;
-    color: #fff;
+    color: var(--hm-text);
     margin: 0 0 0.35rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -581,6 +584,15 @@ body:has(.home-magazine) {
     padding: 1.25rem;
 }
 
+.home-magazine .hm-card-body--overlay .hm-card-title {
+    color: #fff;
+}
+
+.home-magazine .hm-card-body--overlay .hm-card-meta,
+.home-magazine .hm-card-body--overlay .hm-card-excerpt {
+    color: rgba(255, 255, 255, 0.78);
+}
+
 .home-magazine .hm-list {
     display: flex;
     flex-direction: column;
@@ -610,7 +622,7 @@ body:has(.home-magazine) {
     aspect-ratio: 1;
     border-radius: 4px;
     overflow: hidden;
-    background: #222;
+    background: var(--hm-surface-2);
 }
 
 .home-magazine .hm-list-media img {
@@ -623,7 +635,7 @@ body:has(.home-magazine) {
     font-size: 1rem;
     font-weight: 600;
     line-height: 1.35;
-    color: #fff;
+    color: var(--hm-text);
     margin: 0 0 0.2rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -659,7 +671,7 @@ body:has(.home-magazine) {
 /* Sidebar */
 .home-magazine .hm-sidebar {
     position: sticky;
-    top: var(--magazine-sticky-offset, 9rem);
+    top: var(--magazine-sticky-offset, 7.5rem);
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -670,6 +682,7 @@ body:has(.home-magazine) {
     border: 1px solid var(--hm-line);
     border-radius: var(--hm-radius);
     padding: 1.1rem 1.15rem;
+    box-shadow: var(--hm-card-shadow);
 }
 
 .home-magazine .hm-widget-title {
@@ -679,7 +692,7 @@ body:has(.home-magazine) {
     font-family: 'DM Sans', system-ui, sans-serif;
     font-size: 1.05rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--hm-text);
     margin: 0 0 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 2px solid var(--hm-accent);
@@ -723,7 +736,7 @@ body:has(.home-magazine) {
 }
 
 .home-magazine .hm-cat-nav-item:hover {
-    color: #fff;
+    color: var(--hm-accent);
 }
 
 .home-magazine .hm-cat-nav-dot {
@@ -760,7 +773,7 @@ body:has(.home-magazine) {
     height: 56px;
     border-radius: 4px;
     overflow: hidden;
-    background: #222;
+    background: var(--hm-surface-2);
     flex-shrink: 0;
 }
 
@@ -775,7 +788,7 @@ body:has(.home-magazine) {
     font-size: 0.82rem;
     font-weight: 600;
     line-height: 1.35;
-    color: #fff;
+    color: var(--hm-text);
     margin-bottom: 0.15rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -813,7 +826,7 @@ body:has(.home-magazine) {
 }
 
 .home-magazine .hm-latest-widget a:hover {
-    color: #fff;
+    color: var(--hm-accent);
 }
 
 /* Empty state */
@@ -827,7 +840,7 @@ body:has(.home-magazine) {
 
 .home-magazine .hm-empty h2 {
     font-family: 'DM Sans', system-ui, sans-serif;
-    color: #fff;
+    color: var(--hm-text);
     margin-bottom: 0.5rem;
 }
 
@@ -910,7 +923,7 @@ body:has(.home-magazine) {
     aspect-ratio: 16/10;
     border-radius: var(--hm-radius);
     overflow: hidden;
-    background: #222;
+    background: var(--hm-surface-2);
     margin-bottom: 0.5rem;
 }
 
@@ -929,7 +942,7 @@ body:has(.home-magazine) {
     font-size: 0.82rem;
     font-weight: 600;
     line-height: 1.35;
-    color: #fff;
+    color: var(--hm-text);
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -987,14 +1000,14 @@ body:has(.home-magazine) {
 
 .home-magazine .hm-numbered-item:hover {
     background: var(--hm-surface-2);
-    border-color: rgba(255,255,255,0.14);
+    border-color: rgba(233, 30, 140, 0.22);
 }
 
 .home-magazine .hm-numbered-index {
     font-family: 'DM Sans', system-ui, sans-serif;
     font-size: 1.75rem;
     font-weight: 800;
-    color: rgba(255,255,255,0.15);
+    color: rgba(15, 23, 42, 0.14);
     line-height: 1;
     text-align: center;
 }
@@ -1003,7 +1016,7 @@ body:has(.home-magazine) {
     aspect-ratio: 4/3;
     border-radius: 4px;
     overflow: hidden;
-    background: #222;
+    background: var(--hm-surface-2);
 }
 
 .home-magazine .hm-numbered-media img {
@@ -1015,7 +1028,7 @@ body:has(.home-magazine) {
 .home-magazine .hm-numbered-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #fff;
+    color: var(--hm-text);
     margin: 0.25rem 0;
     line-height: 1.35;
 }
@@ -1045,7 +1058,7 @@ body:has(.home-magazine) {
     font-family: 'DM Sans', system-ui, sans-serif;
     font-size: clamp(1.35rem, 2.5vw, 1.65rem);
     font-weight: 800;
-    color: #fff;
+    color: var(--hm-text);
     margin: 0;
     letter-spacing: -0.02em;
 }
@@ -1074,14 +1087,15 @@ body:has(.home-magazine) {
 }
 
 .home-magazine .hm-popular-card:hover {
-    border-color: rgba(255,255,255,0.14);
+    border-color: rgba(233, 30, 140, 0.28);
     transform: translateY(-2px);
+    box-shadow: var(--hm-card-shadow);
 }
 
 .home-magazine .hm-popular-media {
     aspect-ratio: 16/10;
     overflow: hidden;
-    background: #222;
+    background: var(--hm-surface-2);
 }
 
 .home-magazine .hm-popular-media img {
@@ -1119,7 +1133,7 @@ body:has(.home-magazine) {
 .home-magazine .hm-popular-name {
     font-size: 1.02rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--hm-text);
     line-height: 1.35;
     margin: 0;
     display: -webkit-box;

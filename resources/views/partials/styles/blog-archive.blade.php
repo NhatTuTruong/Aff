@@ -1,10 +1,11 @@
 <style>
 .blog-archive {
-    --ba-bg: #0a0a0a;
-    --ba-surface: #141414;
-    --ba-line: rgba(255,255,255,0.08);
-    --ba-text: #f5f5f5;
-    --ba-muted: #9ca3af;
+    --ba-bg: #ffffff;
+    --ba-surface: #ffffff;
+    --ba-surface-2: #f3f4f6;
+    --ba-line: rgba(15, 23, 42, 0.08);
+    --ba-text: #111827;
+    --ba-muted: #6b7280;
     --ba-accent: #e91e8c;
     --ba-shell: min(1320px, calc(100% - 2rem));
     background: var(--ba-bg);
@@ -42,7 +43,7 @@
 .blog-archive .ba-title {
     font-size: clamp(1.75rem, 3.5vw, 2.35rem);
     font-weight: 800;
-    color: #fff;
+    color: var(--ba-text);
     margin: 0 0 0.35rem;
     letter-spacing: -0.02em;
 }
@@ -54,7 +55,7 @@
 }
 
 .blog-archive .ba-subtitle strong {
-    color: #fff;
+    color: var(--ba-text);
 }
 
 .blog-archive .ba-search {
@@ -80,7 +81,7 @@
     min-width: 0;
     border: none;
     background: transparent;
-    color: #fff;
+    color: var(--ba-text);
     font-size: 0.95rem;
     outline: none;
     font-family: inherit;
@@ -122,7 +123,7 @@
 .blog-archive .ba-cat.is-active {
     border-color: var(--ba-cat-color, var(--ba-accent));
     color: #fff;
-    background: color-mix(in srgb, var(--ba-cat-color, var(--ba-accent)) 18%, #141414);
+    background: color-mix(in srgb, var(--ba-cat-color, var(--ba-accent)) 85%, #ffffff);
 }
 
 .blog-archive .ba-spotlight {
@@ -140,12 +141,13 @@
 }
 
 .blog-archive .ba-spotlight:hover {
-    border-color: rgba(255,255,255,0.16);
+    border-color: rgba(233, 30, 140, 0.28);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 }
 
 .blog-archive .ba-spotlight-media {
     min-height: 280px;
-    background: #222;
+    background: var(--ba-surface-2);
 }
 
 .blog-archive .ba-spotlight-media img {
@@ -186,7 +188,7 @@
 .blog-archive .ba-spotlight-title {
     font-size: clamp(1.25rem, 2.2vw, 1.65rem);
     font-weight: 800;
-    color: #fff;
+    color: var(--ba-text);
     line-height: 1.25;
     margin: 0 0 0.65rem;
 }
@@ -234,14 +236,14 @@
 }
 
 .blog-archive .ba-feed-item:hover {
-    background: #1a1a1a;
+    background: #f9fafb;
 }
 
 .blog-archive .ba-feed-thumb {
     border-radius: 10px;
     overflow: hidden;
     aspect-ratio: 16/10;
-    background: #222;
+    background: var(--ba-surface-2);
 }
 
 .blog-archive .ba-feed-thumb img {
@@ -266,7 +268,7 @@
 .blog-archive .ba-feed-title {
     font-size: 1.08rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--ba-text);
     line-height: 1.35;
     margin: 0 0 0.4rem;
 }
@@ -324,7 +326,7 @@
 
 .blog-archive .ba-empty strong {
     display: block;
-    color: #fff;
+    color: var(--ba-text);
     font-size: 1.15rem;
     margin-bottom: 0.35rem;
 }

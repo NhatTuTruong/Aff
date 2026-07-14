@@ -123,7 +123,7 @@
                     <h4>{{ $col['title'] ?? 'Links' }}</h4>
                     <ul>
                         @foreach($col['links'] ?? [] as $link)
-                            <li><a href="{{ $normalizeUrl($link['url'] ?? '/') }}">{{ $link['label'] ?? 'Link' }}</a></li>
+                            <li><a href="{{ $normalizeUrl($link['url'] ?? '/') }}">{{ \App\Support\MagazineLayout::navLabel($link['label'] ?? 'Link') }}</a></li>
                         @endforeach
                     </ul>
                 </div>
