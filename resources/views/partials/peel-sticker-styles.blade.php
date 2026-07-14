@@ -60,7 +60,7 @@
 .btn-peel-sticker .peel-text {
     color: #fff;
     font-weight: 700;
-    font-size: 0.88rem;
+    font-size: 1rem;
     letter-spacing: 0.03em;
 }
 .btn-peel-sticker .peel-flap {

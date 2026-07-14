@@ -50,7 +50,7 @@
     backdrop-filter: blur(14px);
 }
 .site-header .header-inner {
-    max-width: 1180px;
+    max-width: 1320px;
     margin: 0 auto;
     padding: 0.8rem 1.25rem;
     display: flex;
@@ -60,7 +60,7 @@
     gap: 0.75rem 1rem;
 }
 .site-header .logo {
-    font-family: 'Space Grotesk', 'DM Sans', system-ui, sans-serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
     font-weight: 700;
     font-size: 1.35rem;
     color: var(--chrome-ink) !important;
@@ -273,7 +273,7 @@ textarea::placeholder {
     color: #e0f2fe;
 }
 .site-footer .footer-inner {
-    max-width: 1180px;
+    max-width: 1320px;
     margin: 0 auto;
     padding: 3.25rem 1.25rem 1.75rem;
 }
@@ -322,7 +322,7 @@ textarea::placeholder {
     }
 }
 .site-footer .footer-brand .logo {
-    font-family: 'Space Grotesk', 'DM Sans', sans-serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
     font-size: 1.25rem;
     font-weight: 700;
     color: #f0f9ff !important;
@@ -352,7 +352,7 @@ textarea::placeholder {
     transform: translateY(-1px);
 }
 .site-footer .footer-col h4 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -416,7 +416,7 @@ textarea::placeholder {
     justify-content: center;
     cursor: pointer;
     color: #fff;
-    background: linear-gradient(145deg, #7c3aed 0%, #6d28d9 100%);
+    background: var(--primary-dark);
     box-shadow: 0 8px 24px -6px rgba(124, 58, 237, 0.55);
     opacity: 0;
     visibility: hidden;
@@ -432,8 +432,7 @@ textarea::placeholder {
     transform: translateY(0) scale(1);
 }
 .back-to-top:hover {
-    background: linear-gradient(145deg, #6d28d9 0%, #7c3aed 100%);
-    box-shadow: 0 12px 28px -6px rgba(124, 58, 237, 0.6);
+    background: var(--primary-dark);
     transform: translateY(-2px) scale(1);
 }
 .back-to-top:focus-visible {

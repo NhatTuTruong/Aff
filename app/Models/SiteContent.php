@@ -86,6 +86,39 @@ class SiteContent extends Model
         ];
     }
 
+    /** Mặc định mạng xã hội: [{network, url}, ...] — lấy từ .env nếu chưa lưu trong admin. */
+    public static function defaultSocialLinks(): array
+    {
+        $links = [];
+        foreach ([
+            'instagram' => config('app.instagram_url'),
+            'youtube' => config('app.youtube_url'),
+            'facebook' => config('app.facebook_url'),
+        ] as $network => $url) {
+            $url = trim((string) $url);
+            if ($url !== '') {
+                $links[] = ['network' => $network, 'url' => $url];
+            }
+        }
+
+        return $links;
+    }
+
+    /** Danh sách mạng xã hội đang bật (URL không rỗng). */
+    public static function activeSocialLinks(): array
+    {
+        $links = self::get('social_links');
+        if (! is_array($links)) {
+            $links = self::defaultSocialLinks();
+        }
+
+        return array_values(array_filter($links, function ($link) {
+            return is_array($link)
+                && filled($link['network'] ?? null)
+                && trim((string) ($link['url'] ?? '')) !== '';
+        }));
+    }
+
     /** Mặc định nội dung trang lỗi: title, message */
     public static function defaultErrorContent(string $code): array
     {

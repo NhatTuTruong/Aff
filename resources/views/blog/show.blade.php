@@ -4,11 +4,7 @@
 @section('description', Str::limit(strip_tags($post->content ?? ''), 160))
 
 @push('styles')
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 @include('partials.peel-sticker-styles')
-@include('partials.styles.public-modern-base')
 @include('partials.styles.blog-modern')
 @endpush
 
@@ -90,64 +86,6 @@
                     </div>
                 @endif
             </article>
-
-            <aside class="blog-aside">
-                <h2 class="blog-aside-title">
-                    @if($post->category)
-                        Top picks for {{ $post->category }}
-                    @else
-                        Top picks for this topic
-                    @endif
-                </h2>
-
-                @if(isset($sidebarDeals) && $sidebarDeals->isNotEmpty())
-                    <div class="blog-aside-deals">
-                        @foreach($sidebarDeals as $coupon)
-                            @php $campaign = $coupon->campaign; $brand = $campaign?->brand; @endphp
-                            @if($brand)
-                                @php
-                                    $dealUrl = $campaign && $campaign->affiliate_url
-                                        ? route('click.redirect', ['slug' => $campaign->slug])
-                                        : '#';
-                                @endphp
-                                <article class="blog-deal-card">
-                                    <div class="blog-deal-header">
-                                        <div class="blog-deal-logo">
-                                            <img src="{{ $brand->image_url }}" alt="{{ $brand->name }}">
-                                        </div>
-                                        <div class="blog-deal-brand">{{ $brand->name }}</div>
-                                    </div>
-                                    @if($coupon->offer)
-                                        <p class="blog-deal-offer">{{ $coupon->offer }}</p>
-                                    @endif
-                                    <div class="blog-deal-actions">
-                                        @if($coupon->code)
-                                            <button type="button" class="btn-copy-code"
-                                                onclick="navigator.clipboard.writeText('{{ $coupon->code }}'); this.classList.add('copied'); this.textContent='Copied!'; setTimeout(() => { this.classList.remove('copied'); this.textContent='Copy Code'; }, 1500);"
-                                                title="Click to copy code">
-                                                Copy Code
-                                            </button>
-                                        @endif
-                                        @if($dealUrl !== '#')
-                                            <a href="{{ $dealUrl }}" class="blog-deal-cta" target="_blank" rel="nofollow sponsored noopener">
-                                                <span>Open deal</span>
-                                            </a>
-                                        @endif
-                                    </div>
-                                </article>
-                            @endif
-                        @endforeach
-                    </div>
-                @else
-                    <p class="blog-aside-empty">
-                        @if($post->category)
-                            There are no deals in this category yet: “{{ $post->category }}”.
-                        @else
-                            There are no highlighted deals yet for this article.
-                        @endif
-                    </p>
-                @endif
-            </aside>
         </div>
 
         @if(isset($relatedBlogs) && $relatedBlogs->isNotEmpty())

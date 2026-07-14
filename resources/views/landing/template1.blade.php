@@ -140,6 +140,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
         rel="stylesheet">
     @include('partials.site-chrome-styles')
+    @include('partials.landing-magazine-head')
     @if (config('app.ga4_id'))
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('app.ga4_id') }}"></script>
         <script>
@@ -164,10 +165,11 @@
         }
 
         :root {
-            --primary: #7c3aed;
-            --primary-dark: #6d28d9;
-            --primary-soft: #eef1f5;
-            --accent: #6d28d9;
+            --primary: #f9495e;
+            --primary-dark: #d93a4e;
+            --primary-soft: #fff1f2;
+            --primary-light: #ff8a96;
+            --accent: #e8384f;
             --text-dark: #0f172a;
             --text-light: #64748b;
             --bg-page: #f5f5f5;
@@ -238,7 +240,7 @@
             letter-spacing: -0.04em;
             margin-bottom: 12px;
             line-height: 1.2;
-            background: linear-gradient(135deg, #0f172a 0%, var(--primary-dark) 58%, var(--accent) 100%);
+            background: #0f172a;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -527,7 +529,6 @@
 
         /* Left section - Discount Visual */
         .coupon-discount-visual {
-            background: linear-gradient(160deg, #ecfeff 0%, #e0f2fe 58%, #dbeafe 100%);
             padding: 18px 16px;
             display: flex;
             flex-direction: column;
@@ -561,7 +562,7 @@
         }
 
         .discount-percent {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 900;
             color: #111827;
             line-height: 1;
@@ -628,7 +629,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #7c3aed;
+            background: var(--primary);
             color: #fff;
             padding: 3px 8px;
             border-radius: 6px;
@@ -646,7 +647,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #7c3aed;
+            background: var(--primary);
             color: #fff;
             padding: 3px 8px;
             border-radius: 6px;
@@ -691,7 +692,7 @@
             align-items: center;
             gap: 6px;
             background: #ecfeff;
-            color: #6d28d9;
+            color: var(--primary-dark);
             padding: 4px 10px;
             border-radius: 999px;
             font-size: 0.75rem;
@@ -743,7 +744,7 @@
             align-items: center;
             gap: 4px;
             font-weight: 600;
-            color: #6d28d9;
+            color: var(--primary-dark);
         }
 
         .coupon-verified-badge {
@@ -988,7 +989,7 @@
         }
 
         .modal-link {
-            color: #7c3aed;
+            color: var(--primary);
             font-weight: 600;
         }
 
@@ -1125,7 +1126,7 @@
             .coupon-copy-toast {
                 width: calc(100vw - 1.5rem);
                 max-width: calc(100vw - 1.5rem);
-                font-size: 0.88rem;
+                font-size: 1rem;
             }
 
             .coupon-copy-toast-row {
@@ -1137,7 +1138,7 @@
         .coupon-copy-toast-progress {
             width: 100%;
             height: 3px;
-            background: #7c3aed;
+            background: var(--primary);
             transform-origin: left center;
             animation: couponCopyToastProgress 2s linear forwards;
         }
@@ -1167,7 +1168,7 @@
         }
 
         .popup-banner {
-            background: linear-gradient(145deg, #a78bfa 0%, #6d28d9 58%, #7c3aed 100%);
+            background: linear-gradient(145deg, var(--primary-light) 0%, var(--primary-dark) 58%, var(--primary) 100%);
             padding: 32px 28px 40px;
             text-align: center;
             position: relative;
@@ -1208,7 +1209,7 @@
 
         .confetti-piece:nth-child(2) {
             left: 20%;
-            color: #a78bfa;
+            color: var(--primary-light);
             animation-delay: 0.5s;
         }
 
@@ -1232,7 +1233,7 @@
 
         .confetti-piece:nth-child(6) {
             left: 60%;
-            color: #a78bfa;
+            color: var(--primary-light);
             animation-delay: 0.8s;
         }
 
@@ -1364,7 +1365,7 @@
         .coupon-code-icon {
             width: 24px;
             height: 24px;
-            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -1388,7 +1389,7 @@
         }
 
         .btn-copy-code-modal {
-            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -1398,13 +1399,13 @@
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
-            box-shadow: 0 6px 18px #7c3aed;
+            box-shadow: 0 6px 18px var(--primary);
         }
 
         .btn-copy-code-modal:hover {
-            background: linear-gradient(135deg, #6d28d9 0%, #a78bfa 100%);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
             transform: translateY(-1px);
-            box-shadow: 0 10px 24px #7c3aed;
+            box-shadow: 0 10px 24px var(--primary);
         }
 
         .btn-copy-code-modal:active {
@@ -1430,14 +1431,14 @@
 
         .verification-item::before {
             content: '✓';
-            color: #7c3aed;
+            color: var(--primary);
             font-weight: 700;
             font-size: 0.9rem;
         }
 
         .verification-item.success::before {
             content: '●';
-            color: #7c3aed;
+            color: var(--primary);
         }
 
         .coupon-modal-actions {
@@ -1539,7 +1540,7 @@
             font-size: 0.78rem;
             color: #6b7280;
         }
-        .lead-capture-msg.success { color: #6d28d9; }
+        .lead-capture-msg.success { color: var(--primary-dark); }
         .lead-capture-msg.error { color: #dc2626; }
 
         .feedback-btn {
@@ -1571,8 +1572,8 @@
         }
 
         .feedback-btn.worked {
-            border-color: #7c3aed;
-            color: #7c3aed;
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
         .feedback-btn.failed {
@@ -1613,7 +1614,7 @@
 
         .btn-copy-all-codes:active,
         .btn-copy-all-codes.copied {
-            background: #6d28d9 !important;
+            background: var(--primary-dark) !important;
         }
 
         /* Q&A Section */
@@ -1755,7 +1756,7 @@
             gap: 6px;
             padding: 10px 18px;
             border-radius: 999px;
-            background: #7c3aed;
+            background: var(--primary);
             color: #fff;
             font-weight: 700;
             font-size: 0.85rem;
@@ -1767,7 +1768,7 @@
 
         .btn-get-coupon:hover {
             transform: translateY(-1px);
-            background: #6d28d9;
+            background: var(--primary-dark);
             cursor: pointer;
         }
 
@@ -2019,6 +2020,7 @@
 
             .coupon-discount-visual {
                 padding: 14px 12px;
+                background-color: #ffeaea;
             }
 
             .discount-up-to {
@@ -2268,7 +2270,7 @@
     </style>
 </head>
 
-<body>
+<body class="landing-coupon">
     @include('partials.site-header')
     <div class="shell">
         <div class="page-panel">
@@ -3007,7 +3009,7 @@
                 copyCodeToClipboard(code);
                 const t = this.textContent;
                 this.textContent = 'Copied ✓';
-                this.style.background = '#7c3aed';
+                this.style.background = '#f9495e';
                 this.style.color = '#fff';
                 setTimeout(() => {
                     this.textContent = t;
@@ -3378,7 +3380,7 @@
             // Highlight selected button
             if (worked) {
                 btn.style.background = '#dcfce7';
-                btn.style.borderColor = '#7c3aed';
+                btn.style.borderColor = '#f9495e';
                 btn.innerHTML = '<span class="feedback-icon">✓</span><span>Thank you!</span>';
             } else {
                 btn.style.background = '#fef2f2';

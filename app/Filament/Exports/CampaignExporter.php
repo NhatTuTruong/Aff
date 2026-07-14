@@ -63,7 +63,7 @@ class CampaignExporter extends Exporter
             ExportColumn::make('slug')
                 ->label('Slug')
                 ->state(function (Campaign $record) {
-                    // Slug một phần (URL /visit/{slug}), dùng lại khi import
+                    // Slug một phần (URL /store/{slug}), dùng lại khi import
                     return $record->slug;
                 }),
             ExportColumn::make('intro')

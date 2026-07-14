@@ -19,8 +19,8 @@
     --blog-radius-sm: 8px;
     --blog-shadow: 0 4px 24px -8px rgba(15, 23, 42, 0.12);
     --blog-shadow-lg: 0 16px 48px -20px rgba(15, 23, 42, 0.18);
-    --blog-font: 'Outfit', 'DM Sans', system-ui, sans-serif;
-    --blog-heading: 'Space Grotesk', system-ui, sans-serif;
+    --blog-font: 'DM Sans', system-ui, sans-serif;
+    --blog-heading: 'DM Sans', system-ui, sans-serif;
 }
 
 body:has(.blog-page),
@@ -806,8 +806,7 @@ body:has(.blog-shell) {
 
 /* Main grid: article + sidebar */
 .blog-main-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    display: block;
     gap: 2rem;
     align-items: start;
 }

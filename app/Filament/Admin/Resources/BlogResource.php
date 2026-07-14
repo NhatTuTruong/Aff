@@ -118,7 +118,7 @@ class BlogResource extends Resource
                             ->image()
                             ->directory('blogs/featured')
                             ->maxSize(5120)
-                            ->helperText('Ảnh hiển thị ở danh sách Latest Blog Posts'),
+                            ->helperText('Để trống sẽ tự chọn ngẫu nhiên ảnh trong public/images/categories theo danh mục'),
                         Forms\Components\FileUpload::make('images')
                             ->label('Ảnh bổ sung')
                             ->image()

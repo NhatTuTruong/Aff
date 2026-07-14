@@ -79,7 +79,8 @@
     @stack('head')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    @php $usesMagazineChrome = \App\Support\MagazineLayout::usesMagazineChrome(); @endphp
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #f5f5f5;
@@ -100,6 +101,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'DM Sans', system-ui, sans-serif;
+            font-size: 16px;
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
@@ -107,10 +109,25 @@
             display: flex;
             flex-direction: column;
         }
-        .font-heading { font-family: 'Space Grotesk', sans-serif; }
+        body.magazine-site {
+            font-size: 17px;
+            background: #0a0a0a;
+            color: #e8e8e8;
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --surface-hover: #1a1a1a;
+            --text: #f5f5f5;
+            --text-muted: #9ca3af;
+            --primary: #e91e8c;
+            --primary-dark: #c2185b;
+            --accent: #e91e8c;
+            --accent-hover: #c2185b;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+        .font-heading { font-family: 'DM Sans', system-ui, sans-serif; }
 
         .logo {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'DM Sans', system-ui, sans-serif;
             font-weight: 700;
             font-size: 1.35rem;
             color: var(--text);
@@ -222,9 +239,13 @@
         }
     </style>
     @include('partials.site-chrome-styles')
+    @if($usesMagazineChrome)
+        @include('partials.styles.magazine-chrome')
+        @include('partials.styles.magazine-site')
+    @endif
     @stack('styles')
 </head>
-<body>
+<body @if($usesMagazineChrome) class="magazine-site" @endif>
     @include('partials.site-header')
 
     <main>

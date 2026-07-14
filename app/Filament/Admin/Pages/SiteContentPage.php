@@ -3,11 +3,13 @@
 namespace App\Filament\Admin\Pages;
 
 use App\Models\SiteContent;
+use App\Support\SocialNetwork;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -63,6 +65,7 @@ class SiteContentPage extends Page implements HasForms
             'page_contact' => SiteContent::get('page_contact', SiteContent::defaultPageContact()),
             'page_privacy' => SiteContent::get('page_privacy', SiteContent::defaultPagePrivacy()),
             'page_affiliate' => SiteContent::get('page_affiliate', SiteContent::defaultPageAffiliateDisclosure()),
+            'social_links' => SiteContent::get('social_links', SiteContent::defaultSocialLinks()),
         ]);
     }
 
@@ -144,6 +147,33 @@ class SiteContentPage extends Page implements HasForms
                                                     ]),
                                             ])
                                             ->columnSpanFull(),
+                                    ]),
+                            ]),
+                        Tabs\Tab::make('Mạng xã hội')
+                            ->icon('heroicon-o-share')
+                            ->schema([
+                                Section::make('Liên kết mạng xã hội')
+                                    ->description('Hiển thị trên header và footer. Chỉ các mục có URL mới được hiển thị trên website.')
+                                    ->schema([
+                                        Repeater::make('social_links')
+                                            ->label('')
+                                            ->columns(2)
+                                            ->itemLabel(fn (array $state): ?string => SocialNetwork::label((string) ($state['network'] ?? '')))
+                                            ->addActionLabel('Thêm mạng xã hội')
+                                            ->schema([
+                                                Select::make('network')
+                                                    ->label('Mạng')
+                                                    ->options(SocialNetwork::options())
+                                                    ->required()
+                                                    ->searchable()
+                                                    ->native(false),
+                                                TextInput::make('url')
+                                                    ->label('URL')
+                                                    ->url()
+                                                    ->maxLength(500)
+                                                    ->placeholder('https://...')
+                                                    ->required(),
+                                            ]),
                                     ]),
                             ]),
                         Tabs\Tab::make('Trang báo lỗi')
@@ -253,9 +283,13 @@ class SiteContentPage extends Page implements HasForms
         SiteContent::set('page_contact', $data['page_contact'] ?? '');
         SiteContent::set('page_privacy', $data['page_privacy'] ?? '');
         SiteContent::set('page_affiliate', $data['page_affiliate'] ?? '');
+        SiteContent::set('social_links', array_values(array_filter(
+            $data['social_links'] ?? [],
+            fn ($link) => is_array($link) && filled($link['network'] ?? null) && filled($link['url'] ?? null)
+        )));
 
         Notification::make()
-            ->title('Đã lưu nội dung Header, Footer, trang lỗi và các trang.')
+            ->title('Đã lưu nội dung trang, mạng xã hội và các trang tĩnh.')
             ->success()
             ->send();
     }

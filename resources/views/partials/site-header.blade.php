@@ -1,109 +1,113 @@
-@php
-    $navLinks = \App\Models\SiteContent::get('header_nav', \App\Models\SiteContent::defaultHeaderNav());
-    $normalizeUrl = function ($url) {
-        if (empty($url)) {
-            return url('/');
-        }
-        if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
-            return $url;
-        }
+@if(\App\Support\MagazineLayout::usesMagazineChrome())
+    @include('partials.site-header-magazine')
+@else
+    @php
+        $navLinks = \App\Models\SiteContent::get('header_nav', \App\Models\SiteContent::defaultHeaderNav());
+        $normalizeUrl = function ($url) {
+            if (empty($url)) {
+                return url('/');
+            }
+            if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
+                return $url;
+            }
 
-        return url(ltrim($url, '/'));
-    };
+            return url(ltrim($url, '/'));
+        };
 
-    $currentPath = '/' . trim(parse_url(url()->current(), PHP_URL_PATH) ?? '/', '/');
+        $currentPath = '/' . trim(parse_url(url()->current(), PHP_URL_PATH) ?? '/', '/');
 
-    $isActive = function ($url) use ($normalizeUrl, $currentPath) {
-        $resolved = '/' . trim(parse_url($normalizeUrl($url), PHP_URL_PATH) ?? '/', '/');
-        if ($resolved === '/' || $resolved === '') {
-            return $currentPath === '/';
-        }
+        $isActive = function ($url) use ($normalizeUrl, $currentPath) {
+            $resolved = '/' . trim(parse_url($normalizeUrl($url), PHP_URL_PATH) ?? '/', '/');
+            if ($resolved === '/' || $resolved === '') {
+                return $currentPath === '/';
+            }
 
-        return $currentPath === $resolved || str_starts_with($currentPath, $resolved . '/');
-    };
-@endphp
-<div class="site-chrome-topbar">
-    Verified deals &middot; Updated regularly &middot;
-    <a href="{{ url('/affiliate-disclosure') }}">How we earn</a>
-</div>
-<header class="site-header">
-    <div class="header-inner">
-        @include('partials.site-logo')
-        <div class="site-header__actions">
-            <button type="button"
-                class="site-header__toggle"
-                id="site-header-toggle"
-                aria-expanded="false"
-                aria-controls="site-nav"
-                aria-label="Mở menu điều hướng">
-                <span class="site-header__toggle-bar" aria-hidden="true"></span>
-                <span class="site-header__toggle-bar" aria-hidden="true"></span>
-                <span class="site-header__toggle-bar" aria-hidden="true"></span>
-            </button>
-        </div>
-        <nav class="nav-links" id="site-nav" aria-label="Điều hướng chính">
-            @foreach ($navLinks as $link)
-                @php
-                    $active = $isActive($link['url'] ?? '/');
-                @endphp
-                <a
-                    href="{{ $normalizeUrl($link['url'] ?? '/') }}"
-                    @if($active) class="is-active" @endif
-                >{{ $link['label'] ?? 'Link' }}</a>
-            @endforeach
-        </nav>
+            return $currentPath === $resolved || str_starts_with($currentPath, $resolved . '/');
+        };
+    @endphp
+    <div class="site-chrome-topbar">
+        Verified deals &middot; Updated regularly &middot;
+        <a href="{{ url('/affiliate-disclosure') }}">How we earn</a>
     </div>
-</header>
-<script>
-(function () {
-    var header = document.querySelector('.site-header');
-    var toggle = document.getElementById('site-header-toggle');
-    var nav = document.getElementById('site-nav');
-    if (!header || !toggle || !nav) return;
+    <header class="site-header">
+        <div class="header-inner">
+            @include('partials.site-logo')
+            <div class="site-header__actions">
+                <button type="button"
+                    class="site-header__toggle"
+                    id="site-header-toggle"
+                    aria-expanded="false"
+                    aria-controls="site-nav"
+                    aria-label="Mở menu điều hướng">
+                    <span class="site-header__toggle-bar" aria-hidden="true"></span>
+                    <span class="site-header__toggle-bar" aria-hidden="true"></span>
+                    <span class="site-header__toggle-bar" aria-hidden="true"></span>
+                </button>
+            </div>
+            <nav class="nav-links" id="site-nav" aria-label="Điều hướng chính">
+                @foreach ($navLinks as $link)
+                    @php
+                        $active = $isActive($link['url'] ?? '/');
+                    @endphp
+                    <a
+                        href="{{ $normalizeUrl($link['url'] ?? '/') }}"
+                        @if($active) class="is-active" @endif
+                    >{{ $link['label'] ?? 'Link' }}</a>
+                @endforeach
+            </nav>
+        </div>
+    </header>
+    <script>
+    (function () {
+        var header = document.querySelector('.site-header');
+        var toggle = document.getElementById('site-header-toggle');
+        var nav = document.getElementById('site-nav');
+        if (!header || !toggle || !nav) return;
 
-    var mq = window.matchMedia('(min-width: 769px)');
+        var mq = window.matchMedia('(min-width: 769px)');
 
-    function closeMenu() {
-        header.classList.remove('site-header--nav-open');
-        toggle.setAttribute('aria-expanded', 'false');
-        toggle.setAttribute('aria-label', 'Mở menu điều hướng');
-    }
-
-    function openMenu() {
-        header.classList.add('site-header--nav-open');
-        toggle.setAttribute('aria-expanded', 'true');
-        toggle.setAttribute('aria-label', 'Đóng menu điều hướng');
-    }
-
-    toggle.addEventListener('click', function () {
-        if (header.classList.contains('site-header--nav-open')) {
-            closeMenu();
-        } else {
-            openMenu();
+        function closeMenu() {
+            header.classList.remove('site-header--nav-open');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.setAttribute('aria-label', 'Mở menu điều hướng');
         }
-    });
 
-    nav.querySelectorAll('a').forEach(function (a) {
-        a.addEventListener('click', closeMenu);
-    });
+        function openMenu() {
+            header.classList.add('site-header--nav-open');
+            toggle.setAttribute('aria-expanded', 'true');
+            toggle.setAttribute('aria-label', 'Đóng menu điều hướng');
+        }
 
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeMenu();
-    });
+        toggle.addEventListener('click', function () {
+            if (header.classList.contains('site-header--nav-open')) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        });
 
-    document.addEventListener('click', function (e) {
-        if (!header.classList.contains('site-header--nav-open')) return;
-        if (!header.contains(e.target)) closeMenu();
-    });
+        nav.querySelectorAll('a').forEach(function (a) {
+            a.addEventListener('click', closeMenu);
+        });
 
-    function onMqChange() {
-        if (mq.matches) closeMenu();
-    }
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeMenu();
+        });
 
-    if (mq.addEventListener) {
-        mq.addEventListener('change', onMqChange);
-    } else {
-        mq.addListener(onMqChange);
-    }
-})();
-</script>
+        document.addEventListener('click', function (e) {
+            if (!header.classList.contains('site-header--nav-open')) return;
+            if (!header.contains(e.target)) closeMenu();
+        });
+
+        function onMqChange() {
+            if (mq.matches) closeMenu();
+        }
+
+        if (mq.addEventListener) {
+            mq.addEventListener('change', onMqChange);
+        } else {
+            mq.addListener(onMqChange);
+        }
+    })();
+    </script>
+@endif

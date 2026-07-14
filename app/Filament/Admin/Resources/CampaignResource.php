@@ -104,7 +104,7 @@ class CampaignResource extends Resource
                                 ignoreRecord: true,
                                 modifyRuleUsing: fn (\Illuminate\Validation\Rules\Unique $rule) => $rule->whereNull('deleted_at')
                             )
-                            ->helperText('Duy nhất toàn hệ thống. URL landing: /visit/{slug}. Slug chỉ tự tạo khi thêm chiến dịch mới.'),
+                            ->helperText('Duy nhất toàn hệ thống. URL landing: /store/{slug}. Slug chỉ tự tạo khi thêm chiến dịch mới.'),
                         Forms\Components\TextInput::make('affiliate_url')
                             ->label('URL Affiliate')
                             ->required()

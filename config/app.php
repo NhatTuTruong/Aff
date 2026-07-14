@@ -58,7 +58,10 @@ return [
 
     'asset_url' => env('ASSET_URL', '/'),
 
-    'instagram_url' => env('INSTAGRAM_URL', 'https://instagram.com'),
+    'instagram_url' => env('INSTAGRAM_URL', ''),
+    'youtube_url' => env('YOUTUBE_URL', ''),
+    'facebook_url' => env('FACEBOOK_URL', ''),
+    'site_tagline' => env('SITE_TAGLINE', 'Smart News & Hot Deals – Save More Daily'),
 
     /*
     |--------------------------------------------------------------------------

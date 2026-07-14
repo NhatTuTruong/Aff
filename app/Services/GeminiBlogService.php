@@ -231,7 +231,7 @@ PROMPT;
             'temperature' => 0.8,
         ]);
 
-        // Không gán ảnh brand: để featured_image null → Blog dùng ảnh mặc định theo category (slug danh mục).
+        // Không gán ảnh brand: để featured_image null → Blog tự chọn ngẫu nhiên ảnh theo danh mục khi lưu.
         if ($result !== null) {
             $result['featured_image'] = null;
         }

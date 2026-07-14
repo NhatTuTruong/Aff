@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Support\BlogCategoryImage;
 
 class Blog extends Model
 {
@@ -45,58 +45,10 @@ class Blog extends Model
         return $this->belongsTo(Campaign::class);
     }
 
-    /** URL ảnh featured; ưu tiên featured_image, fallback ảnh mặc định theo category. */
+    /** URL ảnh featured; ưu tiên featured_image, fallback ảnh danh mục hoặc mặc định. */
     public function getFeaturedImageUrlAttribute(): string
     {
-        if ($this->featured_image && Storage::disk('public')->exists($this->featured_image)) {
-            return $this->ensureAbsoluteMediaUrl(Storage::disk('public')->url($this->featured_image));
-        }
-        $slug = $this->category ? Str::slug($this->category) : 'default';
-        $extensions = ['svg', 'png', 'jpg', 'jpeg', 'webp', 'gif'];
-        if ($slug !== 'default') {
-            foreach ($extensions as $ext) {
-                $path = "images/categories/{$slug}.{$ext}";
-                if (file_exists(public_path($path))) {
-                    return $this->ensureAbsoluteMediaUrl(asset($path));
-                }
-            }
-        }
-
-        $categoryDefault = public_path('category/default.png');
-        if (file_exists($categoryDefault)) {
-            return $this->ensureAbsoluteMediaUrl(asset('category/default.png'));
-        }
-
-        foreach ($extensions as $ext) {
-            $path = "images/categories/default.{$ext}";
-            if (file_exists(public_path($path))) {
-                return $this->ensureAbsoluteMediaUrl(asset($path));
-            }
-        }
-
-        return $this->ensureAbsoluteMediaUrl(asset('images/placeholder.svg'));
-    }
-
-    /**
-     * Filament ImageColumn chỉ hiển thị được src nếu là URL tuyệt đối (FILTER_VALIDATE_URL).
-     * Storage::url() / asset() đôi khi trả path tương đối (/storage/...) → getImageUrl() trả null.
-     */
-    protected function ensureAbsoluteMediaUrl(string $url): string
-    {
-        $url = trim($url);
-        if ($url === '') {
-            return url('/images/placeholder.svg');
-        }
-        if (preg_match('#^https?://#i', $url)) {
-            return $url;
-        }
-        if (str_starts_with($url, '//')) {
-            $scheme = parse_url((string) config('app.url'), PHP_URL_SCHEME) ?: 'https';
-
-            return "{$scheme}:{$url}";
-        }
-
-        return url('/'.ltrim($url, '/'));
+        return BlogCategoryImage::resolveUrl($this->featured_image, $this->category, $this->id);
     }
 
     protected static function boot()
@@ -116,6 +68,12 @@ class Blog extends Model
             }
             if (empty($blog->user_id) && auth()->check()) {
                 $blog->user_id = auth()->id();
+            }
+            if (empty($blog->featured_image)) {
+                $randomPath = BlogCategoryImage::randomPathForCategory($blog->category);
+                if ($randomPath !== null) {
+                    $blog->featured_image = $randomPath;
+                }
             }
         });
 

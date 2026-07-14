@@ -117,6 +117,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @include('partials.site-chrome-styles')
+    @include('partials.landing-magazine-head')
     @if(config('app.ga4_id'))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('app.ga4_id') }}"></script>
     <script>
@@ -550,7 +551,7 @@
         }
         .coupon-copy-toast-close:hover { background: rgba(255, 255, 255, 0.12); }
         @media (max-width: 480px) {
-            .coupon-copy-toast { width: calc(100vw - 1.5rem); max-width: calc(100vw - 1.5rem); font-size: 0.88rem; }
+            .coupon-copy-toast { width: calc(100vw - 1.5rem); max-width: calc(100vw - 1.5rem); font-size: 1rem; }
             .coupon-copy-toast-row { padding: 10px 10px 12px 12px; gap: 8px; }
         }
         .coupon-copy-toast-progress {
@@ -837,7 +838,7 @@
         }
     </style>
 </head>
-<body>
+<body class="landing-coupon">
 @include('partials.site-header')
 
 <div class="t2-store-banner">

@@ -303,7 +303,7 @@
     }
 
     .home-page .hp-aside-caption {
-        font-size: 0.88rem;
+        font-size: 1rem;
         color: rgba(255, 255, 255, 0.6);
         max-width: 22rem;
         line-height: 1.6;

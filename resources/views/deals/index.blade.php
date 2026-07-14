@@ -16,7 +16,7 @@
     }
     .deals-hero-inner { text-align: center; }
     .deals-hero h1 {
-        font-family: 'Space Grotesk', sans-serif;
+        font-family: 'DM Sans', system-ui, sans-serif;
         font-size: clamp(2rem, 4vw, 3rem);
         font-weight: 800;
         letter-spacing: -0.03em;
@@ -131,7 +131,7 @@
     }
     .deal-date { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
     .deal-title {
-        font-family: 'Space Grotesk', sans-serif;
+        font-family: 'DM Sans', system-ui, sans-serif;
         font-size: 1.15rem;
         font-weight: 800;
         line-height: 1.3;

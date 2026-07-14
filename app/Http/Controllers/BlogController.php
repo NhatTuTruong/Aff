@@ -36,11 +36,24 @@ class BlogController extends Controller
             ->orderBy('category')
             ->pluck('category');
 
+        $featuredPost = Blog::query()
+            ->where('is_published', true)
+            ->when($query, function ($q) use ($query) {
+                $q->where(function ($qq) use ($query) {
+                    $qq->where('title', 'like', "%{$query}%")
+                        ->orWhere('content', 'like', "%{$query}%");
+                });
+            })
+            ->when($category, fn ($q) => $q->where('category', $category))
+            ->orderByDesc('created_at')
+            ->first();
+
         return view('blog.index', [
             'posts' => $posts,
             'searchQuery' => $query,
             'selectedCategory' => $category,
             'categories' => $categories,
+            'featuredPost' => $featuredPost,
         ]);
     }
 
