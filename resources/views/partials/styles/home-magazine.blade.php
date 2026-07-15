@@ -6,7 +6,7 @@ body:has(.home-magazine) {
 }
 
 .home-magazine {
-    --hm-bg: #ffffff;
+    --hm-bg: #fafafa;
     --hm-surface: #ffffff;
     --hm-surface-2: #f3f4f6;
     --hm-line: rgba(15, 23, 42, 0.08);
