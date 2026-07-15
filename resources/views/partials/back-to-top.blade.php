@@ -5,7 +5,7 @@
     </svg>
 </button>
 <script>
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
     var btn = document.getElementById('back-to-top');
     if (!btn) return;
 
@@ -43,5 +43,5 @@
 
     window.addEventListener('scroll', toggle, { passive: true });
     toggle();
-})();
+});
 </script>

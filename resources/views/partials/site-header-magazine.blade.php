@@ -1,18 +1,9 @@
 @php
-    use App\Models\Blog;
+    use App\Support\AdminSettings;
     use App\Support\MagazineLayout;
 
-    $blogCategories = Blog::query()
-        ->where('is_published', true)
-        ->whereNotNull('category')
-        ->where('category', '!=', '')
-        ->distinct()
-        ->orderBy('category')
-        ->pluck('category');
-
-    if ($blogCategories->isEmpty()) {
-        $blogCategories = collect(config('default_categories.names', []))->take(14);
-    }
+    $siteLogoUrl = AdminSettings::siteLogoUrl();
+    $blogCategories = MagazineLayout::blogNavCategories();
 
     $headerNavLinks = \App\Models\SiteContent::headerNav();
     $normalizeUrl = function ($url) {
@@ -25,12 +16,6 @@
 
         return url(ltrim($url, '/'));
     };
-
-    $navItems = collect([['label' => 'HOME', 'url' => url('/')]])
-        ->merge($blogCategories->map(fn ($cat) => [
-            'label' => strtoupper($cat),
-            'url' => route('blog.index', ['category' => $cat]),
-        ]));
 
     $currentPath = '/' . trim(parse_url(url()->current(), PHP_URL_PATH) ?? '/', '/');
     $isHome = $currentPath === '' || $currentPath === '/';
@@ -59,79 +44,92 @@
         return $currentPath === $resolved || str_starts_with($currentPath, $resolved . '/');
     };
 
+    $isBlogLink = function (array $link): bool {
+        $label = strtolower(trim((string) ($link['label'] ?? '')));
+        $url = strtolower(trim((string) ($link['url'] ?? '')));
+
+        return in_array($label, ['review', 'blog'], true)
+            || str_contains($url, '/blog');
+    };
+
+    $topbarLinks = [
+        ['label' => 'Terms of Use', 'url' => url('/terms')],
+        ['label' => 'Privacy Policy', 'url' => url('/privacy')],
+        ['label' => 'Contact', 'url' => url('/contact')],
+    ];
+
     $breadcrumbTrail = MagazineLayout::breadcrumbTrail();
+    $showCrumbBar = ! ($isHome && count($breadcrumbTrail) === 1 && ($breadcrumbTrail[0]['label'] ?? '') === 'Home');
 @endphp
 
 <header class="magazine-header">
-    <div class="magazine-banner">
-        <div class="magazine-shell magazine-banner-grid">
-            <div class="magazine-brand">
-                <a href="{{ url('/') }}" class="magazine-logo font-heading">{{ config('app.name') }}</a>
-                <div class="magazine-banner-collapsible">
-                    <p class="magazine-tagline">{{ config('app.site_tagline', 'Smart News & Hot Deals – Save More Daily') }}</p>
-                </div>
-            </div>
-            <nav class="magazine-banner-nav magazine-banner-collapsible" aria-label="Quick links">
-                @foreach($headerNavLinks as $link)
-                    @php $active = $isActive($link['url'] ?? '/'); @endphp
-                    <a href="{{ $normalizeUrl($link['url'] ?? '/') }}" @if($active) class="is-active" @endif>{{ strtoupper($link['label'] ?? 'LINK') }}</a>
+    <div class="magazine-topbar">
+        <div class="magazine-shell magazine-topbar-inner">
+            <nav class="magazine-topbar-nav" aria-label="Legal links">
+                @foreach($topbarLinks as $link)
+                    <a href="{{ $link['url'] }}">{{ $link['label'] }}</a>
                 @endforeach
             </nav>
+            <div class="magazine-topbar-social">
+                @include('partials.social-links', ['variant' => 'topbar'])
+            </div>
         </div>
     </div>
 
-    <div class="magazine-nav-wrap" id="magazine-nav-wrap">
-        <div class="magazine-shell magazine-nav-inner">
+    <div class="magazine-mainbar" id="magazine-mainbar">
+        <div class="magazine-shell magazine-mainbar-inner">
             <button type="button"
                 class="magazine-nav-toggle"
                 id="magazine-nav-toggle"
                 aria-expanded="false"
-                aria-controls="magazine-nav"
+                aria-controls="magazine-mobile-nav"
                 aria-label="Open menu">
                 <span></span><span></span><span></span>
             </button>
 
-            <nav class="magazine-breadcrumb" aria-label="Breadcrumb">
-                <ol class="magazine-breadcrumb-list">
-                    @foreach($breadcrumbTrail as $index => $crumb)
-                        <li class="magazine-breadcrumb-item">
-                            @if($index > 0)
-                                <span class="magazine-breadcrumb-sep" aria-hidden="true">/</span>
-                            @endif
-                            @if(filled($crumb['url'] ?? null))
-                                <a href="{{ $crumb['url'] }}">{{ $crumb['label'] }}</a>
-                            @else
-                                <span class="magazine-breadcrumb-current" aria-current="page">{{ $crumb['label'] }}</span>
-                            @endif
-                        </li>
-                    @endforeach
-                </ol>
+            <a href="{{ url('/') }}" class="magazine-logo magazine-logo--main font-heading{{ $siteLogoUrl ? '' : ' magazine-logo--text-only' }}" aria-label="{{ config('app.name') }} home">
+                @if($siteLogoUrl)
+                    <span class="magazine-logo-mark">
+                        <img src="{{ $siteLogoUrl }}" alt="" width="44" height="44" decoding="async">
+                    </span>
+                @endif
+                <span class="magazine-logo-text">{{ config('app.name') }}</span>
+            </a>
+
+            <nav class="magazine-main-nav" aria-label="Primary navigation">
+                @foreach($headerNavLinks as $link)
+                    @php
+                        $active = $isActive($link['url'] ?? '/');
+                        $blog = $isBlogLink($link);
+                    @endphp
+                    @if($blog && $blogCategories->isNotEmpty())
+                        <div class="magazine-nav-dropdown-wrap @if($active) is-active @endif">
+                            <a href="{{ $normalizeUrl($link['url'] ?? '/blog') }}"
+                               class="magazine-main-nav-link magazine-main-nav-link--dropdown @if($active) is-active @endif"
+                               aria-haspopup="true"
+                               aria-expanded="false">
+                                {{ strtoupper($link['label'] ?? 'BLOG') }}
+                                <svg class="magazine-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                            </a>
+                            <div class="magazine-nav-dropdown" role="menu">
+                                <a href="{{ route('blog.index') }}" role="menuitem" @if($currentPath === '/blog' && $currentCategory === '') class="is-active" @endif>All Blogs</a>
+                                @foreach($blogCategories as $category)
+                                    <a href="{{ route('blog.index', ['category' => $category]) }}"
+                                       role="menuitem"
+                                       @if($currentPath === '/blog' && $currentCategory === $category) class="is-active" @endif>{{ $category }}</a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ $normalizeUrl($link['url'] ?? '/') }}"
+                           class="magazine-main-nav-link @if($active) is-active @endif">{{ strtoupper($link['label'] ?? 'LINK') }}</a>
+                    @endif
+                @endforeach
             </nav>
 
-            <nav class="magazine-nav" id="magazine-nav" aria-label="Site navigation">
-                <div class="magazine-nav-section magazine-nav-section--mobile">
-                    <p class="magazine-nav-section-label">Menu</p>
-                    <div class="magazine-nav-row">
-                        @foreach($headerNavLinks as $link)
-                            @php $active = $isActive($link['url'] ?? '/'); @endphp
-                            <a href="{{ $normalizeUrl($link['url'] ?? '/') }}" @if($active) class="is-active" @endif>{{ strtoupper($link['label'] ?? 'LINK') }}</a>
-                        @endforeach
-                    </div>
-                </div>
-                <div class="magazine-nav-section magazine-nav-section--categories">
-                    <p class="magazine-nav-section-label magazine-nav-section-label--mobile">Categories</p>
-                    <div class="magazine-nav-row">
-                        @foreach($navItems as $item)
-                            @php $active = $isActive($item['url']); @endphp
-                            <a href="{{ $item['url'] }}" @if($active) class="is-active" @endif>{{ $item['label'] }}</a>
-                        @endforeach
-                    </div>
-                </div>
-            </nav>
-
-            <div class="magazine-nav-actions">
+            <div class="magazine-main-actions">
                 <div class="magazine-search-wrap" id="magazine-search-wrap">
-                    <button type="button" class="magazine-search" id="magazine-search-toggle" aria-expanded="false" aria-controls="magazine-search-panel" aria-label="Search articles">
+                    <button type="button" class="magazine-search magazine-search--main" id="magazine-search-toggle" aria-expanded="false" aria-controls="magazine-search-panel" aria-label="Search articles">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
                     </button>
                     <div class="magazine-search-dropdown" id="magazine-search-dropdown" hidden>
@@ -140,9 +138,6 @@
                             <button type="submit">Search</button>
                         </form>
                     </div>
-                </div>
-                <div class="magazine-nav-social">
-                    @include('partials.social-links', ['variant' => 'icons'])
                 </div>
             </div>
         </div>
@@ -155,15 +150,36 @@
                 </form>
             </div>
         </div>
+
+        <nav class="magazine-mobile-nav" id="magazine-mobile-nav" aria-label="Mobile navigation" hidden>
+            <div class="magazine-shell">
+                @foreach($headerNavLinks as $link)
+                    @php $active = $isActive($link['url'] ?? '/'); @endphp
+                    <a href="{{ $normalizeUrl($link['url'] ?? '/') }}" @if($active) class="is-active" @endif>{{ strtoupper($link['label'] ?? 'LINK') }}</a>
+                @endforeach
+                @if($blogCategories->isNotEmpty())
+                    <p class="magazine-mobile-nav-label">Categories</p>
+                    @foreach($blogCategories as $category)
+                        <a href="{{ route('blog.index', ['category' => $category]) }}"
+                           class="magazine-mobile-nav-sub @if($currentPath === '/blog' && $currentCategory === $category) is-active @endif">{{ $category }}</a>
+                    @endforeach
+                @endif
+                <p class="magazine-mobile-nav-label">Legal</p>
+                @foreach($topbarLinks as $link)
+                    <a href="{{ $link['url'] }}" class="magazine-mobile-nav-sub">{{ $link['label'] }}</a>
+                @endforeach
+            </div>
+        </nav>
     </div>
 </header>
 
+@push('scripts')
 <script>
 (function () {
     var header = document.querySelector('.magazine-header');
-    var navWrap = document.getElementById('magazine-nav-wrap');
+    var mainbar = document.getElementById('magazine-mainbar');
     var toggle = document.getElementById('magazine-nav-toggle');
-    var nav = document.getElementById('magazine-nav');
+    var mobileNav = document.getElementById('magazine-mobile-nav');
     var searchWrap = document.getElementById('magazine-search-wrap');
     var searchToggle = document.getElementById('magazine-search-toggle');
     var searchDropdown = document.getElementById('magazine-search-dropdown');
@@ -179,15 +195,12 @@
         if (searchToggle) searchToggle.setAttribute('aria-expanded', 'false');
         if (searchDropdown) searchDropdown.setAttribute('hidden', '');
         if (searchPanel) searchPanel.setAttribute('hidden', '');
-        if (navWrap) navWrap.classList.remove('magazine-nav-wrap--search-open');
+        if (mainbar) mainbar.classList.remove('magazine-mainbar--search-open');
     }
 
     function openSearch() {
-        if (navWrap) {
-            navWrap.classList.remove('magazine-nav-wrap--open');
-            navWrap.classList.add('magazine-nav-wrap--search-open');
-        }
-        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        closeMenu();
+        if (mainbar) mainbar.classList.add('magazine-mainbar--search-open');
         if (searchToggle) searchToggle.setAttribute('aria-expanded', 'true');
 
         if (usesMobileSearch() && searchPanel) {
@@ -198,7 +211,7 @@
             if (panelInput) setTimeout(function () { panelInput.focus(); }, 50);
         } else if (searchWrap && searchDropdown) {
             if (searchPanel) searchPanel.setAttribute('hidden', '');
-            if (navWrap) navWrap.classList.remove('magazine-nav-wrap--search-open');
+            if (mainbar) mainbar.classList.remove('magazine-mainbar--search-open');
             searchWrap.classList.add('magazine-search-wrap--open');
             searchDropdown.removeAttribute('hidden');
             var input = searchDropdown.querySelector('input[type="search"]');
@@ -207,16 +220,25 @@
     }
 
     function closeMenu() {
-        if (!navWrap) return;
-        navWrap.classList.remove('magazine-nav-wrap--open');
+        if (!mainbar || !mobileNav) return;
+        mainbar.classList.remove('magazine-mainbar--nav-open');
+        mobileNav.setAttribute('hidden', '');
         if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function openMenu() {
+        closeSearch();
+        if (!mainbar || !mobileNav) return;
+        mainbar.classList.add('magazine-mainbar--nav-open');
+        mobileNav.removeAttribute('hidden');
+        if (toggle) toggle.setAttribute('aria-expanded', 'true');
     }
 
     if (header) {
         var scrollTicking = false;
         var isCompact = false;
-        var compactOn = mobileMq.matches ? 56 : 96;
-        var compactOff = mobileMq.matches ? 12 : 28;
+        var compactOn = mobileMq.matches ? 72 : 120;
+        var compactOff = mobileMq.matches ? 16 : 40;
 
         function setCompact(next) {
             if (next === isCompact) return;
@@ -244,9 +266,10 @@
         }, { passive: true });
 
         function onMqChange(e) {
-            compactOn = e.matches ? 56 : 96;
-            compactOff = e.matches ? 12 : 28;
+            compactOn = e.matches ? 72 : 120;
+            compactOff = e.matches ? 16 : 40;
             closeSearch();
+            closeMenu();
             updateHeaderCompact();
         }
 
@@ -259,23 +282,37 @@
         updateHeaderCompact();
     }
 
-    if (navWrap && toggle && nav) {
+    if (mainbar && toggle && mobileNav) {
         toggle.addEventListener('click', function () {
-            closeSearch();
-            var open = navWrap.classList.toggle('magazine-nav-wrap--open');
-            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (mainbar.classList.contains('magazine-mainbar--nav-open')) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
         });
 
-        nav.querySelectorAll('a').forEach(function (a) {
+        mobileNav.querySelectorAll('a').forEach(function (a) {
             a.addEventListener('click', closeMenu);
         });
 
         document.addEventListener('click', function (e) {
-            if (!navWrap.classList.contains('magazine-nav-wrap--open')) return;
-            if (navWrap.contains(e.target)) return;
+            if (!mainbar.classList.contains('magazine-mainbar--nav-open')) return;
+            if (mainbar.contains(e.target)) return;
             closeMenu();
         });
     }
+
+    document.querySelectorAll('.magazine-nav-dropdown-wrap').forEach(function (wrap) {
+        var trigger = wrap.querySelector('.magazine-main-nav-link--dropdown');
+        if (!trigger) return;
+
+        trigger.addEventListener('click', function (e) {
+            if (!mobileMq.matches) return;
+            e.preventDefault();
+            wrap.classList.toggle('is-open');
+            trigger.setAttribute('aria-expanded', wrap.classList.contains('is-open') ? 'true' : 'false');
+        });
+    });
 
     if (searchToggle) {
         searchToggle.addEventListener('click', function (e) {
@@ -304,3 +341,4 @@
     });
 })();
 </script>
+@endpush

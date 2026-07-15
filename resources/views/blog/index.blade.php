@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Review Archive - ' . config('app.name'))
+@section('title', 'Blog Archive - ' . config('app.name'))
 @section('description', 'Browse reviews, guides, and expert articles.')
 
 @push('styles')

@@ -16,7 +16,7 @@
 
     <div class="blog-shell">
         <div class="blog-breadcrumb">
-            <a href="{{ route('blog.index') }}">Review</a>
+            <a href="{{ route('blog.index') }}">Blog</a>
             <span>/</span>
             <span>{{ Str::limit($post->title, 40) }}</span>
         </div>

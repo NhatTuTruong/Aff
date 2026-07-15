@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Blog;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class MagazineLayout
@@ -18,16 +19,63 @@ class MagazineLayout
         return in_array($template, ['template1', 'template2', 'template3'], true);
     }
 
-    /** Chuẩn hóa nhãn menu (vd: Blog cũ → Review). */
+    /** Chuẩn hóa nhãn menu (vd: Review cũ → Blog). */
     public static function navLabel(string $label): string
     {
         $label = trim($label);
 
-        if (strcasecmp($label, 'Blog') === 0 || strcasecmp($label, 'Review Blog') === 0) {
-            return 'Review';
+        if (strcasecmp($label, 'Review') === 0 || strcasecmp($label, 'Review Blog') === 0) {
+            return 'Blog';
         }
 
         return $label !== '' ? $label : 'Link';
+    }
+
+    /** Danh mục blog cho menu dropdown — cache 1 giờ. */
+    public static function blogNavCategories(): \Illuminate\Support\Collection
+    {
+        $categories = Cache::remember('magazine.blog_nav_categories', 3600, function () {
+            $fromDb = Blog::query()
+                ->where('is_published', true)
+                ->whereNotNull('category')
+                ->where('category', '!=', '')
+                ->distinct()
+                ->orderBy('category')
+                ->pluck('category');
+
+            if ($fromDb->isNotEmpty()) {
+                return $fromDb->values()->all();
+            }
+
+            return collect(config('default_categories.names', []))->take(14)->values()->all();
+        });
+
+        return collect($categories);
+    }
+
+    /** Bài viết gallery footer — cache 15 phút. */
+    public static function footerGalleryPosts(): \Illuminate\Database\Eloquent\Collection
+    {
+        return Cache::remember('magazine.footer_gallery_posts', 900, function () {
+            return Blog::query()
+                ->where('is_published', true)
+                ->orderByDesc('created_at')
+                ->limit(6)
+                ->get();
+        });
+    }
+
+    /** Bài xem nhiều footer — cache 15 phút. */
+    public static function footerRecentViewedPosts(): \Illuminate\Database\Eloquent\Collection
+    {
+        return Cache::remember('magazine.footer_recent_posts', 900, function () {
+            return Blog::query()
+                ->where('is_published', true)
+                ->orderByDesc('views_count')
+                ->orderByDesc('created_at')
+                ->limit(3)
+                ->get();
+        });
     }
 
     /**
@@ -50,7 +98,7 @@ class MagazineLayout
             if ($category !== '') {
                 return [
                     $home,
-                    ['label' => 'Review', 'url' => route('blog.index')],
+                    ['label' => 'Blog', 'url' => route('blog.index')],
                     ['label' => $category, 'url' => null],
                 ];
             }
@@ -58,12 +106,12 @@ class MagazineLayout
             if ($query !== '') {
                 return [
                     $home,
-                    ['label' => 'Review', 'url' => route('blog.index')],
+                    ['label' => 'Blog', 'url' => route('blog.index')],
                     ['label' => 'Search: ' . Str::limit($query, 36), 'url' => null],
                 ];
             }
 
-            return [$home, ['label' => 'Review', 'url' => null]];
+            return [$home, ['label' => 'Blog', 'url' => null]];
         }
 
         if (request()->routeIs('blog.show')) {
@@ -73,7 +121,7 @@ class MagazineLayout
                 ->where('slug', $slug)
                 ->first();
 
-            $trail = [$home, ['label' => 'Review', 'url' => route('blog.index')]];
+            $trail = [$home, ['label' => 'Blog', 'url' => route('blog.index')]];
 
             if ($post?->category) {
                 $trail[] = [

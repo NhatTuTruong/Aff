@@ -27,16 +27,12 @@
     <meta name="verify-admitad" content="4455f2e7bb" />
     <meta name='impact-site-verification' value='35f2fb10-d495-4208-b451-b9f1e79b72a9'>
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FF4K1DWWT7"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-FF4K1DWWT7');
-    </script>
-
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    @php $usesMagazineChrome = \App\Support\MagazineLayout::usesMagazineChrome(); @endphp
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     @yield('head')
     @hasSection('og_image')
     <meta property="og:type" content="@yield('og_type', 'website')">
@@ -77,10 +73,6 @@
     @endphp
     <script type="application/ld+json">{{ json_encode($organizationSchema) }}</script>
     @stack('head')
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    @php $usesMagazineChrome = \App\Support\MagazineLayout::usesMagazineChrome(); @endphp
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #f5f5f5;
@@ -261,7 +253,7 @@
         </div>
     </div>
     <script>
-        (function() {
+        window.addEventListener('load', function () {
             if (localStorage.getItem('cookie-consent-accepted')) return;
             var bar = document.getElementById('cookie-consent');
             if (!bar) return;
@@ -270,11 +262,23 @@
                 localStorage.setItem('cookie-consent-accepted', '1');
                 bar.setAttribute('hidden', '');
             });
-        })();
+        }, { once: true });
     </script>
 
     @include('partials.back-to-top')
 
     @stack('scripts')
+    <script>
+    window.addEventListener('load', function () {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-FF4K1DWWT7');
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-FF4K1DWWT7';
+        document.head.appendChild(s);
+    }, { once: true });
+    </script>
 </body>
 </html>

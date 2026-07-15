@@ -1,7 +1,7 @@
 @php
-    use App\Models\Blog;
+    use App\Support\MagazineLayout;
 
-    $isMagazineLayout = \App\Support\MagazineLayout::usesMagazineChrome();
+    $isMagazineLayout = MagazineLayout::usesMagazineChrome();
 
     if ($isMagazineLayout) {
         $brandDescription = \App\Models\SiteContent::get(
@@ -10,18 +10,8 @@
         );
         $copyright = \App\Models\SiteContent::get('footer_copyright', 'Copyright © ' . date('Y') . ' ' . config('app.name') . '.');
 
-        $galleryPosts = Blog::query()
-            ->where('is_published', true)
-            ->orderByDesc('created_at')
-            ->limit(6)
-            ->get();
-
-        $recentViewed = Blog::query()
-            ->where('is_published', true)
-            ->orderByDesc('views_count')
-            ->orderByDesc('created_at')
-            ->limit(3)
-            ->get();
+        $galleryPosts = MagazineLayout::footerGalleryPosts();
+        $recentViewed = MagazineLayout::footerRecentViewedPosts();
 
         $categoryColors = ['#e91e8c', '#00b4a6', '#f59e0b', '#7c3aed', '#ff5c35', '#3b82f6'];
         $colorFor = function (string $label) use ($categoryColors): string {
@@ -56,7 +46,6 @@
             <div class="footer-magazine-brand">
                 <a href="{{ url('/') }}" class="footer-magazine-logo font-heading">{{ config('app.name') }}</a>
                 <p>{{ $brandDescription }}</p>
-                @include('partials.social-links', ['variant' => 'pills'])
             </div>
 
             <div class="footer-magazine-menu">
@@ -72,7 +61,7 @@
             <div class="footer-magazine-gallery" aria-label="Recent article images">
                 @foreach($galleryPosts as $post)
                     <a href="{{ route('blog.show', $post->slug) }}" class="footer-gallery-item">
-                        <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy">
+                        <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" width="120" height="120" loading="lazy" decoding="async">
                     </a>
                 @endforeach
             </div>
@@ -85,7 +74,7 @@
                     @foreach($recentViewed as $post)
                         <a href="{{ route('blog.show', $post->slug) }}" class="footer-recent-item">
                             <span class="footer-recent-thumb">
-                                <img src="{{ $post->featured_image_url }}" alt="" loading="lazy">
+                                <img src="{{ $post->featured_image_url }}" alt="" width="72" height="72" loading="lazy" decoding="async">
                             </span>
                             <span class="footer-recent-body">
                                 @if($post->category)

@@ -18,6 +18,7 @@
         <a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="site-social-link site-social-link--{{ $network }}" aria-label="{{ $label }}">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">{!! $iconPath !!}</svg>
             @if($variant === 'pills')<span>{{ $label }}</span>@endif
+            @if($variant === 'topbar')<span class="sr-only">{{ $label }}</span>@endif
         </a>
         @endif
     @endforeach

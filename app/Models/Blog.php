@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use App\Support\BlogCategoryImage;
 
@@ -89,5 +90,14 @@ class Blog extends Model
                 $blog->slug = $slug;
             }
         });
+
+        $clearCaches = function () {
+            Cache::forget('magazine.blog_nav_categories');
+            Cache::forget('magazine.footer_gallery_posts');
+            Cache::forget('magazine.footer_recent_posts');
+        };
+
+        static::saved($clearCaches);
+        static::deleted($clearCaches);
     }
 }

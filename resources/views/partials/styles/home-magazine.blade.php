@@ -671,7 +671,7 @@ body:has(.home-magazine) {
 /* Sidebar */
 .home-magazine .hm-sidebar {
     position: sticky;
-    top: var(--magazine-sticky-offset, 7.5rem);
+    top: var(--magazine-sticky-offset, 7.25rem);
     display: flex;
     flex-direction: column;
     gap: 1.5rem;

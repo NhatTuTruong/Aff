@@ -330,7 +330,7 @@ body.magazine-site .blog-aside {
     background: linear-gradient(160deg, #fdf2f8 0%, #ffffff 100%);
     border-color: rgba(15, 23, 42, 0.1);
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
-    top: var(--magazine-sticky-offset, 7.5rem);
+    top: var(--magazine-sticky-offset, 7.25rem);
 }
 
 body.magazine-site .blog-aside-title {

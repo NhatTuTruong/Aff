@@ -41,7 +41,7 @@ class SiteContent extends Model
         Cache::forget('site_content.' . $key);
     }
 
-    /** Nav header đã chuẩn hóa nhãn (vd. Blog → Review). */
+    /** Nav header đã chuẩn hóa nhãn (vd. Review → Blog). */
     public static function headerNav(): array
     {
         $links = self::get('header_nav', self::defaultHeaderNav());
@@ -66,7 +66,7 @@ class SiteContent extends Model
     {
         return [
             ['label' => 'Home', 'url' => '/'],
-            ['label' => 'Review', 'url' => '/blog'],
+            ['label' => 'Blog', 'url' => '/blog'],
             ['label' => 'About Us', 'url' => '/about'],
             ['label' => 'Contact', 'url' => '/contact'],
         ];
@@ -80,7 +80,7 @@ class SiteContent extends Model
                 'title' => 'Explore',
                 'links' => [
                     ['label' => 'Home', 'url' => '/'],
-                    ['label' => 'Review', 'url' => '/blog'],
+                    ['label' => 'Blog', 'url' => '/blog'],
                     ['label' => 'Stores', 'url' => '/#stores'],
                     ['label' => 'Coupons', 'url' => '/#coupons'],
                 ],

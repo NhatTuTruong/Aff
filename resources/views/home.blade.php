@@ -7,6 +7,12 @@
 @include('partials.styles.home-magazine')
 @endpush
 
+@if($heroCarouselPosts->isNotEmpty())
+@push('head')
+<link rel="preload" as="image" href="{{ $heroCarouselPosts->first()->featured_image_url }}" fetchpriority="high">
+@endpush
+@endif
+
 @section('content')
 @php
     use Illuminate\Support\Str;
@@ -30,7 +36,7 @@
                     @foreach($heroCarouselPosts as $post)
                         <a href="{{ route('blog.show', $post->slug) }}" class="hm-hero-slide">
                             <div class="hm-hero-main-media">
-                                <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="{{ $loop->first ? 'eager' : 'lazy' }}">
+                                <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" width="800" height="450" @if($loop->first) loading="eager" fetchpriority="high" decoding="async" @else loading="lazy" decoding="async" @endif>
                                 <div class="hm-hero-main-overlay"></div>
                             </div>
                             <div class="hm-hero-main-body">
@@ -63,7 +69,7 @@
                 @foreach($heroSidebarPosts as $post)
                     <a href="{{ route('blog.show', $post->slug) }}" class="hm-hero-mini">
                         <div class="hm-hero-mini-media">
-                            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy">
+                            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" width="220" height="165" loading="lazy" decoding="async">
                         </div>
                         <div class="hm-hero-mini-body">
                             <h3 class="hm-hero-mini-title">{{ $post->title }}</h3>
@@ -121,7 +127,7 @@
                             @foreach($catPosts->take(3) as $post)
                                 <a href="{{ route('blog.show', $post->slug) }}" class="hm-card hm-card--vertical">
                                     <div class="hm-card-media">
-                                        <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy">
+                                        <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" width="220" height="165" loading="lazy" decoding="async">
                                         <span class="hm-tag hm-tag--on-image" style="--hm-tag-color: {{ $colorFor($post->category ?? $categoryName, $loop->index) }}">{{ strtoupper($post->category ?? $categoryName) }}</span>
                                     </div>
                                     <div class="hm-card-body">
@@ -136,7 +142,7 @@
                         <div class="hm-grid hm-grid--2 hm-grid--secondary">
                             @foreach($catPosts->slice(3, 2) as $post)
                                 <a href="{{ route('blog.show', $post->slug) }}" class="hm-card hm-card--horizontal">
-                                    <div class="hm-card-media"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy"></div>
+                                    <div class="hm-card-media"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy" decoding="async"></div>
                                     <div class="hm-card-body">
                                         <h3 class="hm-card-title">{{ $post->title }}</h3>
                                         <p class="hm-card-meta">{{ $post->created_at?->format('F j, Y') }}</p>
@@ -152,7 +158,7 @@
                         <div class="hm-split">
                             @if($featured)
                             <a href="{{ route('blog.show', $featured->slug) }}" class="hm-card hm-card--featured">
-                                <div class="hm-card-media"><img src="{{ $featured->featured_image_url }}" alt="{{ $featured->title }}" loading="lazy"><div class="hm-card-overlay"></div></div>
+                                <div class="hm-card-media"><img src="{{ $featured->featured_image_url }}" alt="{{ $featured->title }}" loading="lazy" decoding="async"><div class="hm-card-overlay"></div></div>
                                 <div class="hm-card-body hm-card-body--overlay">
                                     <span class="hm-tag" style="--hm-tag-color: {{ $catColor }}">{{ strtoupper($categoryName) }}</span>
                                     <h3 class="hm-card-title hm-card-title--lg">{{ $featured->title }}</h3>
@@ -163,7 +169,7 @@
                             <div class="hm-list">
                                 @foreach($listPosts as $post)
                                 <a href="{{ route('blog.show', $post->slug) }}" class="hm-list-item">
-                                    <div class="hm-list-media"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy"></div>
+                                    <div class="hm-list-media"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy" decoding="async"></div>
                                     <div class="hm-list-body">
                                         <h3 class="hm-list-title">{{ $post->title }}</h3>
                                         <p class="hm-list-meta">{{ $post->created_at?->format('M j, Y') }}</p>
@@ -178,7 +184,7 @@
                         <div class="hm-grid hm-grid--4">
                             @foreach($catPosts->take(4) as $post)
                                 <a href="{{ route('blog.show', $post->slug) }}" class="hm-card hm-card--compact">
-                                    <div class="hm-card-media hm-card-media--square"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy"></div>
+                                    <div class="hm-card-media hm-card-media--square"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy" decoding="async"></div>
                                     <div class="hm-card-body">
                                         <h3 class="hm-card-title hm-card-title--sm">{{ $post->title }}</h3>
                                         <p class="hm-card-meta">{{ $post->created_at?->format('M j, Y') }}</p>
@@ -192,7 +198,7 @@
                         @php $banner = $catPosts->first(); $minis = $catPosts->slice(1, 4); @endphp
                         @if($banner)
                         <a href="{{ route('blog.show', $banner->slug) }}" class="hm-banner-card">
-                            <div class="hm-banner-media"><img src="{{ $banner->featured_image_url }}" alt="{{ $banner->title }}" loading="lazy"><div class="hm-card-overlay"></div></div>
+                            <div class="hm-banner-media"><img src="{{ $banner->featured_image_url }}" alt="{{ $banner->title }}" loading="lazy" decoding="async"><div class="hm-card-overlay"></div></div>
                             <div class="hm-banner-body">
                                 <span class="hm-tag" style="--hm-tag-color: {{ $catColor }}">{{ strtoupper($categoryName) }}</span>
                                 <h3 class="hm-banner-title">{{ $banner->title }}</h3>
@@ -204,7 +210,7 @@
                         <div class="hm-grid hm-grid--4 hm-grid--minis">
                             @foreach($minis as $post)
                                 <a href="{{ route('blog.show', $post->slug) }}" class="hm-mini-card">
-                                    <div class="hm-mini-card-media"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy"></div>
+                                    <div class="hm-mini-card-media"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy" decoding="async"></div>
                                     <h4 class="hm-mini-card-title">{{ $post->title }}</h4>
                                 </a>
                             @endforeach
@@ -216,7 +222,7 @@
                         <div class="hm-masonry">
                             @foreach($catPosts->take(2) as $post)
                                 <a href="{{ route('blog.show', $post->slug) }}" class="hm-card hm-card--vertical hm-masonry-large">
-                                    <div class="hm-card-media hm-card-media--tall"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy"></div>
+                                    <div class="hm-card-media hm-card-media--tall"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy" decoding="async"></div>
                                     <div class="hm-card-body">
                                         <h3 class="hm-card-title">{{ $post->title }}</h3>
                                         <p class="hm-card-meta">{{ $post->created_at?->format('F j, Y') }}</p>
@@ -226,7 +232,7 @@
                             <div class="hm-masonry-stack">
                                 @foreach($catPosts->slice(2, 3) as $post)
                                     <a href="{{ route('blog.show', $post->slug) }}" class="hm-list-item hm-list-item--dense">
-                                        <div class="hm-list-media"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy"></div>
+                                        <div class="hm-list-media"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy" decoding="async"></div>
                                         <div class="hm-list-body">
                                             <h3 class="hm-list-title">{{ $post->title }}</h3>
                                             <p class="hm-list-meta">{{ $post->created_at?->format('M j, Y') }}</p>
@@ -242,7 +248,7 @@
                             @foreach($catPosts->take(5) as $post)
                                 <a href="{{ route('blog.show', $post->slug) }}" class="hm-numbered-item">
                                     <span class="hm-numbered-index">{{ str_pad((string) ($loop->iteration), 2, '0', STR_PAD_LEFT) }}</span>
-                                    <div class="hm-numbered-media"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy"></div>
+                                    <div class="hm-numbered-media"><img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy" decoding="async"></div>
                                     <div class="hm-numbered-body">
                                         <span class="hm-tag hm-tag--ghost" style="--hm-tag-color: {{ $colorFor($post->category ?? $categoryName) }}">{{ strtoupper($post->category ?? $categoryName) }}</span>
                                         <h3 class="hm-numbered-title">{{ $post->title }}</h3>
@@ -259,7 +265,7 @@
                             @foreach($catPosts as $post)
                                 <a href="{{ route('blog.show', $post->slug) }}" class="hm-cat-slide">
                                     <div class="hm-hero-main-media">
-                                        <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy">
+                                        <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" width="220" height="165" loading="lazy" decoding="async">
                                         <div class="hm-hero-main-overlay"></div>
                                     </div>
                                     <div class="hm-hero-main-body">
@@ -322,7 +328,7 @@
                     @foreach($trendingPosts->take(6) as $post)
                         <li>
                             <a href="{{ route('blog.show', $post->slug) }}" class="hm-trending-widget-item">
-                                <span class="hm-trending-widget-thumb"><img src="{{ $post->featured_image_url }}" alt="" loading="lazy"></span>
+                                <span class="hm-trending-widget-thumb"><img src="{{ $post->featured_image_url }}" alt="" loading="lazy" decoding="async"></span>
                                 <span class="hm-trending-widget-text">
                                     <span class="hm-trending-widget-title">{{ $post->title }}</span>
                                     <span class="hm-trending-widget-meta">{{ $post->created_at?->format('M j, Y') }}</span>
@@ -363,7 +369,7 @@
                 @foreach($popularPosts as $post)
                     <a href="{{ route('blog.show', $post->slug) }}" class="hm-popular-card">
                         <div class="hm-popular-media">
-                            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy">
+                            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" width="220" height="165" loading="lazy" decoding="async">
                         </div>
                         <div class="hm-popular-body">
                             @if($post->category)
