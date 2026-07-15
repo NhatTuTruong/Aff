@@ -12,6 +12,16 @@ class BlogCategoryImage
     /** @var list<string> */
     private const EXTENSIONS = ['svg', 'png', 'jpg', 'jpeg', 'webp', 'gif'];
 
+    /** Lower value = higher priority when multiple formats exist for the same basename. */
+    private const FORMAT_PRIORITY = [
+        'webp' => 0,
+        'jpg' => 1,
+        'jpeg' => 1,
+        'png' => 2,
+        'gif' => 3,
+        'svg' => 4,
+    ];
+
     public static function slugFromCategory(?string $category): string
     {
         $category = trim((string) $category);
@@ -55,9 +65,48 @@ class BlogCategoryImage
             }
         }
 
-        sort($matches, SORT_NATURAL | SORT_FLAG_CASE);
+        return self::preferOptimizedFormats($matches);
+    }
 
-        return $matches;
+    /**
+     * @param  list<string>  $paths
+     * @return list<string>
+     */
+    public static function preferOptimizedFormats(array $paths): array
+    {
+        $bestByBase = [];
+
+        foreach ($paths as $path) {
+            $base = preg_replace('/\.[^.]+$/', '', $path) ?? $path;
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            $priority = self::FORMAT_PRIORITY[$ext] ?? 99;
+
+            if (
+                ! isset($bestByBase[$base])
+                || $priority < ($bestByBase[$base]['priority'] ?? 99)
+            ) {
+                $bestByBase[$base] = ['path' => $path, 'priority' => $priority];
+            }
+        }
+
+        $result = array_column($bestByBase, 'path');
+        sort($result, SORT_NATURAL | SORT_FLAG_CASE);
+
+        return array_values($result);
+    }
+
+    public static function preferredPublicPath(string $path): string
+    {
+        if (! preg_match('/\.(png|jpe?g)$/i', $path)) {
+            return $path;
+        }
+
+        $webp = preg_replace('/\.(png|jpe?g)$/i', '.webp', $path);
+        if (is_string($webp) && $webp !== $path && file_exists(public_path($webp))) {
+            return $webp;
+        }
+
+        return $path;
     }
 
     public static function randomPathForCategory(?string $category): ?string
@@ -82,13 +131,15 @@ class BlogCategoryImage
 
     public static function defaultPath(): ?string
     {
-        $categoryDefault = public_path('category/default.png');
-        if (file_exists($categoryDefault)) {
-            return 'category/default.png';
+        foreach (['webp', 'png', 'jpg', 'jpeg', 'svg', 'gif'] as $ext) {
+            $path = 'category/default.'.$ext;
+            if (file_exists(public_path($path))) {
+                return $path;
+            }
         }
 
-        foreach (self::EXTENSIONS as $ext) {
-            $path = self::CATEGORY_DIR . '/default.' . $ext;
+        foreach (['webp', 'svg', 'png', 'jpg', 'jpeg', 'gif'] as $ext) {
+            $path = self::CATEGORY_DIR.'/default.'.$ext;
             if (file_exists(public_path($path))) {
                 return $path;
             }
@@ -105,7 +156,7 @@ class BlogCategoryImage
             }
 
             if (file_exists(public_path($featuredImage))) {
-                return self::absoluteUrl(asset($featuredImage));
+                return self::absoluteUrl(asset(self::preferredPublicPath($featuredImage)));
             }
         }
 
@@ -114,12 +165,12 @@ class BlogCategoryImage
             : self::randomPathForCategory($category);
 
         if ($path !== null && file_exists(public_path($path))) {
-            return self::absoluteUrl(asset($path));
+            return self::absoluteUrl(asset(self::preferredPublicPath($path)));
         }
 
         $default = self::defaultPath();
         if ($default !== null) {
-            return self::absoluteUrl(asset($default));
+            return self::absoluteUrl(asset(self::preferredPublicPath($default)));
         }
 
         return self::absoluteUrl(asset('images/placeholder.svg'));
