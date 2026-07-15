@@ -257,11 +257,18 @@
             if (localStorage.getItem('cookie-consent-accepted')) return;
             var bar = document.getElementById('cookie-consent');
             if (!bar) return;
-            bar.removeAttribute('hidden');
-            bar.querySelector('[data-dismiss]')?.addEventListener('click', function() {
-                localStorage.setItem('cookie-consent-accepted', '1');
-                bar.setAttribute('hidden', '');
-            });
+            var showBar = function () {
+                bar.removeAttribute('hidden');
+                bar.querySelector('[data-dismiss]')?.addEventListener('click', function() {
+                    localStorage.setItem('cookie-consent-accepted', '1');
+                    bar.setAttribute('hidden', '');
+                });
+            };
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(showBar, { timeout: 2000 });
+            } else {
+                setTimeout(showBar, 0);
+            }
         }, { once: true });
     </script>
 

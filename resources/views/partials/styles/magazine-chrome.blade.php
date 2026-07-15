@@ -14,6 +14,17 @@ body.magazine-site main {
     padding-top: 0;
 }
 
+.magazine-scroll-sentinel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+    visibility: hidden;
+    overflow: hidden;
+}
+
 .magazine-shell {
     width: var(--magazine-shell);
     margin-inline: auto;
