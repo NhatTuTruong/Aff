@@ -39,8 +39,45 @@
             rootMargin: '-320px 0px 0px 0px',
         }).observe(sentinel);
 
+        var scrollAnimationId = null;
+
         btn.addEventListener('click', function () {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            var start = window.scrollY || document.documentElement.scrollTop || 0;
+            if (start <= 0) {
+                return;
+            }
+
+            if (scrollAnimationId) {
+                cancelAnimationFrame(scrollAnimationId);
+                scrollAnimationId = null;
+            }
+
+            var duration = 700;
+            var startTime = null;
+
+            function easeOutCubic(progress) {
+                return 1 - Math.pow(1 - progress, 3);
+            }
+
+            function step(timestamp) {
+                if (!startTime) {
+                    startTime = timestamp;
+                }
+
+                var elapsed = timestamp - startTime;
+                var progress = Math.min(elapsed / duration, 1);
+                var eased = easeOutCubic(progress);
+
+                window.scrollTo(0, Math.round(start * (1 - eased)));
+
+                if (progress < 1) {
+                    scrollAnimationId = requestAnimationFrame(step);
+                } else {
+                    scrollAnimationId = null;
+                }
+            }
+
+            scrollAnimationId = requestAnimationFrame(step);
         });
     }
 
@@ -63,7 +100,6 @@
         var searchOpen = false;
         var usesMobileSearch = mobileMq.matches;
         var isCompact = false;
-        var compactObservers = [];
 
         function closeSearch() {
             if (!searchOpen) {
@@ -159,58 +195,74 @@
             header.classList.toggle('magazine-header--compact', isCompact);
         }
 
-        function scheduleCompact(next) {
-            if (next === isCompact) {
+        function applyCompactState(nextCompact) {
+            if (nextCompact === isCompact) {
                 return;
             }
 
-            if (next) {
+            if (nextCompact) {
                 closeMenu();
                 closeSearch();
             }
 
-            setCompact(next);
+            setCompact(nextCompact);
         }
 
-        function disconnectCompactObservers() {
-            compactObservers.forEach(function (observer) {
-                observer.disconnect();
-            });
-            compactObservers = [];
-        }
+        function bindCompactScroll() {
+            var compactOn = usesMobileSearch ? 72 : 120;
+            var compactOff = usesMobileSearch ? 48 : 72;
+            var scheduled = false;
 
-        function bindCompactObservers() {
-            disconnectCompactObservers();
+            function scrollTop() {
+                return window.scrollY || document.documentElement.scrollTop || 0;
+            }
 
-            var margins = usesMobileSearch
-                ? { on: '-72px 0px 0px 0px', off: '-16px 0px 0px 0px' }
-                : { on: '-120px 0px 0px 0px', off: '-40px 0px 0px 0px' };
-            var sentinel = getOrCreateSentinel();
+            function readCompactState() {
+                var y = scrollTop();
 
-            compactObservers.push(new IntersectionObserver(function (entries) {
-                if (!entries[0].isIntersecting) {
-                    scheduleCompact(true);
+                if (y <= compactOff) {
+                    return false;
                 }
-            }, {
-                threshold: 0,
-                rootMargin: margins.on,
-            }));
 
-            compactObservers.push(new IntersectionObserver(function (entries) {
-                if (entries[0].isIntersecting) {
-                    scheduleCompact(false);
+                if (y >= compactOn) {
+                    return true;
                 }
-            }, {
-                threshold: 0,
-                rootMargin: margins.off,
-            }));
 
-            compactObservers.forEach(function (observer) {
-                observer.observe(sentinel);
-            });
+                return isCompact;
+            }
+
+            function syncCompact() {
+                applyCompactState(readCompactState());
+            }
+
+            function scheduleSync() {
+                if (scheduled) {
+                    return;
+                }
+
+                scheduled = true;
+                requestAnimationFrame(function () {
+                    scheduled = false;
+                    syncCompact();
+                });
+            }
+
+            window.addEventListener('scroll', scheduleSync, { passive: true });
+
+            if ('onscrollend' in window) {
+                window.addEventListener('scrollend', syncCompact, { passive: true });
+            }
+
+            requestAnimationFrame(syncCompact);
+
+            return function onMqResize() {
+                compactOn = usesMobileSearch ? 72 : 120;
+                compactOff = usesMobileSearch ? 48 : 72;
+                requestAnimationFrame(syncCompact);
+            };
         }
 
-        bindCompactObservers();
+        var onCompactMqChange = bindCompactScroll();
 
         if (mainbar && toggle && mobileNav) {
             toggle.addEventListener('click', function () {
@@ -292,7 +344,7 @@
             usesMobileSearch = event.matches;
             closeSearch();
             closeMenu();
-            bindCompactObservers();
+            onCompactMqChange();
         }
 
         if (mobileMq.addEventListener) {

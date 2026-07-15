@@ -56,11 +56,7 @@ body.magazine-site main {
 }
 
 .magazine-header.magazine-header--compact .magazine-topbar {
-    max-height: 0;
-    opacity: 0;
-    padding: 0;
-    border: none;
-    overflow: hidden;
+
 }
 
 .magazine-header.magazine-header--compact .magazine-crumb-bar {
@@ -69,7 +65,7 @@ body.magazine-site main {
 
 /* ── Top black bar ── */
 .magazine-topbar {
-    background: #000;
+    background: #d8d8d8;
     color: #fff;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     transition: max-height 0.28s ease, opacity 0.22s ease, padding 0.28s ease;
@@ -92,10 +88,10 @@ body.magazine-site main {
 }
 
 .magazine-topbar-nav a {
-    color: #fff;
+    color: #0f172a;
     text-decoration: none;
     font-size: 0.775rem;
-    font-weight: 400;
+    font-weight: 600;
     line-height: 1.3;
     transition: opacity 0.2s;
     white-space: nowrap;
@@ -579,7 +575,7 @@ body.magazine-site main {
     padding: 0;
     border-radius: 0;
     background: none !important;
-    color: #fff;
+    color: #0f172a;
     text-decoration: none;
     transition: opacity 0.2s, transform 0.2s;
 }
@@ -898,7 +894,7 @@ body.magazine-site main {
     }
 
     .magazine-topbar-nav {
-        gap: 0.85rem 1.25rem;
+        gap: 0.85rem 0.7rem;
     }
 
     .magazine-topbar-nav a {

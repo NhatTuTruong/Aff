@@ -28,11 +28,14 @@ if (! str_contains($html, 'js/home-carousel.js')) {
 }
 
 if (str_contains(file_get_contents(public_path('js/magazine-site.js')), 'window.scrollY')) {
-    $issues[] = 'magazine-site.js still reads window.scrollY';
+    $js = file_get_contents(public_path('js/magazine-site.js'));
+    if (! str_contains($js, 'requestAnimationFrame(function () {') || ! str_contains($js, 'readCompactState')) {
+        $issues[] = 'magazine-site.js reads window.scrollY without batched rAF writes';
+    }
 }
 
-if (str_contains(file_get_contents(public_path('js/magazine-site.js')), 'addEventListener(\'scroll\'')) {
-    $issues[] = 'magazine-site.js still uses scroll listener';
+if (str_contains(file_get_contents(public_path('js/magazine-site.js')), 'rootMargin: \'-72px')) {
+    $issues[] = 'magazine-site.js uses compact IntersectionObserver rootMargin that hides topbar on load';
 }
 
 if ($issues === []) {
