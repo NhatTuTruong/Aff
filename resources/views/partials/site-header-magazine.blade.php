@@ -185,12 +185,22 @@
     var searchDropdown = document.getElementById('magazine-search-dropdown');
     var searchPanel = document.getElementById('magazine-search-panel');
     var mobileMq = window.matchMedia('(max-width: 768px)');
+    var menuOpen = false;
+    var searchOpen = false;
+    var usesMobileSearch = mobileMq.matches;
 
-    function usesMobileSearch() {
-        return mobileMq.matches;
+    function focusInput(input) {
+        if (!input) return;
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                input.focus({ preventScroll: true });
+            });
+        });
     }
 
     function closeSearch() {
+        if (!searchOpen) return;
+        searchOpen = false;
         if (searchWrap) searchWrap.classList.remove('magazine-search-wrap--open');
         if (searchToggle) searchToggle.setAttribute('aria-expanded', 'false');
         if (searchDropdown) searchDropdown.setAttribute('hidden', '');
@@ -199,36 +209,38 @@
     }
 
     function openSearch() {
+        if (searchOpen) return;
         closeMenu();
+        searchOpen = true;
         if (mainbar) mainbar.classList.add('magazine-mainbar--search-open');
         if (searchToggle) searchToggle.setAttribute('aria-expanded', 'true');
 
-        if (usesMobileSearch() && searchPanel) {
+        if (usesMobileSearch && searchPanel) {
             if (searchDropdown) searchDropdown.setAttribute('hidden', '');
             if (searchWrap) searchWrap.classList.remove('magazine-search-wrap--open');
             searchPanel.removeAttribute('hidden');
-            var panelInput = searchPanel.querySelector('input[type="search"]');
-            if (panelInput) setTimeout(function () { panelInput.focus(); }, 50);
+            focusInput(searchPanel.querySelector('input[type="search"]'));
         } else if (searchWrap && searchDropdown) {
             if (searchPanel) searchPanel.setAttribute('hidden', '');
             if (mainbar) mainbar.classList.remove('magazine-mainbar--search-open');
             searchWrap.classList.add('magazine-search-wrap--open');
             searchDropdown.removeAttribute('hidden');
-            var input = searchDropdown.querySelector('input[type="search"]');
-            if (input) setTimeout(function () { input.focus(); }, 50);
+            focusInput(searchDropdown.querySelector('input[type="search"]'));
         }
     }
 
     function closeMenu() {
-        if (!mainbar || !mobileNav) return;
+        if (!menuOpen || !mainbar || !mobileNav) return;
+        menuOpen = false;
         mainbar.classList.remove('magazine-mainbar--nav-open');
         mobileNav.setAttribute('hidden', '');
         if (toggle) toggle.setAttribute('aria-expanded', 'false');
     }
 
     function openMenu() {
+        if (menuOpen || !mainbar || !mobileNav) return;
         closeSearch();
-        if (!mainbar || !mobileNav) return;
+        menuOpen = true;
         mainbar.classList.add('magazine-mainbar--nav-open');
         mobileNav.removeAttribute('hidden');
         if (toggle) toggle.setAttribute('aria-expanded', 'true');
@@ -237,8 +249,8 @@
     if (header) {
         var scrollTicking = false;
         var isCompact = false;
-        var compactOn = mobileMq.matches ? 72 : 120;
-        var compactOff = mobileMq.matches ? 16 : 40;
+        var compactOn = usesMobileSearch ? 72 : 120;
+        var compactOff = usesMobileSearch ? 16 : 40;
 
         function setCompact(next) {
             if (next === isCompact) return;
@@ -248,13 +260,16 @@
 
         function updateHeaderCompact() {
             var y = window.scrollY;
-            if (!isCompact && y > compactOn) {
-                setCompact(true);
-                closeMenu();
-                closeSearch();
-            } else if (isCompact && y < compactOff) {
-                setCompact(false);
+            var nextCompact = isCompact ? y >= compactOff : y > compactOn;
+
+            if (nextCompact !== isCompact) {
+                if (nextCompact) {
+                    closeMenu();
+                    closeSearch();
+                }
+                setCompact(nextCompact);
             }
+
             scrollTicking = false;
         }
 
@@ -266,11 +281,12 @@
         }, { passive: true });
 
         function onMqChange(e) {
+            usesMobileSearch = e.matches;
             compactOn = e.matches ? 72 : 120;
             compactOff = e.matches ? 16 : 40;
             closeSearch();
             closeMenu();
-            updateHeaderCompact();
+            requestAnimationFrame(updateHeaderCompact);
         }
 
         if (mobileMq.addEventListener) {
@@ -279,12 +295,12 @@
             mobileMq.addListener(onMqChange);
         }
 
-        updateHeaderCompact();
+        requestAnimationFrame(updateHeaderCompact);
     }
 
     if (mainbar && toggle && mobileNav) {
         toggle.addEventListener('click', function () {
-            if (mainbar.classList.contains('magazine-mainbar--nav-open')) {
+            if (menuOpen) {
                 closeMenu();
             } else {
                 openMenu();
@@ -296,7 +312,7 @@
         });
 
         document.addEventListener('click', function (e) {
-            if (!mainbar.classList.contains('magazine-mainbar--nav-open')) return;
+            if (!menuOpen) return;
             if (mainbar.contains(e.target)) return;
             closeMenu();
         });
@@ -305,21 +321,21 @@
     document.querySelectorAll('.magazine-nav-dropdown-wrap').forEach(function (wrap) {
         var trigger = wrap.querySelector('.magazine-main-nav-link--dropdown');
         if (!trigger) return;
+        var dropdownOpen = false;
 
         trigger.addEventListener('click', function (e) {
-            if (!mobileMq.matches) return;
+            if (!usesMobileSearch) return;
             e.preventDefault();
-            wrap.classList.toggle('is-open');
-            trigger.setAttribute('aria-expanded', wrap.classList.contains('is-open') ? 'true' : 'false');
+            dropdownOpen = !dropdownOpen;
+            wrap.classList.toggle('is-open', dropdownOpen);
+            trigger.setAttribute('aria-expanded', dropdownOpen ? 'true' : 'false');
         });
     });
 
     if (searchToggle) {
         searchToggle.addEventListener('click', function (e) {
             e.stopPropagation();
-            var isOpen = (searchPanel && !searchPanel.hasAttribute('hidden')) ||
-                (searchWrap && searchWrap.classList.contains('magazine-search-wrap--open'));
-            if (isOpen) {
+            if (searchOpen) {
                 closeSearch();
             } else {
                 openSearch();
@@ -328,7 +344,7 @@
     }
 
     document.addEventListener('click', function (e) {
-        if (!searchWrap || !searchPanel) return;
+        if (!searchOpen || !searchWrap || !searchPanel) return;
         if (searchWrap.contains(e.target) || searchPanel.contains(e.target)) return;
         closeSearch();
     });

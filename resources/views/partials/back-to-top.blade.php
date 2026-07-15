@@ -10,17 +10,25 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!btn) return;
 
     var threshold = 320;
+    var isVisible = false;
+    var scrollTicking = false;
 
-    function toggle() {
+    function updateVisibility() {
         var show = window.scrollY > threshold;
+        if (show === isVisible) {
+            scrollTicking = false;
+            return;
+        }
+
+        isVisible = show;
         btn.classList.toggle('is-visible', show);
         btn.setAttribute('aria-hidden', show ? 'false' : 'true');
         btn.tabIndex = show ? 0 : -1;
+        scrollTicking = false;
     }
 
     btn.addEventListener('click', function () {
-        var start = window.pageYOffset || document.documentElement.scrollTop;
-        var distance = start;
+        var start = window.scrollY;
         var duration = 600;
         var startTime = null;
 
@@ -28,10 +36,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!startTime) startTime = timestamp;
             var elapsed = timestamp - startTime;
             var progress = Math.min(elapsed / duration, 1);
-
             var ease = 1 - Math.pow(1 - progress, 3);
 
-            window.scrollTo(0, distance * (1 - ease));
+            window.scrollTo(0, start * (1 - ease));
 
             if (progress < 1) {
                 requestAnimationFrame(step);
@@ -41,7 +48,13 @@ document.addEventListener('DOMContentLoaded', function () {
         requestAnimationFrame(step);
     });
 
-    window.addEventListener('scroll', toggle, { passive: true });
-    toggle();
+    window.addEventListener('scroll', function () {
+        if (!scrollTicking) {
+            scrollTicking = true;
+            requestAnimationFrame(updateVisibility);
+        }
+    }, { passive: true });
+
+    requestAnimationFrame(updateVisibility);
 });
 </script>

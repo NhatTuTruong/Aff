@@ -414,23 +414,25 @@
         var index = 0;
         var timer = null;
         var delay = 3000;
+        var isHovered = false;
+        var isPaused = false;
 
         function goTo(i) {
             index = (i % total + total) % total;
-            track.style.transform = 'translateX(' + (-index * 100) + '%)';
-            dots.forEach(function (d, j) {
-                d.classList.toggle('is-active', j === index);
-            });
+            track.style.transform = 'translate3d(' + (-index * 100) + '%,0,0)';
+            for (var j = 0; j < dots.length; j++) {
+                dots[j].classList.toggle('is-active', j === index);
+            }
         }
 
         function nextSlide() { goTo(index + 1); }
         function prevSlide() { goTo(index - 1); }
 
         function startAuto() {
+            if (isPaused || isHovered) return;
             stopAuto();
             timer = setInterval(function () {
-                if (document.hidden) return;
-                if (carousel.matches(':hover')) return;
+                if (document.hidden || isHovered || isPaused) return;
                 nextSlide();
             }, delay);
         }
@@ -454,18 +456,35 @@
             });
         });
 
-        carousel.addEventListener('mouseenter', stopAuto);
-        carousel.addEventListener('mouseleave', startAuto);
+        carousel.addEventListener('mouseenter', function () {
+            isHovered = true;
+            stopAuto();
+        });
+        carousel.addEventListener('mouseleave', function () {
+            isHovered = false;
+            startAuto();
+        });
         document.addEventListener('visibilitychange', function () {
-            if (document.hidden) stopAuto();
+            isPaused = document.hidden;
+            if (isPaused) stopAuto();
             else startAuto();
         });
 
-        goTo(0);
-        startAuto();
+        requestAnimationFrame(function () {
+            goTo(0);
+            startAuto();
+        });
     }
 
-    document.querySelectorAll('[data-hm-carousel]').forEach(initHmCarousel);
+    function bootCarousels() {
+        document.querySelectorAll('[data-hm-carousel]').forEach(initHmCarousel);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootCarousels, { once: true });
+    } else {
+        requestAnimationFrame(bootCarousels);
+    }
 })();
 </script>
 @endpush
