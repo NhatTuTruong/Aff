@@ -30,6 +30,8 @@ class GeminiBlogService
 
         $brandSubject = trim((string) $brandSubject);
         $isBrandFocused = $brandSubject !== '';
+        $lengthInstruction = $this->resolveLengthInstruction($extras, '1,500-2,200 words');
+        $editorPriorityBlock = $this->buildEditorPriorityBlock($extras, forEnglish: true);
 
         if ($isBrandFocused) {
             $brandSubject = Str::limit($brandSubject, 240, '');
@@ -55,14 +57,14 @@ FOCUS;
             $prompt = <<<PROMPT
 You are an expert English SEO copywriter for a deals and shopping blog.
 
+{$editorPriorityBlock}{$this->buildEditorExtrasBlock($extras, forEnglish: true)}
+
 ## Article requirements
-- Language: **English**, SEO-friendly, **1,500-2,200 words**.
+- Language: **English**, SEO-friendly, target length **{$lengthInstruction}**.
 - Structure: exactly one `<h1>`, main sections with `<h2>`, optional `<h3>`.
 - Helpful, neutral-to-positive tone — not overly salesy.
 - Return a complete HTML fragment: `<h1>`, `<p>`, `<ul>`/`<ol>`, `<h2>`, `<h3>`. No `<html>`/`<body>`.
 - Do NOT use Markdown. Do NOT wrap output in code fences like ```html ... ```.
-
-{$this->buildEditorExtrasBlock($extras, forEnglish: true)}
 
 {$focusBlock}
 
@@ -80,14 +82,14 @@ PROMPT;
             $prompt = <<<PROMPT
 Bạn là copywriter SEO tiếng Anh chuyên nghiệp.
 
+{$this->buildEditorPriorityBlock($extras, forEnglish: false)}{$this->buildEditorExtrasBlock($extras)}
+
 Yêu cầu bài viết:
-- Ngôn ngữ: tiếng Anh, chuẩn SEO, độ dài 1,500-2,200 từ.
+- Ngôn ngữ: tiếng Anh, chuẩn SEO, độ dài {$lengthInstruction}.
 - Cấu trúc: 1 thẻ <h1> duy nhất, các phần chính dùng <h2>, có thể thêm <h3>.
 - Nội dung hữu ích, không quảng cáo thương hiệu cụ thể.
 - Trả về HTML hoàn chỉnh: <h1>, <p>, <ul>/<ol>, <h2>, <h3>. Không bọc <html>/<body>.
 - KHÔNG dùng Markdown, KHÔNG bọc nội dung trong code fence như ```html ... ```.
-
-{$this->buildEditorExtrasBlock($extras)}
 
 ## Trọng tâm nội dung (BẮT BUỘC)
 - Danh mục: **{$category}**
@@ -128,6 +130,8 @@ PROMPT;
 
         $hint = Str::limit($hint, 240, '');
         $hintSafe = htmlspecialchars($hint, ENT_QUOTES, 'UTF-8');
+        $lengthInstruction = $this->resolveLengthInstruction($extras, '450-700 words');
+        $editorPriorityBlock = $this->buildEditorPriorityBlock($extras, forEnglish: true);
         $extrasBlock = $this->buildEditorExtrasBlock($extras, forEnglish: true);
 
         $prompt = <<<PROMPT
@@ -137,13 +141,13 @@ The editor typed this brand or store identifier (it may be a company name OR a d
 
 **Subject (verbatim from editor):** {$hintSafe}
 
-{$extrasBlock}
+{$editorPriorityBlock}{$extrasBlock}
 
 ## Your task
 Write ONE **short** editorial-style article in **English** about this brand/visit as a general shopping subject.
 
 ## Length & tone
-- Target **450-700 words** (shorter than a full review; scannable).
+- Target **{$lengthInstruction}** (shorter than a full review unless the editor idea specifies otherwise; scannable).
 - Helpful, neutral-to-positive, **not** salesy. Do **not** invent specific prices, coupon codes, percentages, or time-limited promotions.
 - You may use **high-level, generic** industry knowledge only; if unsure, stay vague and recommend readers check the official site.
 - If the subject looks like a **domain**, you may mention it as the likely official web presence. Add **at most one** link to `https://` + that host only if it is clearly a domain (use `rel="nofollow noopener"`). If it is only a brand name with no clear domain, **do not** invent URLs.
@@ -239,11 +243,15 @@ PROMPT;
             forEnglish: true,
             forcePromoSection: true,
         );
+        $lengthInstruction = $this->resolveLengthInstruction($extras, '900-1,200 words');
+        $editorPriorityBlock = $this->buildEditorPriorityBlock($extras, forEnglish: true);
 
         $prompt = <<<PROMPT
 You are an expert English SEO copywriter for affiliate coupon sites.
 
-Write ONE blog article introducing the store/brand below. Language: **English**. Target length **900-1,200 words**. Tone: helpful, trustworthy, conversion-oriented but honest.
+{$editorPriorityBlock}{$extrasBlock}
+
+Write ONE blog article introducing the store/brand below. Language: **English**. Target length **{$lengthInstruction}**. Tone: helpful, trustworthy, conversion-oriented but honest.
 
 ## Brand & campaign facts (use only as facts; do not invent unavailable data)
 - Category niche: {$categoryName}
@@ -253,8 +261,6 @@ Write ONE blog article introducing the store/brand below. Language: **English**.
 - Campaign title: {$campaignTitle}
 - Campaign intro: {$campaignIntro}
 - Benefits / highlights: {$benefitsText}
-
-{$extrasBlock}
 
 ## Required HTML output rules
 - Return **complete HTML fragment** only: use `<h1>` once for the main title, then `<h2>`, `<h3>`, `<p>`, `<ul>`, `<ol>`, `<strong>` as needed. **Do not** wrap in `<html>` or `<body>`.
@@ -335,6 +341,102 @@ PROMPT;
     /**
      * @param array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
      */
+    protected function resolveLengthInstruction(array $extras, string $defaultEnglish): string
+    {
+        $idea = trim((string) ($extras['idea'] ?? ''));
+        $fromIdea = $this->extractWordCountFromIdea($idea);
+
+        return $fromIdea ?? $defaultEnglish;
+    }
+
+    /**
+     * Trích số từ từ ý tưởng người dùng (VD: "800 từ", "1500 words", "800-1000 words").
+     */
+    protected function extractWordCountFromIdea(string $idea): ?string
+    {
+        $idea = trim($idea);
+        if ($idea === '') {
+            return null;
+        }
+
+        if (preg_match('/(?:khoảng|about|around|roughly|~|tầm|dài)\s*(\d{2,5})\s*[-–—]\s*(\d{2,5})\s*(?:words?|từ|tu\b)/iu', $idea, $matches)) {
+            return $this->formatWordCountRange((int) $matches[1], (int) $matches[2]);
+        }
+
+        if (preg_match('/(\d{2,5})\s*[-–—]\s*(\d{2,5})\s*(?:words?|từ|tu\b)/iu', $idea, $matches)) {
+            return $this->formatWordCountRange((int) $matches[1], (int) $matches[2]);
+        }
+
+        if (preg_match('/(?:khoảng|about|around|roughly|~|tầm|viết|write|length|độ dài|target|dài)\s*(\d{2,5})\s*(?:words?|từ|tu\b)/iu', $idea, $matches)) {
+            return $this->formatWordCountSingle((int) $matches[1]);
+        }
+
+        if (preg_match('/(\d{2,5})\s*(?:words?|từ|tu\b)/iu', $idea, $matches)) {
+            return $this->formatWordCountSingle((int) $matches[1]);
+        }
+
+        return null;
+    }
+
+    protected function formatWordCountSingle(int $count): string
+    {
+        $count = max(100, min(10000, $count));
+
+        return number_format($count).' words';
+    }
+
+    protected function formatWordCountRange(int $min, int $max): string
+    {
+        if ($min > $max) {
+            [$min, $max] = [$max, $min];
+        }
+
+        $min = max(100, min(10000, $min));
+        $max = max($min, min(10000, $max));
+
+        return number_format($min).'-'.number_format($max).' words';
+    }
+
+    /**
+     * @param array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
+     */
+    protected function buildEditorPriorityBlock(array $extras, bool $forEnglish = false): string
+    {
+        $idea = trim((string) ($extras['idea'] ?? ''));
+        if ($idea === '') {
+            return '';
+        }
+
+        $wordCount = $this->extractWordCountFromIdea($idea);
+
+        if ($forEnglish) {
+            $lines = [
+                '## Editor idea — HIGHEST PRIORITY',
+                '- The editor idea below overrides default article type, topic focus, structure, tone, and length when they conflict.',
+                '- Follow the editor idea first; only use defaults for details the idea does not mention.',
+            ];
+            if ($wordCount !== null) {
+                $lines[] = "- Word count detected in the editor idea: **{$wordCount}** — this overrides any default length.";
+            }
+
+            return implode("\n", $lines)."\n\n";
+        }
+
+        $lines = [
+            '## Ý tưởng người nhập — ƯU TIÊN CAO NHẤT',
+            '- Ý tưởng bên dưới ghi đè loại bài, chủ đề, cấu trúc, giọng văn và độ dài mặc định nếu mâu thuẫn.',
+            '- Bám sát ý tưởng trước; chỉ dùng mặc định cho phần người dùng không nhắc tới.',
+        ];
+        if ($wordCount !== null) {
+            $lines[] = "- Phát hiện số từ trong ý tưởng: **{$wordCount}** — ưu tiên hơn độ dài mặc định.";
+        }
+
+        return implode("\n", $lines)."\n\n";
+    }
+
+    /**
+     * @param array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
+     */
     protected function buildEditorExtrasBlock(array $extras, bool $forEnglish = false, bool $forcePromoSection = false): string
     {
         $idea = trim((string) ($extras['idea'] ?? ''));
@@ -359,7 +461,8 @@ PROMPT;
             $lines = [];
             $lines[] = "## Editor requirements (follow these as hard constraints, do not ignore)";
             if ($ideaSafe !== '') {
-                $lines[] = "- Core article idea / outline (the article MUST closely follow this; do not change the topic or structure unless impossible): {$ideaSafe}";
+                $lines[] = "- Core article idea / outline (**PRIMARY SOURCE** — topic, angle, structure, tone, and any length hint): {$ideaSafe}";
+                $lines[] = '- Treat every detail in the idea as mandatory unless it contradicts HTML output rules or factual constraints above.';
             }
             if ($affiliateSafe !== '') {
                 $lines[] = "- Affiliate link to include (use exactly; do not modify): {$affiliateSafe}";
@@ -367,7 +470,7 @@ PROMPT;
             if ($couponSafe !== '') {
                 $lines[] = "- Coupon code to show exactly as typed (do not invent conditions or extra discounts): {$couponSafe}";
             }
-            $lines[] = "- The article should stay tightly aligned with the idea above (section flow, focus points). Only adjust for grammar and global coherence.";
+            $lines[] = "- The article must stay tightly aligned with the editor idea (section flow, focus points, requested style). Only adjust for grammar and global coherence.";
             $lines[] = "- If an affiliate link is provided, include ONE clear CTA link near the end using `<a href=\"...\" rel=\"nofollow sponsored noopener\" target=\"_blank\">`.";
             $lines[] = "- If a coupon code is provided, include a short section titled `<h2>Coupon code</h2>` containing the code in HTML (e.g. `<p><strong>Code:</strong> CODE</p>`).";
             $lines[] = "- Do not invent extra codes, discount percentages, or time-limited claims beyond what is explicitly provided above.";
@@ -378,7 +481,8 @@ PROMPT;
         $lines = [];
         $lines[] = "Yêu cầu bổ sung từ người nhập (bắt buộc, coi như ràng buộc chính):";
         if ($ideaSafe !== '') {
-            $lines[] = "- Ý tưởng / outline: {$ideaSafe}";
+            $lines[] = "- Ý tưởng / outline (**NGUỒN CHÍNH** — chủ đề, góc viết, cấu trúc, giọng văn và gợi ý độ dài): {$ideaSafe}";
+            $lines[] = '- Mọi chi tiết trong ý tưởng đều bắt buộc trừ khi mâu thuẫn với quy tắc HTML hoặc ràng buộc thực tế phía trên.';
         }
         if ($affiliateSafe !== '') {
             $lines[] = "- Link affiliate cần chèn (dùng đúng link): {$affiliateSafe}";
@@ -386,7 +490,7 @@ PROMPT;
         if ($couponSafe !== '') {
             $lines[] = "- Mã coupon cần hiển thị (giữ nguyên, không bịa thêm điều kiện/discount): {$couponSafe}";
         }
-        $lines[] = "- Nội dung bài viết phải bám sát ý tưởng/outline trên (chỉ được chỉnh nhẹ để mạch lạc hơn, không đổi chủ đề).";
+        $lines[] = "- Nội dung bài viết phải bám sát ý tưởng người nhập (chỉ được chỉnh nhẹ để mạch lạc hơn, không đổi chủ đề).";
         $lines[] = "- Nếu có link affiliate: chèn 1 CTA rõ ràng gần cuối bài với rel=\"nofollow sponsored noopener\" và target=\"_blank\".";
         $lines[] = "- Nếu có mã coupon: tạo 1 mục `<h2>` riêng để hiển thị mã (không bịa thêm điều kiện).";
 
