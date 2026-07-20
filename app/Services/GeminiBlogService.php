@@ -20,11 +20,10 @@ class GeminiBlogService
      */
     public function generateBlog(string $category, string $variant, array $extras = [], ?string $brandSubject = null): ?array
     {
-        $apiKey = AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'));
         $preferredModel = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
         $timeout = (int) AdminSettings::get('gemini_timeout', config('gemini.timeout', 60));
 
-        if (empty($apiKey)) {
+        if (AdminSettings::geminiApiKeys() === []) {
             $this->lastError = 'GEMINI_API_KEY chưa được cấu hình.';
             return null;
         }
@@ -100,7 +99,7 @@ Loại bài: {$variant}
 PROMPT;
         }
 
-        return $this->callGeminiWithFallback($apiKey, $preferredModel, $prompt, $timeout);
+        return $this->callGeminiWithKeyAndModelFallback($preferredModel, $prompt, $timeout);
     }
 
     /**
@@ -113,11 +112,10 @@ PROMPT;
      */
     public function generateBrandSpotlightFromHint(string $hint, array $extras = []): ?array
     {
-        $apiKey = AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'));
         $preferredModel = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
         $timeout = (int) AdminSettings::get('gemini_timeout', config('gemini.timeout', 60));
 
-        if (empty($apiKey)) {
+        if (AdminSettings::geminiApiKeys() === []) {
             $this->lastError = 'GEMINI_API_KEY chưa được cấu hình.';
             return null;
         }
@@ -164,7 +162,7 @@ Write ONE **short** editorial-style article in **English** about this brand/visi
 Do not claim the brand partners with our site or that we verified offers.
 PROMPT;
 
-        $result = $this->callGeminiWithFallback($apiKey, $preferredModel, $prompt, max(60, $timeout), [
+        $result = $this->callGeminiWithKeyAndModelFallback($preferredModel, $prompt, max(60, $timeout), [
             'maxOutputTokens' => 4096,
             'temperature' => 0.75,
         ]);
@@ -188,11 +186,10 @@ PROMPT;
      */
     public function generateBrandIntroBlog(Brand $brand, Campaign $campaign, string $categoryName, array $extras = []): ?array
     {
-        $apiKey = AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'));
         $preferredModel = (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest'));
         $timeout = max(120, (int) AdminSettings::get('gemini_timeout', config('gemini.timeout', 60)));
 
-        if (empty($apiKey)) {
+        if (AdminSettings::geminiApiKeys() === []) {
             $this->lastError = 'GEMINI_API_KEY chưa được cấu hình.';
             return null;
         }
@@ -202,7 +199,6 @@ PROMPT;
 
         $campaignSlug = (string) $campaign->slug;
         $affiliateTrackingUrl = route('click.redirect', ['slug' => $campaignSlug], true);
-        $couponLandingUrl = route('landing.show', ['slug' => $campaignSlug], true);
 
         $brandName = $brand->name;
         $domain = $brand->domain ? trim((string) $brand->domain) : '';
@@ -238,7 +234,11 @@ PROMPT;
             $couponListHtml = "<h2>Available Coupons</h2>\n<ul>\n" . implode("\n", $couponItems) . "\n</ul>";
         }
 
-        $extrasBlock = $this->buildEditorExtrasBlock($extras, forEnglish: true, forcePromoSection: true);
+        $extrasBlock = $this->buildEditorExtrasBlock(
+            array_merge($extras, ['affiliate_url' => $affiliateTrackingUrl]),
+            forEnglish: true,
+            forcePromoSection: true,
+        );
 
         $prompt = <<<PROMPT
 You are an expert English SEO copywriter for affiliate coupon sites.
@@ -260,31 +260,76 @@ Write ONE blog article introducing the store/brand below. Language: **English**.
 - Return **complete HTML fragment** only: use `<h1>` once for the main title, then `<h2>`, `<h3>`, `<p>`, `<ul>`, `<ol>`, `<strong>` as needed. **Do not** wrap in `<html>` or `<body>`.
 - Do NOT use Markdown. Do NOT wrap output in code fences like ```html ... ```.
 - **DO NOT link** the brand name "{$brandName}" anywhere in the article content (headings or paragraphs). Just write it as plain text.
-- **ONLY link** when using these CTA buttons at the BEGINNING and END of the article.
+- **ALL links** in the article must use this affiliate tracking URL only: {$affiliateTrackingUrl}
+- **NEVER** link to coupon landing pages, `/store/` URLs, or internal site pages for this campaign.
 
 ## Article structure
 1. **Title (`<h1>`)**: Include brand name + main category keyword.
-2. **Opening CTA (`<p>` at top)**: `<a href="{$affiliateTrackingUrl}" rel="nofollow sponsored">Shop now at {$brandName}</a>` — put this link in the first paragraph.
+2. **Opening CTA (`<p>` at top)**: `<a href="{$affiliateTrackingUrl}" rel="nofollow sponsored noopener" target="_blank">Shop now at {$brandName}</a>` — put this link in the first paragraph.
 3. **Brief intro (`<h2>`)**: What the brand is, main benefit.
 4. **Products/Services (`<h2>`)**: Main offerings.
 5. **Pros and Cons (`<h2>`)**: Two subsections or bullet lists.
 6. **Available Coupons**: {$couponListHtml}
-7. **Closing CTA (`<p>` at bottom)**: `<a href="{$couponLandingUrl}" rel="nofollow">View all coupons & deals</a>` — put this link in the last paragraph.
+7. **Closing CTA (`<p>` at bottom)**: `<a href="{$affiliateTrackingUrl}" rel="nofollow sponsored noopener" target="_blank">Shop now at {$brandName}</a>` — put this affiliate link in the last paragraph.
 
 Do not claim discounts or codes that are not in the facts.
 PROMPT;
 
-        $result = $this->callGeminiWithFallback($apiKey, $preferredModel, $prompt, $timeout, [
+        $result = $this->callGeminiWithKeyAndModelFallback($preferredModel, $prompt, $timeout, [
             'maxOutputTokens' => 6144,
             'temperature' => 0.8,
         ]);
 
         // Không gán ảnh brand: để featured_image null → Blog tự chọn ngẫu nhiên ảnh theo danh mục khi lưu.
         if ($result !== null) {
+            $result['content'] = $this->normalizeStoreBlogAffiliateLinks(
+                (string) $result['content'],
+                $campaignSlug,
+                $affiliateTrackingUrl,
+            );
             $result['featured_image'] = null;
         }
 
         return $result;
+    }
+
+    /**
+     * Đảm bảo bài giới thiệu cửa hàng không còn link trang coupon (/store/) — chỉ dùng link affiliate (/out/).
+     */
+    protected function normalizeStoreBlogAffiliateLinks(string $html, string $campaignSlug, string $affiliateTrackingUrl): string
+    {
+        if (trim($html) === '') {
+            return $html;
+        }
+
+        $slug = preg_quote($campaignSlug, '#');
+        $replacements = array_unique(array_filter([
+            route('landing.show', ['slug' => $campaignSlug], true),
+            url('/store/'.$campaignSlug),
+            url('/visit/'.$campaignSlug),
+            '/store/'.$campaignSlug,
+            '/visit/'.$campaignSlug,
+        ]));
+
+        usort($replacements, static fn (string $a, string $b): int => strlen($b) <=> strlen($a));
+
+        foreach ($replacements as $from) {
+            $html = str_replace($from, $affiliateTrackingUrl, $html);
+        }
+
+        $html = preg_replace(
+            '~https?://[^"\'\s<>]+/store/'.$slug.'(?:[/?#"\s]|$)~i',
+            $affiliateTrackingUrl,
+            $html
+        ) ?? $html;
+
+        $html = preg_replace(
+            '~https?://[^"\'\s<>]+/visit/'.$slug.'(?:[/?#"\s]|$)~i',
+            $affiliateTrackingUrl,
+            $html
+        ) ?? $html;
+
+        return $html;
     }
 
     /**
@@ -435,6 +480,52 @@ PROMPT;
     }
 
     /**
+     * Thử lần lượt từng API key; mỗi key lại fallback qua các model.
+     *
+     * @param  array<string, mixed>  $generationConfigOverrides
+     */
+    protected function callGeminiWithKeyAndModelFallback(
+        string $preferredModel,
+        string $prompt,
+        int $timeout,
+        array $generationConfigOverrides = []
+    ): ?array {
+        $apiKeys = AdminSettings::geminiApiKeys();
+        if ($apiKeys === []) {
+            $this->lastError = 'GEMINI_API_KEY chưa được cấu hình.';
+
+            return null;
+        }
+
+        $lastError = null;
+
+        foreach ($apiKeys as $index => $apiKey) {
+            $result = $this->callGeminiWithFallback(
+                $apiKey,
+                $preferredModel,
+                $prompt,
+                $timeout,
+                $generationConfigOverrides
+            );
+
+            if ($result !== null) {
+                return $result;
+            }
+
+            $lastError = $this->lastError;
+            Log::warning('GeminiBlogService API key failed, trying next', [
+                'key_index' => $index + 1,
+                'keys_total' => count($apiKeys),
+                'error' => $this->lastError,
+            ]);
+        }
+
+        $this->lastError = $lastError ?? 'Không thể tạo bài viết, vui lòng thử lại sau.';
+
+        return null;
+    }
+
+    /**
      * Gọi Gemini với fallback: nếu model ưu tiên lỗi → thử lần lượt các model khác.
      * Nếu tất cả đều lỗi → trả lỗi cuối cùng.
      *
@@ -444,14 +535,10 @@ PROMPT;
     {
         $supportedModels = config('gemini.supported_models', []);
 
-        // Build fallback list: preferred first, then rest
-        $modelOrder = array_filter([
+        $modelOrder = array_values(array_unique([
             $preferredModel,
             ...$supportedModels,
-        ], fn ($m) => $m !== $preferredModel);
-
-        // Deduplicate
-        $modelOrder = array_values(array_unique($modelOrder));
+        ]));
 
         $lastError = null;
 

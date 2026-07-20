@@ -33,7 +33,7 @@ class GenerateDailyBlogs extends Command
 
     public function handle(GeminiBlogService $gemini): int
     {
-        if (! AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'))) {
+        if (AdminSettings::geminiApiKeys() === []) {
             $this->warn('Gemini API key chưa được cấu hình (Cài đặt hệ thống), bỏ qua.');
             return self::SUCCESS;
         }

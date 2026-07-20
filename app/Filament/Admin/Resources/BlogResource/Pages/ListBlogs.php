@@ -88,7 +88,7 @@ class ListBlogs extends ListRecords
                 ->action(function (array $data): void {
                     $gemini = app(GeminiBlogService::class);
 
-                    if (! AdminSettings::getEncrypted('gemini_api_key', (string) config('gemini.api_key'))) {
+                    if (AdminSettings::geminiApiKeys() === []) {
                         Notification::make()
                             ->title('Lỗi cấu hình')
                             ->body('Gemini API key chưa được cấu hình trong Cài đặt hệ thống.')

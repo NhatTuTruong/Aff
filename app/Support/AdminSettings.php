@@ -48,6 +48,68 @@ class AdminSettings
         SiteContent::set('settings.secure.' . $key, Crypt::encryptString($value));
     }
 
+    /**
+     * @return list<string>
+     */
+    public static function getEncryptedLines(string $key, ?string $default = null): array
+    {
+        $raw = static::getEncrypted($key, $default);
+        if (! is_string($raw) || trim($raw) === '') {
+            return [];
+        }
+
+        $lines = preg_split('/\R/', $raw) ?: [];
+
+        return array_values(array_filter(array_map(
+            static fn ($line) => trim((string) $line),
+            $lines
+        ), static fn (string $line) => $line !== ''));
+    }
+
+    /**
+     * @param  list<string>|string|null  $lines
+     */
+    public static function setEncryptedLines(string $key, array|string|null $lines): void
+    {
+        if ($lines === null) {
+            static::setEncrypted($key, null);
+
+            return;
+        }
+
+        if (is_string($lines)) {
+            $lines = preg_split('/\R/', $lines) ?: [];
+        }
+
+        $normalized = array_values(array_filter(array_map(
+            static fn ($line) => trim((string) $line),
+            $lines
+        ), static fn (string $line) => $line !== ''));
+
+        if ($normalized === []) {
+            static::setEncrypted($key, null);
+
+            return;
+        }
+
+        static::setEncrypted($key, implode("\n", $normalized));
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function geminiApiKeys(): array
+    {
+        $keys = static::getEncryptedLines('gemini_api_key');
+        if ($keys !== []) {
+            return $keys;
+        }
+
+        $fallback = trim((string) config('gemini.api_key', ''));
+
+        return $fallback !== '' ? [$fallback] : [];
+    }
+
     public static function siteLogoPath(): ?string
     {
         $path = trim((string) static::get('site_logo_path', ''));

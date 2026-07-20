@@ -999,6 +999,14 @@ body:has(.blog-shell) {
     margin: 1.5rem 0;
 }
 
+.blog-content.prose figcaption,
+.blog-content.prose .attachment__caption,
+.blog-content.prose .attachment__name,
+.blog-content.prose .attachment__size,
+.blog-content.prose figure.attachment .attachment__caption {
+    display: none !important;
+}
+
 .blog-content.prose blockquote {
     margin: 1.75rem 0;
     padding: 1.1rem 1.5rem;

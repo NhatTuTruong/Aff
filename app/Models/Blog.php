@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use App\Support\BlogCategoryImage;
+use App\Support\BlogContentHtml;
 
 class Blog extends Model
 {
@@ -36,6 +37,12 @@ class Blog extends Model
         'views_count' => 'integer',
     ];
 
+    /** Nội dung đã loại tên file / dung lượng dưới ảnh đính kèm. */
+    public function getRenderedContentAttribute(): string
+    {
+        return BlogContentHtml::stripAttachmentCaptions($this->content);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -57,6 +64,10 @@ class Blog extends Model
         parent::boot();
 
         static::creating(function (Blog $blog) {
+            if (filled($blog->content)) {
+                $blog->content = BlogContentHtml::stripAttachmentCaptions($blog->content);
+            }
+
             if (empty($blog->slug)) {
                 $baseSlug = Str::slug($blog->title);
                 $slug = $baseSlug;
@@ -79,6 +90,10 @@ class Blog extends Model
         });
 
         static::updating(function (Blog $blog) {
+            if ($blog->isDirty('content')) {
+                $blog->content = BlogContentHtml::stripAttachmentCaptions($blog->content);
+            }
+
             if ($blog->isDirty('title') && ! $blog->isDirty('slug')) {
                 $baseSlug = Str::slug($blog->title);
                 $slug = $baseSlug;

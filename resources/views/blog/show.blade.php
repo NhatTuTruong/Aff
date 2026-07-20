@@ -65,7 +65,7 @@
                 </div>
 
                 <div class="blog-content prose">
-                    {!! $post->content !!}
+                    {!! $post->rendered_content !!}
                 </div>
 
                 @if($post->images && count($post->images) > 0)

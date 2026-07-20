@@ -7,6 +7,7 @@ use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -47,11 +48,15 @@ class SystemSettings extends Page implements HasForms
 
     public function mount(): void
     {
+        $geminiKeys = AdminSettings::getEncryptedLines('gemini_api_key');
+
         $this->form->fill([
             'apify_token' => AdminSettings::getEncrypted('apify_token') ? '********' : '',
             'apify_actor_id' => (string) AdminSettings::get('apify_actor_id', 'aqPbs3KeH9aD8b22w'),
             'traffic_threshold_default' => (int) AdminSettings::get('traffic_threshold_default', 100000),
-            'gemini_api_key' => AdminSettings::getEncrypted('gemini_api_key') ? '********' : '',
+            'gemini_api_key' => $geminiKeys !== []
+                ? implode("\n", $geminiKeys)
+                : '',
             'gemini_model' => (string) AdminSettings::get('gemini_model', config('gemini.model', 'gemini-1.5-flash-latest')),
             'gemini_timeout' => (int) AdminSettings::get('gemini_timeout', config('gemini.timeout', 60)),
             'site_contact_email' => (string) AdminSettings::get('site_contact_email', config('mail.from.address', 'contact@example.com')),
@@ -94,12 +99,11 @@ class SystemSettings extends Page implements HasForms
                 Section::make('AI Content (Gemini)')
                     ->description('Dùng cho tạo blog AI trong admin và cron.')
                     ->schema([
-                        TextInput::make('gemini_api_key')
+                        Textarea::make('gemini_api_key')
                             ->label('Gemini API key')
-                            ->password()
-                            ->revealable()
-                            ->helperText('Nhập key mới để lưu. Nếu để "********" thì giữ key hiện tại.')
-                            ->maxLength(255),
+                            ->rows(4)
+                            ->helperText('Nhập nhiều key, mỗi key một dòng. Hệ thống dùng từ trên xuống; key lỗi sẽ tự chuyển sang key tiếp theo.')
+                            ->columnSpanFull(),
                         Select::make('gemini_model')
                             ->label('Gemini model (ưu tiên)')
                             ->options(function (): array {
@@ -196,10 +200,15 @@ class SystemSettings extends Page implements HasForms
             AdminSettings::setEncrypted('apify_token', $apifyToken);
         }
 
-        $geminiApiKey = trim((string) ($data['gemini_api_key'] ?? ''));
-        if ($geminiApiKey !== '' && $geminiApiKey !== '********') {
-            AdminSettings::setEncrypted('gemini_api_key', $geminiApiKey);
+        $geminiApiKeyInput = (string) ($data['gemini_api_key'] ?? '');
+        $newKeys = [];
+        foreach (preg_split('/\R/', $geminiApiKeyInput) ?: [] as $line) {
+            $line = trim((string) $line);
+            if ($line !== '') {
+                $newKeys[] = $line;
+            }
         }
+        AdminSettings::setEncryptedLines('gemini_api_key', $newKeys);
 
         AdminSettings::set('apify_actor_id', trim((string) ($data['apify_actor_id'] ?? 'aqPbs3KeH9aD8b22w')));
         AdminSettings::set('traffic_threshold_default', (int) ($data['traffic_threshold_default'] ?? 100000));
