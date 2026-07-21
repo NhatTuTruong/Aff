@@ -112,10 +112,10 @@
     border-radius: 999px;
     border: 1px solid var(--ba-line);
     background: var(--ba-surface);
-    color: var(--ba-muted);
+    color: #000;
     text-decoration: none;
-    font-size: 0.82rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 900;
     transition: all 0.2s;
 }
 

@@ -515,7 +515,7 @@ body:has(.home-magazine) {
 }
 
 .home-magazine .hm-card-title {
-    font-size: 1.08rem;
+    font-size: 1.2rem;
     font-weight: 600;
     line-height: 1.35;
     color: var(--hm-text);
@@ -785,7 +785,7 @@ body:has(.home-magazine) {
 
 .home-magazine .hm-trending-widget-title {
     display: block;
-    font-size: 0.82rem;
+    font-size: 0.9rem;
     font-weight: 600;
     line-height: 1.35;
     color: var(--hm-text);
@@ -820,7 +820,7 @@ body:has(.home-magazine) {
     padding: 0.55rem 0;
     color: var(--hm-muted);
     text-decoration: none;
-    font-size: 0.86rem;
+    font-size: 1rem;
     line-height: 1.4;
     transition: color 0.2s;
 }
@@ -1131,7 +1131,7 @@ body:has(.home-magazine) {
 }
 
 .home-magazine .hm-popular-name {
-    font-size: 1.02rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--hm-text);
     line-height: 1.35;
