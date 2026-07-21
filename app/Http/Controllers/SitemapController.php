@@ -17,7 +17,6 @@ class SitemapController extends Controller
         $urls = [
             ['loc' => $base . '/', 'changefreq' => 'daily', 'priority' => '1.0'],
             ['loc' => $base . '/blog', 'changefreq' => 'daily', 'priority' => '0.9'],
-            ['loc' => $base . '/deals', 'changefreq' => 'daily', 'priority' => '0.9'],
             ['loc' => $base . '/about', 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => $base . '/contact', 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => $base . '/privacy', 'changefreq' => 'monthly', 'priority' => '0.4'],

@@ -2,6 +2,7 @@
 
 @section('title', 'Deals & Coupons - ' . config('app.name'))
 @section('description', 'Browse the latest hot deals and coupons from verified brands.')
+@section('robots', 'noindex, nofollow')
 
 @push('styles')
 <style>

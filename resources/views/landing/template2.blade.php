@@ -103,7 +103,8 @@
     @endphp
     <title>{{ \App\Support\MetaTag::plain($metaTitle) }}</title>
     <meta name="description" content="{{ \App\Support\MetaTag::plain($metaDescription) }}">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ \App\Support\MetaTag::plain($metaTitle) }}">
     <meta property="og:description" content="{{ \App\Support\MetaTag::plain($metaDescription) }}">

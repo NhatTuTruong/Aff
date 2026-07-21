@@ -124,7 +124,8 @@
     @endphp
     <title>{{ \App\Support\MetaTag::plain($metaTitle) }}</title>
     <meta name="description" content="{{ \App\Support\MetaTag::plain($metaDescription) }}">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ \App\Support\MetaTag::plain($metaTitle) }}">
     <meta property="og:description" content="{{ \App\Support\MetaTag::plain($metaDescription) }}">
@@ -165,11 +166,11 @@
         }
 
         :root {
-            --primary: #f9495e;
-            --primary-dark: #d93a4e;
+            --primary: #019a04;
+            --primary-dark: #019a04;
             --primary-soft: #fff1f2;
-            --primary-light: #ff8a96;
-            --accent: #e8384f;
+            --primary-light: #019a04;
+            --accent: #019a04;
             --text-dark: #0f172a;
             --text-light: #64748b;
             --bg-page: #f5f5f5;
@@ -2020,7 +2021,7 @@
 
             .coupon-discount-visual {
                 padding: 14px 12px;
-                background-color: #ffeaea;
+                background-color: #ddfcde;
             }
 
             .discount-up-to {
@@ -3009,7 +3010,7 @@
                 copyCodeToClipboard(code);
                 const t = this.textContent;
                 this.textContent = 'Copied ✓';
-                this.style.background = '#f9495e';
+                this.style.background = '#019a04';
                 this.style.color = '#fff';
                 setTimeout(() => {
                     this.textContent = t;
@@ -3380,7 +3381,7 @@
             // Highlight selected button
             if (worked) {
                 btn.style.background = '#dcfce7';
-                btn.style.borderColor = '#f9495e';
+                btn.style.borderColor = '#019a04';
                 btn.innerHTML = '<span class="feedback-icon">✓</span><span>Thank you!</span>';
             } else {
                 btn.style.background = '#fef2f2';

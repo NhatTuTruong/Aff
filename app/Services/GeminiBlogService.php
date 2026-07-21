@@ -267,7 +267,7 @@ Write ONE blog article introducing the store/brand below. Language: **English**.
 - Do NOT use Markdown. Do NOT wrap output in code fences like ```html ... ```.
 - **DO NOT link** the brand name "{$brandName}" anywhere in the article content (headings or paragraphs). Just write it as plain text.
 - **ALL links** in the article must use this affiliate tracking URL only: {$affiliateTrackingUrl}
-- **NEVER** link to coupon landing pages, `/store/` URLs, or internal site pages for this campaign.
+- **NEVER** link to coupon landing pages, `/visit/` URLs, or internal site pages for this campaign.
 
 ## Article structure
 1. **Title (`<h1>`)**: Include brand name + main category keyword.
@@ -300,7 +300,7 @@ PROMPT;
     }
 
     /**
-     * Đảm bảo bài giới thiệu cửa hàng không còn link trang coupon (/store/) — chỉ dùng link affiliate (/out/).
+     * Đảm bảo bài giới thiệu cửa hàng không còn link trang coupon (/visit/, /store/) — chỉ dùng link affiliate (/out/).
      */
     protected function normalizeStoreBlogAffiliateLinks(string $html, string $campaignSlug, string $affiliateTrackingUrl): string
     {

@@ -57,9 +57,9 @@ class CheckLandingPagesCommand extends Command
             if (! preg_match('/^[a-z0-9-]+$/', $slug)) {
                 $statusCode = 0;
                 $error = 'invalid_slug_format';
-                $urlPath = '/store/' . $slug;
+                $urlPath = '/visit/' . $slug;
             } else {
-                $urlPath = '/store/' . $slug;
+                $urlPath = '/visit/' . $slug;
 
                 try {
                     $request = Request::create($urlPath, 'GET', ['health_check' => 1], server: [

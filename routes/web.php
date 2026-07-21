@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 // SEO: robots.txt (dynamic so Sitemap URL matches app.url)
 Route::get('/robots.txt', function () {
     $sitemap = url('/sitemap.xml');
-    $body = "User-agent: *\nAllow: /\n\nSitemap: {$sitemap}\n";
+    $body = "User-agent: *\nAllow: /\nDisallow: /visit/\nDisallow: /store/\nDisallow: /deals\n\nSitemap: {$sitemap}\n";
     return response($body, 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
 })->name('robots');
 
@@ -50,17 +50,17 @@ Route::get('/login', function () {
     return redirect('/admin/login');
 })->name('login');
 
-// Landing: /store/{slug}
-Route::get('/store/{slug}', [App\Http\Controllers\LandingPageController::class, 'show'])
-    ->name('landing.show')
-    ->where('slug', '[a-z0-9-]+');
-
-// URL cũ /visit/{user_code}/{slug} → 301 tới /store/{slug}
+// URL cũ /visit/{user_code}/{slug} → 301 tới /visit/{slug} (đặt trước route một segment)
 Route::get('/visit/{userCode}/{slug}', [App\Http\Controllers\LandingPageController::class, 'legacyVisitRedirect'])
     ->where(['userCode' => '[0-9]{5}', 'slug' => '[a-z0-9-]+']);
 
-// URL cũ /visit/{slug} → 301 tới /store/{slug}
-Route::get('/visit/{slug}', [App\Http\Controllers\LandingPageController::class, 'visitSlugRedirect'])
+// Landing: /visit/{slug}
+Route::get('/visit/{slug}', [App\Http\Controllers\LandingPageController::class, 'show'])
+    ->name('landing.show')
+    ->where('slug', '[a-z0-9-]+');
+
+// URL cũ /store/{slug} → 301 tới /visit/{slug}
+Route::get('/store/{slug}', [App\Http\Controllers\LandingPageController::class, 'storeSlugRedirect'])
     ->where('slug', '[a-z0-9-]+');
 
 // Click tracking: URL cũ /out/{user_code}/{slug} → 301 tới /out/{slug}

@@ -17,7 +17,7 @@ class LandingPageController extends Controller
     }
 
     /**
-     * Chuyển URL cũ /visit/{user_code}/{segment} sang /store/{slug} (301).
+     * Chuyển URL cũ /visit/{user_code}/{segment} sang /visit/{slug} (301).
      */
     public function legacyVisitRedirect(string $userCode, string $slug, Request $request)
     {
@@ -36,9 +36,9 @@ class LandingPageController extends Controller
     }
 
     /**
-     * Chuyển URL cũ /visit/{slug} sang /store/{slug} (301).
+     * Chuyển URL cũ /store/{slug} sang /visit/{slug} (301).
      */
-    public function visitSlugRedirect(string $slug)
+    public function storeSlugRedirect(string $slug)
     {
         return redirect()->route('landing.show', ['slug' => $slug], 301);
     }
@@ -83,6 +83,8 @@ class LandingPageController extends Controller
         request()->attributes->set('landing_template', $template);
         request()->attributes->set('landing_campaign', $campaign);
 
-        return view("landing.{$template}", compact('campaign', 'pageView'));
+        return response()
+            ->view("landing.{$template}", compact('campaign', 'pageView'))
+            ->header('X-Robots-Tag', 'noindex, nofollow');
     }
 }

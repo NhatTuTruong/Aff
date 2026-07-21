@@ -24,6 +24,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $documentTitle }}</title>
     <meta name="description" content="{{ $metaDescription }}">
+    @hasSection('robots')
+    <meta name="robots" content="@yield('robots')">
+    <meta name="googlebot" content="@yield('robots')">
+    @endif
     <meta name="verify-admitad" content="4455f2e7bb" />
     <meta name='impact-site-verification' value='35f2fb10-d495-4208-b451-b9f1e79b72a9'>
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">

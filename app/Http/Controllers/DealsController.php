@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Coupon;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Http\Response;
 
 class DealsController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): Response
     {
         $query = $request->get('q');
 
@@ -48,10 +48,12 @@ class DealsController extends Controller
             ')
             ->paginate(12);
 
-        return view('deals.index', [
-            'deals' => $deals,
-            'searchQuery' => $query,
-        ]);
+        return response()
+            ->view('deals.index', [
+                'deals' => $deals,
+                'searchQuery' => $query,
+            ])
+            ->header('X-Robots-Tag', 'noindex, nofollow');
     }
 }
 

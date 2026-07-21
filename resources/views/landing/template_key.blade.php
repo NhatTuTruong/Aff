@@ -12,7 +12,8 @@
     @endphp
     <title>{{ \App\Support\MetaTag::plain($campaign->title) }}</title>
     <meta name="description" content="{{ \App\Support\MetaTag::plain($campaign->subtitle ?? strip_tags($campaign->intro ?? '')) }}">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
