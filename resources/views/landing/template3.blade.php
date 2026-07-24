@@ -1008,6 +1008,13 @@
             .filter-pill { font-size: 0.78rem; padding: 8px 14px; }
             .staff-pick-badge { display: none; }
         }
+
+        /* Override peel-sticker colors to match template3 theme (purple) */
+        .btn-get-code.btn-peel-sticker {
+            --primary: var(--t3-primary);
+            --primary-light: var(--t3-primary-soft);
+            --primary-dark: var(--t3-primary-dark);
+        }
     </style>
 </head>
 <body class="landing-coupon">

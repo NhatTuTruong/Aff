@@ -837,6 +837,13 @@
             .filter-pill { font-size: 0.8rem; padding: 6px 12px; }
             .staff-pick-badge { display: none; }
         }
+
+        /* Override peel-sticker colors to match template2 theme (purple) */
+        .btn-get-code.btn-peel-sticker {
+            --primary: var(--t2-primary);
+            --primary-light: var(--t2-primary-soft);
+            --primary-dark: var(--t2-primary-dark);
+        }
     </style>
 </head>
 <body class="landing-coupon">

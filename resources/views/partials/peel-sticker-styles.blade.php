@@ -1,8 +1,11 @@
 <style>
 .btn-get-code.btn-peel-sticker {
-    --peel-primary: #7c3aed;
-    --peel-primary-light: #ddd6fe;
-    --peel-primary-dark: #6d28d9;
+    --primary: #019a04;
+    --primary-light: #019a04;
+    --primary-dark: #019a04;
+    --peel-primary: var(--primary);
+    --peel-primary-light: var(--primary-light);
+    --peel-primary-dark: var(--primary-dark);
     position: relative;
     display: inline-flex;
     padding: 0;
@@ -73,15 +76,15 @@
     pointer-events: none;
     background: linear-gradient(
         225deg,
-        #ede9fe 0%,
-        #ddd6fe 42%,
-        var(--peel-primary-light) 43%,
+        #dcfcdc 0%,
+        var(--primary-light) 42%,
+        var(--primary-light) 43%,
         var(--primary-dark) 44%
     );
     clip-path: polygon(100% 0, 0 0, 100% 100%);
 }
 .btn-peel-sticker:hover .peel-inner {
-    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.32);
+    box-shadow: 0 4px 14px rgba(1, 154, 4, 0.28);
 }
 .btn-peel-sticker:active .peel-inner {
     transform: scale(0.98);
