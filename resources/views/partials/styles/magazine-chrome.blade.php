@@ -48,11 +48,12 @@ body.magazine-site main {
     top: 0;
     z-index: 120;
     transition: box-shadow 0.25s ease;
+    border-top: 3px solid #2563eb;
 }
 
 .magazine-header.magazine-header--compact {
     --magazine-sticky-offset: 5.5rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 6px 24px rgba(15, 23, 42, 0.14);
 }
 
 .magazine-header.magazine-header--compact .magazine-topbar {
@@ -63,10 +64,10 @@ body.magazine-site main {
     display: none;
 }
 
-/* ── Top black bar ── */
+/* ── Top bar ── */
 .magazine-topbar {
-    background: #d8d8d8;
-    color: #fff;
+    background: linear-gradient(90deg, #0f172a 0%, #1e3a8a 100%);
+    color: rgba(255, 255, 255, 0.88);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     transition: max-height 0.28s ease, opacity 0.22s ease, padding 0.28s ease;
 }
@@ -88,27 +89,28 @@ body.magazine-site main {
 }
 
 .magazine-topbar-nav a {
-    color: #0f172a;
+    color: rgba(255, 255, 255, 0.82);
     text-decoration: none;
     font-size: 0.775rem;
     font-weight: 600;
     line-height: 1.3;
-    transition: opacity 0.2s;
+    transition: color 0.2s;
     white-space: nowrap;
 }
 
 .magazine-topbar-nav a:hover {
-    opacity: 0.78;
+    color: #fff;
 }
 
 .magazine-topbar-social {
     flex-shrink: 0;
 }
 
-/* ── White main bar ── */
+/* ── Main bar ── */
 .magazine-mainbar {
     background: #fff;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    border-bottom: 2px solid rgba(37, 99, 235, 0.12);
+    box-shadow: 0 4px 18px rgba(37, 99, 235, 0.06);
     position: relative;
 }
 
@@ -116,8 +118,8 @@ body.magazine-site main {
     display: flex;
     align-items: center;
     gap: 2rem;
-    padding: 0.85rem 0;
-    min-height: 72px;
+    padding: 0.95rem 0;
+    min-height: 76px;
 }
 
 .magazine-nav-toggle {
@@ -154,9 +156,9 @@ body.magazine-site main {
     justify-content: center;
     width: 2.75rem;
     height: 2.75rem;
-    border: 1px solid rgba(15, 23, 42, 0.12);
-    border-radius: 50%;
-    background: #fff;
+    border: 2px solid rgba(37, 99, 235, 0.2);
+    border-radius: 12px;
+    background: #eff6ff;
     overflow: hidden;
     flex-shrink: 0;
 }
@@ -181,14 +183,18 @@ body.magazine-site main {
     font-weight: 800;
     letter-spacing: -0.02em;
     line-height: 1.1;
-    color: #111;
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 55%, #60a5fa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #2563eb;
 }
 
 .magazine-main-nav {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 0.35rem 1.75rem;
+    gap: 0.35rem 1.1rem;
     flex: 1;
     min-width: 0;
 }
@@ -197,21 +203,24 @@ body.magazine-site main {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    color: #111;
+    color: #334155;
     text-decoration: none;
-    font-size: 0.92rem;
-    font-weight: 800;
-    letter-spacing: 0.07em;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     line-height: 1.2;
     white-space: nowrap;
-    transition: color 0.2s;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    transition: color 0.2s, background 0.2s;
 }
 
 .magazine-main-nav-link:hover,
 .magazine-main-nav-link.is-active,
 .magazine-nav-dropdown-wrap.is-active > .magazine-main-nav-link {
-    color: #e91e8c;
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.1);
 }
 
 .magazine-nav-chevron {
@@ -270,8 +279,8 @@ body.magazine-site main {
 
 .magazine-nav-dropdown a:hover,
 .magazine-nav-dropdown a.is-active {
-    background: rgba(233, 30, 140, 0.08);
-    color: #db2777;
+    background: rgba(37, 99, 235, 0.08);
+    color: #2563eb;
 }
 
 .magazine-main-actions {
@@ -283,18 +292,19 @@ body.magazine-site main {
 }
 
 .magazine-search--main {
-    color: #111 !important;
+    color: #2563eb !important;
+    background: rgba(37, 99, 235, 0.08) !important;
 }
 
 .magazine-search--main:hover,
 .magazine-search-wrap--open .magazine-search--main {
-    color: #111 !important;
-    background: rgba(15, 23, 42, 0.06) !important;
+    color: #fff !important;
+    background: #2563eb !important;
 }
 
 /* ── Breadcrumb bar ── */
 .magazine-crumb-bar {
-    background: #111;
+    background: linear-gradient(90deg, #0f172a 0%, #1e3a8a 100%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -389,7 +399,7 @@ body.magazine-site main {
 }
 
 .magazine-mobile-nav > .magazine-shell > a.is-active {
-    color: #e91e8c;
+    color: #2563eb;
 }
 
 .magazine-mobile-nav-label {
@@ -411,7 +421,7 @@ body.magazine-site main {
 }
 
 .magazine-mobile-nav-sub.is-active {
-    color: #db2777;
+    color: #2563eb;
     font-weight: 600;
 }
 
@@ -449,13 +459,13 @@ body.magazine-site main {
 }
 
 .magazine-search-form--panel input[type="search"]:focus {
-    border-color: #e91e8c;
-    box-shadow: 0 0 0 3px rgba(233, 30, 140, 0.12);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .magazine-search-form--panel button {
     flex-shrink: 0;
-    background: #e91e8c;
+    background: #2563eb;
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -468,7 +478,7 @@ body.magazine-site main {
 }
 
 .magazine-search-form--panel button:hover {
-    background: #c2185b;
+    background: #1d4ed8;
 }
 
 .magazine-search-wrap {
@@ -533,13 +543,13 @@ body.magazine-site main {
 }
 
 .magazine-search-form input[type="search"]:focus {
-    border-color: #e91e8c;
-    box-shadow: 0 0 0 3px rgba(233, 30, 140, 0.12);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .magazine-search-form button {
     flex-shrink: 0;
-    background: #e91e8c;
+    background: #2563eb;
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -551,7 +561,7 @@ body.magazine-site main {
 }
 
 .magazine-search-form button:hover {
-    background: #c2185b;
+    background: #1d4ed8;
 }
 
 /* ── Social links ── */
@@ -575,9 +585,9 @@ body.magazine-site main {
     padding: 0;
     border-radius: 0;
     background: none !important;
-    color: #0f172a;
+    color: rgba(255, 255, 255, 0.82);
     text-decoration: none;
-    transition: opacity 0.2s, transform 0.2s;
+    transition: color 0.2s, transform 0.2s;
 }
 
 .site-social--topbar .site-social-link svg {
@@ -586,7 +596,7 @@ body.magazine-site main {
 }
 
 .site-social--topbar .site-social-link:hover {
-    opacity: 0.78;
+    color: #fff;
     transform: translateY(-1px);
 }
 
@@ -668,14 +678,14 @@ body.magazine-site main {
 
 /* Magazine footer */
 .site-footer--magazine {
-    background: #1a1a1a;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(180deg, #0f172a 0%, #172554 55%, #1e3a8a 100%);
+    border-top: 3px solid #2563eb;
     margin-top: 0;
-    color: #e5e5e5;
+    color: #e2e8f0;
 }
 
 .footer-magazine-main {
-    padding: 2.5rem 0 2rem;
+    padding: 3rem 0 2.25rem;
 }
 
 .footer-magazine-grid {
@@ -692,6 +702,8 @@ body.magazine-site main {
     margin: 0 0 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
+    padding-left: 0.75rem;
+    border-left: 3px solid #2563eb;
 }
 
 .footer-magazine-menu ul {
@@ -700,19 +712,20 @@ body.magazine-site main {
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.45rem;
 }
 
 .footer-magazine-menu a {
-    color: #9ca3af;
+    color: #94a3b8;
     text-decoration: none;
     font-size: 0.92rem;
     line-height: 1.5;
-    transition: color 0.2s;
+    transition: color 0.2s, padding-left 0.2s;
 }
 
 .footer-magazine-menu a:hover {
     color: #fff;
+    padding-left: 0.25rem;
 }
 
 .footer-magazine-logo {
@@ -720,15 +733,19 @@ body.magazine-site main {
     font-family: 'DM Sans', system-ui, sans-serif;
     font-size: 1.35rem;
     font-weight: 700;
+    background: linear-gradient(135deg, #fff 0%, #93c5fd 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     color: #fff !important;
     text-decoration: none;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.85rem;
 }
 
 .footer-magazine-brand p {
-    font-size: 1rem;
+    font-size: 0.98rem;
     line-height: 1.65;
-    color: #9ca3af;
+    color: #94a3b8;
     margin: 0;
     max-width: 340px;
 }
@@ -743,8 +760,9 @@ body.magazine-site main {
     display: block;
     aspect-ratio: 1;
     overflow: hidden;
-    border-radius: 2px;
-    background: #222;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .footer-gallery-item img {
@@ -763,10 +781,12 @@ body.magazine-site main {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #9ca3af;
+    color: #94a3b8;
     margin: 0 0 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-left: 0.75rem;
+    border-left: 3px solid #2563eb;
+    border-bottom: none;
 }
 
 .footer-recent-list {
@@ -787,9 +807,10 @@ body.magazine-site main {
 .footer-recent-thumb {
     width: 72px;
     height: 72px;
-    border-radius: 4px;
+    border-radius: 8px;
     overflow: hidden;
-    background: #222;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .footer-recent-thumb img {
@@ -813,6 +834,7 @@ body.magazine-site main {
     color: #fff;
     line-height: 1.35;
     margin-bottom: 0.2rem;
+    transition: color 0.2s;
 }
 
 .footer-recent-meta {
@@ -821,10 +843,15 @@ body.magazine-site main {
     color: #9ca3af;
 }
 
+.footer-recent-item:hover .footer-recent-name {
+    color: #93c5fd;
+}
+
 .footer-magazine-bar {
-    background: #111;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    padding: 0.85rem 0;
+    background: rgba(15, 23, 42, 0.55);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1rem 0;
+    backdrop-filter: blur(8px);
 }
 
 .footer-magazine-bar-inner {
@@ -838,7 +865,7 @@ body.magazine-site main {
 .footer-magazine-bar p {
     margin: 0;
     font-size: 0.78rem;
-    color: #9ca3af;
+    color: #94a3b8;
 }
 
 .footer-magazine-bar .site-social--icons .site-social-link {

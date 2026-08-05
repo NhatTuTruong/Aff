@@ -10,10 +10,10 @@ body.magazine-site {
     --blog-border: rgba(15, 23, 42, 0.08);
     --blog-text: #111827;
     --blog-muted: #6b7280;
-    --blog-accent: #e91e8c;
-    --blog-accent-deep: #c2185b;
-    --blog-accent-soft: rgba(233, 30, 140, 0.1);
-    --blog-accent-mid: rgba(233, 30, 140, 0.18);
+    --blog-accent: #2563eb;
+    --blog-accent-deep: #1d4ed8;
+    --blog-accent-soft: rgba(37, 99, 235, 0.1);
+    --blog-accent-mid: rgba(37, 99, 235, 0.18);
     --blog-dark: #f3f4f6;
     --blog-dark-2: #e5e7eb;
     --blog-heading: 'DM Sans', system-ui, sans-serif;
@@ -26,13 +26,13 @@ body.magazine-site .font-heading {
 body.magazine-site:has(.blog-page),
 body.magazine-site:has(.blog-shell),
 body.magazine-site:has(.blog-archive) {
-    background: #ffffff;
+    background: #eff6ff;
     color: #111827;
 }
 
 body.magazine-site .blog-page,
 body.magazine-site .blog-shell {
-    background: #ffffff;
+    background: transparent;
     color: #111827;
 }
 
@@ -42,7 +42,7 @@ body.magazine-site .blog-shell .blog-layout {
 }
 
 body.magazine-site .bp-hero {
-    background: linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%);
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
     border-bottom: 1px solid rgba(15, 23, 42, 0.08);
     min-height: auto;
     padding: 2.5rem 0 2rem;
@@ -61,9 +61,9 @@ body.magazine-site .bp-hero-lead {
 }
 
 body.magazine-site .bp-hero-kicker {
-    color: #be185d;
-    background: rgba(233, 30, 140, 0.1);
-    border-color: rgba(233, 30, 140, 0.25);
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.25);
 }
 
 body.magazine-site .bp-search-card {
@@ -79,7 +79,7 @@ body.magazine-site .bp-search-form input {
 }
 
 body.magazine-site .bp-search-form button {
-    background: #e91e8c;
+    background: #2563eb;
 }
 
 body.magazine-site .bp-chip {
@@ -91,9 +91,9 @@ body.magazine-site .bp-chip {
 
 body.magazine-site .bp-chip--on,
 body.magazine-site .bp-chip:hover {
-    background: rgba(233, 30, 140, 0.12);
-    border-color: #e91e8c;
-    color: #9d174d;
+    background: rgba(37, 99, 235, 0.12);
+    border-color: #2563eb;
+    color: #1d4ed8;
 }
 
 body.magazine-site .bp-main {
@@ -129,12 +129,12 @@ body.magazine-site .bp-card-date-inline {
 }
 
 body.magazine-site .bp-card-tag {
-    background: rgba(233, 30, 140, 0.12);
-    color: #be185d;
+    background: rgba(37, 99, 235, 0.12);
+    color: #2563eb;
 }
 
 body.magazine-site .bp-card-cta {
-    color: #e91e8c;
+    color: #2563eb;
 }
 
 body.magazine-site .bp-empty {
@@ -188,13 +188,20 @@ body.magazine-site .blog-related-card h3 {
 }
 
 body.magazine-site .blog-hero-main {
-    background: linear-gradient(150deg, #fdf2f8 0%, #ffffff 100%);
+    background: linear-gradient(150deg, #eff6ff 0%, #ffffff 100%);
 }
 
 body.magazine-site .blog-hero-eyebrow > span {
-    background: rgba(233, 30, 140, 0.1);
-    border-color: rgba(233, 30, 140, 0.22);
-    color: #be185d;
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.22);
+    color: #2563eb;
+}
+
+body.magazine-site .blog-hero-eyebrow > span:first-child {
+    background: rgba(37, 99, 235, 0.12);
+    border-color: rgba(37, 99, 235, 0.28);
+    color: #1d4ed8;
+    font-weight: 700;
 }
 
 body.magazine-site .blog-title {
@@ -207,11 +214,11 @@ body.magazine-site .blog-meta {
 }
 
 body.magazine-site .blog-meta a {
-    color: #db2777;
+    color: #2563eb;
 }
 
 body.magazine-site .blog-meta a:hover {
-    color: #9d174d;
+    color: #1d4ed8;
 }
 
 body.magazine-site .blog-hero-media-overlay {
@@ -233,17 +240,17 @@ body.magazine-site .blog-main {
 }
 
 body.magazine-site .blog-back:hover {
-    color: #db2777;
+    color: #2563eb;
 }
 
 body.magazine-site .blog-back .icon {
-    border-color: rgba(233, 30, 140, 0.22);
-    background: rgba(233, 30, 140, 0.08);
-    color: #db2777;
+    border-color: rgba(37, 99, 235, 0.22);
+    background: rgba(37, 99, 235, 0.08);
+    color: #2563eb;
 }
 
 body.magazine-site .blog-breadcrumb a:hover {
-    color: #db2777;
+    color: #2563eb;
 }
 
 body.magazine-site .blog-shell > .blog-breadcrumb {
@@ -256,7 +263,7 @@ body.magazine-site .blog-hero {
 }
 
 body.magazine-site .blog-hero::before {
-    background: linear-gradient(180deg, #e91e8c 0%, #c2185b 100%);
+    background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
 }
 
 body.magazine-site .blog-chip-row {
@@ -264,15 +271,16 @@ body.magazine-site .blog-chip-row {
 }
 
 body.magazine-site .blog-chip {
-    background: #f3f4f6;
-    border-color: rgba(15, 23, 42, 0.1);
-    color: #6b7280;
+    background: rgba(37, 99, 235, 0.06);
+    border-color: rgba(37, 99, 235, 0.14);
+    color: #475569;
 }
 
 body.magazine-site .blog-chip-accent {
-    border-color: rgba(233, 30, 140, 0.28);
-    background: rgba(233, 30, 140, 0.1);
-    color: #be185d;
+    border-color: rgba(37, 99, 235, 0.28);
+    background: rgba(37, 99, 235, 0.12);
+    color: #1d4ed8;
+    font-weight: 700;
 }
 
 body.magazine-site .blog-share-button {
@@ -282,9 +290,9 @@ body.magazine-site .blog-share-button {
 }
 
 body.magazine-site .blog-share-button:hover {
-    border-color: #e91e8c;
-    color: #db2777;
-    background: rgba(233, 30, 140, 0.08);
+    border-color: #2563eb;
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.08);
 }
 
 body.magazine-site .blog-content.prose {
@@ -300,15 +308,15 @@ body.magazine-site .blog-content.prose strong {
 }
 
 body.magazine-site .blog-content.prose li::marker {
-    color: #e91e8c;
+    color: #2563eb;
 }
 
 body.magazine-site .blog-content.prose a {
-    color: #db2777;
+    color: #2563eb;
 }
 
 body.magazine-site .blog-content.prose a:hover {
-    color: #9d174d;
+    color: #1d4ed8;
 }
 
 body.magazine-site .blog-content.prose img {
@@ -316,8 +324,8 @@ body.magazine-site .blog-content.prose img {
 }
 
 body.magazine-site .blog-content.prose blockquote {
-    border-left-color: #e91e8c;
-    background: rgba(233, 30, 140, 0.06);
+    border-left-color: #2563eb;
+    background: rgba(37, 99, 235, 0.06);
     color: #6b7280;
 }
 
@@ -327,14 +335,14 @@ body.magazine-site .blog-content.prose code {
 }
 
 body.magazine-site .blog-aside {
-    background: linear-gradient(160deg, #fdf2f8 0%, #ffffff 100%);
+    background: linear-gradient(160deg, #eff6ff 0%, #ffffff 100%);
     border-color: rgba(15, 23, 42, 0.1);
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
     top: var(--magazine-sticky-offset, 7.25rem);
 }
 
 body.magazine-site .blog-aside-title {
-    border-bottom-color: rgba(233, 30, 140, 0.2);
+    border-bottom-color: rgba(37, 99, 235, 0.2);
     font-family: 'DM Sans', system-ui, sans-serif;
     color: #111827;
 }
@@ -345,30 +353,30 @@ body.magazine-site .blog-deal-card {
 }
 
 body.magazine-site .blog-deal-card:hover {
-    border-color: rgba(233, 30, 140, 0.35);
+    border-color: rgba(37, 99, 235, 0.35);
 }
 
 body.magazine-site .blog-deal-card::before {
-    background: linear-gradient(135deg, rgba(233, 30, 140, 0.08), transparent 55%);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), transparent 55%);
 }
 
 body.magazine-site .blog-deal-cta {
-    background: #e91e8c;
+    background: #2563eb;
 }
 
 body.magazine-site .blog-deal-cta:hover {
-    background: #c2185b;
+    background: #1d4ed8;
 }
 
 body.magazine-site .btn-copy-code {
-    background: rgba(233, 30, 140, 0.1);
-    border-color: rgba(233, 30, 140, 0.28);
-    color: #be185d;
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.28);
+    color: #2563eb;
 }
 
 body.magazine-site .btn-copy-code:hover {
-    background: rgba(233, 30, 140, 0.16);
-    border-color: #e91e8c;
+    background: rgba(37, 99, 235, 0.16);
+    border-color: #2563eb;
 }
 
 body.magazine-site .related-blogs {
@@ -381,7 +389,7 @@ body.magazine-site .related-blogs-title {
 }
 
 body.magazine-site .related-blogs-title::before {
-    background: linear-gradient(90deg, #e91e8c, #c2185b);
+    background: linear-gradient(90deg, #2563eb, #1d4ed8);
 }
 
 body.magazine-site .related-blog-card {
@@ -391,7 +399,7 @@ body.magazine-site .related-blog-card {
 }
 
 body.magazine-site .related-blog-card:hover {
-    border-color: rgba(233, 30, 140, 0.25);
+    border-color: rgba(37, 99, 235, 0.25);
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
@@ -431,7 +439,7 @@ body.magazine-site .legal-container li {
 }
 
 body.magazine-site .legal-container a {
-    color: #db2777;
+    color: #2563eb;
 }
 
 /* Error pages */
@@ -440,7 +448,7 @@ body.magazine-site .error-page {
 }
 
 body.magazine-site .error-page .error-code {
-    color: #e91e8c;
+    color: #2563eb;
     font-family: 'DM Sans', system-ui, sans-serif;
 }
 
@@ -455,16 +463,16 @@ body.magazine-site .error-page .error-message {
 }
 
 body.magazine-site .error-page .error-actions a {
-    background: #e91e8c;
+    background: #2563eb;
 }
 
 body.magazine-site .error-page .error-actions a:hover {
-    background: #c2185b;
+    background: #1d4ed8;
 }
 
 /* Deals page */
 body.magazine-site .deals-hero {
-    background: linear-gradient(180deg, #fdf2f8 0%, #ffffff 100%);
+    background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
     border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
@@ -498,14 +506,14 @@ body.magazine-site .pagination-item {
 }
 
 body.magazine-site .pagination-item:hover:not(.pagination-disabled):not(.pagination-current) {
-    border-color: #e91e8c;
-    color: #db2777;
+    border-color: #2563eb;
+    color: #2563eb;
 }
 
 body.magazine-site .pagination-current {
-    background: rgba(233, 30, 140, 0.1);
-    border-color: #e91e8c;
-    color: #9d174d;
+    background: rgba(37, 99, 235, 0.1);
+    border-color: #2563eb;
+    color: #1d4ed8;
 }
 
 body.magazine-site .pagination-info {
@@ -513,8 +521,8 @@ body.magazine-site .pagination-info {
 }
 
 body.magazine-site .back-to-top {
-    background: linear-gradient(145deg, #e91e8c 0%, #c2185b 100%);
-    box-shadow: 0 8px 24px -6px rgba(233, 30, 140, 0.4);
+    background: linear-gradient(145deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 8px 24px -6px rgba(37, 99, 235, 0.4);
 }
 
 body.magazine-site .cookie-consent {
@@ -525,10 +533,10 @@ body.magazine-site .cookie-consent {
 }
 
 body.magazine-site .cookie-consent a {
-    color: #db2777;
+    color: #2563eb;
 }
 
 body.magazine-site .cookie-consent a:hover {
-    color: #9d174d;
+    color: #1d4ed8;
 }
 </style>

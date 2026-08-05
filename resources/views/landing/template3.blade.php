@@ -130,19 +130,22 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --t3-primary: #7c3aed;
-            --t3-primary-dark: #6d28d9;
-            --t3-primary-soft: #eef1f5;
-            --t3-accent: #7c3aed;
-            --t3-accent-hover: #6d28d9;
-            --t3-hero-bg: linear-gradient(135deg, #a78bfa 0%, #7c3aed 55%, #1e293b 100%);
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #60a5fa;
+            --t3-primary: #2563eb;
+            --t3-primary-dark: #1d4ed8;
+            --t3-primary-soft: #eff6ff;
+            --t3-accent: #2563eb;
+            --t3-accent-hover: #1d4ed8;
+            --t3-hero-bg: linear-gradient(135deg, #60a5fa 0%, #2563eb 55%, #1e293b 100%);
             --t3-text: #0f172a;
             --t3-text-muted: #64748b;
             --t3-bg: #f1f5f9;
             --t3-card: #ffffff;
             --t3-border: #e2e8f0;
             --t3-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 10px 20px -5px rgba(15, 23, 42, 0.08);
-            --t3-ribbon: linear-gradient(180deg, #6d28d9 0%, #7c3aed 50%, #a78bfa 100%);
+            --t3-ribbon: linear-gradient(180deg, #1d4ed8 0%, #2563eb 50%, #60a5fa 100%);
         }
         body {
             font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -404,7 +407,7 @@
             background: linear-gradient(180deg, transparent, rgba(255,255,255,0.45), transparent);
         }
         .t3-offer-strip--deal {
-            background: linear-gradient(180deg, #6d28d9 0%, #7c3aed 100%);
+            background: linear-gradient(180deg, var(--t3-primary-dark) 0%, var(--t3-primary) 100%);
         }
         .t3-offer-num {
             font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
@@ -749,7 +752,7 @@
             overscroll-behavior: contain;
         }
         .coupon-code-container {
-            background: #1e1b4b;
+            background: var(--t3-primary-dark);
             border-radius: 8px;
             padding: 14px 18px;
             display: flex;

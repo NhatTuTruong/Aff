@@ -165,11 +165,11 @@
         }
 
         :root {
-            --primary: #f9495e;
-            --primary-dark: #d93a4e;
-            --primary-soft: #fff1f2;
-            --primary-light: #ff8a96;
-            --accent: #e8384f;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-soft: #eff6ff;
+            --primary-light: #60a5fa;
+            --accent: #1d4ed8;
             --text-dark: #0f172a;
             --text-light: #64748b;
             --bg-page: #f5f5f5;
@@ -1345,7 +1345,7 @@
         }
 
         .coupon-code-container {
-            background: #374151;
+            background: var(--primary-dark);
             border-radius: 12px;
             padding: 16px 20px;
             display: flex;
@@ -1763,7 +1763,7 @@
             cursor: pointer;
             border: none;
             transition: all 0.2s ease;
-            box-shadow: 0 10px 24px rgba(124, 58, 237, 0.35);
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
         }
 
         .btn-get-coupon:hover {
@@ -3009,7 +3009,7 @@
                 copyCodeToClipboard(code);
                 const t = this.textContent;
                 this.textContent = 'Copied ✓';
-                this.style.background = '#f9495e';
+                this.style.background = '#2563eb';
                 this.style.color = '#fff';
                 setTimeout(() => {
                     this.textContent = t;
@@ -3380,7 +3380,7 @@
             // Highlight selected button
             if (worked) {
                 btn.style.background = '#dcfce7';
-                btn.style.borderColor = '#f9495e';
+                btn.style.borderColor = '#2563eb';
                 btn.innerHTML = '<span class="feedback-icon">✓</span><span>Thank you!</span>';
             } else {
                 btn.style.background = '#fef2f2';

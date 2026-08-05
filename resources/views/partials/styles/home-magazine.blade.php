@@ -1,21 +1,22 @@
 <style>
 /* Homepage magazine — light content theme */
 body:has(.home-magazine) {
-    background: #ffffff !important;
+    background: #f0f5ff !important;
     color: #111827;
 }
 
 .home-magazine {
-    --hm-bg: #fafafa;
+    --hm-bg: #f0f5ff;
     --hm-surface: #ffffff;
-    --hm-surface-2: #f3f4f6;
-    --hm-line: rgba(15, 23, 42, 0.08);
+    --hm-surface-2: #eff6ff;
+    --hm-line: rgba(37, 99, 235, 0.1);
     --hm-text: #111827;
-    --hm-muted: #6b7280;
-    --hm-accent: #e91e8c;
-    --hm-radius: 6px;
+    --hm-muted: #64748b;
+    --hm-accent: #2563eb;
+    --hm-accent-dark: #1d4ed8;
+    --hm-radius: 10px;
     --hm-shell: min(1320px, calc(100% - 2rem));
-    --hm-card-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --hm-card-shadow: 0 2px 8px rgba(37, 99, 235, 0.06);
     font-family: 'DM Sans', system-ui, sans-serif;
     background: var(--hm-bg);
     color: var(--hm-text);
@@ -29,7 +30,8 @@ body:has(.home-magazine) {
 
 /* Hero */
 .home-magazine .hm-hero {
-    padding: 1.5rem 0 1rem;
+    padding: 1.75rem 0 1.25rem;
+    background: linear-gradient(180deg, #eff6ff 0%, var(--hm-bg) 100%);
     border-bottom: 1px solid var(--hm-line);
 }
 
@@ -47,6 +49,8 @@ body:has(.home-magazine) {
     overflow: hidden;
     min-height: 380px;
     background: var(--hm-surface);
+    border: 1px solid var(--hm-line);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
 }
 
 .home-magazine .hm-hero-carousel-track {
@@ -105,7 +109,7 @@ body:has(.home-magazine) {
 }
 
 .home-magazine .hm-hero-arrow:hover {
-    background: rgba(233, 30, 140, 0.85);
+    background: rgba(37, 99, 235, 0.85);
 }
 
 .home-magazine .hm-hero-arrow--prev { left: 0.85rem; }
@@ -166,7 +170,7 @@ body:has(.home-magazine) {
 .home-magazine .hm-hero-main-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.1) 100%);
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.92) 0%, rgba(30, 64, 175, 0.35) 55%, rgba(37, 99, 235, 0.12) 100%);
 }
 
 .home-magazine .hm-hero-main-body {
@@ -217,7 +221,7 @@ body:has(.home-magazine) {
 
 .home-magazine .hm-hero-mini:hover {
     background: var(--hm-surface-2);
-    border-color: rgba(233, 30, 140, 0.25);
+    border-color: rgba(37, 99, 235, 0.25);
 }
 
 .home-magazine .hm-hero-mini-media {
@@ -254,8 +258,9 @@ body:has(.home-magazine) {
 /* Trending ticker */
 .home-magazine .hm-trending {
     border-bottom: 1px solid var(--hm-line);
-    background: var(--hm-surface-2);
+    background: var(--hm-surface);
     overflow: hidden;
+    border-left: 3px solid var(--hm-accent);
 }
 
 .home-magazine .hm-trending-inner {
@@ -271,14 +276,14 @@ body:has(.home-magazine) {
     align-items: center;
     gap: 0.35rem;
     flex-shrink: 0;
-    background: #dc2626;
+    background: var(--hm-accent);
     color: #fff;
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     padding: 0.3rem 0.65rem;
-    border-radius: 3px;
+    border-radius: 999px;
 }
 
 .home-magazine .hm-trending-badge .hm-widget-icon {
@@ -332,13 +337,16 @@ body:has(.home-magazine) {
 
 /* Category sections */
 .home-magazine .hm-cat-section {
-    margin-bottom: 2.5rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid var(--hm-line);
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--hm-surface);
+    border: 1px solid var(--hm-line);
+    border-radius: calc(var(--hm-radius) + 2px);
+    box-shadow: var(--hm-card-shadow);
 }
 
 .home-magazine .hm-cat-section:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .home-magazine .hm-cat-head {
@@ -361,14 +369,15 @@ body:has(.home-magazine) {
 
 .home-magazine .hm-cat-more {
     font-size: 0.82rem;
-    color: var(--hm-muted);
+    font-weight: 600;
+    color: var(--hm-accent);
     text-decoration: none;
     white-space: nowrap;
     transition: color 0.2s;
 }
 
 .home-magazine .hm-cat-more:hover {
-    color: var(--hm-accent);
+    color: var(--hm-accent-dark, #1d4ed8);
 }
 
 /* Category mobile carousel (hidden on desktop) */
@@ -487,7 +496,7 @@ body:has(.home-magazine) {
 }
 
 .home-magazine .hm-card:hover {
-    border-color: rgba(233, 30, 140, 0.35);
+    border-color: rgba(37, 99, 235, 0.35);
     transform: translateY(-2px);
     box-shadow: var(--hm-card-shadow);
 }
@@ -1000,7 +1009,7 @@ body:has(.home-magazine) {
 
 .home-magazine .hm-numbered-item:hover {
     background: var(--hm-surface-2);
-    border-color: rgba(233, 30, 140, 0.22);
+    border-color: rgba(37, 99, 235, 0.22);
 }
 
 .home-magazine .hm-numbered-index {
@@ -1087,7 +1096,7 @@ body:has(.home-magazine) {
 }
 
 .home-magazine .hm-popular-card:hover {
-    border-color: rgba(233, 30, 140, 0.28);
+    border-color: rgba(37, 99, 235, 0.28);
     transform: translateY(-2px);
     box-shadow: var(--hm-card-shadow);
 }

@@ -17,7 +17,7 @@
 @php
     use Illuminate\Support\Str;
 
-    $categoryColors = ['#e91e8c', '#00b4a6', '#ff5c35', '#7c3aed', '#f59e0b', '#3b82f6'];
+    $categoryColors = ['#2563eb', '#00b4a6', '#ff5c35', '#7c3aed', '#f59e0b', '#0ea5e9'];
     $colorFor = function (string $label, int $index = 0) use ($categoryColors): string {
         $hash = crc32($label);
         return $categoryColors[($hash + $index) % count($categoryColors)];

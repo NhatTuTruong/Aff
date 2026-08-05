@@ -6,7 +6,7 @@
     --ba-line: rgba(15, 23, 42, 0.08);
     --ba-text: #111827;
     --ba-muted: #6b7280;
-    --ba-accent: #e91e8c;
+    --ba-accent: #2563eb;
     --ba-shell: min(1320px, calc(100% - 2rem));
     background: var(--ba-bg);
     color: var(--ba-text);
@@ -141,7 +141,7 @@
 }
 
 .blog-archive .ba-spotlight:hover {
-    border-color: rgba(233, 30, 140, 0.28);
+    border-color: rgba(37, 99, 235, 0.28);
     box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 }
 

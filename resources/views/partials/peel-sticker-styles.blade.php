@@ -1,8 +1,8 @@
 <style>
 .btn-get-code.btn-peel-sticker {
-    --peel-primary: #7c3aed;
-    --peel-primary-light: #ddd6fe;
-    --peel-primary-dark: #6d28d9;
+    --peel-primary: var(--primary, #2563eb);
+    --peel-primary-light: var(--primary-light, #bfdbfe);
+    --peel-primary-dark: var(--primary-dark, #1d4ed8);
     position: relative;
     display: inline-flex;
     padding: 0;
@@ -18,7 +18,7 @@
     display: block;
     min-width: 148px;
     height: 40px;
-    border: 2px dashed var(--primary-dark);
+    border: 2px dashed var(--peel-primary-dark);
     border-radius: 6px;
     background: #fff;
     transition: box-shadow 0.2s ease;
@@ -31,7 +31,7 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-weight: 700;
     font-size: 0.95rem;
-    color: var(--primary-dark);
+    color: var(--peel-primary-dark);
     letter-spacing: 0.08em;
     z-index: 0;
     pointer-events: none;
@@ -44,7 +44,7 @@
     bottom: -3px;
     height: 42px;
     width: calc(100% - 15px);
-    background: var(--primary-dark);
+    background: var(--peel-primary-dark);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -73,15 +73,15 @@
     pointer-events: none;
     background: linear-gradient(
         225deg,
-        #ede9fe 0%,
-        #ddd6fe 42%,
+        #eff6ff 0%,
+        #bfdbfe 42%,
         var(--peel-primary-light) 43%,
-        var(--primary-dark) 44%
+        var(--peel-primary-dark) 44%
     );
     clip-path: polygon(100% 0, 0 0, 100% 100%);
 }
 .btn-peel-sticker:hover .peel-inner {
-    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.32);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.32);
 }
 .btn-peel-sticker:active .peel-inner {
     transform: scale(0.98);

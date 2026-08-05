@@ -133,10 +133,13 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --t2-primary: #7c3aed;
-            --t2-primary-dark: #6d28d9;
-            --t2-primary-soft: #eef1f5;
-            --t2-banner: #1e293b;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #60a5fa;
+            --t2-primary: #2563eb;
+            --t2-primary-dark: #1d4ed8;
+            --t2-primary-soft: #eff6ff;
+            --t2-banner: #1e3a8a;
             --t2-banner-dark: #0f172a;
             --t2-text: #1e293b;
             --t2-text-muted: #64748b;
@@ -315,7 +318,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #7c3aed;
+            background: var(--t2-primary);
             color: #fff;
             padding: 3px 8px;
             border-radius: 4px;
@@ -347,7 +350,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #7c3aed;
+            background: var(--t2-primary);
             color: #fff;
             padding: 3px 8px;
             border-radius: 4px;

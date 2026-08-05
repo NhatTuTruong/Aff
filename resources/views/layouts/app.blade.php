@@ -110,10 +110,11 @@
             --surface-hover: #f3f4f6;
             --text: #111827;
             --text-muted: #6b7280;
-            --primary: #e91e8c;
-            --primary-dark: #c2185b;
-            --accent: #e91e8c;
-            --accent-hover: #c2185b;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --accent-rose: #60a5fa;
             --border: rgba(15, 23, 42, 0.08);
         }
         .font-heading { font-family: 'DM Sans', system-ui, sans-serif; }

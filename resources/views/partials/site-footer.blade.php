@@ -13,7 +13,7 @@
         $galleryPosts = MagazineLayout::footerGalleryPosts();
         $recentViewed = MagazineLayout::footerRecentViewedPosts();
 
-        $categoryColors = ['#e91e8c', '#00b4a6', '#f59e0b', '#7c3aed', '#ff5c35', '#3b82f6'];
+        $categoryColors = ['#2563eb', '#00b4a6', '#f59e0b', '#7c3aed', '#ff5c35', '#0ea5e9'];
         $colorFor = function (string $label) use ($categoryColors): string {
             return $categoryColors[crc32($label) % count($categoryColors)];
         };
