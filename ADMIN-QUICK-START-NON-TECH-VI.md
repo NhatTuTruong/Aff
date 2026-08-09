@@ -107,7 +107,7 @@ Dùng để quản lý thông tin cửa hàng/thương hiệu.
    - **Tiêu đề**
    - **Affiliate URL**
    - **Trạng thái** (`draft`, `active`, `paused`)
-   - **Template** (`template1`, `template2`, `template3`)
+   - **Template** (`template1`, `template2`, `template3`, `template4`)
 4. Bấm **Lưu**.
 
 ### Thêm mã giảm giá trong chiến dịch

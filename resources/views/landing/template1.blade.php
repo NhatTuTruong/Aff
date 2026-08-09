@@ -824,7 +824,7 @@
         .section-title {
             font-size: 1.2rem;
             font-weight: 800;
-            margin-bottom: 14px;
+            margin-bottom: 20px;
             letter-spacing: -0.02em;
             color: var(--text-dark);
         }
