@@ -55,20 +55,18 @@ class LandingPageController extends Controller
         }
 
         // Xác định template dựa trên type và template field
-        $template = $campaign->template ?? 'template1';
+        $template = $campaign->template ?? 'template4';
         
         // Nếu type = key nhưng template chưa được set, dùng template_key
         if ($campaign->type === 'key' && !str_starts_with($template, 'template_key')) {
             $template = 'template_key';
         }
         
-        // Cho phép template1 hoặc template2 với type coupon
-        
         // Check if template exists, fallback to default
         if (!view()->exists("landing.{$template}")) {
-            $template = ($campaign->type ?? 'coupon') === 'key' ? 'template_key' : 'template1';
+            $template = ($campaign->type ?? 'coupon') === 'key' ? 'template_key' : 'template4';
             if (!view()->exists("landing.{$template}")) {
-                $template = 'template1';
+                $template = 'template4';
             }
         }
         

@@ -4,16 +4,85 @@ namespace App\Services;
 
 use App\Models\Brand;
 use App\Models\Campaign;
-use Illuminate\Support\Facades\DB;
+use App\Models\Category;
+use App\Support\AdminSettings;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
- * Chọn store (brand) + chiến dịch để viết blog giới thiệu (theo engagement hoặc theo gợi ý admin).
+ * Chọn store (brand) + chiến dịch để viết blog giới thiệu.
  */
 class BrandIntroBlogCandidateService
 {
+    public const INTRO_QUEUE_INDEX_KEY = 'auto_blog.intro_campaign_queue_index';
+
     /**
-     * Tìm brand + một campaign có affiliate_url theo tên brand hoặc domain (dùng nút AI trong admin).
+     * Danh sách chiến dịch theo thứ tự cũ → mới (xoay vòng khi hết list).
+     *
+     * @return Collection<int, Campaign>
+     */
+    public function orderedCampaignsForIntro(): Collection
+    {
+        return Campaign::query()
+            ->with(['brand.category', 'couponItems'])
+            ->whereNull('deleted_at')
+            ->whereHas('brand', fn ($query) => $query->whereNull('deleted_at'))
+            ->when(app()->environment('production'), fn ($query) => $query->where('status', 'active'))
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
+     * Lấy brand + campaign tiếp theo trong hàng đợi (chưa tăng index).
+     *
+     * @return array{0: Brand, 1: Campaign}|null
+     */
+    public function peekNextForIntroQueue(): ?array
+    {
+        $campaigns = $this->orderedCampaignsForIntro();
+        if ($campaigns->isEmpty()) {
+            return null;
+        }
+
+        $index = $this->currentQueueIndex() % $campaigns->count();
+        $campaign = $campaigns->get($index);
+        if (! $campaign instanceof Campaign) {
+            return null;
+        }
+
+        $brand = $campaign->brand;
+        if (! $brand instanceof Brand) {
+            return null;
+        }
+
+        return [$brand, $campaign];
+    }
+
+    /**
+     * Tăng index hàng đợi sau khi tạo bài thành công.
+     */
+    public function advanceIntroQueue(): void
+    {
+        $count = $this->orderedCampaignsForIntro()->count();
+        if ($count === 0) {
+            return;
+        }
+
+        $index = $this->currentQueueIndex();
+        AdminSettings::set(self::INTRO_QUEUE_INDEX_KEY, ($index + 1) % $count);
+    }
+
+    /**
+     * @return array{0: Brand, 1: Campaign}|null
+     */
+    public function findBrandAndCampaignForIntro(): ?array
+    {
+        return $this->peekNextForIntroQueue();
+    }
+
+    /**
+     * Tìm brand + campaign theo gợi ý admin (tên/domain).
      *
      * @return array{0: Brand, 1: Campaign}|null
      */
@@ -29,12 +98,44 @@ class BrandIntroBlogCandidateService
             return null;
         }
 
-        $campaign = $this->pickTopImportedCampaignForBrand($brand);
+        $campaign = $this->pickCampaignForBrand($brand);
         if (! $campaign) {
             return null;
         }
 
         return [$brand, $campaign];
+    }
+
+    public function resolveBrandCategoryLabel(Brand $brand): string
+    {
+        $brand->loadMissing('category');
+
+        if (filled($brand->category?->name)) {
+            return (string) $brand->category->name;
+        }
+
+        if ($brand->category_id) {
+            $category = Category::withTrashed()->find($brand->category_id);
+            if (filled($category?->name)) {
+                return (string) $category->name;
+            }
+        }
+
+        $legacyCategory = trim((string) $brand->getAttribute('category'));
+        if ($legacyCategory !== '') {
+            $raw = (string) Str::of($legacyCategory)->afterLast('/')->replace('-', ' ')->replace('_', ' ');
+            $normalized = Str::title(trim($raw));
+            if ($normalized !== '') {
+                return $normalized;
+            }
+        }
+
+        return (string) (config('default_categories.names.0') ?? 'General');
+    }
+
+    protected function currentQueueIndex(): int
+    {
+        return max(0, (int) AdminSettings::get(self::INTRO_QUEUE_INDEX_KEY, 0));
     }
 
     protected function findBrandByHint(string $hint): ?Brand
@@ -69,9 +170,6 @@ class BrandIntroBlogCandidateService
             ->first();
     }
 
-    /**
-     * Chuẩn hóa domain từ chuỗi người dùng (có thể là URL hoặc example.com).
-     */
     protected function normalizeHostForLookup(string $input): ?string
     {
         $t = trim($input);
@@ -96,83 +194,15 @@ class BrandIntroBlogCandidateService
         return null;
     }
 
-    /**
-     * @return array{0: Brand, 1: Campaign}|null
-     */
-    public function findBrandAndCampaignForIntro(): ?array
+    protected function pickCampaignForBrand(Brand $brand): ?Campaign
     {
-        $pvSub = DB::table('page_views')
-            ->select('campaign_id', DB::raw('COUNT(*) as cnt'))
-            ->groupBy('campaign_id');
-
-        $ckSub = DB::table('clicks')
-            ->whereNull('deleted_at')
-            ->select('campaign_id', DB::raw('COUNT(*) as cnt'))
-            ->groupBy('campaign_id');
-
-        $brandRows = DB::table('campaigns')
-            ->leftJoinSub($pvSub, 'pv', 'pv.campaign_id', '=', 'campaigns.id')
-            ->leftJoinSub($ckSub, 'ck', 'ck.campaign_id', '=', 'campaigns.id')
-            ->join('brands', 'brands.id', '=', 'campaigns.brand_id')
-            ->whereNull('campaigns.deleted_at')
-            ->whereNotNull('campaigns.affiliate_url')
-            ->where('campaigns.affiliate_url', '!=', '')
-            ->whereNull('brands.deleted_at')
-            ->when(app()->environment('production'), fn ($q) => $q->where('campaigns.status', 'active'))
-            ->select('campaigns.brand_id', DB::raw('SUM(COALESCE(pv.cnt, 0) + COALESCE(ck.cnt, 0)) AS total_eng'))
-            ->groupBy('campaigns.brand_id')
-            ->orderByDesc('total_eng')
-            ->orderBy('campaigns.brand_id')
-            ->get();
-
-        if ($brandRows->isEmpty()) {
-            return null;
-        }
-
-        // Mỗi ngày trong năm chọn 1 brand khác nhau (xoay vòng theo day-of-year)
-        $index = now()->dayOfYear() % $brandRows->count();
-        $row = $brandRows[$index];
-
-        $brandId = (int) $row->brand_id;
-        $brand = Brand::query()->with('category')->whereKey($brandId)->first();
-        if (! $brand) {
-            return null;
-        }
-
-        $campaign = $this->pickTopImportedCampaignForBrand($brand);
-        if (! $campaign) {
-            return null;
-        }
-
-        return [$brand, $campaign];
-    }
-
-    /**
-     * Chiến dịch đã import + affiliate_url, engagement (views + clicks) cao nhất trong brand.
-     */
-    public function pickTopImportedCampaignForBrand(Brand $brand): ?Campaign
-    {
-        $pvSub = DB::table('page_views')
-            ->select('campaign_id', DB::raw('COUNT(*) as cnt'))
-            ->groupBy('campaign_id');
-
-        $ckSub = DB::table('clicks')
-            ->whereNull('deleted_at')
-            ->select('campaign_id', DB::raw('COUNT(*) as cnt'))
-            ->groupBy('campaign_id');
-
         return Campaign::query()
-            ->leftJoinSub($pvSub, 'pv', 'pv.campaign_id', '=', 'campaigns.id')
-            ->leftJoinSub($ckSub, 'ck', 'ck.campaign_id', '=', 'campaigns.id')
-            ->where('campaigns.brand_id', $brand->id)
-            ->whereNull('campaigns.deleted_at')
-            ->whereNotNull('campaigns.affiliate_url')
-            ->where('campaigns.affiliate_url', '!=', '')
-            ->when(app()->environment('production'), fn ($q) => $q->where('campaigns.status', 'active'))
-            ->select('campaigns.*')
-            ->selectRaw('(COALESCE(pv.cnt, 0) + COALESCE(ck.cnt, 0)) AS engagement')
-            ->orderByDesc('engagement')
-            ->orderBy('campaigns.id')
+            ->with(['brand.category', 'couponItems'])
+            ->where('brand_id', $brand->id)
+            ->whereNull('deleted_at')
+            ->when(app()->environment('production'), fn ($query) => $query->where('status', 'active'))
+            ->orderBy('created_at')
+            ->orderBy('id')
             ->first();
     }
 }

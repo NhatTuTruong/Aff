@@ -8,7 +8,6 @@ use App\Models\User;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 
 class NotificationAlertService
 {
@@ -20,7 +19,6 @@ class NotificationAlertService
     {
         $this->notifyCampaignsDailyHumanClicksThreshold();
         $this->checkUnusualClicks();
-        $this->checkLandingPageAvailability();
     }
 
     /**
@@ -107,55 +105,5 @@ class NotificationAlertService
 
             Cache::put($cacheKey, true, now()->addMinutes(15));
         }
-    }
-
-    protected function checkLandingPageAvailability(): void
-    {
-        $baseUrl = rtrim(config('app.url'), '/');
-        $testUrl = $baseUrl . '/';
-        $cacheKey = 'notification_landing_down_' . now()->format('Y-m-d-H');
-
-        try {
-            $response = Http::timeout(5)->get($testUrl);
-            if ($response->successful()) {
-                return;
-            }
-        } catch (\Throwable $e) {
-            // Site down or unreachable
-        }
-
-        if (Cache::has($cacheKey)) {
-            return;
-        }
-
-        $admins = User::where('is_admin', true)->get();
-        if ($admins->isEmpty()) {
-            $admins = User::limit(1)->get();
-        }
-
-        foreach ($admins as $user) {
-            Notification::make()
-                ->title('Sự cố: Trang web có thể đang ngưng hoạt động')
-                ->body("Không thể truy cập {$baseUrl}. Vui lòng kiểm tra.")
-                ->danger()
-                ->icon('heroicon-o-exclamation-triangle')
-                ->sendToDatabase($user);
-
-            if ($user->email) {
-                try {
-                    \Illuminate\Support\Facades\Mail::to($user->email)->send(
-                        new \App\Mail\SystemAlertMail(
-                            'Sự cố hệ thống: Website có thể đang ngưng hoạt động',
-                            "Hệ thống không thể truy cập {$baseUrl} trong lần kiểm tra gần nhất.\n\n" .
-                            "Bạn nên kiểm tra lại server, domain hoặc cấu hình hosting để đảm bảo landing/coupon vẫn hoạt động bình thường."
-                        )
-                    );
-                } catch (\Throwable $e) {
-                    report($e);
-                }
-            }
-        }
-
-        Cache::put($cacheKey, true, now()->addHour());
     }
 }

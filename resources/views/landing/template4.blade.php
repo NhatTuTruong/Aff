@@ -204,6 +204,10 @@
             align-items: center;
             justify-content: center;
             background: #fff;
+            cursor: pointer;
+        }
+        .t4-store-logo:hover {
+            opacity: 0.92;
         }
         .t4-store-logo img {
             max-width: 100%;
@@ -222,7 +226,7 @@
             display: block;
             margin-top: 4px;
             font-size: 12px;
-            color: var(--t4-orange);
+            color: var(--t4-orange) !important  ;
             text-decoration: underline;
         }
         .t4-rate-it:hover { color: #d48806; }
@@ -302,9 +306,9 @@
         }
         .t4-brand-green { color: var(--t4-primary); font-weight: 700; }
         .t4-brand-link {
-            color: var(--t4-primary);
+            text-decoration: underline !important;
+            color: var(--t4-primary-dark) !important;
             font-weight: 700;
-            text-decoration: none;
         }
         .t4-brand-link:hover {
             text-decoration: underline;
@@ -923,7 +927,9 @@
 <div class="t4-container">
 @php
     use App\Models\Campaign;
+    use App\Services\CouponDescriptionGenerator;
 
+    $couponDescGenerator = app(CouponDescriptionGenerator::class);
     $campaignSeed = (int) ($campaign->id ?? 0);
     $totalCoupons = $coupons->count();
     $codeCount = $coupons->filter(fn ($c) => !empty($c->code))->count();
@@ -994,7 +1000,7 @@
 <div class="t4-layout">
     <aside class="t4-sidebar">
         <div class="t4-store-card">
-            <div class="t4-store-logo">
+            <div class="t4-store-logo" role="button" tabindex="0" aria-label="Get coupon alert for {{ $brandName }}">
                 @if($campaign->brand)
                     <img src="{{ $campaign->brand->image_url }}" alt="{{ $campaign->brand->name }}" loading="lazy">
                 @elseif($campaign->logo)
@@ -1104,14 +1110,18 @@
                     ? $formatHeadline($coupon, $offerType, $offerValue, $currencySymbol, $isFreeShipping)
                     : ($descriptionText !== '' ? $descriptionText : $formatHeadline($coupon, $offerType, $offerValue, $currencySymbol, $isFreeShipping));
 
+                $descSeed = (int) (($campaign->id ?? 0) * 1000 + ($coupon->id ?? 0) + ($coupon->sort_order ?? 0));
+
                 if ($hasCode) {
                     $couponBody = $descriptionText !== ''
                         ? $descriptionText
-                        : 'Such quality and price are hard to come by! Great chance to save money with this ' . $brandName . ' coupon.';
+                        : $couponDescGenerator->generate($offerText, true, $brandName, $descSeed);
                 } else {
                     $couponBody = $offerText !== ''
                         ? $offerText
-                        : 'Excellent savings at ' . $brandName . '. A great place to be if you want a bargain.';
+                        : ($descriptionText !== ''
+                            ? $descriptionText
+                            : $couponDescGenerator->generate($offerText, false, $brandName, $descSeed));
                 }
 
                 $codeDisplay = '';
@@ -1914,6 +1924,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.addEventListener('click', function (e) {
+        const logoTrigger = e.target.closest('.t4-store-logo');
+        if (logoTrigger) {
+            const alertBtn = document.getElementById('t4-coupon-alert-btn');
+            if (alertBtn) {
+                handleCouponAlertClick(alertBtn, e);
+            }
+            return;
+        }
+
         const alertBtn = e.target.closest('.t4-alert-btn');
         if (alertBtn) {
             handleCouponAlertClick(alertBtn, e);

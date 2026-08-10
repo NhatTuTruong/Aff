@@ -140,7 +140,7 @@ class BlogResource extends Resource
                 Tables\Columns\ImageColumn::make('featured_image')
                     ->label('Ảnh')
                     ->getStateUsing(fn (Blog $record): string => $record->featured_image_url)
-                    ->defaultImageUrl(fn () => asset('category/default.png'))
+                    ->defaultImageUrl(fn () => asset('category/default.webp'))
                     ->size(40)
                     ->extraImgAttributes(['class' => 'rounded-[10px]'])
                     ->circular(false),

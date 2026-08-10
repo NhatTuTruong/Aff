@@ -96,7 +96,7 @@ class CampaignImporter extends Importer
                     $type = $data['type'] ?? 'coupon';
             
                     $record->template = $state
-                        ?: ($type === 'key' ? 'template_key' : 'template1');
+                        ?: ($type === 'key' ? 'template_key' : 'template4');
                 }),
             ImportColumn::make('affiliate_url')
                 ->label('URL Affiliate')
@@ -173,7 +173,7 @@ class CampaignImporter extends Importer
         
         // Set template dựa trên type nếu chưa có hoặc không hợp lệ
         if (empty($this->record->template) || !in_array($this->record->template, ['template1', 'template2', 'template3', 'template4', 'template_key'])) {
-            $this->record->template = $this->record->type === 'key' ? 'template_key' : 'template1';
+            $this->record->template = $this->record->type === 'key' ? 'template_key' : 'template4';
         }
         
         $this->record->slug = Campaign::normalizeCampaignSlug(
@@ -201,6 +201,8 @@ class CampaignImporter extends Importer
 
     protected function createCoupons(): void
     {
+        $this->record->loadMissing('brand');
+
         $codes = $this->parseListByNewline($this->data['coupon_codes'] ?? '');
         $offers = $this->parseListByNewline($this->data['coupon_offers'] ?? '');
         $descriptions = $this->parseListByNewline($this->data['coupon_descriptions'] ?? '');
@@ -218,7 +220,7 @@ class CampaignImporter extends Importer
             $offer = $offers[$i] ?? '';
             $description = $descriptions[$i] ?? '';
             if (strtolower(trim($description)) === 'no') {
-                $description = $this->generateCouponDescription($offer, $code !== '');
+                $description = '';
             }
 
             Coupon::create([
@@ -229,45 +231,6 @@ class CampaignImporter extends Importer
                 'sort_order' => $i + 1,
             ]);
         }
-    }
-
-    protected function generateCouponDescription(string $offer, bool $hasCode): string
-    {
-        $offerTrim = trim($offer);
-        $offerLower = strtolower($offerTrim);
-
-        $freeShippingTemplates = [
-            'Free Shipping on All Orders',
-            'Enjoy Free Shipping Storewide',
-            'Get Free Delivery on Selected Items',
-        ];
-
-        $codeTemplates = [
-            'Get [offer] OFF on Selected Items',
-            'Enjoy [offer] OFF Storewide Today',
-            'Take Extra 20% OFF Clearance Deals',
-            'Get [offer] OFF Your First Purchase',
-            'Apply Code to Get 10% OFF at Checkout',
-            'Extra [offer] OFF When You Pay Online',
-            'Limited Time: [offer] OFF Sitewide',
-            'Instantly Save [offer] on Your Order',
-        ];
-
-        $dealTemplates = [
-            'Up to [offer] OFF Storewide Offers',
-            'Limited Time Deals – Save Big Today',
-            'Flash Deals – Prices Dropped on Selected Items',
-            'Check Out Today’s Best Deals & Offers',
-            'Enjoy Additional Discounts on Sale Items',
-        ];
-
-        $isFreeShipping = $offerLower === 'free shipping' || str_contains($offerLower, 'free shipping');
-        $templates = $isFreeShipping
-            ? $freeShippingTemplates
-            : ($hasCode ? $codeTemplates : $dealTemplates);
-
-        $template = Arr::random($templates);
-        return str_replace('[offer]', $offerTrim, $template);
     }
 
     /** Phân cách bằng xuống hàng (\\n) thay vì , hoặc ; */

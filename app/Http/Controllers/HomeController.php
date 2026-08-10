@@ -69,7 +69,7 @@ class HomeController extends Controller
         $latestPosts = Blog::query()
             ->where('is_published', true)
             ->orderByDesc('created_at')
-            ->limit(6)
+            ->limit(8)
             ->get();
 
         return view('home', [

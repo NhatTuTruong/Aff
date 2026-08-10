@@ -45,7 +45,7 @@ class Blog extends Model
             return $this->ensureAbsoluteMediaUrl(Storage::disk('public')->url($this->featured_image));
         }
         $slug = $this->category ? Str::slug($this->category) : 'default';
-        $extensions = ['svg', 'png', 'jpg', 'jpeg', 'webp', 'gif'];
+        $extensions = ['webp', 'svg', 'png', 'jpg', 'jpeg', 'gif'];
         if ($slug !== 'default') {
             foreach ($extensions as $ext) {
                 $path = "images/categories/{$slug}.{$ext}";
@@ -55,8 +55,13 @@ class Blog extends Model
             }
         }
 
-        $categoryDefault = public_path('category/default.png');
+        $categoryDefault = public_path('category/default.webp');
         if (file_exists($categoryDefault)) {
+            return $this->ensureAbsoluteMediaUrl(asset('category/default.webp'));
+        }
+
+        $legacyCategoryDefault = public_path('category/default.png');
+        if (file_exists($legacyCategoryDefault)) {
             return $this->ensureAbsoluteMediaUrl(asset('category/default.png'));
         }
 

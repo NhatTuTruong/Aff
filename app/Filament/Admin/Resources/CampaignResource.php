@@ -179,7 +179,7 @@ class CampaignResource extends Resource
                             })
                             ->required()
                             ->default(function (Forms\Get $get) {
-                                return $get('type') === 'key' ? 'template_key' : 'template1';
+                                return $get('type') === 'key' ? 'template_key' : 'template4';
                             })
                             ->helperText('Chọn template landing page'),
                     ])->columns(3),

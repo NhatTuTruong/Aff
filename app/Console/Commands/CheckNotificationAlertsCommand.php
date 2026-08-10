@@ -9,7 +9,7 @@ class CheckNotificationAlertsCommand extends Command
 {
     protected $signature = 'notifications:check-alerts';
 
-    protected $description = 'Thông báo: ngưỡng click/ngày/chiến dịch, click bất thường, sự cố hệ thống (landing)';
+    protected $description = 'Thông báo: ngưỡng click/ngày/chiến dịch, click bất thường';
 
     public function handle(NotificationAlertService $service): int
     {
@@ -17,7 +17,7 @@ class CheckNotificationAlertsCommand extends Command
 
         try {
             $service->checkAndSendAlerts();
-            $this->info('✓ Đã kiểm tra: Click từ người trong ngày/chiến dịch, Click bất thường, Landing page');
+            $this->info('✓ Đã kiểm tra: Click từ người trong ngày/chiến dịch, Click bất thường');
         } catch (\Throwable $e) {
             $this->error('Lỗi: ' . $e->getMessage());
             $this->error($e->getTraceAsString());

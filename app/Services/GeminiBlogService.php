@@ -306,7 +306,7 @@ PROMPT;
 
         return [
             'title' => $title,
-            'content' => $text,
+            'content' => app(BlogAiContentEnricher::class)->sanitizeAiHtml($text),
             'featured_image' => null,
         ];
     }
