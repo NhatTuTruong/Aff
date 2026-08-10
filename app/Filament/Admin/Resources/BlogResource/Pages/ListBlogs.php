@@ -8,6 +8,7 @@ use App\Models\Brand;
 use App\Models\Campaign;
 use App\Models\Category;
 use App\Models\User;
+use App\Services\BlogApifyImageService;
 use App\Services\GeminiBlogService;
 use App\Support\AdminSettings;
 use App\Support\AutoBlogSettings;
@@ -115,6 +116,8 @@ class ListBlogs extends ListRecords
                         || $extras['affiliate_url'] !== ''
                         || $extras['coupon_code'] !== '';
 
+                    $extras = AutoBlogSettings::mergeExtras($extras);
+
                     $modes = AutoBlogSettings::enabledManualAiModes();
                     if ($modes === []) {
                         Notification::make()
@@ -129,6 +132,7 @@ class ListBlogs extends ListRecords
                     $campaignId = null;
                     $introType = null;
                     $categoryLabel = null;
+                    $apifySearchQuery = null;
 
                     $categoryNames = config('default_categories.names', User::defaultCategoryNames());
                     $aiCategory = $pickedCategoryName
@@ -141,6 +145,7 @@ class ListBlogs extends ListRecords
                             $result = $gemini->generateBlog($aiCategory, $variant, $extras, $brandHint);
                             $categoryLabel = $pickedCategoryName ?? 'General';
                             $introType = $variant;
+                            $apifySearchQuery = $brandHint;
                         } else {
                             if (empty($categoryNames) || ! is_array($categoryNames)) {
                                 Notification::make()
@@ -208,6 +213,7 @@ class ListBlogs extends ListRecords
                                 $result = $gemini->generateBrandIntroBlog($brand, $campaign, $categoryLabel, $extras);
                                 $campaignId = $campaign->id;
                                 $introType = 'store';
+                                $apifySearchQuery = trim($brand->name ?: (string) ($brand->domain ?? $campaign->title));
                             }
                         }
 
@@ -231,6 +237,14 @@ class ListBlogs extends ListRecords
                         return;
                     }
 
+                    if ($apifySearchQuery !== null && $apifySearchQuery !== '') {
+                        $result = app(BlogApifyImageService::class)->enrich(
+                            $result,
+                            $apifySearchQuery,
+                            $categoryLabel
+                        );
+                    }
+
                     $author = User::where('is_admin', true)->first() ?? User::first();
 
                     $blog = Blog::create([
@@ -241,6 +255,7 @@ class ListBlogs extends ListRecords
                         'category' => $categoryLabel ?? 'General',
                         'content' => $result['content'],
                         'featured_image' => $result['featured_image'] ?? null,
+                        'images' => ! empty($result['images']) ? $result['images'] : null,
                         'is_published' => true,
                         'views_count' => 0,
                     ]);

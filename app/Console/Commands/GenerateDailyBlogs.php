@@ -7,7 +7,7 @@ use App\Models\Brand;
 use App\Models\Campaign;
 use App\Models\Category;
 use App\Models\User;
-use App\Services\BrandIntroBlogCandidateService;
+use App\Services\BlogApifyImageService;
 use App\Services\GeminiBlogService;
 use App\Support\AdminSettings;
 use App\Support\AutoBlogSettings;
@@ -58,6 +58,7 @@ class GenerateDailyBlogs extends Command
         }
 
         $author = User::where('is_admin', true)->first() ?? User::first();
+        $extras = AutoBlogSettings::mergeExtras([]);
 
         for ($i = 0; $i < $count; $i++) {
             $category = $this->pickWeightedCategory($weights);
@@ -65,7 +66,7 @@ class GenerateDailyBlogs extends Command
 
             $this->info("Generating blog ({$variant}) for category: {$category}");
 
-            $result = $gemini->generateBlog($category, $variant);
+            $result = $gemini->generateBlog($category, $variant, $extras);
 
             if (! $result) {
                 $err = $gemini->lastError ?? 'Không rõ lỗi';
@@ -126,12 +127,18 @@ class GenerateDailyBlogs extends Command
 
         $this->info("Generating brand intro blog for store: {$brand->name} (campaign #{$campaign->id})");
 
-        $result = $gemini->generateBrandIntroBlog($brand, $campaign, $categoryLabel);
+        $extras = AutoBlogSettings::mergeExtras([]);
+        $result = $gemini->generateBrandIntroBlog($brand, $campaign, $categoryLabel, $extras);
         if (! $result) {
             $err = $gemini->lastError ?? 'Không rõ lỗi';
             $this->warn("Gemini lỗi (blog giới thiệu brand), sẽ thử lại lần chạy sau: {$err}");
 
             return;
+        }
+
+        $searchQuery = trim($brand->name ?: (string) ($brand->domain ?? $campaign->title));
+        if ($searchQuery !== '') {
+            $result = app(BlogApifyImageService::class)->enrich($result, $searchQuery, $categoryLabel);
         }
 
         $blog = new Blog();
@@ -144,6 +151,9 @@ class GenerateDailyBlogs extends Command
         $blog->category = $categoryLabel;
         $blog->content = $result['content'];
         $blog->featured_image = $result['featured_image'] ?? null;
+        if (! empty($result['images'])) {
+            $blog->images = $result['images'];
+        }
         $blog->is_published = true;
         $blog->views_count = 0;
         $blog->save();

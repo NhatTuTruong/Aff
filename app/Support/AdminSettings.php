@@ -110,6 +110,14 @@ class AdminSettings
         return $fallback !== '' ? [$fallback] : [];
     }
 
+    /**
+     * @return list<string>
+     */
+    public static function apifyTokens(): array
+    {
+        return static::getEncryptedLines('apify_token');
+    }
+
     public static function siteLogoPath(): ?string
     {
         $path = trim((string) static::get('site_logo_path', ''));

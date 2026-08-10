@@ -38,6 +38,30 @@ class AutoBlogSettings
         return $hours > 0 ? $hours : 1;
     }
 
+    public static function globalIdea(): string
+    {
+        return trim((string) AdminSettings::get('auto_blog_global_idea', ''));
+    }
+
+    /**
+     * Gộp ý tưởng chung (cài đặt) vào extras khi popup/modal chưa nhập idea.
+     *
+     * @param  array{idea?: string, affiliate_url?: string, coupon_code?: string}  $extras
+     * @return array{idea?: string, affiliate_url?: string, coupon_code?: string}
+     */
+    public static function mergeExtras(array $extras = []): array
+    {
+        $idea = trim((string) ($extras['idea'] ?? ''));
+        if ($idea === '') {
+            $global = static::globalIdea();
+            if ($global !== '') {
+                $extras['idea'] = $global;
+            }
+        }
+
+        return $extras;
+    }
+
     /**
      * Các chế độ nút "Tạo bài bằng AI" / phân bổ nội dung: intro + các variant category đang bật.
      *

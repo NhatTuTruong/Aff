@@ -49,10 +49,14 @@ class SystemSettings extends Page implements HasForms
     public function mount(): void
     {
         $geminiKeys = AdminSettings::getEncryptedLines('gemini_api_key');
+        $apifyTokens = AdminSettings::getEncryptedLines('apify_token');
 
         $this->form->fill([
-            'apify_token' => AdminSettings::getEncrypted('apify_token') ? '********' : '',
+            'apify_token' => $apifyTokens !== []
+                ? implode("\n", $apifyTokens)
+                : '',
             'apify_actor_id' => (string) AdminSettings::get('apify_actor_id', 'aqPbs3KeH9aD8b22w'),
+            'apify_blog_image_actor_id' => (string) AdminSettings::get('apify_blog_image_actor_id', 'IOrPh0bOfzJiGxsvk'),
             'traffic_threshold_default' => (int) AdminSettings::get('traffic_threshold_default', 100000),
             'gemini_api_key' => $geminiKeys !== []
                 ? implode("\n", $geminiKeys)
@@ -66,6 +70,7 @@ class SystemSettings extends Page implements HasForms
             'auto_blog_variant_comparison' => (bool) AdminSettings::get('auto_blog_variant_comparison', true),
             'auto_blog_brand_intro_enabled' => (bool) AdminSettings::get('auto_blog_brand_intro_enabled', true),
             'auto_blog_brand_intro_interval_hours' => (float) AdminSettings::get('auto_blog_brand_intro_interval_hours', 1),
+            'auto_blog_global_idea' => (string) AdminSettings::get('auto_blog_global_idea', ''),
             'seo_title_suffix' => (string) AdminSettings::get('seo_title_suffix', '- ' . config('app.name')),
             'seo_meta_description_default' => (string) AdminSettings::get('seo_meta_description_default', 'Best coupons, deals and store reviews.'),
             'seo_og_image_default' => (string) AdminSettings::get('seo_og_image_default', ''),
@@ -77,17 +82,22 @@ class SystemSettings extends Page implements HasForms
         return $form
             ->schema([
                 Section::make('Traffic API (Apify)')
-                    ->description('Dùng cho trang lọc traffic theo domain.')
+                    ->description('Dùng cho lọc traffic theo domain và lấy ảnh blog AI.')
                     ->schema([
-                        TextInput::make('apify_token')
+                        Textarea::make('apify_token')
                             ->label('Apify token')
-                            ->password()
-                            ->revealable()
-                            ->helperText('Nhập token mới để lưu. Nếu để "********" thì giữ token hiện tại.')
-                            ->maxLength(255),
+                            ->rows(4)
+                            ->helperText('Nhập nhiều token, mỗi token một dòng. Hệ thống dùng từ trên xuống; token lỗi sẽ tự chuyển sang token tiếp theo.')
+                            ->columnSpanFull(),
                         TextInput::make('apify_actor_id')
-                            ->label('Actor ID')
+                            ->label('Actor ID (traffic)')
                             ->required()
+                            ->maxLength(100),
+                        TextInput::make('apify_blog_image_actor_id')
+                            ->label('Actor ID (ảnh blog AI)')
+                            ->required()
+                            ->default('IOrPh0bOfzJiGxsvk')
+                            ->helperText('Apify Google Images — dùng khi tạo bài giới thiệu cửa hàng hoặc nhập brand/domain.')
                             ->maxLength(100),
                         TextInput::make('traffic_threshold_default')
                             ->label('Ngưỡng traffic mặc định')
@@ -151,6 +161,13 @@ class SystemSettings extends Page implements HasForms
                             ->minValue(0.1)
                             ->step(0.1)
                             ->required(),
+                        Textarea::make('auto_blog_global_idea')
+                            ->label('Ý tưởng chung cho tất cả bài viết')
+                            ->placeholder('VD: Viết tiếng Anh, giọng thân thiện, thêm FAQ cuối bài, khoảng 1000 từ...')
+                            ->helperText('Áp dụng cho mọi bài AI (cron + nút tạo bài). Ưu tiên cao hơn luồng mặc định. Ý tưởng trong popup (nếu có) sẽ ghi đè ý tưởng chung này. Để trống = theo luồng mặc định.')
+                            ->rows(5)
+                            ->maxLength(2000)
+                            ->columnSpanFull(),
                     ])
                     ->columns(3),
                 Section::make('SEO mặc định')
@@ -195,10 +212,15 @@ class SystemSettings extends Page implements HasForms
     {
         $data = $this->form->getState();
 
-        $apifyToken = trim((string) ($data['apify_token'] ?? ''));
-        if ($apifyToken !== '' && $apifyToken !== '********') {
-            AdminSettings::setEncrypted('apify_token', $apifyToken);
+        $apifyTokenInput = (string) ($data['apify_token'] ?? '');
+        $newApifyTokens = [];
+        foreach (preg_split('/\R/', $apifyTokenInput) ?: [] as $line) {
+            $line = trim((string) $line);
+            if ($line !== '' && $line !== '********') {
+                $newApifyTokens[] = $line;
+            }
         }
+        AdminSettings::setEncryptedLines('apify_token', $newApifyTokens);
 
         $geminiApiKeyInput = (string) ($data['gemini_api_key'] ?? '');
         $newKeys = [];
@@ -211,6 +233,7 @@ class SystemSettings extends Page implements HasForms
         AdminSettings::setEncryptedLines('gemini_api_key', $newKeys);
 
         AdminSettings::set('apify_actor_id', trim((string) ($data['apify_actor_id'] ?? 'aqPbs3KeH9aD8b22w')));
+        AdminSettings::set('apify_blog_image_actor_id', trim((string) ($data['apify_blog_image_actor_id'] ?? 'IOrPh0bOfzJiGxsvk')));
         AdminSettings::set('traffic_threshold_default', (int) ($data['traffic_threshold_default'] ?? 100000));
         AdminSettings::set('gemini_model', trim((string) ($data['gemini_model'] ?? config('gemini.model', 'gemini-1.5-flash-latest'))));
         AdminSettings::set('gemini_timeout', max(5, (int) ($data['gemini_timeout'] ?? config('gemini.timeout', 60))));
@@ -221,6 +244,7 @@ class SystemSettings extends Page implements HasForms
         AdminSettings::set('auto_blog_variant_comparison', (bool) ($data['auto_blog_variant_comparison'] ?? true));
         AdminSettings::set('auto_blog_brand_intro_enabled', (bool) ($data['auto_blog_brand_intro_enabled'] ?? true));
         AdminSettings::set('auto_blog_brand_intro_interval_hours', (float) ($data['auto_blog_brand_intro_interval_hours'] ?? 1));
+        AdminSettings::set('auto_blog_global_idea', trim((string) ($data['auto_blog_global_idea'] ?? '')));
         AdminSettings::set('seo_title_suffix', trim((string) ($data['seo_title_suffix'] ?? ('- ' . config('app.name')))));
         AdminSettings::set('seo_meta_description_default', trim((string) ($data['seo_meta_description_default'] ?? 'Best coupons, deals and store reviews.')));
         AdminSettings::set('seo_og_image_default', trim((string) ($data['seo_og_image_default'] ?? '')));

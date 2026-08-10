@@ -31,7 +31,9 @@ class GeminiBlogService
         $brandSubject = trim((string) $brandSubject);
         $isBrandFocused = $brandSubject !== '';
         $lengthInstruction = $this->resolveLengthInstruction($extras, '1,500-2,200 words');
+        $languageInstruction = $this->buildLanguageInstruction($extras, 'English');
         $editorPriorityBlock = $this->buildEditorPriorityBlock($extras, forEnglish: true);
+        $articleRequirements = $this->buildArticleRequirementsBlock($extras, $lengthInstruction, $languageInstruction, forEnglish: true);
 
         if ($isBrandFocused) {
             $brandSubject = Str::limit($brandSubject, 240, '');
@@ -54,16 +56,19 @@ class GeminiBlogService
 - If the subject looks like a domain, you may mention it as the likely official site. Add at most one link to `https://` + that host only if clearly a domain (`rel="nofollow noopener"`).
 FOCUS;
 
+            $copywriterIntro = $this->hasEditorIdea($extras)
+                ? 'You are an expert SEO copywriter for a deals and shopping blog.'
+                : 'You are an expert English SEO copywriter for a deals and shopping blog.';
+
             $prompt = <<<PROMPT
-You are an expert English SEO copywriter for a deals and shopping blog.
+{$copywriterIntro}
 
 {$editorPriorityBlock}{$this->buildEditorExtrasBlock($extras, forEnglish: true)}
 
-## Article requirements
-- Language: **English**, SEO-friendly, target length **{$lengthInstruction}**.
+{$articleRequirements}
 - Structure: exactly one `<h1>`, main sections with `<h2>`, optional `<h3>`.
 - Helpful, neutral-to-positive tone — not overly salesy.
-- Return a complete HTML fragment: `<h1>`, `<p>`, `<ul>`/`<ol>`, `<h2>`, `<h3>`. No `<html>`/`<body>`.
+- Return a complete HTML fragment: `<h1>`, `<p>`, `<ul>`/`<ol>`, `<h2>`, `<h3>`, `<table>` when requested. No `<html>`/`<body>`.
 - Do NOT use Markdown. Do NOT wrap output in code fences like ```html ... ```.
 
 {$focusBlock}
@@ -79,19 +84,26 @@ PROMPT;
                 default => "Viết bài blog chất lượng cao về chủ đề {$category}.",
             };
 
+            $languageInstruction = $this->buildLanguageInstruction($extras, 'tiếng Anh');
+            $articleRequirements = $this->buildArticleRequirementsBlock($extras, $lengthInstruction, $languageInstruction, forEnglish: false);
+
+            $focusHeading = $this->hasEditorIdea($extras)
+                ? '## Trọng tâm mặc định (chỉ áp dụng nếu ý tưởng không quy định khác)'
+                : '## Trọng tâm nội dung (BẮT BUỘC)';
+
             $prompt = <<<PROMPT
-Bạn là copywriter SEO tiếng Anh chuyên nghiệp.
+Bạn là copywriter SEO chuyên nghiệp.
 
 {$this->buildEditorPriorityBlock($extras, forEnglish: false)}{$this->buildEditorExtrasBlock($extras)}
 
 Yêu cầu bài viết:
-- Ngôn ngữ: tiếng Anh, chuẩn SEO, độ dài {$lengthInstruction}.
-- Cấu trúc: 1 thẻ <h1> duy nhất, các phần chính dùng <h2>, có thể thêm <h3>.
+{$articleRequirements}
+- Cấu trúc: 1 thẻ <h1> duy nhất, các phần chính dùng <h2>, có thể thêm <h3>, `<table>` nếu ý tưởng yêu cầu.
 - Nội dung hữu ích, không quảng cáo thương hiệu cụ thể.
-- Trả về HTML hoàn chỉnh: <h1>, <p>, <ul>/<ol>, <h2>, <h3>. Không bọc <html>/<body>.
+- Trả về HTML hoàn chỉnh: <h1>, <p>, <ul>/<ol>, <h2>, <h3>, <table>. Không bọc <html>/<body>.
 - KHÔNG dùng Markdown, KHÔNG bọc nội dung trong code fence như ```html ... ```.
 
-## Trọng tâm nội dung (BẮT BUỘC)
+{$focusHeading}
 - Danh mục: **{$category}**
 - Toàn bộ bài viết phải xoay quanh danh mục **{$category}** — tips, sản phẩm, xu hướng, hướng dẫn mua trong niche này.
 - Không viết về một brand/cửa hàng cụ thể làm chủ đề chính.
@@ -131,11 +143,19 @@ PROMPT;
         $hint = Str::limit($hint, 240, '');
         $hintSafe = htmlspecialchars($hint, ENT_QUOTES, 'UTF-8');
         $lengthInstruction = $this->resolveLengthInstruction($extras, '450-700 words');
+        $languageInstruction = $this->buildLanguageInstruction($extras, 'English');
         $editorPriorityBlock = $this->buildEditorPriorityBlock($extras, forEnglish: true);
         $extrasBlock = $this->buildEditorExtrasBlock($extras, forEnglish: true);
+        $taskLanguageLine = $this->hasEditorIdea($extras)
+            ? 'Write ONE **short** editorial-style article following the **editor idea language and style** about this brand/store as a general shopping subject.'
+            : 'Write ONE **short** editorial-style article in **English** about this brand/store as a general shopping subject.';
+
+        $copywriterIntro = $this->hasEditorIdea($extras)
+            ? 'You are an expert copywriter for a deals and shopping blog.'
+            : 'You are an expert English copywriter for a deals and shopping blog.';
 
         $prompt = <<<PROMPT
-You are an expert English copywriter for a deals and shopping blog.
+{$copywriterIntro}
 
 The editor typed this brand or store identifier (it may be a company name OR a domain like example.com). Use it only as the **subject label** — you have **no access** to our internal database, coupons, or verified facts about this merchant.
 
@@ -144,10 +164,11 @@ The editor typed this brand or store identifier (it may be a company name OR a d
 {$editorPriorityBlock}{$extrasBlock}
 
 ## Your task
-Write ONE **short** editorial-style article in **English** about this brand/visit as a general shopping subject.
+{$taskLanguageLine}
 
 ## Length & tone
 - Target **{$lengthInstruction}** (shorter than a full review unless the editor idea specifies otherwise; scannable).
+- {$languageInstruction}
 - Helpful, neutral-to-positive, **not** salesy. Do **not** invent specific prices, coupon codes, percentages, or time-limited promotions.
 - You may use **high-level, generic** industry knowledge only; if unsure, stay vague and recommend readers check the official site.
 - If the subject looks like a **domain**, you may mention it as the likely official web presence. Add **at most one** link to `https://` + that host only if it is clearly a domain (use `rel="nofollow noopener"`). If it is only a brand name with no clear domain, **do not** invent URLs.
@@ -244,14 +265,19 @@ PROMPT;
             forcePromoSection: true,
         );
         $lengthInstruction = $this->resolveLengthInstruction($extras, '900-1,200 words');
+        $languageInstruction = $this->buildLanguageInstruction($extras, 'English');
         $editorPriorityBlock = $this->buildEditorPriorityBlock($extras, forEnglish: true);
+        $introLanguageLine = $this->hasEditorIdea($extras)
+            ? 'Write ONE blog article introducing the store/brand below. **Follow the editor idea for language, structure, and format.** Target length **'.$lengthInstruction.'**. Tone: helpful, trustworthy, conversion-oriented but honest.'
+            : 'Write ONE blog article introducing the store/brand below. Language: **English**. Target length **'.$lengthInstruction.'**. Tone: helpful, trustworthy, conversion-oriented but honest.';
 
         $prompt = <<<PROMPT
-You are an expert English SEO copywriter for affiliate coupon sites.
+You are an expert SEO copywriter for affiliate coupon sites.
 
 {$editorPriorityBlock}{$extrasBlock}
 
-Write ONE blog article introducing the store/brand below. Language: **English**. Target length **{$lengthInstruction}**. Tone: helpful, trustworthy, conversion-oriented but honest.
+{$introLanguageLine}
+- {$languageInstruction}
 
 ## Brand & campaign facts (use only as facts; do not invent unavailable data)
 - Category niche: {$categoryName}
@@ -341,6 +367,46 @@ PROMPT;
     /**
      * @param array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
      */
+    protected function hasEditorIdea(array $extras): bool
+    {
+        return trim((string) ($extras['idea'] ?? '')) !== '';
+    }
+
+    /**
+     * @param array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
+     */
+    protected function buildLanguageInstruction(array $extras, string $defaultLanguage): string
+    {
+        if (! $this->hasEditorIdea($extras)) {
+            return $defaultLanguage === 'English'
+                ? 'Language: **English**, SEO-friendly.'
+                : "Ngôn ngữ: **{$defaultLanguage}**, chuẩn SEO.";
+        }
+
+        return $defaultLanguage === 'English'
+            ? 'Language: **Follow the editor idea** — if it specifies a language (e.g. Chinese/中文, Tiếng Trung, Vietnamese, English), write the **entire** article including all headings in that language. The editor idea overrides the default ('.$defaultLanguage.').'
+            : 'Ngôn ngữ: **Theo ý tưởng người nhập** — nếu ý tưởng chỉ định ngôn ngữ (vd: Tiếng Trung/中文, Tiếng Việt, tiếng Anh), viết **toàn bộ** bài kể cả tiêu đề bằng ngôn ngữ đó. Ý tưởng ghi đè mặc định ('.$defaultLanguage.').';
+    }
+
+    /**
+     * @param array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
+     */
+    protected function buildArticleRequirementsBlock(
+        array $extras,
+        string $lengthInstruction,
+        string $languageInstruction,
+        bool $forEnglish = true,
+    ): string {
+        if ($forEnglish) {
+            return "## Article requirements\n- {$languageInstruction}\n- Target length: **{$lengthInstruction}**.";
+        }
+
+        return "- {$languageInstruction}\n- Độ dài: **{$lengthInstruction}**.";
+    }
+
+    /**
+     * @param array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
+     */
     protected function resolveLengthInstruction(array $extras, string $defaultEnglish): string
     {
         $idea = trim((string) ($extras['idea'] ?? ''));
@@ -412,24 +478,26 @@ PROMPT;
         if ($forEnglish) {
             $lines = [
                 '## Editor idea — HIGHEST PRIORITY',
-                '- The editor idea below overrides default article type, topic focus, structure, tone, and length when they conflict.',
-                '- Follow the editor idea first; only use defaults for details the idea does not mention.',
+                '- The editor idea below overrides **language**, article type, topic focus, structure (including `<table>` comparison tables, FAQ, lists), tone, and length when they conflict with defaults.',
+                '- Apply the editor idea first; use defaults only for details the idea does not mention.',
             ];
             if ($wordCount !== null) {
                 $lines[] = "- Word count detected in the editor idea: **{$wordCount}** — this overrides any default length.";
             }
+            $lines[] = '- If the idea specifies a language (e.g. Chinese/中文, Tiếng Trung, Vietnamese), ignore any default English instruction elsewhere in this prompt.';
 
             return implode("\n", $lines)."\n\n";
         }
 
         $lines = [
             '## Ý tưởng người nhập — ƯU TIÊN CAO NHẤT',
-            '- Ý tưởng bên dưới ghi đè loại bài, chủ đề, cấu trúc, giọng văn và độ dài mặc định nếu mâu thuẫn.',
+            '- Ý tưởng bên dưới ghi đè **ngôn ngữ**, loại bài, chủ đề, cấu trúc (kể cả bảng `<table>` so sánh, FAQ, danh sách), giọng văn và độ dài mặc định nếu mâu thuẫn.',
             '- Bám sát ý tưởng trước; chỉ dùng mặc định cho phần người dùng không nhắc tới.',
         ];
         if ($wordCount !== null) {
             $lines[] = "- Phát hiện số từ trong ý tưởng: **{$wordCount}** — ưu tiên hơn độ dài mặc định.";
         }
+        $lines[] = '- Nếu ý tưởng yêu cầu ngôn ngữ cụ thể (vd: Tiếng Trung, tiếng Anh), bỏ qua mọi chỉ dẫn ngôn ngữ mặc định khác trong prompt này.';
 
         return implode("\n", $lines)."\n\n";
     }
@@ -461,8 +529,10 @@ PROMPT;
             $lines = [];
             $lines[] = "## Editor requirements (follow these as hard constraints, do not ignore)";
             if ($ideaSafe !== '') {
-                $lines[] = "- Core article idea / outline (**PRIMARY SOURCE** — topic, angle, structure, tone, and any length hint): {$ideaSafe}";
+                $lines[] = "- Core article idea / outline (**PRIMARY SOURCE** — language, topic, angle, structure, tone, and any length hint): {$ideaSafe}";
                 $lines[] = '- Treat every detail in the idea as mandatory unless it contradicts HTML output rules or factual constraints above.';
+                $lines[] = '- If the idea requests a language (e.g. Chinese/Tiếng Trung), write the full article in that language.';
+                $lines[] = '- If the idea requests comparison tables, include proper HTML `<table>` elements.';
             }
             if ($affiliateSafe !== '') {
                 $lines[] = "- Affiliate link to include (use exactly; do not modify): {$affiliateSafe}";
@@ -481,8 +551,10 @@ PROMPT;
         $lines = [];
         $lines[] = "Yêu cầu bổ sung từ người nhập (bắt buộc, coi như ràng buộc chính):";
         if ($ideaSafe !== '') {
-            $lines[] = "- Ý tưởng / outline (**NGUỒN CHÍNH** — chủ đề, góc viết, cấu trúc, giọng văn và gợi ý độ dài): {$ideaSafe}";
+            $lines[] = "- Ý tưởng / outline (**NGUỒN CHÍNH** — ngôn ngữ, chủ đề, góc viết, cấu trúc, giọng văn và gợi ý độ dài): {$ideaSafe}";
             $lines[] = '- Mọi chi tiết trong ý tưởng đều bắt buộc trừ khi mâu thuẫn với quy tắc HTML hoặc ràng buộc thực tế phía trên.';
+            $lines[] = '- Nếu ý tưởng yêu cầu ngôn ngữ (vd: Tiếng Trung), viết toàn bộ bài bằng ngôn ngữ đó.';
+            $lines[] = '- Nếu ý tưởng yêu cầu bảng so sánh, dùng HTML `<table>`.';
         }
         if ($affiliateSafe !== '') {
             $lines[] = "- Link affiliate cần chèn (dùng đúng link): {$affiliateSafe}";
