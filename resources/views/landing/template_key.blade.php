@@ -6,6 +6,8 @@
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     @php
         $campaignSlug = $campaign->slug;
+        $brandName = $campaign->brand->name ?? $campaign->title;
+        $affiliateUrl = route('click.redirect', ['slug' => $campaignSlug]);
         $backgroundImage = $campaign->background_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->background_image) : null;
         $productImages = $campaign->key_product_images ?? [];
         $logoUrl = $campaign->logo ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->logo) : ($campaign->brand?->image_url ?? asset('images/default-brand.svg'));
@@ -141,6 +143,15 @@
         .intro p {
             margin-bottom: 16px;
         }
+        .intro-brand-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .intro-brand-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
 
         /* Product Images Grid */
         .product-grid {
@@ -245,13 +256,15 @@
                     @php
                         $intro = (string) $campaign->intro;
                         $hasHtml = $intro !== strip_tags($intro);
+                        // Replace brand name with affiliate link (case-insensitive, whole word)
+                        $intro = preg_replace(
+                            '/\b(' . preg_quote($brandName, '/') . ')\b/i',
+                            '<a href="' . e($affiliateUrl) . '" target="_blank" rel="nofollow sponsored noopener" class="intro-brand-link">$1</a>',
+                            $intro
+                        );
                     @endphp
                     <div class="intro">
-                        @if($hasHtml)
-                            {!! $intro !!}
-                        @else
-                            {!! nl2br(e($intro)) !!}
-                        @endif
+                        {!! $intro !!}
                     </div>
                 @endif
 

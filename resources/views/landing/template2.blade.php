@@ -83,6 +83,7 @@
         $campaignSlug = $campaign->slug;
 
         $brandName = $campaign->brand->name ?? $campaign->title;
+        $affiliateUrl = route('click.redirect', ['slug' => $campaignSlug]);
         $rawIntro = (string) ($campaign->subtitle ?? $campaign->intro ?? '');
         $metaTitle = $brandName . ' Coupons & Promo Codes – ' . now()->format('F Y');
         $metaDescription = \Illuminate\Support\Str::limit(strip_tags($rawIntro), 160);
@@ -434,6 +435,16 @@
         .intro-content p:last-child { margin-bottom: 0; }
         .intro-content a { color: var(--t2-primary); text-decoration: underline; }
         .intro-content a:hover { color: var(--t2-primary-dark); }
+
+        .intro-brand-link {
+            color: var(--t2-primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .intro-brand-link:hover {
+            color: var(--t2-primary-dark);
+            text-decoration: underline;
+        }
 
         /* Q&A */
         .qa-item {
@@ -1086,15 +1097,17 @@
                 @php
                     $intro = (string) $campaign->intro;
                     $hasHtml = $intro !== strip_tags($intro);
+                    // Replace brand name with affiliate link (case-insensitive, whole word)
+                    $intro = preg_replace(
+                        '/\b(' . preg_quote($brandName, '/') . ')\b/i',
+                        '<a href="' . e($affiliateUrl) . '" target="_blank" rel="nofollow sponsored noopener" class="intro-brand-link">$1</a>',
+                        $intro
+                    );
                 @endphp
-                @if($hasHtml)
-                    {!! $intro !!}
-                @else
-                    {!! nl2br(e($intro)) !!}
-                @endif
+                {!! $intro !!}
             @else
             <p>
-                Discover exclusive deals from {{ $campaign->brand->name ?? $campaign->title }} designed to help you save more every time you shop online. We carefully curate the latest discounts, special offers, and limited-time promotions so you can enjoy the best value on your favorite products. Whether you're looking for everyday essentials or trending items, {{ $campaign->brand->name ?? $campaign->title }} makes it easier to shop smarter and spend less.
+                Discover exclusive deals from <a href="{{ $affiliateUrl }}" target="_blank" rel="nofollow sponsored noopener" class="intro-brand-link">{{ $campaign->brand->name ?? $campaign->title }}</a> designed to help you save more every time you shop online. We carefully curate the latest discounts, special offers, and limited-time promotions so you can enjoy the best value on your favorite products. Whether you're looking for everyday essentials or trending items, <a href="{{ $affiliateUrl }}" target="_blank" rel="nofollow sponsored noopener" class="intro-brand-link">{{ $campaign->brand->name ?? $campaign->title }}</a> makes it easier to shop smarter and spend less.
             </p>
             @endif
         </div>

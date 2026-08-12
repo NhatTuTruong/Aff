@@ -156,7 +156,7 @@
         body.t4-corelux .site-header .logo {
             font-family: var(--t4-font);
         }
-        body.t4-corelux a { text-decoration: none; color: inherit; }
+        body.t4-corelux a { text-decoration: none; color: var(--t4-primary) }
 
         .t4-page { background: var(--t4-bg); }
         .t4-container {
@@ -222,6 +222,16 @@
         }
         .t4-rating-score { font-weight: 700; color: var(--t4-text); }
         .t4-rating-sep { margin: 0 4px; }
+        .t4-rate-brand {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--t4-primary) !important;
+            text-align: center;
+            text-decoration: none;
+        }
+        .t4-rate-brand:hover { color: #095400 !important; }
         .t4-rate-it {
             display: block;
             margin-top: 4px;
@@ -232,7 +242,7 @@
         .t4-rate-it:hover { color: #d48806; }
         .t4-stars {
             color: var(--t4-orange);
-            font-size: 17px;
+            font-size: 20px;
             letter-spacing: 1px;
             margin-bottom: 6px;
         }
@@ -306,13 +316,12 @@
         }
         .t4-brand-green { color: var(--t4-primary); font-weight: 700; }
         .t4-brand-link {
-            text-decoration: underline !important;
+            text-decoration: none !important;
             color: var(--t4-primary-dark) !important;
             font-weight: 700;
         }
         .t4-brand-link:hover {
-            text-decoration: underline;
-            color: var(--t4-primary-dark);
+            color: #095400 !important;
         }
 
         /* Filter tabs */
@@ -375,7 +384,7 @@
         .t4-coupon-content { min-width: 0; }
         .t4-verified-tag {
             display: block;
-            font-size: 12px;
+            font-size: 15px;
             font-weight: 700;
             color: var(--t4-primary);
             margin-bottom: 15px;
@@ -505,6 +514,14 @@
             vertical-align: top;
         }
         .t4-content-table a { color: var(--t4-link); text-decoration: underline; }
+        .intro-brand-link {
+            color: var(--t4-primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .intro-brand-link:hover {
+            color: #095400;
+        }
         .t4-content-table strong { font-weight: 700; }
         .intro-content p { margin: 0 0 12px; }
         .intro-content p:last-child { margin-bottom: 0; }
@@ -552,7 +569,7 @@
                 display: inline-block;
                 padding: 12px 24px;
                 background: var(--t4-primary);
-                color: #fff;
+                color: #fff !important;
                 font-weight: 700;
                 border-radius: 3px;
             }
@@ -1009,6 +1026,7 @@
                     <img src="{{ asset('images/default-brand.svg') }}" alt="{{ $brandName }}" loading="lazy">
                 @endif
             </div>
+            <a href="#coupon-list" class="t4-rate-brand" onclick="document.getElementById('t4-coupon-alert-btn').click(); return false;">{{ $brandName }}</a>
             <div class="t4-stars" aria-hidden="true">★★★★★</div>
             <div class="t4-rating">
                 <span class="t4-rating-score">5.0</span>
@@ -1195,16 +1213,18 @@
                     @php
                         $intro = (string) $campaign->intro;
                         $hasHtml = $intro !== strip_tags($intro);
+                        // Replace brand name with affiliate link (case-insensitive, whole word)
+                        $intro = preg_replace(
+                            '/\b(' . preg_quote($brandName, '/') . ')\b/i',
+                            '<a href="' . e($affiliateUrl) . '" target="_blank" rel="nofollow sponsored noopener" class="intro-brand-link">$1</a>',
+                            $intro
+                        );
                     @endphp
-                    @if($hasHtml)
-                        {!! $intro !!}
-                    @else
-                        {!! nl2br(e($intro)) !!}
-                    @endif
+                    {!! $intro !!}
                 @else
                 <p>
-                    {{ $brandName }} is a trusted online store with competitive prices, fast shipping, and reliable customer service.
-                    Shoppers can save more by using the latest {{ $brandName }} coupon codes, promo codes, and exclusive discounts available before checkout.
+                    <a href="{{ $affiliateUrl }}" target="_blank" rel="nofollow sponsored noopener" class="intro-brand-link">{{ $brandName }}</a> is a trusted online store with competitive prices, fast shipping, and reliable customer service.
+                    Shoppers can save more by using the latest <a href="{{ $affiliateUrl }}" target="_blank" rel="nofollow sponsored noopener" class="intro-brand-link">{{ $brandName }}</a> coupon codes, promo codes, and exclusive discounts available before checkout.
                 </p>
                 @endif
                         </td>
