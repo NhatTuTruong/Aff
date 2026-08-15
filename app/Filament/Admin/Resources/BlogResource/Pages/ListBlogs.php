@@ -133,6 +133,7 @@ class ListBlogs extends ListRecords
                     $introType = null;
                     $categoryLabel = null;
                     $apifySearchQuery = null;
+                    $storeCampaign = null;
 
                     $categoryNames = config('default_categories.names', User::defaultCategoryNames());
                     $aiCategory = $pickedCategoryName
@@ -209,6 +210,7 @@ class ListBlogs extends ListRecords
                                     ->send();
                             } else {
                                 [$brand, $campaign] = $picked;
+                                $storeCampaign = $campaign;
                                 $categoryLabel = $this->resolveBrandCategoryLabel($brand);
                                 $result = $gemini->generateBrandIntroBlog($brand, $campaign, $categoryLabel, $extras);
                                 $campaignId = $campaign->id;
@@ -242,6 +244,15 @@ class ListBlogs extends ListRecords
                             $result,
                             $apifySearchQuery,
                             $categoryLabel
+                        );
+                    }
+
+                    // Apify insertImagesEvenly chỉ giữ thẻ <p> — inject lại coupon sau enrich.
+                    if (($introType ?? null) === 'store' && $storeCampaign !== null) {
+                        $storeCampaign->loadMissing('couponItems');
+                        $result['content'] = $gemini->ensureStoreBlogCouponSection(
+                            (string) ($result['content'] ?? ''),
+                            $storeCampaign,
                         );
                     }
 

@@ -141,6 +141,12 @@ class GenerateDailyBlogs extends Command
             $result = app(BlogApifyImageService::class)->enrich($result, $searchQuery, $categoryLabel);
         }
 
+        $campaign->loadMissing('couponItems');
+        $result['content'] = $gemini->ensureStoreBlogCouponSection(
+            (string) ($result['content'] ?? ''),
+            $campaign,
+        );
+
         $blog = new Blog();
         if ($author) {
             $blog->user_id = $author->id;

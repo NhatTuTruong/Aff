@@ -40,7 +40,20 @@ class Blog extends Model
     /** Nội dung đã loại tên file / dung lượng dưới ảnh đính kèm. */
     public function getRenderedContentAttribute(): string
     {
-        return BlogContentHtml::stripAttachmentCaptions($this->content);
+        $html = BlogContentHtml::stripAttachmentCaptions($this->content);
+
+        if ($this->intro_type === 'store' && filled($this->campaign_id)) {
+            $campaign = $this->relationLoaded('campaign')
+                ? $this->campaign
+                : $this->campaign()->with('couponItems')->first();
+
+            if ($campaign) {
+                $html = app(\App\Services\GeminiBlogService::class)
+                    ->ensureStoreBlogCouponSection($html, $campaign);
+            }
+        }
+
+        return $html;
     }
 
     public function user(): BelongsTo

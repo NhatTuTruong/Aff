@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Brand;
 use App\Models\Campaign;
+use App\Models\Coupon;
 use App\Support\AdminSettings;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -235,29 +236,8 @@ PROMPT;
             ? implode('; ', array_filter(array_map('strval', $benefits)))
             : (string) $benefits;
 
-        // Lấy tối đa 5 coupon codes để nhúng vào nội dung
-        $couponCodes = $campaign->couponItems
-            ->take(5)
-            ->map(function ($c) {
-                $parts = array_filter([
-                    $c->offer ? "<strong>{$c->offer}</strong>" : null,
-                    $c->code ? "Code: <code>{$c->code}</code>" : null,
-                    $c->description ? Str::limit(strip_tags((string) $c->description), 100) : null,
-                ]);
-                return $parts ? implode(' — ', $parts) : null;
-            })
-            ->filter()
-            ->values()
-            ->toArray();
-
-        $couponListHtml = '';
-        if (!empty($couponCodes)) {
-            $couponItems = [];
-            foreach ($couponCodes as $code) {
-                $couponItems[] = "<li>{$code}</li>";
-            }
-            $couponListHtml = "<h2>Available Coupons</h2>\n<ul>\n" . implode("\n", $couponItems) . "\n</ul>";
-        }
+        $couponSectionHtml = $this->buildStoreBlogCouponSectionHtml($campaign);
+        $couponSummaryForPrompt = $this->buildStoreBlogCouponSummaryForPrompt($campaign);
 
         $extrasBlock = $this->buildEditorExtrasBlock(
             array_merge($extras, ['affiliate_url' => $affiliateTrackingUrl]),
@@ -301,10 +281,11 @@ You are an expert SEO copywriter for affiliate coupon sites.
 3. **Brief intro (`<h2>`)**: What the brand is, main benefit.
 4. **Products/Services (`<h2>`)**: Main offerings.
 5. **Pros and Cons (`<h2>`)**: Two subsections or bullet lists.
-6. **Available Coupons**: {$couponListHtml}
+6. **Do NOT write an "Available Coupons" section** — the system injects verified coupon codes automatically after generation.
 7. **Closing CTA (`<p>` at bottom)**: `<a href="{$affiliateTrackingUrl}" rel="nofollow sponsored noopener" target="_blank">Shop now at {$brandName}</a>` — put this affiliate link in the last paragraph.
 
-Do not claim discounts or codes that are not in the facts.
+Current verified coupons for this campaign (reference only; do not invent others):
+{$couponSummaryForPrompt}
 PROMPT;
 
         $result = $this->callGeminiWithKeyAndModelFallback($preferredModel, $prompt, $timeout, [
@@ -314,15 +295,246 @@ PROMPT;
 
         // Không gán ảnh brand: để featured_image null → Blog tự chọn ngẫu nhiên ảnh theo danh mục khi lưu.
         if ($result !== null) {
-            $result['content'] = $this->normalizeStoreBlogAffiliateLinks(
+            $content = $this->normalizeStoreBlogAffiliateLinks(
                 (string) $result['content'],
                 $campaignSlug,
                 $affiliateTrackingUrl,
             );
+            $result['content'] = $this->injectStoreBlogCouponSection($content, $couponSectionHtml);
             $result['featured_image'] = null;
         }
 
         return $result;
+    }
+
+    /**
+     * HTML block coupon thật từ chiến dịch — inject sau khi AI tạo bài.
+     */
+    protected function buildStoreBlogCouponSectionHtml(Campaign $campaign, int $limit = 20): string
+    {
+        $campaign->loadMissing(['couponItems', 'brand']);
+        $brandName = $this->resolveStoreBlogBrandName($campaign);
+
+        $listItems = $campaign->couponItems
+            ->take($limit)
+            ->map(fn (Coupon $coupon) => $this->formatStoreBlogCouponListItem($coupon, $brandName))
+            ->filter()
+            ->values();
+
+        if ($listItems->isEmpty()) {
+            return '';
+        }
+
+        return "<h2>Available Coupons</h2>\n<ul>\n"
+            .$listItems->implode("\n")
+            ."\n</ul>";
+    }
+
+    protected function resolveStoreBlogBrandName(Campaign $campaign): string
+    {
+        $name = trim((string) ($campaign->brand->name ?? $campaign->title ?? ''));
+
+        return $name !== '' ? $name : 'this store';
+    }
+
+    protected function formatStoreBlogCouponListItem(Coupon $coupon, string $brandName): ?string
+    {
+        $offer = trim(strip_tags((string) ($coupon->offer ?? '')));
+        $code = trim((string) ($coupon->code ?? ''));
+        $description = trim(strip_tags((string) ($coupon->description ?? '')));
+
+        if ($offer === '' && $code === '' && $description === '') {
+            return null;
+        }
+
+        if ($code !== '') {
+            $parts = [];
+            if ($offer !== '') {
+                $parts[] = '<strong>'.e($offer).'</strong>';
+            }
+            $parts[] = 'Code: <code>'.e($code).'</code>';
+            if ($description !== '') {
+                $parts[] = e($description);
+            }
+
+            return '<li>'.implode(' — ', $parts).'</li>';
+        }
+
+        // Deal không có mã: offer + mô tả (DB hoặc sinh tự động).
+        $dealDescription = $description !== ''
+            ? $description
+            : $this->buildStoreBlogDealDescription($coupon, $brandName);
+
+        if ($offer !== '') {
+            return '<li><strong>'.e($offer).'</strong> — '.e($dealDescription).'</li>';
+        }
+
+        return '<li>'.e($dealDescription).'</li>';
+    }
+
+    protected function buildStoreBlogDealDescription(Coupon $coupon, string $brandName): string
+    {
+        $offerText = trim(strip_tags((string) ($coupon->offer ?? '')));
+        $descriptionText = trim(strip_tags((string) ($coupon->description ?? '')));
+        $isFreeShipping = stripos($offerText, 'free shipping') !== false
+            || stripos($descriptionText, 'free shipping') !== false;
+
+        $currencyMap = [
+            'USD' => '$', 'EUR' => '€', 'GBP' => '£', 'JPY' => '¥',
+            'INR' => '₹', 'CAD' => 'C$', 'AUD' => 'A$', 'CHF' => 'CHF', 'CNY' => '¥',
+        ];
+
+        if ($offerText !== '') {
+            if (preg_match('/(\d+)\s*%/i', $offerText, $matches)) {
+                return 'Save '.$matches[1].'% on your order with this '.$brandName.' promo code';
+            }
+
+            if (preg_match('/([€$£¥₹])\s*(\d+(?:[.,]\d+)?)/u', $offerText, $matches)) {
+                $val = number_format((float) str_replace([',', ' '], ['', ''], $matches[2]), 0, '.', '');
+
+                return 'Save '.$matches[1].$val.' on your order with this '.$brandName.' promo code';
+            }
+
+            if (preg_match('/(\d+(?:[.,]\d+)?)\s*([€$£¥₹])/u', $offerText, $matches)) {
+                $val = number_format((float) str_replace([',', ' '], ['', ''], $matches[1]), 0, '.', '');
+
+                return 'Save '.$matches[2].$val.' on your order with this '.$brandName.' promo code';
+            }
+
+            if (preg_match('/(USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY)\s*(\d+(?:[.,]\d+)?)/i', $offerText, $matches)) {
+                $symbol = $currencyMap[strtoupper($matches[1])] ?? strtoupper($matches[1]);
+                $val = number_format((float) str_replace([',', ' '], ['', ''], $matches[2]), 0, '.', '');
+
+                return 'Save '.$symbol.$val.' on your order with this '.$brandName.' promo code';
+            }
+
+            if (preg_match('/(\d+(?:[.,]\d+)?)\s*(USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY)/i', $offerText, $matches)) {
+                $symbol = $currencyMap[strtoupper($matches[2])] ?? strtoupper($matches[2]);
+                $val = number_format((float) str_replace([',', ' '], ['', ''], $matches[1]), 0, '.', '');
+
+                return 'Save '.$symbol.$val.' on your order with this '.$brandName.' promo code';
+            }
+        }
+
+        if ($isFreeShipping) {
+            return 'Get free shipping on your order with this '.$brandName.' promo code';
+        }
+
+        return 'Save with this '.$brandName.' offer when you shop and apply it at checkout.';
+    }
+
+    /**
+     * Tóm tắt coupon cho prompt (plain text, không HTML).
+     */
+    protected function buildStoreBlogCouponSummaryForPrompt(Campaign $campaign, int $limit = 20): string
+    {
+        $campaign->loadMissing(['couponItems', 'brand']);
+        $brandName = $this->resolveStoreBlogBrandName($campaign);
+
+        $lines = $campaign->couponItems
+            ->take($limit)
+            ->map(function (Coupon $coupon) use ($brandName) {
+                $offer = trim(strip_tags((string) ($coupon->offer ?? '')));
+                $code = trim((string) ($coupon->code ?? ''));
+                $description = trim(strip_tags((string) ($coupon->description ?? '')));
+
+                if ($code !== '') {
+                    $bits = array_filter([
+                        $offer !== '' ? $offer : null,
+                        'Code: '.$code,
+                        $description !== '' ? $description : null,
+                    ]);
+
+                    return $bits !== [] ? '- '.implode(' | ', $bits) : null;
+                }
+
+                $dealDescription = $description !== ''
+                    ? $description
+                    : $this->buildStoreBlogDealDescription($coupon, $brandName);
+
+                if ($offer !== '') {
+                    return '- '.$offer.' — '.$dealDescription;
+                }
+
+                return $dealDescription !== '' ? '- '.$dealDescription : null;
+            })
+            ->filter()
+            ->values();
+
+        if ($lines->isEmpty()) {
+            return '- (No coupons in this campaign yet.)';
+        }
+
+        return $lines->implode("\n");
+    }
+
+    /**
+     * Chèn block coupon vào giữa hoặc cuối bài (trước CTA "Shop now" nếu có).
+     */
+    protected function injectStoreBlogCouponSection(string $html, string $couponSectionHtml): string
+    {
+        $html = trim($html);
+        $couponSectionHtml = trim($couponSectionHtml);
+
+        if ($html === '' || $couponSectionHtml === '') {
+            return $html;
+        }
+
+        // Gỡ block coupon AI có thể đã viết (tránh trùng).
+        $html = preg_replace(
+            '/<h2[^>]*>\s*(Available Coupons|Coupon Codes|Promo Codes|Active Coupons|Current Coupons)[^<]*<\/h2>\s*(?:<ul\b[^>]*>.*?<\/ul>)?/is',
+            '',
+            $html
+        ) ?? $html;
+
+        // Bài dài: chèn vào giữa (sau ~50% đoạn <p>).
+        if (preg_match_all('/<p\b[^>]*>.*?<\/p>/is', $html, $paragraphMatches)) {
+            $paragraphCount = count($paragraphMatches[0]);
+            if ($paragraphCount >= 6) {
+                $middleIndex = (int) floor(($paragraphCount - 1) / 2);
+
+                return $this->insertHtmlAfterParagraphIndex($html, $middleIndex, $couponSectionHtml);
+            }
+        }
+
+        // Cuối bài: trước CTA "Shop now" hoặc đoạn <p> cuối.
+        if (preg_match('/<p\b[^>]*>.*?Shop now.*?<\/p>\s*$/is', $html, $matches, PREG_OFFSET_CAPTURE)) {
+            $pos = $matches[0][1];
+
+            return rtrim(substr($html, 0, $pos))."\n\n".$couponSectionHtml."\n\n".ltrim(substr($html, $pos));
+        }
+
+        if (preg_match_all('/<p\b[^>]*>/i', $html, $lastPMatches, PREG_OFFSET_CAPTURE)) {
+            $pos = $lastPMatches[0][count($lastPMatches[0]) - 1][1];
+
+            return rtrim(substr($html, 0, $pos))."\n\n".$couponSectionHtml."\n\n".ltrim(substr($html, $pos));
+        }
+
+        return $html."\n\n".$couponSectionHtml;
+    }
+
+    protected function insertHtmlAfterParagraphIndex(string $html, int $paragraphIndex, string $insertHtml): string
+    {
+        if (! preg_match_all('/<p\b[^>]*>.*?<\/p>/is', $html, $matches, PREG_OFFSET_CAPTURE)) {
+            return $html."\n\n".$insertHtml;
+        }
+
+        $paragraphIndex = max(0, min($paragraphIndex, count($matches[0]) - 1));
+        $target = $matches[0][$paragraphIndex];
+        $endPos = $target[1] + strlen($target[0]);
+
+        return rtrim(substr($html, 0, $endPos))."\n\n".$insertHtml."\n\n".ltrim(substr($html, $endPos));
+    }
+
+    /**
+     * Đảm bảo bài store blog có block coupon từ chiến dịch (gọi sau Apify enrich).
+     */
+    public function ensureStoreBlogCouponSection(string $html, Campaign $campaign): string
+    {
+        return $this->injectStoreBlogCouponSection(
+            $html,
+            $this->buildStoreBlogCouponSectionHtml($campaign),
+        );
     }
 
     /**
