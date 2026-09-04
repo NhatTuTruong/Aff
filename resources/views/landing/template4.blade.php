@@ -1125,21 +1125,25 @@
                 $uses = (($campaign->id ?? 0) * 11 + ($coupon->id ?? 0)) % 4900 + 100;
 
                 $couponHeadline = $hasCode
-                    ? $formatHeadline($coupon, $offerType, $offerValue, $currencySymbol, $isFreeShipping)
-                    : ($descriptionText !== '' ? $descriptionText : $formatHeadline($coupon, $offerType, $offerValue, $currencySymbol, $isFreeShipping));
+                    ? ($descriptionText !== ''
+                        ? $descriptionText
+                        : $formatHeadline($coupon, $offerType, $offerValue, $currencySymbol, $isFreeShipping))
+                    : ($descriptionText !== ''
+                        ? $descriptionText
+                        : $formatHeadline($coupon, $offerType, $offerValue, $currencySymbol, $isFreeShipping));
 
                 $descSeed = (int) (($campaign->id ?? 0) * 1000 + ($coupon->id ?? 0) + ($coupon->sort_order ?? 0));
 
                 if ($hasCode) {
-                    $couponBody = $descriptionText !== ''
-                        ? $descriptionText
-                        : $couponDescGenerator->generate($offerText, true, $brandName, $descSeed);
+                    $couponBody = $couponDescGenerator->generate($offerText, true, $brandName, $descSeed)
+                        . ' – <b style="color: #313131;">Click "Get Code" – to get the code.</b>';
                 } else {
-                    $couponBody = $offerText !== ''
+                    $couponBody = ($offerText !== ''
                         ? $offerText
                         : ($descriptionText !== ''
                             ? $descriptionText
-                            : $couponDescGenerator->generate($offerText, false, $brandName, $descSeed));
+                            : $couponDescGenerator->generate($offerText, false, $brandName, $descSeed)))
+                        . ' – <b style="color: #313131;">Click "Get Deal" – discount applied automatically.</b>';
                 }
 
                 $codeDisplay = '';
@@ -1163,7 +1167,7 @@
                 <div class="t4-coupon-content">
                     <span class="t4-verified-tag">{{ $hasCode ? 'Verified Code' : 'Verified Deal' }}</span>
                     <h2 class="coupon-title">{{ $couponHeadline }}</h2>
-                    <p class="t4-coupon-desc">{{ $couponBody }}</p>
+                    <p class="t4-coupon-desc">{!! $couponBody !!}</p>
                 </div>
                 @if($hasCode)
                 <div class="get-code">
