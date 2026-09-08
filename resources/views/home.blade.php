@@ -7,6 +7,12 @@
 @include('partials.styles.home-magazine')
 @endpush
 
+@push('head')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+@endpush
+
 @if($heroCarouselPosts->isNotEmpty())
 @push('head')
 <link rel="preload" as="image" href="{{ $heroCarouselPosts->first()->featured_image_url }}" fetchpriority="high">
@@ -17,7 +23,7 @@
 @php
     use Illuminate\Support\Str;
 
-    $categoryColors = ['#2563eb', '#00b4a6', '#ff5c35', '#7c3aed', '#f59e0b', '#0ea5e9'];
+    $categoryColors = ['#198754', '#fbbf24', '#22d3ee', '#a78bfa', '#f472b6', '#157347'];
     $colorFor = function (string $label, int $index = 0) use ($categoryColors): string {
         $hash = crc32($label);
         return $categoryColors[($hash + $index) % count($categoryColors)];

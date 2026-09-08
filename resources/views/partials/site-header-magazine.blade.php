@@ -65,6 +65,7 @@
 <header class="magazine-header">
     <div class="magazine-topbar">
         <div class="magazine-shell magazine-topbar-inner">
+            <span class="magazine-topbar-tagline">Deals · Reviews · Guides — updated daily</span>
             <nav class="magazine-topbar-nav" aria-label="Legal links">
                 @foreach($topbarLinks as $link)
                     <a href="{{ $link['url'] }}">{{ $link['label'] }}</a>

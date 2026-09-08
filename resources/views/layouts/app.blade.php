@@ -31,8 +31,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     @php $usesMagazineChrome = \App\Support\MagazineLayout::usesMagazineChrome(); @endphp
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
     @yield('head')
     @hasSection('og_image')
     <meta property="og:type" content="@yield('og_type', 'website')">
@@ -75,24 +75,24 @@
     @stack('head')
     <style>
         :root {
-            --bg: #f5f5f5;
+            --bg: #eceae4;
             --surface: #ffffff;
-            --surface-hover: #eef1f5;
-            --text: #0f172a;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --primary: #7c3aed;
-            --primary-dark: #6d28d9;
-            --accent: #7c3aed;
-            --accent-hover: #6d28d9;
-            --accent-rose: #a78bfa;
-            --border: rgba(15, 23, 42, 0.08);
+            --surface-hover: #f5f3ee;
+            --text: #0f0f14;
+            --text-dark: #0f0f14;
+            --text-muted: #5a5a6e;
+            --primary: #198754;
+            --primary-dark: #157347;
+            --accent: #198754;
+            --accent-hover: #157347;
+            --accent-rose: #20c997;
+            --border: rgba(15, 15, 20, 0.1);
             --radius: 12px;
             --radius-sm: 8px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'DM Sans', system-ui, sans-serif;
+            font-family: 'Poppins', system-ui, sans-serif;
             font-size: 16px;
             background: var(--bg);
             color: var(--text);
@@ -102,25 +102,26 @@
             flex-direction: column;
         }
         body.magazine-site {
+            font-family: 'Poppins', system-ui, sans-serif;
             font-size: 17px;
-            background: #ffffff;
-            color: #111827;
-            --bg: #ffffff;
+            background: #eceae4;
+            color: #0f0f14;
+            --bg: #eceae4;
             --surface: #ffffff;
-            --surface-hover: #f3f4f6;
-            --text: #111827;
-            --text-muted: #6b7280;
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-            --accent-rose: #60a5fa;
-            --border: rgba(15, 23, 42, 0.08);
+            --surface-hover: #f5f3ee;
+            --text: #0f0f14;
+            --text-muted: #5a5a6e;
+            --primary: #198754;
+            --primary-dark: #157347;
+            --accent: #198754;
+            --accent-hover: #157347;
+            --accent-rose: #20c997;
+            --border: rgba(15, 15, 20, 0.1);
         }
-        .font-heading { font-family: 'DM Sans', system-ui, sans-serif; }
+        .font-heading { font-family: 'Poppins', system-ui, sans-serif; }
 
         .logo {
-            font-family: 'DM Sans', system-ui, sans-serif;
+            font-family: 'Poppins', system-ui, sans-serif;
             font-weight: 700;
             font-size: 1.35rem;
             color: var(--text);
@@ -228,7 +229,7 @@
         }
         .cookie-consent-btn:hover {
             filter: brightness(1.06);
-            box-shadow: 0 4px 14px rgba(20, 184, 166, 0.35);
+            box-shadow: 0 4px 14px rgba(25, 135, 84, 0.35);
         }
     </style>
     @include('partials.site-chrome-styles')

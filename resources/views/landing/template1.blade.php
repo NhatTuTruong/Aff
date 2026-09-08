@@ -100,8 +100,14 @@
         }
 
         $couponsWithCodes = $coupons->filter(fn($c) => !empty($c->code))->values();
+        $firstCoupon = $coupons->first();
 
         $campaignSlug = $campaign->slug;
+        $firstCouponData = [
+            'id' => (string) ($firstCoupon?->id ?? 'shop-now'),
+            'code' => (string) ($firstCoupon?->code ?? ''),
+            'url' => route('click.redirect', ['slug' => $campaignSlug]),
+        ];
 
         $brandName = $campaign->title;
         $rawIntro = (string) ($campaign->subtitle ?? ($campaign->intro ?? ''));
@@ -124,7 +130,7 @@
     @endphp
     <title>{{ \App\Support\MetaTag::plain($metaTitle) }}</title>
     <meta name="description" content="{{ \App\Support\MetaTag::plain($metaDescription) }}">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="noindex, follow">
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ \App\Support\MetaTag::plain($metaTitle) }}">
     <meta property="og:description" content="{{ \App\Support\MetaTag::plain($metaDescription) }}">
@@ -165,11 +171,11 @@
         }
 
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --primary-soft: #eff6ff;
-            --primary-light: #60a5fa;
-            --accent: #1d4ed8;
+            --primary: #198754;
+            --primary-dark: #157347;
+            --primary-soft: #d1e7dd;
+            --primary-light: #20c997;
+            --accent: #157347;
             --text-dark: #0f172a;
             --text-light: #64748b;
             --bg-page: #f5f5f5;
@@ -417,6 +423,7 @@
             color: #fff;
             border: none;
             border-radius: 999px;
+            font-family: inherit;
             font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
@@ -1215,7 +1222,7 @@
 
         .confetti-piece:nth-child(3) {
             left: 30%;
-            color: #60a5fa;
+            color: #20c997;
             animation-delay: 1s;
         }
 
@@ -1239,7 +1246,7 @@
 
         .confetti-piece:nth-child(7) {
             left: 70%;
-            color: #60a5fa;
+            color: #20c997;
             animation-delay: 1.3s;
         }
 
@@ -1386,6 +1393,21 @@
             letter-spacing: 1px;
             color: #fff;
             font-family: ui-monospace, monospace;
+        }
+
+        .coupon-code-box.coupon-code-box--no-code {
+            font-family: inherit;
+            letter-spacing: normal;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .coupon-code-container.is-no-code {
+            justify-content: center;
+        }
+
+        .coupon-code-container.is-no-code .coupon-code-left {
+            justify-content: center;
         }
 
         .btn-copy-code-modal {
@@ -1763,7 +1785,7 @@
             cursor: pointer;
             border: none;
             transition: all 0.2s ease;
-            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
+            box-shadow: 0 10px 24px rgba(25, 135, 84, 0.35);
         }
 
         .btn-get-coupon:hover {
@@ -2248,11 +2270,14 @@
                 max-width: 320px;
                 padding: 12px 18px;
                 text-align: center;
+                border: none;
                 border-radius: 999px;
                 background: var(--primary);
                 color: #fff;
+                font-family: inherit;
                 font-weight: 600;
                 font-size: 0.95rem;
+                cursor: pointer;
                 text-decoration: none;
                 box-shadow: 0 4px 12px rgba(47, 194, 169, 0.3);
             }
@@ -2339,8 +2364,8 @@
                             </div>
                         </div>
                         <nav class="quick-menu" aria-label="Quick menu">
-                            <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
-                                class="quick-menu-shop-now" target="_blank" rel="noopener">Shop Now</a>
+                            <button type="button" class="quick-menu-shop-now"
+                                onclick="handleShopNowClick()">Shop Now</button>
                             <h3 class="quick-menu-title">Quick Menu</h3>
                             <ul class="quick-menu-list">
                                 <li><a href="#about-us">About us</a></li>
@@ -2609,10 +2634,10 @@
                         </section>
 
                         {{-- Mobile-only Shop Now dưới danh sách coupon --}}
-                        <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
-                            class="mobile-shop-now-bottom" target="_blank" rel="nofollow sponsored noopener">
+                        <button type="button" class="mobile-shop-now-bottom"
+                            onclick="handleShopNowClick()">
                             Shop Now
-                        </a>
+                        </button>
 
                         <!-- ABOUT US -->
                         <section class="section" id="about-us">
@@ -2974,6 +2999,8 @@
 
 
     <script>
+        const firstCouponData = @json($firstCouponData);
+
         let currentCode = '';
         let currentCouponRow = null;
         let currentCouponId = null;
@@ -3009,7 +3036,7 @@
                 copyCodeToClipboard(code);
                 const t = this.textContent;
                 this.textContent = 'Copied ✓';
-                this.style.background = '#2563eb';
+                this.style.background = '#198754';
                 this.style.color = '#fff';
                 setTimeout(() => {
                     this.textContent = t;
@@ -3131,29 +3158,73 @@
             const code = btn.dataset.code || '';
             const url = btn.dataset.url;
             const couponId = btn.dataset.couponId;
-            const activeTabBtn = document.querySelector('.filter-pill.active');
-            const activeTab = activeTabBtn ? (activeTabBtn.dataset.tab || 'all') : 'all';
-            if (type === 'deal' || activeTab === 'deals') {
-                clearCouponModalHash();
-                return;
-            }
-            if (!code) {
-                clearCouponModalHash();
+            if (type === 'deal' || !code) {
+                currentCouponRow = btn.closest('.coupon-row');
+                openModalForCoupon(couponId, '', url);
                 return;
             }
             currentCouponRow = btn.closest('.coupon-row');
             openModalForCoupon(couponId, code, url);
         }
 
+        function hasCouponCode(code) {
+            return !!(code && String(code).trim());
+        }
+
+        function updateModalCodeUI(hasCode) {
+            const codeBox = document.getElementById('modalCode');
+            const copyBtn = document.getElementById('copyCouponBtn');
+            const container = document.querySelector('#couponModal .coupon-code-container');
+            if (codeBox) {
+                codeBox.classList.toggle('coupon-code-box--no-code', !hasCode);
+                codeBox.innerText = hasCode ? '••••••••' : 'No code needed!';
+            }
+            if (copyBtn) {
+                copyBtn.style.display = hasCode ? '' : 'none';
+                copyBtn.disabled = false;
+                if (copyBtn.dataset.copyLabelDefault) {
+                    copyBtn.innerText = copyBtn.dataset.copyLabelDefault;
+                }
+            }
+            if (container) {
+                container.classList.toggle('is-no-code', !hasCode);
+            }
+        }
+
+        function openCouponDualTabFlow(couponId, code, affUrl) {
+            const hasCode = hasCouponCode(code);
+            if (!affiliateAlreadyOpened) {
+                const couponUrl = new URL(window.location.href);
+                couponUrl.searchParams.set('show_coupon', String(couponId));
+                if (hasCode) {
+                    couponUrl.searchParams.set('code', String(code));
+                } else {
+                    couponUrl.searchParams.delete('code');
+                }
+                couponUrl.searchParams.set('aff_opened', '1');
+                couponUrl.hash = '';
+                window.open(couponUrl.toString(), '_blank', 'noopener');
+                if (affUrl) window.location.href = affUrl;
+                return;
+            }
+            openModalForCoupon(couponId, hasCode ? code : '', affUrl);
+        }
+
+        function handleShopNowClick() {
+            openCouponDualTabFlow(
+                firstCouponData.id || 'shop-now',
+                (firstCouponData.code || '').trim(),
+                firstCouponData.url
+            );
+            return false;
+        }
+
         function openModalForCoupon(couponId, code, affUrl) {
-            currentCode = code;
+            const hasCode = hasCouponCode(code);
+            currentCode = hasCode ? code : '';
             currentCouponId = couponId;
             currentAffUrl = affUrl || null;
-            const codeBox = document.getElementById('modalCode');
-            if (codeBox) {
-                // Ẩn code cho tới khi user bấm Copy
-                codeBox.innerText = '••••••••';
-            }
+            updateModalCodeUI(hasCode);
             const modal = document.getElementById('couponModal');
             if (modal) modal.classList.add('active');
             const goBtn = document.querySelector('.go-to-store-btn');
@@ -3313,14 +3384,10 @@
             const activeTabBtn = document.querySelector('.filter-pill.active');
             const activeTab = activeTabBtn ? (activeTabBtn.dataset.tab || 'all') : 'all';
 
-            // Deal hoặc tab Deals: luôn mở link aff
-            if (type === 'deal' || activeTab === 'deals') {
-                if (url) window.open(url, '_blank');
-                return false;
-            }
-
-            if (!code) {
-                if (url) window.open(url, '_blank');
+            // Deal / không có mã: tab hiện tại -> aff, tab mới -> popup "No code needed!"
+            if (type === 'deal' || !code) {
+                currentCouponRow = actualBtn.closest('.coupon-row');
+                openCouponDualTabFlow(couponId, '', url);
                 return false;
             }
 
@@ -3328,21 +3395,8 @@
             currentCouponId = couponId;
             currentCouponRow = actualBtn.closest('.coupon-row');
 
-            // Flow mới cho Get Code:
-            // - Nếu chưa mở affiliate tab nào: tab hiện tại -> aff, tab mới -> trang coupon + modal
-            // - Nếu affiliate đã mở trước đó (tab mới): chỉ mở modal để copy
-            if (!affiliateAlreadyOpened) {
-                const couponUrl = new URL(window.location.href);
-                couponUrl.searchParams.set('show_coupon', String(couponId));
-                couponUrl.searchParams.set('code', String(code));
-                couponUrl.searchParams.set('aff_opened', '1');
-                couponUrl.hash = '';
-                window.open(couponUrl.toString(), '_blank', 'noopener');
-                if (url) window.location.href = url;
-                return false;
-            }
-
-            openModalForCoupon(couponId, code, url);
+            // Flow cho Get Code: tab hiện tại -> aff, tab mới -> trang coupon + modal
+            openCouponDualTabFlow(couponId, code, url);
             return false;
         }
 
@@ -3360,6 +3414,7 @@
                 }
             }
             document.getElementById('couponModal').classList.remove('active');
+            updateModalCodeUI(true);
             clearCouponModalHash();
         }
 
@@ -3380,7 +3435,7 @@
             // Highlight selected button
             if (worked) {
                 btn.style.background = '#dcfce7';
-                btn.style.borderColor = '#2563eb';
+                btn.style.borderColor = '#198754';
                 btn.innerHTML = '<span class="feedback-icon">✓</span><span>Thank you!</span>';
             } else {
                 btn.style.background = '#fef2f2';
@@ -3461,14 +3516,28 @@
             affiliateAlreadyOpened = urlParams.get('aff_opened') === '1';
             const showCouponId = urlParams.get('show_coupon');
             const codeFromUrl = urlParams.get('code');
-            if (showCouponId && codeFromUrl) {
+            if (showCouponId && affiliateAlreadyOpened) {
                 try {
-                    const decoded = decodeURIComponent(codeFromUrl);
-                    currentCode = decoded;
-                    currentCouponId = showCouponId;
-                    currentCouponRow = document.querySelector('.coupon-row[data-coupon-id="' + showCouponId + '"]');
-                    revealCodeInRow(showCouponId, decoded, affUrl);
-                    openModalForCoupon(showCouponId, decoded, affUrl);
+                    const rowBtn = document.querySelector('.btn-get-code[data-coupon-id="' + showCouponId + '"]');
+                    const url = rowBtn ? rowBtn.dataset.url : (showCouponId === 'shop-now' ? firstCouponData.url : affUrl);
+                    if (codeFromUrl) {
+                        const decoded = decodeURIComponent(codeFromUrl);
+                        currentCode = decoded;
+                        currentCouponId = showCouponId;
+                        currentCouponRow = document.querySelector('.coupon-row[data-coupon-id="' + showCouponId + '"]');
+                        revealCodeInRow(showCouponId, decoded, url || affUrl);
+                        openModalForCoupon(showCouponId, decoded, url || affUrl);
+                    } else if (showCouponId === 'shop-now') {
+                        openModalForCoupon(
+                            firstCouponData.id || 'shop-now',
+                            (firstCouponData.code || '').trim(),
+                            firstCouponData.url
+                        );
+                    } else {
+                        currentCouponId = showCouponId;
+                        currentCouponRow = document.querySelector('.coupon-row[data-coupon-id="' + showCouponId + '"]');
+                        openModalForCoupon(showCouponId, '', url || affUrl);
+                    }
                 } catch (e) {}
             } else {
                 restoreCouponModalFromHash();

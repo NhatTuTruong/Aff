@@ -84,7 +84,7 @@ class ListBlogs extends ListRecords
                         ->label('Mã coupon (tuỳ chọn)')
                         ->placeholder('VD: SAVE10')
                         ->maxLength(80)
-                        ->helperText('Nếu nhập, AI sẽ hiển thị mã trong bài viết (không tự bịa thêm điều kiện).'),
+                        ->helperText('Nếu nhập, AI sẽ hiển thị mã trong bài viết.'),
                 ])
                 ->action(function (array $data): void {
                     $gemini = app(GeminiBlogService::class);
