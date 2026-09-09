@@ -28,6 +28,7 @@ class Blog extends Model
         'videos',
         'is_published',
         'views_count',
+        'created_at',
     ];
 
     protected $casts = [
@@ -35,6 +36,7 @@ class Blog extends Model
         'videos' => 'array',
         'is_published' => 'boolean',
         'views_count' => 'integer',
+        'created_at' => 'datetime',
     ];
 
     /** Nội dung đã loại tên file / dung lượng dưới ảnh đính kèm. */

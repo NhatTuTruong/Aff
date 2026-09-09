@@ -85,6 +85,14 @@ class BlogResource extends Resource
                             ->label('Xuất bản')
                             ->default(true)
                             ->helperText('Chỉ bài đã xuất bản mới hiển thị trên trang chủ'),
+                        Forms\Components\DateTimePicker::make('created_at')
+                            ->label('Ngày đăng')
+                            ->default(now())
+                            ->required()
+                            ->native(false)
+                            ->seconds(false)
+                            ->displayFormat('d/m/Y H:i')
+                            ->helperText('Ngày hiển thị trên trang chủ và trang bài viết'),
                     ])
                     ->columns(2),
                 Forms\Components\Section::make('Nội dung')
