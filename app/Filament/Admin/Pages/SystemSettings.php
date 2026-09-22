@@ -69,6 +69,7 @@ class SystemSettings extends Page implements HasForms
             'auto_blog_variant_guide' => (bool) AdminSettings::get('auto_blog_variant_guide', true),
             'auto_blog_variant_comparison' => (bool) AdminSettings::get('auto_blog_variant_comparison', true),
             'auto_blog_brand_intro_enabled' => (bool) AdminSettings::get('auto_blog_brand_intro_enabled', true),
+            'auto_blog_brand_intro_allow_rerun' => (bool) AdminSettings::get('auto_blog_brand_intro_allow_rerun', false),
             'auto_blog_brand_intro_interval_hours' => (float) AdminSettings::get('auto_blog_brand_intro_interval_hours', 1),
             'auto_blog_global_idea' => (string) AdminSettings::get('auto_blog_global_idea', ''),
             'seo_title_suffix' => (string) AdminSettings::get('seo_title_suffix', '- ' . config('app.name')),
@@ -155,6 +156,11 @@ class SystemSettings extends Page implements HasForms
                         Toggle::make('auto_blog_brand_intro_enabled')
                             ->label('Bật variant: Bài viết về cửa hàng đang có')
                             ->inline(false),
+                        Toggle::make('auto_blog_brand_intro_allow_rerun')
+                            ->label('Cho phép đăng lại nhiều vòng')
+                            ->helperText('Bật: sau khi đăng hết mọi chiến dịch có affiliate, cron bắt đầu vòng mới và có thể tạo bài mới cho cùng chiến dịch. Tắt: dừng khi hết danh sách.')
+                            ->inline(false)
+                            ->columnSpanFull(),
                         TextInput::make('auto_blog_brand_intro_interval_hours')
                             ->label('Khoảng cách đăng bài (giờ)')
                             ->numeric()
@@ -243,6 +249,7 @@ class SystemSettings extends Page implements HasForms
         AdminSettings::set('auto_blog_variant_guide', (bool) ($data['auto_blog_variant_guide'] ?? true));
         AdminSettings::set('auto_blog_variant_comparison', (bool) ($data['auto_blog_variant_comparison'] ?? true));
         AdminSettings::set('auto_blog_brand_intro_enabled', (bool) ($data['auto_blog_brand_intro_enabled'] ?? true));
+        AdminSettings::set('auto_blog_brand_intro_allow_rerun', (bool) ($data['auto_blog_brand_intro_allow_rerun'] ?? false));
         AdminSettings::set('auto_blog_brand_intro_interval_hours', (float) ($data['auto_blog_brand_intro_interval_hours'] ?? 1));
         AdminSettings::set('auto_blog_global_idea', trim((string) ($data['auto_blog_global_idea'] ?? '')));
         AdminSettings::set('seo_title_suffix', trim((string) ($data['seo_title_suffix'] ?? ('- ' . config('app.name')))));

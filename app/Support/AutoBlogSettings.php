@@ -38,6 +38,14 @@ class AutoBlogSettings
         return $hours > 0 ? $hours : 1;
     }
 
+    /**
+     * Khi bật: sau khi đăng hết mọi chiến dịch, cron có thể bắt đầu vòng mới (đăng lại cùng campaign).
+     */
+    public static function brandIntroAllowRerun(): bool
+    {
+        return (bool) AdminSettings::get('auto_blog_brand_intro_allow_rerun', false);
+    }
+
     public static function globalIdea(): string
     {
         return trim((string) AdminSettings::get('auto_blog_global_idea', ''));

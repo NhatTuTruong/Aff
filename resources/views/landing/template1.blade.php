@@ -2042,7 +2042,7 @@
 
             .coupon-discount-visual {
                 padding: 14px 12px;
-                background-color: #ffeaea;
+                background-color: #bfecd7;
             }
 
             .discount-up-to {

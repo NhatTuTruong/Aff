@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Blog;
 use App\Models\Brand;
 use App\Models\Campaign;
+use App\Support\AutoBlogSettings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -152,7 +153,12 @@ class BrandIntroBlogCandidateService
         }
 
         if (empty($availableBrandIds)) {
-            return null;
+            if (! AutoBlogSettings::brandIntroAllowRerun()) {
+                return null;
+            }
+
+            $usedCampaignIds = [];
+            $availableBrandIds = $brandRows->pluck('id')->map(fn ($id) => (int) $id)->toArray();
         }
 
         // Mỗi ngày trong năm chọn 1 brand khác nhau (xoay vòng theo day-of-year)

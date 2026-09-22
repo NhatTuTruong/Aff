@@ -117,7 +117,11 @@ class GenerateDailyBlogs extends Command
 
         $candidate = $this->pickNextBrandIntroCandidate();
         if ($candidate === null) {
-            $this->warn('Blog giới thiệu store: không có chiến dịch nào có affiliate_url phù hợp.');
+            if (AutoBlogSettings::brandIntroAllowRerun()) {
+                $this->warn('Blog giới thiệu store: không có chiến dịch nào có affiliate_url phù hợp.');
+            } else {
+                $this->warn('Blog giới thiệu store: đã đăng hết tất cả chiến dịch (tắt đăng lại nhiều vòng).');
+            }
 
             return;
         }
@@ -174,7 +178,7 @@ class GenerateDailyBlogs extends Command
      * - Mỗi brand chỉ được chọn khi có ít nhất 1 campaign có affiliate_url
      * - Campaign được chọn là campaign cũ nhất (created_at ASC) của brand đó
      * - Xoay vòng qua các brand theo thứ tự đã sắp xếp để mỗi lần đăng là 1 brand khác nhau
-     * - Bỏ qua campaign đã có blog giới thiệu (trừ khi blog đã bị xóa)
+     * - Bỏ qua campaign đã có blog giới thiệu (trừ khi blog đã bị xóa hoặc bật đăng lại nhiều vòng)
      *
      * @return array{0: Brand, 1: Campaign}|null
      */
@@ -227,8 +231,13 @@ class GenerateDailyBlogs extends Command
             }
         }
 
-        // Nếu đã đăng hết tất cả campaigns, reset và bắt đầu lại từ đầu
         if (empty($availableBrandIds)) {
+            if (! AutoBlogSettings::brandIntroAllowRerun()) {
+                return null;
+            }
+
+            // Vòng mới: bỏ lọc campaign đã có blog giới thiệu
+            $usedCampaignIds = [];
             $availableBrandIds = $brandRows->pluck('id')->map(fn ($id) => (int) $id)->toArray();
         }
 
