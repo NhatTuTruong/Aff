@@ -262,6 +262,26 @@ class BlogApifyImageService
     }
 
     /**
+    /**
+     * Tách ảnh inline đã có và phân bố lại đều giữa các đoạn văn.
+     */
+    public function redistributeContentImages(string $html): string
+    {
+        if (! preg_match_all('/<p\b[^>]*>\s*<img\b[^>]*\bsrc=(["\'])([^"\']+)\1/is', $html, $matches)) {
+            return $html;
+        }
+
+        $urls = array_values(array_unique($matches[2]));
+        if ($urls === []) {
+            return $html;
+        }
+
+        return $this->insertImagesEvenly($html, $urls);
+    }
+
+    /**
+     * Chèn ảnh xen kẽ đều giữa các đoạn văn (giữ nguyên heading/ul/cấu trúc khác).
+     *
      * @param  list<string>  $imagePublicUrls
      */
     public function insertImagesEvenly(string $html, array $imagePublicUrls): string
@@ -271,7 +291,12 @@ class BlogApifyImageService
             return $html;
         }
 
-        if (! preg_match_all('/<p\b[^>]*>.*?<\/p>/is', $html, $matches)) {
+        // Gỡ ảnh Apify cũ (chỉ <p> chứa <img>) để tránh dồn đầu bài khi enrich lại.
+        $html = preg_replace('/<p\b[^>]*>\s*<img\b[^>]*>\s*<\/p>\s*/is', '', $html) ?? $html;
+
+        $html = $this->normalizeLooseTextParagraphs($html);
+
+        if (! preg_match_all('/<p\b[^>]*>.*?<\/p>/is', $html, $matches, PREG_OFFSET_CAPTURE)) {
             $extra = '';
             foreach ($imagePublicUrls as $url) {
                 $extra .= $this->imageParagraph($url);
@@ -280,39 +305,128 @@ class BlogApifyImageService
             return rtrim($html).$extra;
         }
 
-        $paragraphs = $matches[0];
-        $pCount = count($paragraphs);
+        /** @var list<array{0: string, 1: int}> $contentParas */
+        $contentParas = [];
+        foreach ($matches[0] as $match) {
+            if ($this->isInsertableContentParagraph($match[0])) {
+                $contentParas[] = $match;
+            }
+        }
+
+        if ($contentParas === []) {
+            $extra = '';
+            foreach ($imagePublicUrls as $url) {
+                $extra .= $this->imageParagraph($url);
+            }
+
+            return rtrim($html).$extra;
+        }
+
+        $pCount = count($contentParas);
         $imgCount = count($imagePublicUrls);
 
         /** @var array<int, list<string>> $insertAfter */
         $insertAfter = [];
         for ($i = 0; $i < $imgCount; $i++) {
-            $paraIndex = max(0, (int) floor(($i + 1) * $pCount / ($imgCount + 1)) - 1);
+            // Phân bố đều: ảnh thứ k sau đoạn gần vị trí k/(n+1).
+            $paraIndex = max(0, (int) round(($i + 1) * $pCount / ($imgCount + 1)) - 1);
+            $paraIndex = min($pCount - 1, $paraIndex);
+            while (isset($insertAfter[$paraIndex]) && $paraIndex < $pCount - 1) {
+                $paraIndex++;
+            }
             $insertAfter[$paraIndex][] = $imagePublicUrls[$i];
         }
 
-        $output = '';
-        for ($i = 0; $i < $pCount; $i++) {
-            $output .= $paragraphs[$i];
-            if (isset($insertAfter[$i])) {
-                foreach ($insertAfter[$i] as $url) {
-                    $output .= $this->imageParagraph($url);
-                }
+        // Chèn từ cuối → đầu để offset không lệch.
+        krsort($insertAfter);
+        foreach ($insertAfter as $paraIndex => $urls) {
+            $target = $contentParas[$paraIndex];
+            $endPos = $target[1] + strlen($target[0]);
+            $chunk = '';
+            foreach ($urls as $url) {
+                $chunk .= $this->imageParagraph($url);
+            }
+            $html = substr($html, 0, $endPos)."\n".$chunk.substr($html, $endPos);
+        }
+
+        return $html;
+    }
+
+    protected function isInsertableContentParagraph(string $pHtml): bool
+    {
+        if (preg_match('/<img\b/i', $pHtml)) {
+            return false;
+        }
+
+        if (preg_match('/blog-aff-cta|blog-coupon-code/i', $pHtml)) {
+            return false;
+        }
+
+        if (preg_match('/<strong>\s*Code:\s*<\/strong>/i', $pHtml)) {
+            return false;
+        }
+
+        $text = trim(preg_replace('/\s+/u', ' ', strip_tags($pHtml)) ?? '');
+        if ($text === '') {
+            return false;
+        }
+
+        if (preg_match('/^(?:Shop now(?: at .*)?|Visit the store|Discover .+|Get the latest offers from the store\.?)$/iu', $text)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Bọc text thuần (AI hay trả sau heading) thành <p> để có điểm chèn ảnh giữa bài.
+     */
+    protected function normalizeLooseTextParagraphs(string $html): string
+    {
+        $html = preg_replace_callback(
+            '/(<\/h[1-6]>)\s*(.+?)(?=\s*<(?:h[1-6]|p|ul|ol|div|figure|blockquote|table|hr)\b|\z)/is',
+            function (array $m): string {
+                return $m[1].$this->wrapPlainTextBlocks($m[2]);
+            },
+            $html
+        ) ?? $html;
+
+        $html = preg_replace_callback(
+            '/\A\s*((?:(?!<(?:h[1-6]|p|ul|ol|div)\b).)+?)(?=\s*<(?:h[1-6]|p|ul|ol|div)\b)/is',
+            function (array $m): string {
+                return $this->wrapPlainTextBlocks($m[1]);
+            },
+            $html
+        ) ?? $html;
+
+        return $html;
+    }
+
+    protected function wrapPlainTextBlocks(string $raw): string
+    {
+        $raw = trim($raw);
+        if ($raw === '') {
+            return '';
+        }
+
+        if (preg_match('/^\s*<p\b/i', $raw)) {
+            return "\n\n".$raw;
+        }
+
+        $out = '';
+        foreach (preg_split('/\n\s*\n+/u', $raw) as $para) {
+            $para = trim($para);
+            if ($para === '') {
+                continue;
+            }
+            if (preg_match('/^<[a-z][\s>]/i', $para)) {
+                $out .= "\n\n".$para;
+            } else {
+                $out .= "\n\n<p>".$para.'</p>';
             }
         }
 
-        $lastPos = 0;
-        foreach ($paragraphs as $paragraph) {
-            $pos = strpos($html, $paragraph, $lastPos);
-            if ($pos === false) {
-                return $html;
-            }
-            $lastPos = $pos + strlen($paragraph);
-        }
-
-        $tail = substr($html, $lastPos);
-
-        return $output.$tail;
+        return $out;
     }
 
     protected function imageParagraph(string $publicUrl): string

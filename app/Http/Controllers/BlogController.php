@@ -60,6 +60,7 @@ class BlogController extends Controller
     public function show(string $slug): View
     {
         $post = Blog::query()
+            ->with('campaign')
             ->where('is_published', true)
             ->where('slug', $slug)
             ->firstOrFail();

@@ -142,7 +142,7 @@ class GenerateDailyBlogs extends Command
         }
 
         $campaign->loadMissing('couponItems');
-        $result['content'] = $gemini->ensureStoreBlogCouponSection(
+        $result['content'] = $gemini->prepareStoreBlogHtml(
             (string) ($result['content'] ?? ''),
             $campaign,
         );
@@ -152,6 +152,7 @@ class GenerateDailyBlogs extends Command
             $blog->user_id = $author->id;
         }
         $blog->campaign_id = $campaign->id;
+        $blog->affiliate_url = route('click.redirect', ['slug' => $campaign->slug], true);
         $blog->intro_type = 'store';
         $blog->title = $result['title'];
         $blog->category = $categoryLabel;

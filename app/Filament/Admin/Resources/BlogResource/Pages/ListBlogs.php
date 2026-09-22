@@ -141,12 +141,23 @@ class ListBlogs extends ListRecords
 
                     if ($hasCustomInput) {
                         if ($brandHint !== '') {
-                            $variants = AutoBlogSettings::enabledCategoryVariants();
-                            $variant = $variants !== [] ? $variants[array_rand($variants)] : 'best';
-                            $result = $gemini->generateBlog($aiCategory, $variant, $extras, $brandHint);
-                            $categoryLabel = $pickedCategoryName ?? 'General';
-                            $introType = $variant;
-                            $apifySearchQuery = $brandHint;
+                            $resolved = $this->findCampaignForBrandHint($brandHint);
+                            if ($resolved !== null) {
+                                [$brand, $campaign] = $resolved;
+                                $storeCampaign = $campaign;
+                                $campaignId = $campaign->id;
+                                $categoryLabel = $this->resolveBrandCategoryLabel($brand);
+                                $result = $gemini->generateBrandIntroBlog($brand, $campaign, $categoryLabel, $extras);
+                                $introType = 'store';
+                                $apifySearchQuery = trim($brand->name ?: (string) ($brand->domain ?? $campaign->title));
+                            } else {
+                                $variants = AutoBlogSettings::enabledCategoryVariants();
+                                $variant = $variants !== [] ? $variants[array_rand($variants)] : 'best';
+                                $result = $gemini->generateBlog($aiCategory, $variant, $extras, $brandHint);
+                                $categoryLabel = $pickedCategoryName ?? 'General';
+                                $introType = $variant;
+                                $apifySearchQuery = $brandHint;
+                            }
                         } else {
                             if (empty($categoryNames) || ! is_array($categoryNames)) {
                                 Notification::make()
@@ -247,12 +258,28 @@ class ListBlogs extends ListRecords
                         );
                     }
 
-                    // Apify insertImagesEvenly chỉ giữ thẻ <p> — inject lại coupon sau enrich.
-                    if (($introType ?? null) === 'store' && $storeCampaign !== null) {
+                    $affiliateForPost = trim((string) ($extras['affiliate_url'] ?? ''));
+
+                    if ($storeCampaign !== null) {
                         $storeCampaign->loadMissing('couponItems');
-                        $result['content'] = $gemini->ensureStoreBlogCouponSection(
+                        $result['content'] = $gemini->prepareStoreBlogHtml(
                             (string) ($result['content'] ?? ''),
                             $storeCampaign,
+                        );
+                        $affiliateForPost = route('click.redirect', ['slug' => $storeCampaign->slug], true);
+                    } elseif (filled($campaignId)) {
+                        $linkedCampaign = Campaign::query()->with('couponItems')->find($campaignId);
+                        if ($linkedCampaign) {
+                            $result['content'] = $gemini->prepareStoreBlogHtml(
+                                (string) ($result['content'] ?? ''),
+                                $linkedCampaign,
+                            );
+                            $affiliateForPost = route('click.redirect', ['slug' => $linkedCampaign->slug], true);
+                        }
+                    } elseif ($affiliateForPost !== '') {
+                        $result['content'] = $gemini->prepareAffiliateBlogHtml(
+                            (string) ($result['content'] ?? ''),
+                            $affiliateForPost,
                         );
                     }
 
@@ -261,6 +288,7 @@ class ListBlogs extends ListRecords
                     $blog = Blog::create([
                         'user_id' => $author?->id,
                         'campaign_id' => $campaignId ?? null,
+                        'affiliate_url' => $affiliateForPost !== '' ? $affiliateForPost : null,
                         'intro_type' => $introType ?? null,
                         'title' => $result['title'],
                         'category' => $categoryLabel ?? 'General',
@@ -290,6 +318,52 @@ class ListBlogs extends ListRecords
      *
      * @return array{0: Brand, 1: Campaign}|null
      */
+    /**
+     * @return array{0: Brand, 1: Campaign}|null
+     */
+    protected function findCampaignForBrandHint(string $hint): ?array
+    {
+        $hint = trim($hint);
+        if ($hint === '') {
+            return null;
+        }
+
+        $domainHint = preg_replace('#^https?://#i', '', $hint);
+        $domainHint = explode('/', (string) $domainHint)[0] ?? $domainHint;
+
+        $brand = Brand::query()
+            ->whereNull('deleted_at')
+            ->where(function ($q) use ($hint, $domainHint) {
+                $q->where('name', 'like', '%'.$hint.'%')
+                    ->orWhere('domain', 'like', '%'.$hint.'%');
+                if ($domainHint !== '' && $domainHint !== $hint) {
+                    $q->orWhere('domain', 'like', '%'.$domainHint.'%');
+                }
+            })
+            ->orderBy('id')
+            ->first();
+
+        if (! $brand) {
+            return null;
+        }
+
+        $campaign = Campaign::query()
+            ->where('brand_id', $brand->id)
+            ->whereNull('deleted_at')
+            ->whereNotNull('affiliate_url')
+            ->where('affiliate_url', '!=', '')
+            ->when(app()->environment('production'), fn ($q) => $q->where('status', 'active'))
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->first();
+
+        if (! $campaign) {
+            return null;
+        }
+
+        return [$brand, $campaign];
+    }
+
     protected function findNextBrandIntroCandidate(): ?array
     {
         // Lấy tất cả campaigns phù hợp (sắp xếp theo thời gian tạo: cũ -> mới)

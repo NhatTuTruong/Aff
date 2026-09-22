@@ -12,9 +12,10 @@
     @php
         $wordCount = str_word_count(strip_tags($post->content ?? ''));
         $readingMinutes = max(1, (int) ceil($wordCount / 220));
+        $blogAffUrl = $post->affiliate_tracking_url;
     @endphp
 
-    <div class="blog-shell">
+    <div class="blog-shell"@if($blogAffUrl) data-aff-url="{{ $blogAffUrl }}"@endif>
         <div class="blog-breadcrumb">
             <a href="{{ route('blog.index') }}">Blog</a>
             <span>/</span>
@@ -106,3 +107,82 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text);
+        }
+        return new Promise(function (resolve, reject) {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy') ? resolve() : reject();
+            } catch (e) {
+                reject(e);
+            }
+            document.body.removeChild(ta);
+        });
+    }
+
+        document.querySelectorAll('.blog-coupon-code').forEach(function (btn) {
+        if (btn.dataset.blogCouponBound === '1') return;
+        btn.dataset.blogCouponBound = '1';
+
+        btn.addEventListener('click', function () {
+            var code = (btn.dataset.code || '').trim();
+            var affUrl = (btn.dataset.affUrl || '').trim();
+            if (!code || btn.disabled) return;
+
+            var original = btn.textContent;
+            btn.disabled = true;
+            btn.classList.add('copied');
+            btn.textContent = 'Copied!';
+
+            copyText(code).catch(function () {});
+
+            setTimeout(function () {
+                if (affUrl) {
+                    window.open(affUrl, '_blank', 'noopener');
+                }
+                btn.classList.remove('copied');
+                btn.textContent = original;
+                btn.disabled = false;
+            }, 1000);
+        });
+    });
+
+    var blogShell = document.querySelector('.blog-shell[data-aff-url]');
+    if (blogShell) {
+        var affUrl = (blogShell.dataset.affUrl || '').trim();
+        if (affUrl) {
+            blogShell.querySelectorAll('.blog-hero-media-inner img, .blog-content.prose img, .blog-side-media img').forEach(function (img) {
+                if (img.dataset.affImageBound === '1') return;
+                img.dataset.affImageBound = '1';
+                img.classList.add('blog-aff-image');
+                img.setAttribute('role', 'link');
+                img.setAttribute('tabindex', '0');
+                img.setAttribute('title', 'View store offers');
+                var go = function () {
+                    window.open(affUrl, '_blank', 'noopener');
+                };
+                img.addEventListener('click', go);
+                img.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        go();
+                    }
+                });
+            });
+        }
+    }
+})();
+</script>
+@endpush

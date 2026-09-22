@@ -1029,6 +1029,74 @@ body:has(.blog-shell) {
     background: rgba(15, 23, 42, 0.06);
 }
 
+.blog-content.prose .blog-coupon-code {
+    display: inline-block;
+    margin: 0 0.15rem;
+    padding: 0.2rem 0.65rem;
+    border: 2px dashed var(--blog-accent);
+    border-radius: 8px;
+    background: var(--blog-accent-soft);
+    color: var(--blog-accent);
+    font-size: 0.9em;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.blog-content.prose .blog-coupon-code:hover {
+    background: var(--blog-accent-mid);
+    border-style: solid;
+    transform: translateY(-1px);
+}
+
+.blog-content.prose .blog-coupon-code.copied {
+    background: #10b981;
+    border-color: #059669;
+    border-style: solid;
+    color: #fff;
+}
+
+.blog-content.prose a.blog-aff-cta {
+    display: inline-block;
+    max-width: min(100%, 22rem);
+    padding: 0.65rem 1.25rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--blog-accent), var(--blog-accent-deep));
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 0.88rem;
+    line-height: 1.35;
+    text-align: center;
+    white-space: normal;
+    text-decoration: none !important;
+    box-shadow: 0 8px 20px -8px rgba(25, 135, 84, 0.55);
+    transition: transform 0.2s, filter 0.2s;
+}
+
+.blog-shell[data-aff-url] .blog-aff-image,
+.blog-shell[data-aff-url] .blog-hero-media-inner img,
+.blog-shell[data-aff-url] .blog-content.prose img,
+.blog-shell[data-aff-url] .blog-side-media img {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.blog-shell[data-aff-url] .blog-aff-image:hover,
+.blog-shell[data-aff-url] .blog-hero-media-inner img:hover,
+.blog-shell[data-aff-url] .blog-content.prose img:hover,
+.blog-shell[data-aff-url] .blog-side-media img:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px -12px rgba(15, 23, 42, 0.35);
+}
+
+.blog-content.prose a.blog-aff-cta:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+    color: #fff !important;
+}
+
 .blog-side-media {
     margin-top: 1.75rem;
     display: grid;

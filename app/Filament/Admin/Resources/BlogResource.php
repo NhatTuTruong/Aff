@@ -77,6 +77,12 @@ class BlogResource extends Resource
                             ->preload()
                             ->placeholder('Chọn chiến dịch (tùy chọn)')
                             ->helperText('Gắn bài viết với chiến dịch để tránh tạo trùng'),
+                        Forms\Components\TextInput::make('affiliate_url')
+                            ->label('Link affiliate')
+                            ->url()
+                            ->maxLength(2048)
+                            ->placeholder('https://...')
+                            ->helperText('Dùng khi bài AI không gắn chiến dịch — mọi link & mã coupon sẽ dùng URL này khi hiển thị'),
                         Forms\Components\TextInput::make('intro_type')
                             ->label('Loại bài viết')
                             ->placeholder('store, best, guide...')

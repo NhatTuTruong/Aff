@@ -18,6 +18,7 @@ class Blog extends Model
     protected $fillable = [
         'user_id',
         'campaign_id',
+        'affiliate_url',
         'intro_type',
         'title',
         'category',
@@ -44,15 +45,20 @@ class Blog extends Model
     {
         $html = BlogContentHtml::stripAttachmentCaptions($this->content);
 
-        if ($this->intro_type === 'store' && filled($this->campaign_id)) {
+        $gemini = app(\App\Services\GeminiBlogService::class);
+
+        if (filled($this->campaign_id)) {
             $campaign = $this->relationLoaded('campaign')
                 ? $this->campaign
                 : $this->campaign()->with('couponItems')->first();
 
             if ($campaign) {
-                $html = app(\App\Services\GeminiBlogService::class)
-                    ->ensureStoreBlogCouponSection($html, $campaign);
+                $html = $gemini->prepareStoreBlogHtml($html, $campaign);
             }
+        } elseif (filled($this->affiliate_url)) {
+            $html = $gemini->prepareAffiliateBlogHtml($html, (string) $this->affiliate_url);
+        } else {
+            $html = app(\App\Services\BlogApifyImageService::class)->redistributeContentImages($html);
         }
 
         return $html;
@@ -72,6 +78,28 @@ class Blog extends Model
     public function getFeaturedImageUrlAttribute(): string
     {
         return BlogCategoryImage::resolveUrl($this->featured_image, $this->category, $this->id);
+    }
+
+    /** Link affiliate tracking cho CTA / ảnh trong bài (từ campaign hoặc cột affiliate_url). */
+    public function getAffiliateTrackingUrlAttribute(): ?string
+    {
+        if (filled($this->affiliate_url)) {
+            return (string) $this->affiliate_url;
+        }
+
+        if (! filled($this->campaign_id)) {
+            return null;
+        }
+
+        $campaign = $this->relationLoaded('campaign')
+            ? $this->campaign
+            : $this->campaign()->first();
+
+        if (! $campaign) {
+            return null;
+        }
+
+        return route('click.redirect', ['slug' => $campaign->slug], true);
     }
 
     protected static function boot()

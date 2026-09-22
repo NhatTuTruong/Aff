@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 
 class GeminiBlogService
 {
+    public const AFF_CTA_LABEL = 'Get the latest offers from the store.';
+
     /** @var string|null Lưu lỗi gần nhất để debug */
     public ?string $lastError = null;
 
@@ -114,7 +116,19 @@ Loại bài: {$variant}
 PROMPT;
         }
 
-        return $this->callGeminiWithKeyAndModelFallback($preferredModel, $prompt, $timeout);
+        $result = $this->callGeminiWithKeyAndModelFallback($preferredModel, $prompt, $timeout);
+
+        if ($result !== null) {
+            $affiliateUrl = trim((string) ($extras['affiliate_url'] ?? ''));
+            if ($affiliateUrl !== '') {
+                $result['content'] = $this->prepareAffiliateBlogHtml(
+                    (string) ($result['content'] ?? ''),
+                    $affiliateUrl,
+                );
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -236,7 +250,6 @@ PROMPT;
             ? implode('; ', array_filter(array_map('strval', $benefits)))
             : (string) $benefits;
 
-        $couponSectionHtml = $this->buildStoreBlogCouponSectionHtml($campaign);
         $couponSummaryForPrompt = $this->buildStoreBlogCouponSummaryForPrompt($campaign);
 
         $extrasBlock = $this->buildEditorExtrasBlock(
@@ -271,18 +284,19 @@ You are an expert SEO copywriter for affiliate coupon sites.
 ## Required HTML output rules
 - Return **complete HTML fragment** only: use `<h1>` once for the main title, then `<h2>`, `<h3>`, `<p>`, `<ul>`, `<ol>`, `<strong>` as needed. **Do not** wrap in `<html>` or `<body>`.
 - Do NOT use Markdown. Do NOT wrap output in code fences like ```html ... ```.
-- **DO NOT link** the brand name "{$brandName}" anywhere in the article content (headings or paragraphs). Just write it as plain text.
-- **ALL links** in the article must use this affiliate tracking URL only: {$affiliateTrackingUrl}
-- **NEVER** link to coupon landing pages, `/store/` URLs, or internal site pages for this campaign.
+- **DO NOT link** the brand name "{$brandName}" anywhere (never wrap brand name in `<a>`). Write brand names as plain text only.
+- Affiliate links: **exactly TWO** CTAs only — one right after the opening intro paragraph, one at the very end. No other `<a>` tags in the body.
+- CTA link text must be exactly: **Get the latest offers from the store.** — do **not** make the brand name itself the link text.
+- **NEVER** link to coupon landing pages, `/store/` URLs, merchant homepages, or other domains.
 
 ## Article structure
-1. **Title (`<h1>`)**: Include brand name + main category keyword.
-2. **Opening CTA (`<p>` at top)**: `<a href="{$affiliateTrackingUrl}" rel="nofollow sponsored noopener" target="_blank">Shop now at {$brandName}</a>` — put this link in the first paragraph.
+1. **Title (`<h1>`)**: Include brand name + main category keyword (plain text, no link).
+2. **Opening CTA (`<p>`)**: Immediately after the first intro paragraph: `<p><a href="{$affiliateTrackingUrl}" class="blog-aff-cta" rel="nofollow sponsored noopener" target="_blank">Get the latest offers from the store.</a></p>`
 3. **Brief intro (`<h2>`)**: What the brand is, main benefit.
 4. **Products/Services (`<h2>`)**: Main offerings.
 5. **Pros and Cons (`<h2>`)**: Two subsections or bullet lists.
-6. **Do NOT write an "Available Coupons" section** — the system injects verified coupon codes automatically after generation.
-7. **Closing CTA (`<p>` at bottom)**: `<a href="{$affiliateTrackingUrl}" rel="nofollow sponsored noopener" target="_blank">Shop now at {$brandName}</a>` — put this affiliate link in the last paragraph.
+6. **Do NOT write an "Available Coupons" section** — the system injects verified coupon codes automatically into the article body.
+7. **Closing CTA (`<p>` at bottom)**: `<p><a href="{$affiliateTrackingUrl}" class="blog-aff-cta" rel="nofollow sponsored noopener" target="_blank">Get the latest offers from the store.</a></p>`
 
 Current verified coupons for this campaign (reference only; do not invent others):
 {$couponSummaryForPrompt}
@@ -295,12 +309,7 @@ PROMPT;
 
         // Không gán ảnh brand: để featured_image null → Blog tự chọn ngẫu nhiên ảnh theo danh mục khi lưu.
         if ($result !== null) {
-            $content = $this->normalizeStoreBlogAffiliateLinks(
-                (string) $result['content'],
-                $campaignSlug,
-                $affiliateTrackingUrl,
-            );
-            $result['content'] = $this->injectStoreBlogCouponSection($content, $couponSectionHtml);
+            $result['content'] = $this->prepareStoreBlogHtml((string) $result['content'], $campaign);
             $result['featured_image'] = null;
         }
 
@@ -314,10 +323,11 @@ PROMPT;
     {
         $campaign->loadMissing(['couponItems', 'brand']);
         $brandName = $this->resolveStoreBlogBrandName($campaign);
+        $affiliateTrackingUrl = route('click.redirect', ['slug' => $campaign->slug], true);
 
         $listItems = $campaign->couponItems
             ->take($limit)
-            ->map(fn (Coupon $coupon) => $this->formatStoreBlogCouponListItem($coupon, $brandName))
+            ->map(fn (Coupon $coupon) => $this->formatStoreBlogCouponListItem($coupon, $brandName, $affiliateTrackingUrl))
             ->filter()
             ->values();
 
@@ -337,11 +347,12 @@ PROMPT;
         return $name !== '' ? $name : 'this store';
     }
 
-    protected function formatStoreBlogCouponListItem(Coupon $coupon, string $brandName): ?string
+    protected function formatStoreBlogCouponListItem(Coupon $coupon, string $brandName, string $affiliateTrackingUrl): ?string
     {
         $offer = trim(strip_tags((string) ($coupon->offer ?? '')));
         $code = trim((string) ($coupon->code ?? ''));
         $description = trim(strip_tags((string) ($coupon->description ?? '')));
+        $affEsc = e($affiliateTrackingUrl);
 
         if ($offer === '' && $code === '' && $description === '') {
             return null;
@@ -352,7 +363,8 @@ PROMPT;
             if ($offer !== '') {
                 $parts[] = '<strong>'.e($offer).'</strong>';
             }
-            $parts[] = 'Code: <code>'.e($code).'</code>';
+            $codeBtn = '<button type="button" class="blog-coupon-code" data-code="'.e($code).'" data-aff-url="'.$affEsc.'" aria-label="Copy code '.e($code).'">'.e($code).'</button>';
+            $parts[] = 'Code: '.$codeBtn;
             if ($description !== '') {
                 $parts[] = e($description);
             }
@@ -365,6 +377,7 @@ PROMPT;
             ? $description
             : $this->buildStoreBlogDealDescription($coupon, $brandName);
 
+        // Deal không gắn link aff (chỉ 2 CTA đầu/cuối bài được phép có link).
         if ($offer !== '') {
             return '<li><strong>'.e($offer).'</strong> — '.e($dealDescription).'</li>';
         }
@@ -497,8 +510,14 @@ PROMPT;
             }
         }
 
-        // Cuối bài: trước CTA "Shop now" hoặc đoạn <p> cuối.
-        if (preg_match('/<p\b[^>]*>.*?Shop now.*?<\/p>\s*$/is', $html, $matches, PREG_OFFSET_CAPTURE)) {
+        // Cuối bài: trước CTA affiliate hoặc đoạn <p> cuối.
+        if (preg_match('/<p\b[^>]*>\s*<a\b[^>]*blog-aff-cta[^>]*>.*?<\/a>\s*<\/p>\s*$/is', $html, $matches, PREG_OFFSET_CAPTURE)) {
+            $pos = $matches[0][1];
+
+            return rtrim(substr($html, 0, $pos))."\n\n".$couponSectionHtml."\n\n".ltrim(substr($html, $pos));
+        }
+
+        if (preg_match('/<p\b[^>]*>.*?(?:Shop now|Get the latest offers from the store).*?<\/p>\s*$/is', $html, $matches, PREG_OFFSET_CAPTURE)) {
             $pos = $matches[0][1];
 
             return rtrim(substr($html, 0, $pos))."\n\n".$couponSectionHtml."\n\n".ltrim(substr($html, $pos));
@@ -527,49 +546,167 @@ PROMPT;
     }
 
     /**
-     * Đảm bảo bài store blog có block coupon từ chiến dịch (gọi sau Apify enrich).
+     * Chuẩn hóa bài có link affiliate (không gắn campaign): ép link + nút copy mã inline.
      */
-    public function ensureStoreBlogCouponSection(string $html, Campaign $campaign): string
+    public function prepareAffiliateBlogHtml(string $html, string $affiliateTrackingUrl, ?Campaign $campaign = null): string
     {
-        return $this->injectStoreBlogCouponSection(
-            $html,
-            $this->buildStoreBlogCouponSectionHtml($campaign),
+        if ($campaign !== null) {
+            return $this->prepareStoreBlogHtml($html, $campaign);
+        }
+
+        $affiliateTrackingUrl = trim($affiliateTrackingUrl);
+        if ($affiliateTrackingUrl === '') {
+            return $html;
+        }
+
+        $html = $this->transformInlineCouponCodes($html, $affiliateTrackingUrl);
+
+        return app(BlogApifyImageService::class)->redistributeContentImages(
+            $this->normalizeAffiliateLinks($html, $affiliateTrackingUrl, null)
         );
     }
 
     /**
-     * Đảm bảo bài giới thiệu cửa hàng không còn link trang coupon (/store/) — chỉ dùng link affiliate (/out/).
+     * Chuẩn hóa bài store blog: inject coupon + ép mọi link sang affiliate.
      */
-    protected function normalizeStoreBlogAffiliateLinks(string $html, string $campaignSlug, string $affiliateTrackingUrl): string
+    public function prepareStoreBlogHtml(string $html, Campaign $campaign): string
+    {
+        $campaignSlug = (string) $campaign->slug;
+        $affiliateTrackingUrl = route('click.redirect', ['slug' => $campaignSlug], true);
+
+        $html = $this->injectStoreBlogCouponSection(
+            $html,
+            $this->buildStoreBlogCouponSectionHtml($campaign),
+        );
+
+        $html = $this->transformInlineCouponCodes($html, $affiliateTrackingUrl);
+
+        return app(BlogApifyImageService::class)->redistributeContentImages(
+            $this->normalizeAffiliateLinks($html, $affiliateTrackingUrl, $campaignSlug)
+        );
+    }
+
+    /**
+     * Đảm bảo bài store blog có block coupon từ chiến dịch (gọi sau Apify enrich).
+     */
+    public function ensureStoreBlogCouponSection(string $html, Campaign $campaign): string
+    {
+        return $this->prepareStoreBlogHtml($html, $campaign);
+    }
+
+    /**
+     * Chỉ giữ đúng 2 link affiliate (đầu + cuối bài); gỡ mọi <a> khác (kể cả gắn tên brand).
+     */
+    public function normalizeAffiliateLinks(string $html, string $affiliateTrackingUrl, ?string $campaignSlug = null): string
     {
         if (trim($html) === '') {
             return $html;
         }
 
-        $slug = preg_quote($campaignSlug, '#');
-        $replacements = array_unique(array_filter([
-            route('landing.show', ['slug' => $campaignSlug], true),
-            url('/store/'.$campaignSlug),
-            url('/visit/'.$campaignSlug),
-            '/store/'.$campaignSlug,
-            '/visit/'.$campaignSlug,
-        ]));
+        if ($campaignSlug !== null && $campaignSlug !== '') {
+            $slug = preg_quote($campaignSlug, '#');
+            $replacements = array_unique(array_filter([
+                route('landing.show', ['slug' => $campaignSlug], true),
+                url('/store/'.$campaignSlug),
+                url('/visit/'.$campaignSlug),
+                '/store/'.$campaignSlug,
+                '/visit/'.$campaignSlug,
+            ]));
 
-        usort($replacements, static fn (string $a, string $b): int => strlen($b) <=> strlen($a));
+            usort($replacements, static fn (string $a, string $b): int => strlen($b) <=> strlen($a));
 
-        foreach ($replacements as $from) {
-            $html = str_replace($from, $affiliateTrackingUrl, $html);
+            foreach ($replacements as $from) {
+                $html = str_replace($from, $affiliateTrackingUrl, $html);
+            }
+
+            $html = preg_replace(
+                '~https?://[^"\'\s<>]+/store/'.$slug.'(?:[/?#"\s]|$)~i',
+                $affiliateTrackingUrl,
+                $html
+            ) ?? $html;
+
+            $html = preg_replace(
+                '~https?://[^"\'\s<>]+/visit/'.$slug.'(?:[/?#"\s]|$)~i',
+                $affiliateTrackingUrl,
+                $html
+            ) ?? $html;
         }
 
+        // Gỡ mọi thẻ <a> → giữ text (không gắn link vào brand / body).
+        $html = preg_replace('/<a\b[^>]*>(.*?)<\/a>/is', '$1', $html) ?? $html;
+
+        return $this->ensureTopAndBottomAffiliateCtas($html, $affiliateTrackingUrl);
+    }
+
+    /**
+     * Chèn đúng 2 CTA affiliate: sau đoạn intro đầu, và cuối bài.
+     */
+    protected function ensureTopAndBottomAffiliateCtas(string $html, string $affiliateTrackingUrl): string
+    {
+        $affiliateTrackingUrl = trim($affiliateTrackingUrl);
+        if ($affiliateTrackingUrl === '') {
+            return $html;
+        }
+
+        $ctaLabel = e(self::AFF_CTA_LABEL);
+        $cta = '<p><a href="'.e($affiliateTrackingUrl).'" class="blog-aff-cta" rel="nofollow sponsored noopener" target="_blank">'.$ctaLabel.'</a></p>';
+
+        // Gỡ CTA cũ (idempotent khi render lại).
         $html = preg_replace(
-            '~https?://[^"\'\s<>]+/store/'.$slug.'(?:[/?#"\s]|$)~i',
-            $affiliateTrackingUrl,
+            '/<p>\s*<a\b[^>]*class="[^"]*blog-aff-cta[^"]*"[^>]*>.*?<\/a>\s*<\/p>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        $html = preg_replace(
+            '/<p>\s*(?:Shop now(?: at [^<]*)?|Visit the store|Discover [^<]*|Get the latest offers from the store\.?)\s*<\/p>\s*/iu',
+            '',
             $html
         ) ?? $html;
 
-        $html = preg_replace(
-            '~https?://[^"\'\s<>]+/visit/'.$slug.'(?:[/?#"\s]|$)~i',
-            $affiliateTrackingUrl,
+        // Opening CTA: sau <h1> nếu có, không thì đầu bài; ưu tiên sau đoạn <p> đầu tiên có chữ.
+        if (preg_match('/<h1\b[^>]*>.*?<\/h1>/is', $html, $h1Match, PREG_OFFSET_CAPTURE)) {
+            $afterH1 = $h1Match[0][1] + strlen($h1Match[0][0]);
+            $rest = substr($html, $afterH1);
+            if (preg_match('/<p\b[^>]*>.*?<\/p>/is', $rest, $pMatch, PREG_OFFSET_CAPTURE)) {
+                $insertAt = $afterH1 + $pMatch[0][1] + strlen($pMatch[0][0]);
+                $html = substr($html, 0, $insertAt)."\n".$cta."\n".substr($html, $insertAt);
+            } else {
+                $html = substr($html, 0, $afterH1)."\n".$cta."\n".substr($html, $afterH1);
+            }
+        } elseif (preg_match('/<p\b[^>]*>.*?<\/p>/is', $html, $pMatch, PREG_OFFSET_CAPTURE)) {
+            $insertAt = $pMatch[0][1] + strlen($pMatch[0][0]);
+            $html = substr($html, 0, $insertAt)."\n".$cta."\n".substr($html, $insertAt);
+        } else {
+            $html = $cta."\n".$html;
+        }
+
+        // Closing CTA: trước Available Coupons thì không — đặt cuối bài.
+        $html = rtrim($html)."\n".$cta;
+
+        return $html;
+    }
+
+    protected function transformInlineCouponCodes(string $html, string $affiliateTrackingUrl): string
+    {
+        if (trim($html) === '') {
+            return $html;
+        }
+
+        $affEsc = e($affiliateTrackingUrl);
+
+        $html = preg_replace_callback(
+            '/<p>\s*<strong>Code:<\/strong>\s*(?:<code>)?\s*([^<]+?)\s*(?:<\/code>)?\s*<\/p>/i',
+            static function (array $matches) use ($affEsc): string {
+                $code = trim(strip_tags($matches[1]));
+                if ($code === '') {
+                    return $matches[0];
+                }
+                $btn = '<button type="button" class="blog-coupon-code" data-code="'
+                    .e($code).'" data-aff-url="'.$affEsc.'" aria-label="Copy code '.e($code).'">'
+                    .e($code).'</button>';
+
+                return '<p><strong>Code:</strong> '.$btn.'</p>';
+            },
             $html
         ) ?? $html;
 
@@ -753,8 +890,10 @@ PROMPT;
                 $lines[] = "- Coupon code to show exactly as typed (do not invent conditions or extra discounts): {$couponSafe}";
             }
             $lines[] = "- The article must stay tightly aligned with the editor idea (section flow, focus points, requested style). Only adjust for grammar and global coherence.";
-            $lines[] = "- If an affiliate link is provided, include ONE clear CTA link near the end using `<a href=\"...\" rel=\"nofollow sponsored noopener\" target=\"_blank\">`.";
-            $lines[] = "- If a coupon code is provided, include a short section titled `<h2>Coupon code</h2>` containing the code in HTML (e.g. `<p><strong>Code:</strong> CODE</p>`).";
+            $lines[] = '- If an affiliate link is provided: use **exactly TWO** CTAs only — one after the opening intro, one at the very end — with that exact URL. Link text must be exactly: **Get the latest offers from the store.** Never wrap the brand name in a link.';
+            $lines[] = "- Do **not** add any other `<a>` tags in the article body.";
+            $lines[] = "- If a coupon code is provided, include `<h2>Coupon code</h2>` with `<p><strong>Code:</strong> CODE</p>` in the **middle** of the article body **and still write the full article** (intro, multiple `<h2>` body sections, conclusion) — never output only the code line.";
+            $lines[] = '- Minimum structure when affiliate or coupon extras exist: `<h1>`, at least 4 `<h2>` sections, multiple `<p>` paragraphs, opening CTA, closing CTA.';
             $lines[] = "- Do not invent extra codes, discount percentages, or time-limited claims beyond what is explicitly provided above.";
 
             return implode("\n", $lines) . "\n";
@@ -775,8 +914,8 @@ PROMPT;
             $lines[] = "- Mã coupon cần hiển thị (giữ nguyên, không bịa thêm điều kiện/discount): {$couponSafe}";
         }
         $lines[] = "- Nội dung bài viết phải bám sát ý tưởng người nhập (chỉ được chỉnh nhẹ để mạch lạc hơn, không đổi chủ đề).";
-        $lines[] = "- Nếu có link affiliate: chèn 1 CTA rõ ràng gần cuối bài với rel=\"nofollow sponsored noopener\" và target=\"_blank\".";
-        $lines[] = "- Nếu có mã coupon: tạo 1 mục `<h2>` riêng để hiển thị mã (không bịa thêm điều kiện).";
+        $lines[] = "- Nếu có link affiliate: chỉ đúng **2 CTA** (đầu bài + cuối bài), dùng đúng URL; không gắn link vào tên brand; không thêm `<a>` ở thân bài.";
+        $lines[] = "- Nếu có mã coupon: tạo mục `<h2>` ở **thân bài** để hiển thị mã (không bịa thêm điều kiện).";
 
         return implode("\n", $lines) . "\n";
     }

@@ -37,7 +37,7 @@ if ($campaign->couponItems->where(fn ($c) => filled($c->code))->isEmpty()) {
 
 $section = $build->invoke($service, $campaign);
 $okSection = str_contains($section, '<h2>Available Coupons</h2>')
-    && str_contains($section, '<code>')
+    && str_contains($section, 'blog-coupon-code')
     && str_contains($section, '<li>');
 echo ($okSection ? 'OK' : 'FAIL')." | buildStoreBlogCouponSectionHtml\n";
 
@@ -45,7 +45,7 @@ $aiHtml = '<h1>Brand Review</h1><p>Intro</p><h2>Pros and Cons</h2><p>Details</p>
     .'<p><a href="https://example.com/out/x">Shop now at Brand</a></p>';
 $result = $inject->invoke($service, $aiHtml, $section);
 $okInject = str_contains($result, 'Available Coupons')
-    && str_contains($result, '<code>')
+    && str_contains($result, 'blog-coupon-code')
     && strrpos($result, 'Shop now at Brand') > strrpos($result, 'Available Coupons');
 echo ($okInject ? 'OK' : 'FAIL')." | injectStoreBlogCouponSection before closing CTA\n";
 
@@ -55,17 +55,19 @@ $okReplace = substr_count($replaced, '<h2>Available Coupons</h2>') === 1
     && ! str_contains($replaced, 'OLD');
 echo ($okReplace ? 'OK' : 'FAIL')." | replace duplicate AI coupon block\n";
 
-// Simulate Apify insertImagesEvenly stripping non-<p> content
+// Apify insertImagesEvenly must keep headings/coupon blocks (not rebuild only <p>)
 $apify = app(App\Services\BlogApifyImageService::class);
 $apifyRef = new ReflectionClass($apify);
 $insert = $apifyRef->getMethod('insertImagesEvenly');
 $insert->setAccessible(true);
 $withCoupons = $inject->invoke($service, $aiHtml, $section);
-$stripped = $insert->invoke($apify, $withCoupons, ['https://example.com/img.jpg']);
-$okApifyStrip = ! str_contains($stripped, 'Available Coupons');
-$restored = $service->ensureStoreBlogCouponSection($stripped, $campaign);
-$okRestore = str_contains($restored, 'Available Coupons') && str_contains($restored, '<code>');
-echo ($okApifyStrip ? 'OK' : 'FAIL')." | apify strips coupon block\n";
+$withImages = $insert->invoke($apify, $withCoupons, ['https://example.com/img.jpg']);
+$okApifyKeep = str_contains($withImages, 'Available Coupons')
+    && str_contains($withImages, '<img')
+    && str_contains($withImages, '<h1>Brand Review</h1>');
+$restored = $service->ensureStoreBlogCouponSection($withImages, $campaign);
+$okRestore = str_contains($restored, 'Available Coupons') && str_contains($restored, 'blog-coupon-code');
+echo ($okApifyKeep ? 'OK' : 'FAIL')." | apify keeps coupon block + headings when inserting images\n";
 echo ($okRestore ? 'OK' : 'FAIL')." | ensureStoreBlogCouponSection after apify\n";
 
 $format = $ref->getMethod('formatStoreBlogCouponListItem');
@@ -75,7 +77,7 @@ $deal = new Coupon([
     'code' => '',
     'description' => '',
 ]);
-$dealLine = $format->invoke($service, $deal, 'Konyks');
+$dealLine = $format->invoke($service, $deal, 'Konyks', 'https://example.com/out/test');
 $okDeal = str_contains($dealLine, '$30 Off')
     && str_contains($dealLine, 'Save')
     && str_contains($dealLine, 'Konyks promo code');
@@ -92,4 +94,14 @@ $shopPos = strrpos($middleInject, 'Shop now at Brand');
 $okMiddle = $couponPos !== false && $shopPos !== false && $couponPos < $shopPos;
 echo ($okMiddle ? 'OK' : 'FAIL')." | long article injects coupons before closing CTA\n";
 
-exit(($okSection && $okInject && $okReplace && $okApifyStrip && $okRestore && $okDeal && $okMiddle) ? 0 : 1);
+$prepare = $ref->getMethod('prepareStoreBlogHtml');
+$prepare->setAccessible(true);
+$mixedLinks = '<h1>Title</h1><p><a href="https://example.com/store/foo">Shop</a></p><p><a href="https://other.com">Other</a></p>';
+$affUrl = route('click.redirect', ['slug' => $campaign->slug], true);
+$prepared = $prepare->invoke($service, $mixedLinks, $campaign);
+$okAffLinks = str_contains($prepared, 'href="'.htmlspecialchars($affUrl, ENT_QUOTES).'"')
+    && ! str_contains($prepared, 'https://other.com')
+    && ! str_contains($prepared, '/store/'.$campaign->slug);
+echo ($okAffLinks ? 'OK' : 'FAIL')." | prepareStoreBlogHtml normalizes all anchor links\n";
+
+exit(($okSection && $okInject && $okReplace && $okApifyKeep && $okRestore && $okDeal && $okMiddle && $okAffLinks) ? 0 : 1);
