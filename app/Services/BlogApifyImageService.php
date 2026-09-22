@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Support\AdminSettings;
+use App\Support\RasterWebpConverter;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -218,13 +219,29 @@ class BlogApifyImageService
 
             $body = $response->body();
             $size = strlen($body);
-            if ($size === 0 || $size > self::MAX_FILE_BYTES) {
+            if ($size === 0) {
                 return null;
             }
 
             $contentType = strtolower((string) $response->header('Content-Type'));
             $ext = $this->extensionFromContentType($contentType, $url);
             if ($ext === null) {
+                return null;
+            }
+
+            $webpBody = RasterWebpConverter::convertBinary($body);
+            if ($webpBody !== null) {
+                $body = $webpBody;
+                $ext = 'webp';
+            } elseif (RasterWebpConverter::isSupported()) {
+                Log::debug('BlogApifyImageService webp conversion failed', ['url' => $url]);
+
+                return null;
+            } elseif ($size > self::MAX_FILE_BYTES) {
+                return null;
+            }
+
+            if (strlen($body) > self::MAX_FILE_BYTES) {
                 return null;
             }
 
