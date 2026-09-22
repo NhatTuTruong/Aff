@@ -70,8 +70,8 @@ class ListBlogs extends ListRecords
                         ->maxLength(255),
                     Textarea::make('idea')
                         ->label('Ý tưởng / yêu cầu bài viết')
-                        ->placeholder('VD: Viết review ngắn 800 từ, nhấn mạnh shipping/return, thêm FAQ... (có thể dán outline hoặc gạch đầu dòng)')
-                        ->helperText('Ưu tiên cao nhất: chủ đề, cấu trúc, giọng văn. Nếu ghi số từ (VD: 800 từ, 1500 words) thì dùng đúng độ dài đó; không ghi thì dùng mặc định.')
+                        ->placeholder('VD: Review ngắn 800 từ, nhấn shipping/return, thêm FAQ... (có thể gõ tiếng Việt; bài vẫn viết tiếng Anh trừ khi ghi rõ "viết bằng tiếng Việt")')
+                        ->helperText('Ưu tiên: chủ đề, cấu trúc, giọng văn. Bài mặc định tiếng Anh — chỉ đổi ngôn ngữ khi ghi rõ trong ô này (vd: viết bằng tiếng Việt, Language: Chinese). Số từ: 800 từ / 1500 words.')
                         ->rows(5)
                         ->maxLength(2000),
                     TextInput::make('affiliate_url')

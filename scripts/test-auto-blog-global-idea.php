@@ -23,9 +23,28 @@ $ref = new ReflectionClass($svc);
 $lang = $ref->getMethod('buildLanguageInstruction');
 $lang->setAccessible(true);
 
-$withIdea = $lang->invoke($svc, ['idea' => 'Viết bằng Tiếng Trung'], 'English');
-$okLang = str_contains($withIdea, 'Follow the editor idea') || str_contains($withIdea, 'Theo ý tưởng');
-echo ($okLang ? 'OK' : 'FAIL')." | language instruction defers to idea\n";
+$extract = $ref->getMethod('extractExplicitOutputLanguageFromIdea');
+$extract->setAccessible(true);
+
+$viIdeaOnly = $lang->invoke($svc, ['idea' => 'Review ngắn, nhấn mạnh shipping và FAQ'], 'English');
+$okViIdeaEnglish = str_contains($viIdeaOnly, '**English**') && str_contains($viIdeaOnly, 'still write the article in English');
+echo ($okViIdeaEnglish ? 'OK' : 'FAIL')." | Vietnamese idea text still outputs English\n";
+
+$withChinese = $lang->invoke($svc, ['idea' => 'Viết bằng Tiếng Trung, có bảng so sánh'], 'English');
+$okChinese = str_contains($withChinese, '**Chinese**') && str_contains($withChinese, 'explicitly requested');
+echo ($okChinese ? 'OK' : 'FAIL')." | explicit Chinese in idea\n";
+
+$explicitVi = $extract->invoke($svc, 'viết bằng tiếng Việt, thêm FAQ');
+$okExplicitVi = $explicitVi === 'Vietnamese';
+echo ($okExplicitVi ? 'OK' : 'FAIL')." | extract explicit Vietnamese\n";
+
+$noExplicit = $extract->invoke($svc, 'So sánh giá và chất lượng sản phẩm');
+$okNoExplicit = $noExplicit === null;
+echo ($okNoExplicit ? 'OK' : 'FAIL')." | no language from Vietnamese topic only\n";
+
+$thaiIdea = $lang->invoke($svc, ['idea' => 'viết bằng tiếng thái, thêm FAQ'], 'English');
+$okThai = str_contains($thaiIdea, '**Thai**') && str_contains($thaiIdea, 'explicitly requested');
+echo ($okThai ? 'OK' : 'FAIL')." | explicit Thai in idea (no PCRE error)\n";
 
 $withoutIdea = $lang->invoke($svc, ['idea' => ''], 'English');
 $okDefault = str_contains($withoutIdea, 'English');
@@ -33,4 +52,4 @@ echo ($okDefault ? 'OK' : 'FAIL')." | default language when no idea\n";
 
 AdminSettings::set('auto_blog_global_idea', '');
 
-exit(($okMerge && $okPopup && $okLang && $okDefault) ? 0 : 1);
+exit(($okMerge && $okPopup && $okViIdeaEnglish && $okChinese && $okExplicitVi && $okNoExplicit && $okThai && $okDefault) ? 0 : 1);

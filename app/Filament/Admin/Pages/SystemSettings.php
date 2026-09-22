@@ -163,8 +163,8 @@ class SystemSettings extends Page implements HasForms
                             ->required(),
                         Textarea::make('auto_blog_global_idea')
                             ->label('Ý tưởng chung cho tất cả bài viết')
-                            ->placeholder('VD: Viết tiếng Anh, giọng thân thiện, thêm FAQ cuối bài, khoảng 1000 từ...')
-                            ->helperText('Áp dụng cho mọi bài AI (cron + nút tạo bài). Ưu tiên cao hơn luồng mặc định. Ý tưởng trong popup (nếu có) sẽ ghi đè ý tưởng chung này. Để trống = theo luồng mặc định.')
+                            ->placeholder('VD: Giọng thân thiện, thêm FAQ, 1000 từ... (có thể gõ tiếng Việt; bài mặc định tiếng Anh)')
+                            ->helperText('Áp dụng cho mọi bài AI (cron + nút tạo bài). Bài mặc định tiếng Anh; chỉ đổi ngôn ngữ khi ghi rõ (vd: viết bằng tiếng Việt). Popup ghi đè ý tưởng chung nếu có.')
                             ->rows(5)
                             ->maxLength(2000)
                             ->columnSpanFull(),

@@ -59,9 +59,9 @@ class GeminiBlogService
 - If the subject looks like a domain, you may mention it as the likely official site. Add at most one link to `https://` + that host only if clearly a domain (`rel="nofollow noopener"`).
 FOCUS;
 
-            $copywriterIntro = $this->hasEditorIdea($extras)
-                ? 'You are an expert SEO copywriter for a deals and shopping blog.'
-                : 'You are an expert English SEO copywriter for a deals and shopping blog.';
+            $copywriterIntro = $this->resolveOutputLanguage($extras) === 'English'
+                ? 'You are an expert English SEO copywriter for a deals and shopping blog.'
+                : 'You are an expert SEO copywriter for a deals and shopping blog.';
 
             $prompt = <<<PROMPT
 {$copywriterIntro}
@@ -161,13 +161,14 @@ PROMPT;
         $languageInstruction = $this->buildLanguageInstruction($extras, 'English');
         $editorPriorityBlock = $this->buildEditorPriorityBlock($extras, forEnglish: true);
         $extrasBlock = $this->buildEditorExtrasBlock($extras, forEnglish: true);
-        $taskLanguageLine = $this->hasEditorIdea($extras)
-            ? 'Write ONE **short** editorial-style article following the **editor idea language and style** about this brand/store as a general shopping subject.'
-            : 'Write ONE **short** editorial-style article in **English** about this brand/store as a general shopping subject.';
+        $outputLanguage = $this->resolveOutputLanguage($extras);
+        $taskLanguageLine = $outputLanguage === 'English'
+            ? 'Write ONE **short** editorial-style article in **English** about this brand/store as a general shopping subject.'
+            : "Write ONE **short** editorial-style article in **{$outputLanguage}** about this brand/store as a general shopping subject.";
 
-        $copywriterIntro = $this->hasEditorIdea($extras)
-            ? 'You are an expert copywriter for a deals and shopping blog.'
-            : 'You are an expert English copywriter for a deals and shopping blog.';
+        $copywriterIntro = $outputLanguage === 'English'
+            ? 'You are an expert English copywriter for a deals and shopping blog.'
+            : 'You are an expert copywriter for a deals and shopping blog.';
 
         $prompt = <<<PROMPT
 {$copywriterIntro}
@@ -260,9 +261,8 @@ PROMPT;
         $lengthInstruction = $this->resolveLengthInstruction($extras, '900-1,200 words');
         $languageInstruction = $this->buildLanguageInstruction($extras, 'English');
         $editorPriorityBlock = $this->buildEditorPriorityBlock($extras, forEnglish: true);
-        $introLanguageLine = $this->hasEditorIdea($extras)
-            ? 'Write ONE blog article introducing the store/brand below. **Follow the editor idea for language, structure, and format.** Target length **'.$lengthInstruction.'**. Tone: helpful, trustworthy, conversion-oriented but honest.'
-            : 'Write ONE blog article introducing the store/brand below. Language: **English**. Target length **'.$lengthInstruction.'**. Tone: helpful, trustworthy, conversion-oriented but honest.';
+        $outputLanguage = $this->resolveOutputLanguage($extras);
+        $introLanguageLine = 'Write ONE blog article introducing the store/brand below. Language: **'.$outputLanguage.'**. Target length **'.$lengthInstruction.'**. Tone: helpful, trustworthy, conversion-oriented but honest.';
 
         $prompt = <<<PROMPT
 You are an expert SEO copywriter for affiliate coupon sites.
@@ -295,10 +295,10 @@ You are an expert SEO copywriter for affiliate coupon sites.
 3. **Brief intro (`<h2>`)**: What the brand is, main benefit.
 4. **Products/Services (`<h2>`)**: Main offerings.
 5. **Pros and Cons (`<h2>`)**: Two subsections or bullet lists.
-6. **Do NOT write an "Available Coupons" section** — the system injects verified coupon codes automatically into the article body.
+6. **Do NOT write coupon codes in the body** — no `<h2>Coupon code</h2>`, no `<p><strong>Code:</strong>`, no "Available Coupons" block. The system injects one **Available Coupons** list in the middle of the article automatically.
 7. **Closing CTA (`<p>` at bottom)**: `<p><a href="{$affiliateTrackingUrl}" class="blog-aff-cta" rel="nofollow sponsored noopener" target="_blank">Get the latest offers from the store.</a></p>`
 
-Current verified coupons for this campaign (reference only; do not invent others):
+Current verified coupons for this campaign (reference only for facts; do not paste codes into the HTML):
 {$couponSummaryForPrompt}
 PROMPT;
 
@@ -325,11 +325,23 @@ PROMPT;
         $brandName = $this->resolveStoreBlogBrandName($campaign);
         $affiliateTrackingUrl = route('click.redirect', ['slug' => $campaign->slug], true);
 
-        $listItems = $campaign->couponItems
-            ->take($limit)
-            ->map(fn (Coupon $coupon) => $this->formatStoreBlogCouponListItem($coupon, $brandName, $affiliateTrackingUrl))
-            ->filter()
-            ->values();
+        $seenCodes = [];
+        $listItems = collect();
+
+        foreach ($campaign->couponItems->take($limit) as $coupon) {
+            $codeKey = strtoupper(trim((string) ($coupon->code ?? '')));
+            if ($codeKey !== '' && isset($seenCodes[$codeKey])) {
+                continue;
+            }
+            if ($codeKey !== '') {
+                $seenCodes[$codeKey] = true;
+            }
+
+            $line = $this->formatStoreBlogCouponListItem($coupon, $brandName, $affiliateTrackingUrl);
+            if ($line !== null) {
+                $listItems->push($line);
+            }
+        }
 
         if ($listItems->isEmpty()) {
             return '';
@@ -484,6 +496,26 @@ PROMPT;
     /**
      * Chèn block coupon vào giữa hoặc cuối bài (trước CTA "Shop now" nếu có).
      */
+    /**
+     * Gỡ mọi hiển thị mã coupon ngoài block Available Coupons (bài từ chiến dịch).
+     */
+    protected function stripInlineStoreBlogCouponBlocks(string $html): string
+    {
+        $html = preg_replace(
+            '/<h2\b[^>]*>\s*Coupon\s*Codes?\s*<\/h2>\s*.*?(?=<h2\b|\z)/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $html = preg_replace(
+            '/<p\b[^>]*>\s*<strong>\s*Code:\s*<\/strong>.*?<\/p>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        return trim($html);
+    }
+
     protected function injectStoreBlogCouponSection(string $html, string $couponSectionHtml): string
     {
         $html = trim($html);
@@ -493,17 +525,19 @@ PROMPT;
             return $html;
         }
 
+        $html = $this->stripInlineStoreBlogCouponBlocks($html);
+
         // Gỡ block coupon AI có thể đã viết (tránh trùng).
         $html = preg_replace(
-            '/<h2[^>]*>\s*(Available Coupons|Coupon Codes|Promo Codes|Active Coupons|Current Coupons)[^<]*<\/h2>\s*(?:<ul\b[^>]*>.*?<\/ul>)?/is',
+            '/<h2[^>]*>\s*(Available Coupons|Coupon Codes?|Promo Codes|Active Coupons|Current Coupons)[^<]*<\/h2>\s*(?:<ul\b[^>]*>.*?<\/ul>)?/is',
             '',
             $html
         ) ?? $html;
 
-        // Bài dài: chèn vào giữa (sau ~50% đoạn <p>).
+        // Chèn vào giữa bài (sau ~50% đoạn <p>).
         if (preg_match_all('/<p\b[^>]*>.*?<\/p>/is', $html, $paragraphMatches)) {
             $paragraphCount = count($paragraphMatches[0]);
-            if ($paragraphCount >= 6) {
+            if ($paragraphCount >= 2) {
                 $middleIndex = (int) floor(($paragraphCount - 1) / 2);
 
                 return $this->insertHtmlAfterParagraphIndex($html, $middleIndex, $couponSectionHtml);
@@ -574,12 +608,12 @@ PROMPT;
         $campaignSlug = (string) $campaign->slug;
         $affiliateTrackingUrl = route('click.redirect', ['slug' => $campaignSlug], true);
 
+        $html = $this->stripInlineStoreBlogCouponBlocks($html);
+
         $html = $this->injectStoreBlogCouponSection(
             $html,
             $this->buildStoreBlogCouponSectionHtml($campaign),
         );
-
-        $html = $this->transformInlineCouponCodes($html, $affiliateTrackingUrl);
 
         return app(BlogApifyImageService::class)->redistributeContentImages(
             $this->normalizeAffiliateLinks($html, $affiliateTrackingUrl, $campaignSlug)
@@ -724,17 +758,116 @@ PROMPT;
     /**
      * @param array{idea?:string, affiliate_url?:string, coupon_code?:string} $extras
      */
-    protected function buildLanguageInstruction(array $extras, string $defaultLanguage): string
+    protected function resolveOutputLanguage(array $extras): string
     {
-        if (! $this->hasEditorIdea($extras)) {
-            return $defaultLanguage === 'English'
-                ? 'Language: **English**, SEO-friendly.'
-                : "Ngôn ngữ: **{$defaultLanguage}**, chuẩn SEO.";
+        $idea = trim((string) ($extras['idea'] ?? ''));
+
+        return $this->extractExplicitOutputLanguageFromIdea($idea) ?? 'English';
+    }
+
+    /**
+     * Chỉ trả về ngôn ngữ khi ý tưởng chỉ định rõ (vd. "viết bằng tiếng Việt", "Language: Chinese").
+     * Ý tưởng viết bằng tiếng Việt nhưng không yêu cầu ngôn ngữ đầu ra → null (mặc định English).
+     */
+    protected function extractExplicitOutputLanguageFromIdea(string $idea): ?string
+    {
+        $idea = trim($idea);
+        if ($idea === '') {
+            return null;
         }
 
-        return $defaultLanguage === 'English'
-            ? 'Language: **Follow the editor idea** — if it specifies a language (e.g. Chinese/中文, Tiếng Trung, Vietnamese, English), write the **entire** article including all headings in that language. The editor idea overrides the default ('.$defaultLanguage.').'
-            : 'Ngôn ngữ: **Theo ý tưởng người nhập** — nếu ý tưởng chỉ định ngôn ngữ (vd: Tiếng Trung/中文, Tiếng Việt, tiếng Anh), viết **toàn bộ** bài kể cả tiêu đề bằng ngôn ngữ đó. Ý tưởng ghi đè mặc định ('.$defaultLanguage.').';
+        if (preg_match('/(?:^|[\n\r]|;\s*)(?:ngôn ngữ|language|lang)\s*[:：]\s*([^,\n\r;]{2,40})/iu', $idea, $matches)) {
+            return $this->normalizeLanguageLabel(trim($matches[1]));
+        }
+
+        if (preg_match('/(?:viết|write|output|publish|dùng)\s+(?:bài|article|content|nội dung)?\s*(?:bằng|in)\s+([^,\n\r;.]{2,40})/iu', $idea, $matches)) {
+            return $this->normalizeLanguageLabel(trim($matches[1]));
+        }
+
+        return null;
+    }
+
+    protected function normalizeLanguageLabel(string $raw): ?string
+    {
+        $raw = trim($raw);
+        if ($raw === '') {
+            return null;
+        }
+
+        $lower = mb_strtolower($raw);
+
+        if (preg_match('/việt|vietnamese|^vi$/u', $lower)) {
+            return 'Vietnamese';
+        }
+
+        if (preg_match('/^en$|english|tiếng anh|tieng anh/u', $lower)) {
+            return 'English';
+        }
+
+        if (preg_match('/trung|chinese|mandarin|中文/u', $lower)) {
+            return 'Chinese';
+        }
+
+        if (preg_match('/spanish|español|tiếng tây ban nha/u', $lower)) {
+            return 'Spanish';
+        }
+
+        if (preg_match('/french|français|tiếng pháp/u', $lower)) {
+            return 'French';
+        }
+
+        if (preg_match('/german|deutsch|tiếng đức/u', $lower)) {
+            return 'German';
+        }
+
+        if (preg_match('/japanese|日本語|tiếng nhật/u', $lower)) {
+            return 'Japanese';
+        }
+
+        if (preg_match('/korean|한국어|tiếng hàn/u', $lower)) {
+            return 'Korean';
+        }
+
+        if (preg_match('/thai|tiếng thái|tieng thai|ภาษาไทย/u', $lower)) {
+            return 'Thai';
+        }
+
+        if (preg_match('/^[\p{L}\s\-]{2,30}$/u', $raw)) {
+            return mb_convert_case($raw, MB_CASE_TITLE, 'UTF-8');
+        }
+
+        return null;
+    }
+
+    protected function buildLanguageInstruction(array $extras, string $defaultLanguage): string
+    {
+        $idea = trim((string) ($extras['idea'] ?? ''));
+        $explicit = $this->extractExplicitOutputLanguageFromIdea($idea);
+        $outputLanguage = $explicit ?? 'English';
+
+        if ($defaultLanguage === 'English') {
+            if ($explicit === null) {
+                $instruction = 'Language: **English** (SEO-friendly).';
+                if ($idea !== '') {
+                    $instruction .= ' The editor idea may be written in any language — use it only for topic, structure, angle, and tone; **still write the article in English** unless the idea **explicitly** requests another output language (e.g. "viết bằng tiếng Việt", "Language: Chinese").';
+                }
+
+                return $instruction;
+            }
+
+            return 'Language: **'.$outputLanguage.'** — explicitly requested in the editor idea. Write the **entire** article including all headings in **'.$outputLanguage.'**.';
+        }
+
+        if ($explicit === null) {
+            $instruction = 'Ngôn ngữ bài viết: **tiếng Anh** (chuẩn SEO).';
+            if ($idea !== '') {
+                $instruction .= ' Ý tưởng có thể nhập bằng tiếng Việt — chỉ dùng để nắm chủ đề/cấu trúc; **vẫn viết bài bằng tiếng Anh** trừ khi ý tưởng **chỉ rõ** ngôn ngữ đầu ra (vd: "viết bằng tiếng Việt", "Language: Chinese").';
+            }
+
+            return $instruction;
+        }
+
+        return 'Ngôn ngữ bài viết: **'.$outputLanguage.'** — người nhập đã chỉ định rõ trong ý tưởng. Viết **toàn bộ** bài kể cả tiêu đề bằng ngôn ngữ này.';
     }
 
     /**
@@ -827,26 +960,26 @@ PROMPT;
         if ($forEnglish) {
             $lines = [
                 '## Editor idea — HIGHEST PRIORITY',
-                '- The editor idea below overrides **language**, article type, topic focus, structure (including `<table>` comparison tables, FAQ, lists), tone, and length when they conflict with defaults.',
+                '- The editor idea below overrides article type, topic focus, structure (including `<table>` comparison tables, FAQ, lists), tone, and length when they conflict with defaults.',
+                '- **Output language defaults to English.** Only change language if the idea **explicitly** requests it (e.g. "write in Vietnamese", "Language: Chinese"). Do not infer output language from the language used to write the idea.',
                 '- Apply the editor idea first; use defaults only for details the idea does not mention.',
             ];
             if ($wordCount !== null) {
                 $lines[] = "- Word count detected in the editor idea: **{$wordCount}** — this overrides any default length.";
             }
-            $lines[] = '- If the idea specifies a language (e.g. Chinese/中文, Tiếng Trung, Vietnamese), ignore any default English instruction elsewhere in this prompt.';
 
             return implode("\n", $lines)."\n\n";
         }
 
         $lines = [
             '## Ý tưởng người nhập — ƯU TIÊN CAO NHẤT',
-            '- Ý tưởng bên dưới ghi đè **ngôn ngữ**, loại bài, chủ đề, cấu trúc (kể cả bảng `<table>` so sánh, FAQ, danh sách), giọng văn và độ dài mặc định nếu mâu thuẫn.',
+            '- Ý tưởng ghi đè loại bài, chủ đề, cấu trúc (kể cả bảng `<table>` so sánh, FAQ, danh sách), giọng văn và độ dài mặc định nếu mâu thuẫn.',
+            '- **Bài viết mặc định bằng tiếng Anh.** Chỉ đổi ngôn ngữ khi ý tưởng **chỉ rõ** (vd: "viết bằng tiếng Việt", "Language: Chinese"). Không suy ngôn ngữ đầu ra từ việc ý tưởng được gõ bằng tiếng Việt.',
             '- Bám sát ý tưởng trước; chỉ dùng mặc định cho phần người dùng không nhắc tới.',
         ];
         if ($wordCount !== null) {
             $lines[] = "- Phát hiện số từ trong ý tưởng: **{$wordCount}** — ưu tiên hơn độ dài mặc định.";
         }
-        $lines[] = '- Nếu ý tưởng yêu cầu ngôn ngữ cụ thể (vd: Tiếng Trung, tiếng Anh), bỏ qua mọi chỉ dẫn ngôn ngữ mặc định khác trong prompt này.';
 
         return implode("\n", $lines)."\n\n";
     }
@@ -878,21 +1011,25 @@ PROMPT;
             $lines = [];
             $lines[] = "## Editor requirements (follow these as hard constraints, do not ignore)";
             if ($ideaSafe !== '') {
-                $lines[] = "- Core article idea / outline (**PRIMARY SOURCE** — language, topic, angle, structure, tone, and any length hint): {$ideaSafe}";
-                $lines[] = '- Treat every detail in the idea as mandatory unless it contradicts HTML output rules or factual constraints above.';
-                $lines[] = '- If the idea requests a language (e.g. Chinese/Tiếng Trung), write the full article in that language.';
+                $lines[] = "- Core article idea / outline (**PRIMARY SOURCE** — topic, angle, structure, tone, and any length hint; may be written in Vietnamese or other languages): {$ideaSafe}";
+                $lines[] = '- Treat every detail in the idea as mandatory unless it contradicts HTML output rules, factual constraints, or the default **English** output language above.';
+                $lines[] = '- Write the article in **English** unless the idea **explicitly** names an output language (e.g. "viết bằng tiếng Việt", "Language: Chinese").';
                 $lines[] = '- If the idea requests comparison tables, include proper HTML `<table>` elements.';
             }
             if ($affiliateSafe !== '') {
                 $lines[] = "- Affiliate link to include (use exactly; do not modify): {$affiliateSafe}";
             }
-            if ($couponSafe !== '') {
+            if ($couponSafe !== '' && ! $forcePromoSection) {
                 $lines[] = "- Coupon code to show exactly as typed (do not invent conditions or extra discounts): {$couponSafe}";
             }
             $lines[] = "- The article must stay tightly aligned with the editor idea (section flow, focus points, requested style). Only adjust for grammar and global coherence.";
             $lines[] = '- If an affiliate link is provided: use **exactly TWO** CTAs only — one after the opening intro, one at the very end — with that exact URL. Link text must be exactly: **Get the latest offers from the store.** Never wrap the brand name in a link.';
             $lines[] = "- Do **not** add any other `<a>` tags in the article body.";
-            $lines[] = "- If a coupon code is provided, include `<h2>Coupon code</h2>` with `<p><strong>Code:</strong> CODE</p>` in the **middle** of the article body **and still write the full article** (intro, multiple `<h2>` body sections, conclusion) — never output only the code line.";
+            if ($forcePromoSection) {
+                $lines[] = '- **Store campaign article:** do **NOT** write coupon codes in the HTML — no `<h2>Coupon code</h2>`, no `<p><strong>Code:</strong>`, no "Available Coupons" section. The system injects one verified **Available Coupons** block in the middle automatically.';
+            } elseif ($couponSafe !== '') {
+                $lines[] = "- If a coupon code is provided, include `<h2>Coupon code</h2>` with `<p><strong>Code:</strong> CODE</p>` in the **middle** of the article body **and still write the full article** (intro, multiple `<h2>` body sections, conclusion) — never output only the code line.";
+            }
             $lines[] = '- Minimum structure when affiliate or coupon extras exist: `<h1>`, at least 4 `<h2>` sections, multiple `<p>` paragraphs, opening CTA, closing CTA.';
             $lines[] = "- Do not invent extra codes, discount percentages, or time-limited claims beyond what is explicitly provided above.";
 
@@ -902,9 +1039,9 @@ PROMPT;
         $lines = [];
         $lines[] = "Yêu cầu bổ sung từ người nhập (bắt buộc, coi như ràng buộc chính):";
         if ($ideaSafe !== '') {
-            $lines[] = "- Ý tưởng / outline (**NGUỒN CHÍNH** — ngôn ngữ, chủ đề, góc viết, cấu trúc, giọng văn và gợi ý độ dài): {$ideaSafe}";
-            $lines[] = '- Mọi chi tiết trong ý tưởng đều bắt buộc trừ khi mâu thuẫn với quy tắc HTML hoặc ràng buộc thực tế phía trên.';
-            $lines[] = '- Nếu ý tưởng yêu cầu ngôn ngữ (vd: Tiếng Trung), viết toàn bộ bài bằng ngôn ngữ đó.';
+            $lines[] = "- Ý tưởng / outline (**NGUỒN CHÍNH** — chủ đề, góc viết, cấu trúc, giọng văn và gợi ý độ dài; có thể nhập bằng tiếng Việt): {$ideaSafe}";
+            $lines[] = '- Mọi chi tiết trong ý tưởng đều bắt buộc trừ khi mâu thuẫn với quy tắc HTML, ràng buộc thực tế, hoặc mặc định **tiếng Anh** cho bài viết.';
+            $lines[] = '- Viết bài bằng **tiếng Anh** trừ khi ý tưởng **chỉ rõ** ngôn ngữ đầu ra (vd: "viết bằng tiếng Việt", "Language: Chinese").';
             $lines[] = '- Nếu ý tưởng yêu cầu bảng so sánh, dùng HTML `<table>`.';
         }
         if ($affiliateSafe !== '') {

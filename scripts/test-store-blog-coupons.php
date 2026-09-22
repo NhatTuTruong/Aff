@@ -104,4 +104,13 @@ $okAffLinks = str_contains($prepared, 'href="'.htmlspecialchars($affUrl, ENT_QUO
     && ! str_contains($prepared, '/store/'.$campaign->slug);
 echo ($okAffLinks ? 'OK' : 'FAIL')." | prepareStoreBlogHtml normalizes all anchor links\n";
 
-exit(($okSection && $okInject && $okReplace && $okApifyKeep && $okRestore && $okDeal && $okMiddle && $okAffLinks) ? 0 : 1);
+$withInlineCode = '<h1>Title</h1><p>Intro paragraph one.</p><p>Intro two.</p>'
+    .'<h2>Coupon Code</h2><p><strong>Code:</strong> OLDCODE</p>'
+    .'<h2>Pros</h2><p>Body text here.</p>';
+$preparedStore = $prepare->invoke($service, $withInlineCode, $campaign);
+$okNoCouponCodeH2 = ! preg_match('/<h2[^>]*>\s*Coupon\s*Code/i', $preparedStore);
+$okNoInlineCodeP = ! preg_match('/<strong>\s*Code:\s*<\/strong>\s*OLDCODE/i', $preparedStore);
+$okOneAvailable = substr_count($preparedStore, '<h2>Available Coupons</h2>') === 1;
+echo ($okNoCouponCodeH2 && $okNoInlineCodeP && $okOneAvailable ? 'OK' : 'FAIL')." | store blog strips Coupon Code, keeps one Available Coupons\n";
+
+exit(($okSection && $okInject && $okReplace && $okApifyKeep && $okRestore && $okDeal && $okMiddle && $okAffLinks && $okNoCouponCodeH2 && $okNoInlineCodeP && $okOneAvailable) ? 0 : 1);
