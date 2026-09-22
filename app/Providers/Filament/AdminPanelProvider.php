@@ -51,7 +51,6 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()->label('Admin'),
                 NavigationGroup::make()->label('Quản lý'),
                 NavigationGroup::make()->label('Thống Kê'),
-                NavigationGroup::make()->label('Tool'),
                 NavigationGroup::make()->label('Cài đặt'),
             ])
             ->pages([

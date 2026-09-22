@@ -38,12 +38,12 @@ class TrafficDomainFilter extends Page implements HasForms
 
     public static function canAccess(): bool
     {
-        return (bool) Filament::auth()->check();
+        return false;
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        return static::canAccess();
+        return false;
     }
 
     public function mount(): void
