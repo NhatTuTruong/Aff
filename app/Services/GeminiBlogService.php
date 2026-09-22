@@ -309,7 +309,6 @@ PROMPT;
 
         // Không gán ảnh brand: để featured_image null → Blog tự chọn ngẫu nhiên ảnh theo danh mục khi lưu.
         if ($result !== null) {
-            $result['content'] = $this->prepareStoreBlogHtml((string) $result['content'], $campaign);
             $result['featured_image'] = null;
         }
 
@@ -325,17 +324,15 @@ PROMPT;
         $brandName = $this->resolveStoreBlogBrandName($campaign);
         $affiliateTrackingUrl = route('click.redirect', ['slug' => $campaign->slug], true);
 
-        $seenCodes = [];
+        $seenFingerprints = [];
         $listItems = collect();
 
         foreach ($campaign->couponItems->take($limit) as $coupon) {
-            $codeKey = strtoupper(trim((string) ($coupon->code ?? '')));
-            if ($codeKey !== '' && isset($seenCodes[$codeKey])) {
+            $fingerprint = $this->storeBlogCouponFingerprint($coupon);
+            if (isset($seenFingerprints[$fingerprint])) {
                 continue;
             }
-            if ($codeKey !== '') {
-                $seenCodes[$codeKey] = true;
-            }
+            $seenFingerprints[$fingerprint] = true;
 
             $line = $this->formatStoreBlogCouponListItem($coupon, $brandName, $affiliateTrackingUrl);
             if ($line !== null) {
@@ -395,6 +392,19 @@ PROMPT;
         }
 
         return '<li>'.e($dealDescription).'</li>';
+    }
+
+    protected function storeBlogCouponFingerprint(Coupon $coupon): string
+    {
+        $code = strtoupper(trim((string) ($coupon->code ?? '')));
+        if ($code !== '') {
+            return 'code:'.$code;
+        }
+
+        $offer = mb_strtolower(trim(strip_tags((string) ($coupon->offer ?? ''))));
+        $description = mb_strtolower(trim(strip_tags((string) ($coupon->description ?? ''))));
+
+        return 'deal:'.$offer.'|'.$description;
     }
 
     protected function buildStoreBlogDealDescription(Coupon $coupon, string $brandName): string
@@ -516,6 +526,39 @@ PROMPT;
         return trim($html);
     }
 
+    /**
+     * Gỡ mọi block Available Coupons (kể cả khi ảnh/chèn HTML làm tách <h2> và <ul>).
+     */
+    protected function stripExistingAvailableCouponsBlocks(string $html): string
+    {
+        $heading = '(Available Coupons|Coupon Codes?|Promo Codes|Active Coupons|Current Coupons)';
+
+        $prev = '';
+        while ($prev !== $html) {
+            $prev = $html;
+
+            $html = preg_replace(
+                '/<h2\b[^>]*>\s*'.$heading.'[^<]*<\/h2>\s*<ul\b[^>]*>.*?<\/ul>\s*/is',
+                '',
+                $html
+            ) ?? $html;
+
+            $html = preg_replace(
+                '/<h2\b[^>]*>\s*'.$heading.'[^<]*<\/h2>\s*/is',
+                '',
+                $html
+            ) ?? $html;
+
+            $html = preg_replace(
+                '/<ul\b[^>]*>(?:(?!<\/ul>).)*(?:blog-coupon-code|<li>\s*<(?:strong|code)\b)(?:(?!<\/ul>).)*<\/ul>\s*/is',
+                '',
+                $html
+            ) ?? $html;
+        }
+
+        return trim($html);
+    }
+
     protected function injectStoreBlogCouponSection(string $html, string $couponSectionHtml): string
     {
         $html = trim($html);
@@ -526,13 +569,7 @@ PROMPT;
         }
 
         $html = $this->stripInlineStoreBlogCouponBlocks($html);
-
-        // Gỡ block coupon AI có thể đã viết (tránh trùng).
-        $html = preg_replace(
-            '/<h2[^>]*>\s*(Available Coupons|Coupon Codes?|Promo Codes|Active Coupons|Current Coupons)[^<]*<\/h2>\s*(?:<ul\b[^>]*>.*?<\/ul>)?/is',
-            '',
-            $html
-        ) ?? $html;
+        $html = $this->stripExistingAvailableCouponsBlocks($html);
 
         // Chèn vào giữa bài (sau ~50% đoạn <p>).
         if (preg_match_all('/<p\b[^>]*>.*?<\/p>/is', $html, $paragraphMatches)) {

@@ -113,4 +113,11 @@ $okNoInlineCodeP = ! preg_match('/<strong>\s*Code:\s*<\/strong>\s*OLDCODE/i', $p
 $okOneAvailable = substr_count($preparedStore, '<h2>Available Coupons</h2>') === 1;
 echo ($okNoCouponCodeH2 && $okNoInlineCodeP && $okOneAvailable ? 'OK' : 'FAIL')." | store blog strips Coupon Code, keeps one Available Coupons\n";
 
-exit(($okSection && $okInject && $okReplace && $okApifyKeep && $okRestore && $okDeal && $okMiddle && $okAffLinks && $okNoCouponCodeH2 && $okNoInlineCodeP && $okOneAvailable) ? 0 : 1);
+$splitUl = '<h1>T</h1><p>P1</p><p>P2</p><h2>Available Coupons</h2><p><img src="/x.webp"></p><ul><li><strong>12</strong> — Code: <button class="blog-coupon-code">FGH</button></li></ul>';
+$twicePrepared = $prepare->invoke($service, $splitUl, $campaign);
+$liCount = substr_count($twicePrepared, '<li>');
+$okNoDupPrepare = substr_count($twicePrepared, '<h2>Available Coupons</h2>') === 1
+    && $liCount === substr_count($section, '<li>');
+echo ($okNoDupPrepare ? 'OK' : 'FAIL')." | double prepare does not duplicate coupon list (li={$liCount})\n";
+
+exit(($okSection && $okInject && $okReplace && $okApifyKeep && $okRestore && $okDeal && $okMiddle && $okAffLinks && $okNoCouponCodeH2 && $okNoInlineCodeP && $okOneAvailable && $okNoDupPrepare) ? 0 : 1);

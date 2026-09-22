@@ -133,14 +133,14 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --primary-light: #60a5fa;
-            --t2-primary: #2563eb;
-            --t2-primary-dark: #1d4ed8;
-            --t2-primary-soft: #eff6ff;
-            --t2-banner: #1e3a8a;
-            --t2-banner-dark: #0f172a;
+            --primary: #198754;
+            --primary-dark: #157347;
+            --primary-light: #20c997;
+            --t2-primary: #198754;
+            --t2-primary-dark: #157347;
+            --t2-primary-soft: #d1e7dd;
+            --t2-banner: #157347;
+            --t2-banner-dark: #0f5132;
             --t2-text: #1e293b;
             --t2-text-muted: #64748b;
             --t2-bg: #f8fafc;
@@ -639,6 +639,18 @@
             letter-spacing: 1px;
             color: #fff;
             font-family: ui-monospace, monospace;
+        }
+        .coupon-code-box.coupon-code-box--no-code {
+            font-family: inherit;
+            letter-spacing: normal;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+        .coupon-code-container.is-no-code {
+            justify-content: center;
+        }
+        .coupon-code-container.is-no-code .coupon-code-left {
+            justify-content: center;
         }
         .btn-copy-code-modal {
             background: var(--t2-primary);
@@ -1485,15 +1497,55 @@ function restoreCouponModalFromHash() {
     openModalForCoupon(couponId, code, url);
 }
 
+function hasCouponCode(code) {
+    return !!(code && String(code).trim());
+}
+
+function updateModalCodeUI(hasCode) {
+    const codeBox = document.getElementById('modalCode');
+    const copyBtn = document.getElementById('copyCouponBtn');
+    const container = document.querySelector('#couponModal .coupon-code-container');
+    if (codeBox) {
+        codeBox.classList.toggle('coupon-code-box--no-code', !hasCode);
+        codeBox.innerText = hasCode ? '••••••••' : 'No code needed!';
+    }
+    if (copyBtn) {
+        copyBtn.style.display = hasCode ? '' : 'none';
+        copyBtn.disabled = false;
+        if (copyBtn.dataset.copyLabelDefault) {
+            copyBtn.innerText = copyBtn.dataset.copyLabelDefault;
+        }
+    }
+    if (container) {
+        container.classList.toggle('is-no-code', !hasCode);
+    }
+}
+
+function openCouponDualTabFlow(couponId, code, affUrl) {
+    const hasCode = hasCouponCode(code);
+    if (!affiliateAlreadyOpened) {
+        const couponUrl = new URL(window.location.href);
+        couponUrl.searchParams.set('show_coupon', String(couponId));
+        if (hasCode) {
+            couponUrl.searchParams.set('code', String(code));
+        } else {
+            couponUrl.searchParams.delete('code');
+        }
+        couponUrl.searchParams.set('aff_opened', '1');
+        couponUrl.hash = '';
+        window.open(couponUrl.toString(), '_blank', 'noopener');
+        if (affUrl) window.location.href = affUrl;
+        return;
+    }
+    openModalForCoupon(couponId, hasCode ? code : '', affUrl);
+}
+
 function openModalForCoupon(couponId, code, affUrl) {
-    currentCode = code;
+    const hasCode = hasCouponCode(code);
+    currentCode = hasCode ? code : '';
     currentCouponId = couponId;
     currentAffUrl = affUrl || null;
-    const codeBox = document.getElementById('modalCode');
-    if (codeBox) {
-        // Ẩn code cho tới khi user bấm Copy
-        codeBox.innerText = '••••••••';
-    }
+    updateModalCodeUI(hasCode);
     const modal = document.getElementById('couponModal');
     if (modal) modal.classList.add('active');
     const goBtn = document.querySelector('.go-to-store-btn');
@@ -1627,16 +1679,9 @@ function handleCouponClick(btn){
     const url = actualBtn.dataset.url;
     const couponId = actualBtn.dataset.couponId;
 
-    const activeTabBtn = document.querySelector('.filter-pill.active');
-    const activeTab = activeTabBtn ? (activeTabBtn.dataset.tab || 'all') : 'all';
-
-    if (type === 'deal' || activeTab === 'deals') {
-        if (url) window.open(url, '_blank');
-        return false;
-    }
-
-    if (!code) {
-        if (url) window.open(url, '_blank');
+    if (type === 'deal' || !hasCouponCode(code)) {
+        currentCouponRow = actualBtn.closest('.coupon-row');
+        openCouponDualTabFlow(couponId, '', url);
         return false;
     }
 
@@ -1644,21 +1689,7 @@ function handleCouponClick(btn){
     currentCouponId = couponId;
     currentCouponRow = actualBtn.closest('.coupon-row');
 
-    // Flow mới cho Get Code:
-    // - Nếu chưa mở affiliate tab nào: tab hiện tại -> aff, tab mới -> trang coupon + modal
-    // - Nếu affiliate đã mở trước đó (tab mới): chỉ mở modal để copy
-    if (!affiliateAlreadyOpened) {
-        const couponUrl = new URL(window.location.href);
-        couponUrl.searchParams.set('show_coupon', String(couponId));
-        couponUrl.searchParams.set('code', String(code));
-        couponUrl.searchParams.set('aff_opened', '1');
-        couponUrl.hash = '';
-        window.open(couponUrl.toString(), '_blank', 'noopener');
-        if (url) window.location.href = url;
-        return false;
-    }
-
-    openModalForCoupon(couponId, code, url);
+    openCouponDualTabFlow(couponId, code, url);
     return false;
 }
 
@@ -1676,6 +1707,7 @@ function closeCouponPopup(){
         }
     }
     document.getElementById('couponModal').classList.remove('active');
+    updateModalCodeUI(true);
     clearCouponModalHash();
 }
 function closeAllCodesModal(){
@@ -1768,14 +1800,22 @@ document.addEventListener('DOMContentLoaded', function () {
     affiliateAlreadyOpened = urlParams.get('aff_opened') === '1';
     const showCouponId = urlParams.get('show_coupon');
     const codeFromUrl = urlParams.get('code');
-    if (showCouponId && codeFromUrl) {
+    if (showCouponId && affiliateAlreadyOpened) {
         try {
-            const decoded = decodeURIComponent(codeFromUrl);
-            currentCode = decoded;
-            currentCouponId = showCouponId;
-            currentCouponRow = document.querySelector('.coupon-row[data-coupon-id="' + showCouponId + '"]');
-            revealCodeInRow(showCouponId, decoded, affUrl);
-            openModalForCoupon(showCouponId, decoded, affUrl);
+            const rowBtn = document.querySelector('.btn-get-code[data-coupon-id="' + showCouponId + '"]');
+            const url = rowBtn ? rowBtn.dataset.url : affUrl;
+            if (codeFromUrl) {
+                const decoded = decodeURIComponent(codeFromUrl);
+                currentCode = decoded;
+                currentCouponId = showCouponId;
+                currentCouponRow = document.querySelector('.coupon-row[data-coupon-id="' + showCouponId + '"]');
+                revealCodeInRow(showCouponId, decoded, url || affUrl);
+                openModalForCoupon(showCouponId, decoded, url || affUrl);
+            } else {
+                currentCouponId = showCouponId;
+                currentCouponRow = document.querySelector('.coupon-row[data-coupon-id="' + showCouponId + '"]');
+                openModalForCoupon(showCouponId, '', url || affUrl);
+            }
         } catch (e) {}
     } else {
         restoreCouponModalFromHash();

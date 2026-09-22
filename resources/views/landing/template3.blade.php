@@ -130,22 +130,22 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --primary-light: #60a5fa;
-            --t3-primary: #2563eb;
-            --t3-primary-dark: #1d4ed8;
-            --t3-primary-soft: #eff6ff;
-            --t3-accent: #2563eb;
-            --t3-accent-hover: #1d4ed8;
-            --t3-hero-bg: linear-gradient(135deg, #60a5fa 0%, #2563eb 55%, #1e293b 100%);
+            --primary: #198754;
+            --primary-dark: #157347;
+            --primary-light: #20c997;
+            --t3-primary: #198754;
+            --t3-primary-dark: #157347;
+            --t3-primary-soft: #d1e7dd;
+            --t3-accent: #198754;
+            --t3-accent-hover: #157347;
+            --t3-hero-bg: linear-gradient(135deg, #d1e7dd 0%, #198754 55%, #157347 100%);
             --t3-text: #0f172a;
             --t3-text-muted: #64748b;
-            --t3-bg: #f1f5f9;
+            --t3-bg: #f5f5f5;
             --t3-card: #ffffff;
             --t3-border: #e2e8f0;
             --t3-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 10px 20px -5px rgba(15, 23, 42, 0.08);
-            --t3-ribbon: linear-gradient(180deg, #1d4ed8 0%, #2563eb 50%, #60a5fa 100%);
+            --t3-ribbon: linear-gradient(180deg, #157347 0%, #198754 50%, #20c997 100%);
         }
         body {
             font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -210,14 +210,14 @@
             border: none;
             cursor: pointer;
             transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+            box-shadow: 0 4px 14px rgba(25, 135, 84, 0.35);
             font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
         }
         .t3-banner-cta:hover {
             background: var(--t3-accent-hover);
             transform: translateY(-1px);
             color: #fff;
-            box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
+            box-shadow: 0 6px 20px rgba(25, 135, 84, 0.4);
         }
 
         .t3-main {
@@ -369,7 +369,7 @@
         }
         .coupon-row {
             display: grid;
-            grid-template-columns: 108px 1fr minmax(130px, 150px);
+            grid-template-columns: 108px minmax(0, 1fr) minmax(168px, 180px);
             align-items: stretch;
             min-height: 140px;
             background: var(--t3-card);
@@ -439,9 +439,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 16px 14px;
+            padding: 16px 12px;
+            min-width: 0;
             background: linear-gradient(90deg, #f8fafc 0%, #fff 100%);
             border-left: 1px dashed var(--t3-border);
+        }
+        .t3-coupon-cta .btn-peel-sticker {
+            width: 100%;
+            max-width: 100%;
+            display: flex;
+        }
+        .t3-coupon-cta .btn-peel-sticker .peel-inner {
+            width: 100%;
+            min-width: 0;
         }
         .t3-coupon-content { flex: 1; min-width: 0; }
         .coupon-title {
@@ -784,6 +794,18 @@
             color: #fff;
             font-family: ui-monospace, monospace;
         }
+        .coupon-code-box.coupon-code-box--no-code {
+            font-family: inherit;
+            letter-spacing: normal;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+        .coupon-code-container.is-no-code {
+            justify-content: center;
+        }
+        .coupon-code-container.is-no-code .coupon-code-left {
+            justify-content: center;
+        }
         .btn-copy-code-modal {
             background: var(--t3-primary);
             color: #fff;
@@ -976,7 +998,10 @@
                 border-top: 1px dashed var(--t3-border);
                 padding: 14px 16px;
             }
-            .btn-peel-sticker { max-width: 280px; margin: 0 auto; }
+            .t3-coupon-cta .btn-peel-sticker {
+                max-width: 280px;
+                margin: 0 auto;
+            }
         }
         @media (max-width: 768px) {
             .t3-store-banner { padding: 14px 18px; }
@@ -992,7 +1017,7 @@
                 color: #fff;
                 font-weight: 800;
                 border-radius: 999px;
-                box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+                box-shadow: 0 4px 14px rgba(25, 135, 84, 0.35);
             }
             .t3-mobile-shop a:hover { background: var(--t3-accent-hover); color: #fff; }
         }
@@ -1687,15 +1712,55 @@ function restoreCouponModalFromHash() {
     openModalForCoupon(couponId, code, url);
 }
 
+function hasCouponCode(code) {
+    return !!(code && String(code).trim());
+}
+
+function updateModalCodeUI(hasCode) {
+    const codeBox = document.getElementById('modalCode');
+    const copyBtn = document.getElementById('copyCouponBtn');
+    const container = document.querySelector('#couponModal .coupon-code-container');
+    if (codeBox) {
+        codeBox.classList.toggle('coupon-code-box--no-code', !hasCode);
+        codeBox.innerText = hasCode ? '••••••••' : 'No code needed!';
+    }
+    if (copyBtn) {
+        copyBtn.style.display = hasCode ? '' : 'none';
+        copyBtn.disabled = false;
+        if (copyBtn.dataset.copyLabelDefault) {
+            copyBtn.innerText = copyBtn.dataset.copyLabelDefault;
+        }
+    }
+    if (container) {
+        container.classList.toggle('is-no-code', !hasCode);
+    }
+}
+
+function openCouponDualTabFlow(couponId, code, affUrl) {
+    const hasCode = hasCouponCode(code);
+    if (!affiliateAlreadyOpened) {
+        const couponUrl = new URL(window.location.href);
+        couponUrl.searchParams.set('show_coupon', String(couponId));
+        if (hasCode) {
+            couponUrl.searchParams.set('code', String(code));
+        } else {
+            couponUrl.searchParams.delete('code');
+        }
+        couponUrl.searchParams.set('aff_opened', '1');
+        couponUrl.hash = '';
+        window.open(couponUrl.toString(), '_blank', 'noopener');
+        if (affUrl) window.location.href = affUrl;
+        return;
+    }
+    openModalForCoupon(couponId, hasCode ? code : '', affUrl);
+}
+
 function openModalForCoupon(couponId, code, affUrl) {
-    currentCode = code;
+    const hasCode = hasCouponCode(code);
+    currentCode = hasCode ? code : '';
     currentCouponId = couponId;
     currentAffUrl = affUrl || null;
-    const codeBox = document.getElementById('modalCode');
-    if (codeBox) {
-        // Ẩn code cho tới khi user bấm Copy
-        codeBox.innerText = '••••••••';
-    }
+    updateModalCodeUI(hasCode);
     const modal = document.getElementById('couponModal');
     if (modal) modal.classList.add('active');
     const goBtn = document.querySelector('.go-to-store-btn');
@@ -1828,16 +1893,10 @@ function handleCouponClick(btn){
     const url = actualBtn.dataset.url;
     const couponId = actualBtn.dataset.couponId;
 
-    const activeTabBtn = document.querySelector('.filter-pill.active');
-    const activeTab = activeTabBtn ? (activeTabBtn.dataset.tab || 'all') : 'all';
-
-    if (type === 'deal' || activeTab === 'deals') {
-        if (url) window.open(url, '_blank');
-        return false;
-    }
-
-    if (!code) {
-        if (url) window.open(url, '_blank');
+    // Deal / không có mã: tab hiện tại -> aff, tab mới -> popup "No code needed!"
+    if (type === 'deal' || !hasCouponCode(code)) {
+        currentCouponRow = actualBtn.closest('.coupon-row');
+        openCouponDualTabFlow(couponId, '', url);
         return false;
     }
 
@@ -1845,21 +1904,7 @@ function handleCouponClick(btn){
     currentCouponId = couponId;
     currentCouponRow = actualBtn.closest('.coupon-row');
 
-    // Flow mới cho Get Code:
-    // - Nếu chưa mở affiliate tab nào: tab hiện tại -> aff, tab mới -> trang coupon + modal
-    // - Nếu affiliate đã mở trước đó (tab mới): chỉ mở modal để copy
-    if (!affiliateAlreadyOpened) {
-        const couponUrl = new URL(window.location.href);
-        couponUrl.searchParams.set('show_coupon', String(couponId));
-        couponUrl.searchParams.set('code', String(code));
-        couponUrl.searchParams.set('aff_opened', '1');
-        couponUrl.hash = '';
-        window.open(couponUrl.toString(), '_blank', 'noopener');
-        if (url) window.location.href = url;
-        return false;
-    }
-
-    openModalForCoupon(couponId, code, url);
+    openCouponDualTabFlow(couponId, code, url);
     return false;
 }
 
@@ -1877,6 +1922,7 @@ function closeCouponPopup(){
         }
     }
     document.getElementById('couponModal').classList.remove('active');
+    updateModalCodeUI(true);
     clearCouponModalHash();
 }
 function closeAllCodesModal(){
@@ -1969,14 +2015,22 @@ document.addEventListener('DOMContentLoaded', function () {
     affiliateAlreadyOpened = urlParams.get('aff_opened') === '1';
     const showCouponId = urlParams.get('show_coupon');
     const codeFromUrl = urlParams.get('code');
-    if (showCouponId && codeFromUrl) {
+    if (showCouponId && affiliateAlreadyOpened) {
         try {
-            const decoded = decodeURIComponent(codeFromUrl);
-            currentCode = decoded;
-            currentCouponId = showCouponId;
-            currentCouponRow = document.querySelector('.coupon-row[data-coupon-id="' + showCouponId + '"]');
-            revealCodeInRow(showCouponId, decoded, affUrl);
-            openModalForCoupon(showCouponId, decoded, affUrl);
+            const rowBtn = document.querySelector('.btn-get-code[data-coupon-id="' + showCouponId + '"]');
+            const url = rowBtn ? rowBtn.dataset.url : affUrl;
+            if (codeFromUrl) {
+                const decoded = decodeURIComponent(codeFromUrl);
+                currentCode = decoded;
+                currentCouponId = showCouponId;
+                currentCouponRow = document.querySelector('.coupon-row[data-coupon-id="' + showCouponId + '"]');
+                revealCodeInRow(showCouponId, decoded, url || affUrl);
+                openModalForCoupon(showCouponId, decoded, url || affUrl);
+            } else {
+                currentCouponId = showCouponId;
+                currentCouponRow = document.querySelector('.coupon-row[data-coupon-id="' + showCouponId + '"]');
+                openModalForCoupon(showCouponId, '', url || affUrl);
+            }
         } catch (e) {}
     } else {
         restoreCouponModalFromHash();

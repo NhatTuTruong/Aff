@@ -1,7 +1,7 @@
 <style>
 .btn-get-code.btn-peel-sticker {
     --peel-primary: var(--primary, #198754);
-    --peel-primary-light: var(--primary-light, #bfdbfe);
+    --peel-primary-light: var(--primary-light, #20c997);
     --peel-primary-dark: var(--primary-dark, #157347);
     position: relative;
     display: inline-flex;
@@ -74,7 +74,7 @@
     background: linear-gradient(
         225deg,
         #f5f3ee 0%,
-        #bfdbfe 42%,
+        #d1e7dd 42%,
         var(--peel-primary-light) 43%,
         var(--peel-primary-dark) 44%
     );
@@ -98,8 +98,12 @@
 .peel-inner.peel-inner--deal .peel-flap {
     display: none;
 }
+.btn-peel-sticker.btn-peel-sticker--wide {
+    width: 100%;
+    display: flex;
+}
 .btn-peel-sticker.btn-peel-sticker--wide .peel-inner {
     width: 100%;
-    min-width: 0;
+    min-width: 148px;
 }
 </style>
