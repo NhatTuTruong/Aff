@@ -204,7 +204,7 @@ class SiteContentPage extends Page implements HasForms
                         Tabs\Tab::make('Mã <head>')
                             ->icon('heroicon-o-code-bracket')
                             ->schema([
-                                Section::make('Mã bổ sung trong thẻ &lt;head&gt;')
+                                Section::make('Mã bổ sung trong thẻ <head>')
                                     ->description('Áp dụng cho toàn site: trang chủ, blog, landing chiến dịch. Có thể dán thẻ script, meta, link... Mỗi dòng một thẻ hoặc nhiều dòng tùy ý.')
                                     ->schema([
                                         Textarea::make('head_extras')

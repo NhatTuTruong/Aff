@@ -61,7 +61,7 @@ class SiteContent extends Model
         }, $links));
     }
 
-    /** Mã HTML/script bổ sung trong thẻ &lt;head&gt; (Avantlink, tracking, ...). */
+    /** Mã HTML/script bổ sung trong thẻ <head> (Avantlink, tracking, ...). */
     public static function headExtrasHtml(): string
     {
         $value = static::get('head_extras');
