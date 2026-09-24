@@ -852,6 +852,7 @@
             .staff-pick-badge { display: none; }
         }
     </style>
+    @include('partials.site-head-extras')
 </head>
 <body class="landing-coupon">
 @include('partials.site-header')

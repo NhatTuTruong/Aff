@@ -66,6 +66,7 @@ class SiteContentPage extends Page implements HasForms
             'page_privacy' => SiteContent::get('page_privacy', SiteContent::defaultPagePrivacy()),
             'page_affiliate' => SiteContent::get('page_affiliate', SiteContent::defaultPageAffiliateDisclosure()),
             'social_links' => SiteContent::get('social_links', SiteContent::defaultSocialLinks()),
+            'head_extras' => SiteContent::get('head_extras', SiteContent::defaultHeadExtras()),
         ]);
     }
 
@@ -200,6 +201,19 @@ class SiteContentPage extends Page implements HasForms
                                         Textarea::make('error_503.message')->label('Nội dung')->rows(2)->maxLength(500),
                                     ])->columns(1),
                             ]),
+                        Tabs\Tab::make('Mã <head>')
+                            ->icon('heroicon-o-code-bracket')
+                            ->schema([
+                                Section::make('Mã bổ sung trong thẻ &lt;head&gt;')
+                                    ->description('Áp dụng cho toàn site: trang chủ, blog, landing chiến dịch. Có thể dán thẻ script, meta, link... Mỗi dòng một thẻ hoặc nhiều dòng tùy ý.')
+                                    ->schema([
+                                        Textarea::make('head_extras')
+                                            ->label('Nội dung HTML')
+                                            ->rows(12)
+                                            ->placeholder('<script src="..."></script>')
+                                            ->columnSpanFull(),
+                                    ]),
+                            ]),
                         Tabs\Tab::make('About, Contact, Policy')
                             ->icon('heroicon-o-document-text')
                             ->schema([
@@ -287,6 +301,7 @@ class SiteContentPage extends Page implements HasForms
             $data['social_links'] ?? [],
             fn ($link) => is_array($link) && filled($link['network'] ?? null) && filled($link['url'] ?? null)
         )));
+        SiteContent::set('head_extras', (string) ($data['head_extras'] ?? ''));
 
         Notification::make()
             ->title('Đã lưu nội dung trang, mạng xã hội và các trang tĩnh.')

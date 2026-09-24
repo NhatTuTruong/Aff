@@ -2293,6 +2293,7 @@
             }
         }
     </style>
+    @include('partials.site-head-extras')
 </head>
 
 <body class="landing-coupon">

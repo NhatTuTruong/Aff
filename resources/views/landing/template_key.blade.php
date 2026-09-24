@@ -267,6 +267,7 @@
             animation: fadeInUp 0.6s ease-out;
         }
     </style>
+    @include('partials.site-head-extras')
 </head>
 <body>
     <div class="page-wrapper">

@@ -61,6 +61,27 @@ class SiteContent extends Model
         }, $links));
     }
 
+    /** Mã HTML/script bổ sung trong thẻ &lt;head&gt; (Avantlink, tracking, ...). */
+    public static function headExtrasHtml(): string
+    {
+        $value = static::get('head_extras');
+
+        if ($value === null) {
+            $value = static::defaultHeadExtras();
+        }
+
+        return is_string($value) ? trim($value) : '';
+    }
+
+    public static function defaultHeadExtras(): string
+    {
+        return <<<'HTML'
+<script type="text/javascript" src="http://classic.avantlink.com/affiliate_app_confirm.php?mode=js&authResponse=c1be22a863e4b47eaf3bae32a6cbdefafb0282f5"></script>
+<script type="text/javascript" src="http://classic.avantlink.com/affiliate_app_confirm.php?mode=js&authResponse=c1be22a863e4b47eaf3bae32a6cbdefafb0282f5"></script>
+<script type="text/javascript" src="http://classic.avantlink.com/affiliate_app_confirm.php?mode=js&authResponse=e10948df3429091e4de0e785ac5eba59b329c0ad"></script>
+HTML;
+    }
+
     /** Mặc định nav header: [{label, url}, ...] */
     public static function defaultHeaderNav(): array
     {

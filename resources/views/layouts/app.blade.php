@@ -238,6 +238,7 @@
         @include('partials.styles.magazine-site')
     @endif
     @stack('styles')
+    @include('partials.site-head-extras')
 </head>
 <body @if($usesMagazineChrome) class="magazine-site" @endif>
     @include('partials.site-header')
