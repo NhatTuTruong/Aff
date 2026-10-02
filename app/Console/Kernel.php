@@ -14,7 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('notifications:check-alerts')->everyThirtyMinutes();
+        // Cảnh báo hệ thống (uptime / click) đã tắt — xem NotificationAlertService::SYSTEM_ALERTS_ENABLED
         $schedule->command('health:check-landing --only-errors')->hourly();
         $schedule->command('landing:send-issues')->hourly()->withoutOverlapping();
         // Báo cáo hiệu suất chiến dịch cho từng user (2 lần/ngày: 8h sáng, 8h tối)

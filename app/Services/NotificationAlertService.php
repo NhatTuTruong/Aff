@@ -12,12 +12,19 @@ use Illuminate\Support\Facades\Http;
 
 class NotificationAlertService
 {
+    /** Tắt cảnh báo hệ thống trên chuông admin (uptime, click bất thường, mốc click ngày). */
+    public const SYSTEM_ALERTS_ENABLED = false;
+
     protected const CACHE_PREFIX_CAMPAIGN_HUMAN_CLICKS_DAILY = 'notification_campaign_human_clicks_daily_';
 
     protected const HUMAN_CLICKS_PER_DAY_MIN = 10;
 
     public function checkAndSendAlerts(): void
     {
+        if (! self::SYSTEM_ALERTS_ENABLED) {
+            return;
+        }
+
         $this->notifyCampaignsDailyHumanClicksThreshold();
         $this->checkUnusualClicks();
         $this->checkLandingPageAvailability();

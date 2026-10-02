@@ -6,8 +6,6 @@ use App\Models\BlockedIp;
 use App\Models\Campaign;
 use App\Models\PageView;
 use App\Models\Click;
-use App\Models\User;
-use Filament\Notifications\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
@@ -137,20 +135,7 @@ class AnalyticsService
             ]
         );
 
-        // Avoid spamming notifications for the same IP
-        $notifyKey = "rate_limit_notified:{$userId}:{$ip}";
-        if (! Cache::has($notifyKey)) {
-            if ($user = User::find($userId)) {
-                Notification::make()
-                    ->title('Phát hiện bot nghi ngờ (IP bị ngưng thống kê)')
-                    ->body("IP {$ip} đã tạo {$count} {$eventType}(s) trong 1 giây trên chiến dịch \"{$campaign->title}\". Hệ thống đã tự động ngưng thống kê IP này.")
-                    ->warning()
-                    ->icon('heroicon-o-shield-exclamation')
-                    ->sendToDatabase($user);
-            }
-
-            Cache::put($notifyKey, true, now()->addMinutes(10));
-        }
+        // Cảnh báo bot trên chuông admin đã tắt; vẫn auto-block IP như trên.
 
         return true;
     }
