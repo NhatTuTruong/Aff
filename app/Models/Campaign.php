@@ -131,7 +131,7 @@ class Campaign extends Model
     }
 
     /**
-     * Slug một segment (URL /visit/{slug}), duy nhất giữa các chiến dịch đang hoạt động (deleted_at null).
+     * Slug một segment (URL /store/{slug}), duy nhất giữa các chiến dịch đang hoạt động (deleted_at null).
      * Hỗ trợ nhập cũ dạng {userCode}/{part}: chỉ giữ phần cuối làm slug.
      *
      * @param  string|array|null  $slug

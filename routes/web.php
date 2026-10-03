@@ -50,11 +50,15 @@ Route::get('/login', function () {
     return redirect('/admin/login');
 })->name('login');
 
-// Landing: URL cũ /visit/{user_code}/{slug} → 301 tới /visit/{slug}
+// Landing coupon: /store/{slug} (URL cũ /visit/* → 301)
 Route::get('/visit/{userCode}/{slug}', [App\Http\Controllers\LandingPageController::class, 'legacyVisitRedirect'])
     ->where(['userCode' => '[0-9]{5}', 'slug' => '[a-z0-9-]+']);
 
-Route::get('/visit/{slug}', [App\Http\Controllers\LandingPageController::class, 'show'])
+Route::get('/visit/{slug}', function (string $slug) {
+    return redirect()->route('landing.show', ['slug' => $slug], 301);
+})->where('slug', '[a-z0-9-]+');
+
+Route::get('/store/{slug}', [App\Http\Controllers\LandingPageController::class, 'show'])
     ->name('landing.show')
     ->where('slug', '[a-z0-9-]+');
 

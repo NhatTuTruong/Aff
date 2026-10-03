@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
+use App\Models\Campaign;
 use Illuminate\Http\Response;
 
 class SitemapController extends Controller
@@ -37,6 +38,24 @@ class SitemapController extends Controller
                 'changefreq' => 'weekly',
                 'priority' => '0.8',
                 'lastmod' => $post->updated_at?->toAtomString(),
+            ];
+        }
+
+        $campaigns = Campaign::query()
+            ->whereNull('deleted_at')
+            ->whereNotNull('slug')
+            ->where('slug', '!=', '')
+            ->whereHas('brand')
+            ->when(app()->environment('production'), fn ($q) => $q->where('status', 'active'))
+            ->orderByDesc('updated_at')
+            ->get(['slug', 'updated_at']);
+
+        foreach ($campaigns as $campaign) {
+            $urls[] = [
+                'loc' => $base . '/store/' . $campaign->slug,
+                'changefreq' => 'weekly',
+                'priority' => '0.8',
+                'lastmod' => $campaign->updated_at?->toAtomString(),
             ];
         }
 

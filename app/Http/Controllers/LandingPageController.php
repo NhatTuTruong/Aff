@@ -17,7 +17,7 @@ class LandingPageController extends Controller
     }
 
     /**
-     * Chuyển URL cũ /visit/{user_code}/{segment} sang /visit/{slug} (301).
+     * Chuyển URL cũ /visit/{user_code}/{segment} sang /store/{slug} (301).
      */
     public function legacyVisitRedirect(string $userCode, string $slug, Request $request)
     {

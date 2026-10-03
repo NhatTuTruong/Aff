@@ -118,7 +118,7 @@ Dùng để quản lý thông tin cửa hàng/thương hiệu.
 5. Bấm **Lưu**.
 
 ### Kiểm tra hiển thị ngoài website
-- Mở link public của chiến dịch (dạng `/visit/{userCode}/{slug}`) để kiểm tra thực tế.
+- Mở link public của chiến dịch (dạng `/store/{slug}`) để kiểm tra thực tế.
 
 -- Có thể import file csv bằng nút "Import CSV", TẢI FILE Mẫu để điền thông tin, lưu lại và import vào
 
