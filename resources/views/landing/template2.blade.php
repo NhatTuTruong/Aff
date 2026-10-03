@@ -1371,12 +1371,8 @@ function revealCodeInRow(couponId, code, affUrl) {
     if (affUrl) codeSpan.dataset.url = affUrl;
     codeSpan.onclick = function(e) {
         e.stopPropagation();
-        copyCodeToClipboard(code);
-        const t = this.textContent;
-        this.textContent = 'Copied ✓';
-        this.style.background = '#f59e0b';
-        this.style.color = '#fff';
-        setTimeout(() => { this.textContent = t; this.style.background = ''; this.style.color = ''; }, 1500);
+        const url = affUrl || this.dataset.url || null;
+        copyCodeAndGoToAffiliate(code, url);
     };
     btn.parentNode.replaceChild(codeSpan, btn);
     saveRevealed(couponId, code);
@@ -1397,6 +1393,27 @@ function revealCodeInRow(couponId, code, affUrl) {
 }
 function copyCodeToClipboard(text) {
     navigator.clipboard.writeText(text);
+}
+
+function isMobileAffDevice() {
+    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+        return true;
+    }
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent || '');
+}
+
+function openAffiliateLink(affUrl) {
+    if (!affUrl) return;
+    if (isMobileAffDevice()) {
+        window.location.href = affUrl;
+    } else {
+        window.open(affUrl, '_blank', 'noopener');
+    }
+}
+
+function copyCodeAndGoToAffiliate(code, affUrl) {
+    copyCodeToClipboard(code);
+    openAffiliateLink(affUrl);
 }
 
 function showCouponCopyToast() {
@@ -1610,10 +1627,7 @@ function handleCouponClick(btn){
             bt.onclick = function() {
                 const code = this.dataset.code;
                 if (!code) return;
-                copyCodeToClipboard(code);
-                const originalText = this.textContent;
 
-                // Hiện code thật trong list khi user copy
                 const box = this
                     .closest('.all-codes-item')
                     ?.querySelector('.coupon-code-box');
@@ -1621,21 +1635,7 @@ function handleCouponClick(btn){
                     box.textContent = box.dataset.realCode;
                 }
 
-                this.textContent = 'Copied ✓';
-                this.disabled = true;
-
-                setTimeout(() => {
-                    this.textContent = 'Go To Store';
-                }, 600);
-
-                setTimeout(() => {
-                    if (affUrl && !affiliateAlreadyOpened) {
-                        window.open(affUrl, '_blank');
-                    }
-                    this.textContent = originalText;
-                    this.disabled = false;
-                    this.classList.remove('copied');
-                }, 1500);
+                copyCodeAndGoToAffiliate(code, affUrl);
             };
         });
         return false;
@@ -1728,40 +1728,24 @@ function copyCoupon(btn){
         btn.dataset.copyLabelDefault = btn.innerText.trim();
     }
 
-    copyCodeToClipboard(currentCode);
-    const originalText = btn.dataset.copyLabelDefault;
+    const goBtn = document.querySelector('.go-to-store-btn');
+    const affUrl = currentAffUrl || (goBtn ? goBtn.getAttribute('data-url') : null);
 
     const codeBox = document.getElementById('modalCode');
     if (codeBox) {
         codeBox.innerText = currentCode;
     }
 
-    btn.innerText = 'Copied ✓';
-    btn.disabled = true;
-    showCouponCopyToast();
-
-    const goBtn = document.querySelector('.go-to-store-btn');
-    if(goBtn){
-        goBtn.classList.remove('go-store-attention');
-        void goBtn.offsetWidth;
-        goBtn.classList.add('go-store-attention');
-    }
-
-    const affUrl = currentAffUrl || (goBtn ? goBtn.getAttribute('data-url') : null);
     if (currentCouponId && currentCode) {
         revealCodeInRow(currentCouponId, currentCode, affUrl);
     }
 
-    if (couponCopyRedirectTimer) clearTimeout(couponCopyRedirectTimer);
-    couponCopyRedirectTimer = setTimeout(function() {
+    if (couponCopyRedirectTimer) {
+        clearTimeout(couponCopyRedirectTimer);
         couponCopyRedirectTimer = null;
-        hideCouponCopyToast();
-        if (affUrl && !affiliateAlreadyOpened) {
-            window.open(affUrl, '_blank');
-        }
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }, 2300);
+    }
+
+    copyCodeAndGoToAffiliate(currentCode, affUrl);
 }
 function toggleQA(el){
     const item = el.closest('.qa-item');

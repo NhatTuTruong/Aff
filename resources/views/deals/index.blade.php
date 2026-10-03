@@ -272,7 +272,7 @@
 
                                 <div class="deal-actions">
                                     @if($coupon->code)
-                                        <button type="button" class="deal-code-btn" onclick="navigator.clipboard.writeText('{{ $coupon->code }}'); this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 1200);">
+                                        <button type="button" class="deal-code-btn" data-code="{{ e($coupon->code) }}" data-aff="{{ route('click.redirect', ['slug' => $campaign->slug]) }}" onclick="copyCouponCodeAndRedirect(this)">
                                             <span>Code:</span>
                                             <strong>{{ $coupon->code }}</strong>
                                         </button>
@@ -294,4 +294,8 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    @include('partials.copy-code-affiliate-script')
+@endpush
 

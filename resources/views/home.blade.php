@@ -979,7 +979,7 @@
                             @endif
                             <div class="coupon-card-actions">
                                 @if($coupon->code)
-                                    <button type="button" class="coupon-card-code" onclick="navigator.clipboard.writeText('{{ $coupon->code }}'); this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 1200);" title="Click to copy">
+                                    <button type="button" class="coupon-card-code" data-code="{{ e($coupon->code) }}" data-aff="{{ route('click.redirect', ['slug' => $campaign->slug]) }}" onclick="copyCouponCodeAndRedirect(this)" title="Click to copy">
                                         <span class="coupon-card-code-label">Code</span>
                                         <span class="coupon-card-code-value">{{ $coupon->code }}</span>
                                         <span class="coupon-card-code-copy">Copy</span>
@@ -1216,4 +1216,7 @@
     @endpush
     @endif
 </div>
+@push('scripts')
+    @include('partials.copy-code-affiliate-script')
+@endpush
 @endsection
