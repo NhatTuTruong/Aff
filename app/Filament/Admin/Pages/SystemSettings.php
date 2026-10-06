@@ -72,26 +72,6 @@ class SystemSettings extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Traffic API (Apify)')
-                    ->description('Dùng cho trang lọc traffic theo domain.')
-                    ->schema([
-                        TextInput::make('apify_token')
-                            ->label('Apify token')
-                            ->password()
-                            ->revealable()
-                            ->helperText('Nhập token mới để lưu. Nếu để "********" thì giữ token hiện tại.')
-                            ->maxLength(255),
-                        TextInput::make('apify_actor_id')
-                            ->label('Actor ID')
-                            ->required()
-                            ->maxLength(100),
-                        TextInput::make('traffic_threshold_default')
-                            ->label('Ngưỡng traffic mặc định')
-                            ->numeric()
-                            ->minValue(0)
-                            ->required(),
-                    ])
-                    ->columns(3),
                 Section::make('AI Content (Gemini)')
                     ->description('Dùng cho tạo blog AI trong admin và cron.')
                     ->schema([

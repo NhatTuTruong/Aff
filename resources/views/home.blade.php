@@ -6,6 +6,7 @@
 @push('styles')
 <style>
     .home-page {
+        overflow-x: clip;
         --hp-ink: #0c0a12;
         --hp-muted: #5c5866;
         --hp-line: rgba(5, 150, 105, 0.12);
@@ -26,6 +27,7 @@
         max-width: 1180px;
         margin: 0 auto;
         padding: 0 1.25rem;
+        box-sizing: border-box;
     }
 
     .hp-hero {
@@ -34,6 +36,9 @@
     }
     .hp-hero-panel {
         position: relative;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
         border-radius: 5px;
         border: 1px solid var(--hp-line);
         background: var(--hp-surface);
@@ -62,16 +67,21 @@
         position: relative;
         z-index: 1;
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 0;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
     }
     @media (min-width: 900px) {
         .hp-hero-inner {
-            grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
+            grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
         }
     }
     .hp-hero-main {
+        min-width: 0;
         padding: clamp(1.5rem, 3vw, 2.25rem);
+        overflow-wrap: anywhere;
     }
     @media (min-width: 900px) {
         .hp-hero-main {
@@ -114,7 +124,7 @@
         line-height: 1.12;
         color: var(--hp-ink);
         margin: 0 0 0.85rem;
-        max-width: 22ch;
+        max-width: none;
     }
     @media (min-width: 900px) {
         .hp-hero h1 { max-width: 14ch; }
@@ -129,6 +139,7 @@
         line-height: 1.6;
         max-width: 34rem;
         margin: 0 0 1.15rem;
+        overflow-wrap: anywhere;
     }
     .hp-hero-actions {
         display: flex;
@@ -231,6 +242,7 @@
 
     .hp-hero-aside {
         position: relative;
+        min-width: 0;
         padding: clamp(1.25rem, 2.5vw, 1.75rem);
         background: linear-gradient(160deg, #064e3b 0%, #047857 50%, #059669 100%);
         color: #ecfdf5;
@@ -238,6 +250,7 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
+        overflow: hidden;
     }
     @media (min-width: 900px) {
         .hp-hero-aside { min-height: 100%; }
@@ -257,17 +270,23 @@
         position: relative;
         z-index: 1;
         min-height: 168px;
+        width: 100%;
+        max-width: 100%;
         overflow: hidden;
     }
     .hp-aside-track {
         display: flex;
+        flex-wrap: nowrap;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
         transition: transform 0.45s ease;
         will-change: transform;
     }
     .hp-aside-slide {
         flex: 0 0 100%;
-        min-width: 0;
+        width: 0;
+        min-width: 100%;
         box-sizing: border-box;
         display: flex;
         gap: 1rem;
@@ -308,7 +327,11 @@
         opacity: 0.9;
         margin: 0;
         line-height: 1.5;
-        max-width: 20rem;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+    @media (min-width: 900px) {
+        .hp-aside-caption { max-width: 20rem; }
     }
     .hp-aside-dots {
         position: relative;
@@ -801,7 +824,11 @@
     .coupon-card:nth-child(3) { animation-delay: 0.16s; }
 
     @media (max-width: 768px) {
-        .hp-search { border-radius: 18px; }
+        .home-page .hp-shell { padding: 0 1rem; }
+        .hp-hero-main { padding: 1.25rem 1rem; }
+        .hp-hero-lead { max-width: 100%; }
+        .hp-hero-foot { padding-left: 1rem; padding-right: 1rem; }
+        .hp-search { border-radius: 18px; max-width: 100%; }
         .hp-search button { width: 100%; }
         .stores-carousel { gap: 1.25rem; }
         .store-carousel-item { width: 88px; }
@@ -900,8 +927,13 @@
         var timer = null;
         var delay = 3000;
 
+        function slideWidth() {
+            return slider.clientWidth || slider.offsetWidth || 0;
+        }
+
         function setActive() {
-            track.style.transform = 'translateX(' + (-i * 100) + '%)';
+            var w = slideWidth();
+            track.style.transform = w ? 'translateX(' + (-i * w) + 'px)' : 'translateX(0)';
             dots.forEach(function (d, j) {
                 var on = j === i;
                 d.classList.toggle('is-active', on);
@@ -946,6 +978,12 @@
         document.addEventListener('visibilitychange', function () {
             if (document.hidden) stop();
             else start();
+        });
+
+        var resizeTimer;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(setActive, 120);
         });
 
         setActive();
