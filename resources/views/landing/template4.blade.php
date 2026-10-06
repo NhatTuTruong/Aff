@@ -918,6 +918,7 @@
 </head>
 <body class="t4-corelux">
 @include('partials.site-header')
+@include('partials.landing-shop-now-handler')
 
 <div class="t4-page">
 <div class="t4-container">
@@ -934,8 +935,9 @@
         ? $maxPercent . '% OFF'
         : ($maxCurrencyValue > 0 ? strtoupper($maxCurrencySymbol . number_format($maxCurrencyValue, 0, '.', '') . ' OFF') : 'Deals');
 
-    $affiliateUrl = route('click.redirect', ['slug' => $campaignSlug]);
+    $affiliateUrl = trim((string) ($campaign->affiliate_url ?? ''));
     $firstCodeCoupon = $couponsWithCodes->first();
+    $firstDealCoupon = $coupons->filter(fn ($c) => empty($c->code))->first();
     $alertBtnLabel = $codeCount > 0 ? 'Get Coupon Alert' : 'Get Deals';
 
     $popularBrands = Campaign::query()
@@ -1018,6 +1020,9 @@
                 @if($firstCodeCoupon)
                 data-first-coupon-id="{{ $firstCodeCoupon->id }}"
                 data-first-code="{{ $firstCodeCoupon->code }}"
+                @endif
+                @if($firstDealCoupon && $codeCount === 0)
+                data-first-deal-id="{{ $firstDealCoupon->id }}"
                 @endif>{{ $alertBtnLabel }}</a>
         </div>
         <div class="t4-stats-card">
@@ -1036,7 +1041,7 @@
         <h1 class="t4-page-title">{{ $displayBrand }} Coupons and Promo Codes</h1>
         <p class="t4-page-intro">
             Great chance to save money at
-            <a href="{{ $affiliateUrl }}" class="t4-brand-link" target="_blank" rel="nofollow sponsored noopener">{{ $brandName }}</a>
+            <a href="{{ $affiliateUrl ?: '#' }}" class="t4-brand-link" target="_blank" rel="nofollow sponsored noopener">{{ $brandName }}</a>
             because sale season is here. Time to go shopping!
         </p>
 
@@ -1100,19 +1105,15 @@
                 $hoursAgo = (($campaign->id ?? 0) * 7 + ($coupon->id ?? 0)) % 48 + 1;
                 $uses = (($campaign->id ?? 0) * 11 + ($coupon->id ?? 0)) % 4900 + 100;
 
-                $couponHeadline = $hasCode
-                    ? $formatHeadline($coupon, $offerType, $offerValue, $currencySymbol, $isFreeShipping)
-                    : ($descriptionText !== '' ? $descriptionText : $formatHeadline($coupon, $offerType, $offerValue, $currencySymbol, $isFreeShipping));
+                $couponHeadline = $descriptionText !== ''
+                    ? $descriptionText
+                    : $formatHeadline($coupon, $offerType, $offerValue, $currencySymbol, $isFreeShipping);
 
-                if ($hasCode) {
-                    $couponBody = $descriptionText !== ''
-                        ? $descriptionText
-                        : 'Such quality and price are hard to come by! Great chance to save money with this ' . $brandName . ' coupon.';
-                } else {
-                    $couponBody = $offerText !== ''
-                        ? $offerText
-                        : 'Excellent savings at ' . $brandName . '. A great place to be if you want a bargain.';
-                }
+                $couponBody = $offerText !== ''
+                    ? $offerText
+                    : ($hasCode
+                        ? 'Such quality and price are hard to come by! Great chance to save money with this ' . $brandName . ' coupon.'
+                        : 'Excellent savings at ' . $brandName . '. A great place to be if you want a bargain.');
 
                 $codeDisplay = '';
                 if ($hasCode) {
@@ -1146,7 +1147,7 @@
                         data-type="code"
                         data-code="{{ $coupon->code }}"
                         data-coupon-id="{{ $coupon->id }}"
-                        data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
+                        data-url="{{ $campaign->affiliate_url ?? '' }}"
                         aria-label="Get coupon code and go to store">Get Code</a>
                 </div>
                 @else
@@ -1156,7 +1157,7 @@
                         role="button"
                         data-type="deal"
                         data-coupon-id="{{ $coupon->id }}"
-                        data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
+                        data-url="{{ $campaign->affiliate_url ?? '' }}"
                         aria-label="Open deal and go to store">Get Deal</a>
                 </div>
                 @endif
@@ -1172,7 +1173,8 @@
         </div>
 
         <div class="t4-mobile-shop">
-            <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}" target="_blank" rel="nofollow sponsored noopener">Visit Store</a>
+            <a href="{{ $campaign->affiliate_url ?: '#' }}" rel="nofollow sponsored noopener"
+                onclick="return handleShopNowClick(event)">Visit Store</a>
         </div>
 
         <section class="section" id="about-us">
@@ -1413,7 +1415,7 @@
                 @endforeach
             </div>
             <div class="coupon-modal-actions" style="margin-top: 20px;">
-                <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
+                <a href="{{ $campaign->affiliate_url ?: '#' }}"
                    target="_blank" rel="nofollow sponsored noopener"
                    class="coupon-btn store">
                     Go To The Store
@@ -1440,6 +1442,7 @@ let currentCode = '';
 let currentCouponRow = null;
 let currentCouponId = null;
 let currentAffUrl = null;
+let currentCouponIsDeal = false;
 let affiliateAlreadyOpened = false;
 function getStoredRevealed() { return {}; }
 function saveRevealed(couponId, code) { return; }
@@ -1565,8 +1568,9 @@ function restoreCouponModalFromHash() {
     const couponId = btn.dataset.couponId;
     const activeTabBtn = document.querySelector('.filter-pill.active');
     const activeTab = activeTabBtn ? (activeTabBtn.dataset.tab || 'all') : 'all';
-    if (type === 'deal' || activeTab === 'deals') {
-        clearCouponModalHash();
+    if (type === 'deal') {
+        currentCouponRow = btn.closest('.coupon-row');
+        openModalForCoupon(couponId, '', url, true);
         return;
     }
     if (!code) {
@@ -1574,18 +1578,18 @@ function restoreCouponModalFromHash() {
         return;
     }
     currentCouponRow = btn.closest('.coupon-row');
-    openModalForCoupon(couponId, code, url);
+    openModalForCoupon(couponId, code, url, false);
 }
 
-function openModalForCoupon(couponId, code, affUrl) {
-    currentCode = code;
+@include('partials.landing-deal-popup-js')
+
+function openModalForCoupon(couponId, code, affUrl, isDeal) {
+    isDeal = isDeal === true;
+    currentCouponIsDeal = isDeal;
+    currentCode = isDeal ? '' : code;
     currentCouponId = couponId;
     currentAffUrl = affUrl || null;
-    const codeBox = document.getElementById('modalCode');
-    if (codeBox) {
-        // Ẩn code cho tới khi user bấm Copy
-        codeBox.innerText = '••••••••';
-    }
+    applyDealModalUi(isDeal);
     const modal = document.getElementById('couponModal');
     if (modal) modal.classList.add('active');
     const goBtn = document.querySelector('.go-to-store-btn');
@@ -1680,8 +1684,12 @@ function handleCouponAlertClick(alertBtn, e) {
         }
 
         revealCodeInRow(couponId, code, affUrl);
-        openModalForCoupon(couponId, code, affUrl);
+        openModalForCoupon(couponId, code, affUrl, false);
         return false;
+    }
+    const dealId = alertBtn.dataset.firstDealId;
+    if (dealId) {
+        return openDealCouponFlow(dealId, affUrl, null);
     }
     if (affUrl) {
         window.location.href = affUrl;
@@ -1763,9 +1771,8 @@ function handleCouponClick(btn, e){
     const activeTabBtn = document.querySelector('.filter-pill.active');
     const activeTab = activeTabBtn ? (activeTabBtn.dataset.tab || 'all') : 'all';
 
-    if (type === 'deal' || activeTab === 'deals') {
-        if (url) window.open(url, '_blank');
-        return false;
+    if (type === 'deal') {
+        return openDealCouponFlow(couponId, url, actualBtn);
     }
 
     if (!code) {
@@ -1791,7 +1798,7 @@ function handleCouponClick(btn, e){
         return false;
     }
 
-    openModalForCoupon(couponId, code, url);
+    openModalForCoupon(couponId, code, url, false);
     return false;
 }
 
@@ -1804,10 +1811,12 @@ function closeCouponPopup(){
     const copyBtn = document.getElementById('copyCouponBtn');
     if (copyBtn) {
         copyBtn.disabled = false;
+        copyBtn.style.display = '';
         if (copyBtn.dataset.copyLabelDefault) {
             copyBtn.innerText = copyBtn.dataset.copyLabelDefault;
         }
     }
+    currentCouponIsDeal = false;
     document.getElementById('couponModal').classList.remove('active');
     clearCouponModalHash();
 }
@@ -1835,7 +1844,7 @@ function handleFeedback(btn, worked){
 }
 
 function copyCoupon(btn){
-    if(!currentCode) return;
+    if (currentCouponIsDeal || !currentCode) return;
 
     if (!btn.dataset.copyLabelDefault) {
         btn.dataset.copyLabelDefault = btn.innerText.trim();
@@ -1896,14 +1905,15 @@ document.addEventListener('DOMContentLoaded', function () {
     affiliateAlreadyOpened = urlParams.get('aff_opened') === '1';
     const showCouponId = urlParams.get('show_coupon');
     const codeFromUrl = urlParams.get('code');
-    if (showCouponId && codeFromUrl) {
+    if (restoreDealModalFromUrlParams(affUrl)) {
+    } else if (showCouponId && codeFromUrl) {
         try {
             const decoded = decodeURIComponent(codeFromUrl);
             currentCode = decoded;
             currentCouponId = showCouponId;
             currentCouponRow = document.querySelector('.coupon-row[data-coupon-id="' + showCouponId + '"]');
             revealCodeInRow(showCouponId, decoded, affUrl);
-            openModalForCoupon(showCouponId, decoded, affUrl);
+            openModalForCoupon(showCouponId, decoded, affUrl, false);
         } catch (e) {}
     } else {
         restoreCouponModalFromHash();

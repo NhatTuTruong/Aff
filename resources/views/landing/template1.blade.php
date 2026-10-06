@@ -591,7 +591,7 @@
         .coupon-header-row {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             gap: 12px;
             margin-bottom: 2px;
         }
@@ -605,49 +605,27 @@
             color: var(--text-dark);
         }
 
-        .btn-get-code {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            color: #fff;
-            border: none;
-            border-radius: 999px;
-            padding: 10px 20px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
-        }
-
-        .btn-get-code:hover {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, #047857 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
-        }
-
-        .btn-get-code::after {
-            content: '↗';
-            font-size: 0.85rem;
-        }
+        @include('partials.peel-sticker-styles')
 
         .coupon-revealed-code {
             display: inline-flex;
             align-items: center;
-            padding: 10px 16px;
+            justify-content: center;
+            min-width: 148px;
+            height: 40px;
+            padding: 0 14px;
             font-size: 0.95rem;
             font-weight: 700;
-            font-family: ui-monospace, monospace;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
             letter-spacing: 0.05em;
-            background: #ecfdf5;
+            background: #fff;
             color: var(--primary-dark);
-            border: 1px dashed var(--primary);
-            border-radius: 12px;
+            border: 2px dashed var(--primary-dark);
+            border-radius: 6px;
             white-space: nowrap;
             cursor: pointer;
             transition: none;
+            flex-shrink: 0;
         }
 
         .staff-pick-badge {
@@ -1939,12 +1917,6 @@
                 gap: 10px;
             }
 
-            .btn-get-code {
-                width: auto;
-                min-width: 100px;
-                padding: 10px 16px;
-            }
-
             .coupon-title {
                 font-size: 0.9rem;
                 line-height: 1.3;
@@ -2090,11 +2062,6 @@
             .coupon-desc {
                 overflow: hidden;
                 display: none;
-            }
-
-            .btn-get-code {
-                font-size: 0.85rem;
-                padding: 10px 16px;
             }
 
             .filter-tabs {
@@ -2299,6 +2266,7 @@
 
 <body>
     @include('partials.site-header')
+    @include('partials.landing-shop-now-handler')
     <div class="shell">
         <div class="page-panel">
             <header class="hero">
@@ -2366,8 +2334,9 @@
                             </div>
                         </div>
                         <nav class="quick-menu" aria-label="Quick menu">
-                            <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
-                                class="quick-menu-shop-now" target="_blank" rel="noopener">Shop Now</a>
+                            <a href="{{ $campaign->affiliate_url ?: '#' }}"
+                                class="quick-menu-shop-now" rel="nofollow sponsored noopener"
+                                onclick="return handleShopNowClick(event)">Shop Now</a>
                             <h3 class="quick-menu-title">Quick Menu</h3>
                             <ul class="quick-menu-list">
                                 <li><a href="#about-us">About us</a></li>
@@ -2556,14 +2525,12 @@
                                                     <div class="meta-item uses">{{ number_format($uses) }} Uses</div>
                                                 </div>
                                             </div>
-                                            <button class="btn-get-code" type="button"
-                                                data-type="{{ $hasCode ? 'code' : 'deal' }}"
-                                                data-code="{{ $coupon->code }}" data-coupon-id="{{ $coupon->id }}"
-                                                data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
-                                                aria-label="{{ $hasCode ? 'Get coupon code and go to store' : 'Open deal and go to store' }}"
-                                                onclick="return handleCouponClick(this)">
-                                                {{ $hasCode ? 'GET CODE' : 'GET DEAL' }}
-                                            </button>
+                                            @include('partials.coupon-get-code-btn', [
+                                                'hasCode' => $hasCode,
+                                                'code' => $coupon->code,
+                                                'couponId' => $coupon->id,
+                                                'url' => $campaign->affiliate_url ?? '',
+                                            ])
                                         </div>
 
                                         <div class="coupon-desc coupon-verified" aria-label="Coupon status">
@@ -2625,13 +2592,12 @@
                                                         Uses</div>
                                                 </div>
                                             </div>
-                                            <button class="btn-get-code" type="button" data-type="code"
-                                                data-all-codes="1" data-coupon-id="all-codes"
-                                                data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
-                                                aria-label="View all coupon codes"
-                                                onclick="return handleCouponClick(this)">
-                                                GET CODE
-                                            </button>
+                                            @include('partials.coupon-get-code-btn', [
+                                                'hasCode' => true,
+                                                'allCodes' => true,
+                                                'couponId' => 'all-codes',
+                                                'url' => $campaign->affiliate_url ?? '',
+                                            ])
                                         </div>
                                     </div>
                                 </article>
@@ -2639,8 +2605,9 @@
                         </section>
 
                         {{-- Mobile-only Shop Now dưới danh sách coupon --}}
-                        <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
-                            class="mobile-shop-now-bottom" target="_blank" rel="nofollow sponsored noopener">
+                        <a href="{{ $campaign->affiliate_url ?: '#' }}"
+                            class="mobile-shop-now-bottom" rel="nofollow sponsored noopener"
+                            onclick="return handleShopNowClick(event)">
                             Shop Now
                         </a>
 
@@ -2983,7 +2950,7 @@
                     @endforeach
                 </div>
                 <div class="coupon-modal-actions" style="margin-top: 20px;">
-                    <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
+                    <a href="{{ $campaign->affiliate_url ?: '#' }}"
                         target="_blank" rel="nofollow sponsored noopener" class="coupon-btn store">
                         Go To {{ $campaign->brand->name ?? $campaign->title }}
                     </a>
@@ -3008,6 +2975,7 @@
         let currentCouponRow = null;
         let currentCouponId = null;
         let currentAffUrl = null;
+        let currentCouponIsDeal = false;
         let affiliateAlreadyOpened = false;
         let couponCopyRedirectTimer = null;
         let couponCopyToastHideTimer = null;
@@ -3163,8 +3131,9 @@
             const couponId = btn.dataset.couponId;
             const activeTabBtn = document.querySelector('.filter-pill.active');
             const activeTab = activeTabBtn ? (activeTabBtn.dataset.tab || 'all') : 'all';
-            if (type === 'deal' || activeTab === 'deals') {
-                clearCouponModalHash();
+            if (type === 'deal') {
+                currentCouponRow = btn.closest('.coupon-row');
+                openModalForCoupon(couponId, '', url, true);
                 return;
             }
             if (!code) {
@@ -3172,18 +3141,18 @@
                 return;
             }
             currentCouponRow = btn.closest('.coupon-row');
-            openModalForCoupon(couponId, code, url);
+            openModalForCoupon(couponId, code, url, false);
         }
 
-        function openModalForCoupon(couponId, code, affUrl) {
-            currentCode = code;
+        @include('partials.landing-deal-popup-js')
+
+        function openModalForCoupon(couponId, code, affUrl, isDeal) {
+            isDeal = isDeal === true;
+            currentCouponIsDeal = isDeal;
+            currentCode = isDeal ? '' : code;
             currentCouponId = couponId;
             currentAffUrl = affUrl || null;
-            const codeBox = document.getElementById('modalCode');
-            if (codeBox) {
-                // Ẩn code cho tới khi user bấm Copy
-                codeBox.innerText = '••••••••';
-            }
+            applyDealModalUi(isDeal);
             const modal = document.getElementById('couponModal');
             if (modal) modal.classList.add('active');
             const goBtn = document.querySelector('.go-to-store-btn');
@@ -3343,10 +3312,8 @@
             const activeTabBtn = document.querySelector('.filter-pill.active');
             const activeTab = activeTabBtn ? (activeTabBtn.dataset.tab || 'all') : 'all';
 
-            // Deal hoặc tab Deals: luôn mở link aff
-            if (type === 'deal' || activeTab === 'deals') {
-                if (url) window.open(url, '_blank');
-                return false;
+            if (type === 'deal') {
+                return openDealCouponFlow(couponId, url, actualBtn);
             }
 
             if (!code) {
@@ -3372,7 +3339,7 @@
                 return false;
             }
 
-            openModalForCoupon(couponId, code, url);
+            openModalForCoupon(couponId, code, url, false);
             return false;
         }
 
@@ -3385,10 +3352,12 @@
             const copyBtn = document.getElementById('copyCouponBtn');
             if (copyBtn) {
                 copyBtn.disabled = false;
+                copyBtn.style.display = '';
                 if (copyBtn.dataset.copyLabelDefault) {
                     copyBtn.innerText = copyBtn.dataset.copyLabelDefault;
                 }
             }
+            currentCouponIsDeal = false;
             document.getElementById('couponModal').classList.remove('active');
             clearCouponModalHash();
         }
@@ -3423,7 +3392,7 @@
         }
 
         function copyCoupon(btn) {
-            if (!currentCode) return;
+            if (currentCouponIsDeal || !currentCode) return;
 
             if (!btn.dataset.copyLabelDefault) {
                 btn.dataset.copyLabelDefault = btn.innerText.trim();
@@ -3491,14 +3460,15 @@
             affiliateAlreadyOpened = urlParams.get('aff_opened') === '1';
             const showCouponId = urlParams.get('show_coupon');
             const codeFromUrl = urlParams.get('code');
-            if (showCouponId && codeFromUrl) {
+            if (restoreDealModalFromUrlParams(affUrl)) {
+            } else if (showCouponId && codeFromUrl) {
                 try {
                     const decoded = decodeURIComponent(codeFromUrl);
                     currentCode = decoded;
                     currentCouponId = showCouponId;
                     currentCouponRow = document.querySelector('.coupon-row[data-coupon-id="' + showCouponId + '"]');
                     revealCodeInRow(showCouponId, decoded, affUrl);
-                    openModalForCoupon(showCouponId, decoded, affUrl);
+                    openModalForCoupon(showCouponId, decoded, affUrl, false);
                 } catch (e) {}
             } else {
                 restoreCouponModalFromHash();

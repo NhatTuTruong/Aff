@@ -855,6 +855,7 @@
 </head>
 <body>
 @include('partials.site-header')
+@include('partials.landing-shop-now-handler')
 
 <div class="t2-store-banner">
     <div class="t2-banner-brand">
@@ -867,7 +868,8 @@
         @endif
         <span class="t2-banner-name">{{ $brandName }}</span>
     </div>
-    <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}" class="t2-banner-cta" target="_blank" rel="noopener">Shop Now</a>
+    <a href="{{ $campaign->affiliate_url ?: '#' }}" class="t2-banner-cta" rel="nofollow sponsored noopener"
+        onclick="return handleShopNowClick(event)">Shop Now</a>
 </div>
 
 <div class="t2-main">
@@ -1023,7 +1025,7 @@
                     data-type="{{ $hasCode ? 'code' : 'deal' }}"
                     data-code="{{ $coupon->code }}"
                     data-coupon-id="{{ $coupon->id }}"
-                    data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
+                    data-url="{{ $campaign->affiliate_url ?? '' }}"
                     aria-label="{{ $hasCode ? 'Get coupon code and go to store' : 'Open deal and go to store' }}"
                     onclick="return handleCouponClick(this)">
                     {{ $hasCode ? 'GET CODE' : 'GET DEAL' }}
@@ -1065,7 +1067,7 @@
                     data-type="code"
                     data-all-codes="1"
                     data-coupon-id="all-codes"
-                    data-url="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
+                    data-url="{{ $campaign->affiliate_url ?? '' }}"
                     aria-label="View all coupon codes"
                     onclick="return handleCouponClick(this)">
                     GET CODE
@@ -1075,7 +1077,8 @@
         </div>
 
         <div class="t2-mobile-shop">
-            <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}" target="_blank" rel="nofollow sponsored noopener">Shop Now</a>
+            <a href="{{ $campaign->affiliate_url ?: '#' }}" rel="nofollow sponsored noopener"
+                onclick="return handleShopNowClick(event)">Shop Now</a>
         </div>
     </section>
 
@@ -1328,7 +1331,7 @@
                 @endforeach
             </div>
             <div class="coupon-modal-actions" style="margin-top: 20px;">
-                <a href="{{ route('click.redirect', ['slug' => $campaignSlug]) }}"
+                <a href="{{ $campaign->affiliate_url ?: '#' }}"
                    target="_blank" rel="nofollow sponsored noopener"
                    class="coupon-btn store">
                     Go To The Store
@@ -1355,6 +1358,7 @@ let currentCode = '';
 let currentCouponRow = null;
 let currentCouponId = null;
 let currentAffUrl = null;
+let currentCouponIsDeal = false;
 let affiliateAlreadyOpened = false;
 function getStoredRevealed() { return {}; }
 function saveRevealed(couponId, code) { return; }
@@ -1493,8 +1497,9 @@ function restoreCouponModalFromHash() {
     const couponId = btn.dataset.couponId;
     const activeTabBtn = document.querySelector('.filter-pill.active');
     const activeTab = activeTabBtn ? (activeTabBtn.dataset.tab || 'all') : 'all';
-    if (type === 'deal' || activeTab === 'deals') {
-        clearCouponModalHash();
+    if (type === 'deal') {
+        currentCouponRow = btn.closest('.coupon-row');
+        openModalForCoupon(couponId, '', url, true);
         return;
     }
     if (!code) {
@@ -1502,18 +1507,18 @@ function restoreCouponModalFromHash() {
         return;
     }
     currentCouponRow = btn.closest('.coupon-row');
-    openModalForCoupon(couponId, code, url);
+    openModalForCoupon(couponId, code, url, false);
 }
 
-function openModalForCoupon(couponId, code, affUrl) {
-    currentCode = code;
+@include('partials.landing-deal-popup-js')
+
+function openModalForCoupon(couponId, code, affUrl, isDeal) {
+    isDeal = isDeal === true;
+    currentCouponIsDeal = isDeal;
+    currentCode = isDeal ? '' : code;
     currentCouponId = couponId;
     currentAffUrl = affUrl || null;
-    const codeBox = document.getElementById('modalCode');
-    if (codeBox) {
-        // Ẩn code cho tới khi user bấm Copy
-        codeBox.innerText = '••••••••';
-    }
+    applyDealModalUi(isDeal);
     const modal = document.getElementById('couponModal');
     if (modal) modal.classList.add('active');
     const goBtn = document.querySelector('.go-to-store-btn');
@@ -1650,9 +1655,8 @@ function handleCouponClick(btn){
     const activeTabBtn = document.querySelector('.filter-pill.active');
     const activeTab = activeTabBtn ? (activeTabBtn.dataset.tab || 'all') : 'all';
 
-    if (type === 'deal' || activeTab === 'deals') {
-        if (url) window.open(url, '_blank');
-        return false;
+    if (type === 'deal') {
+        return openDealCouponFlow(couponId, url, actualBtn);
     }
 
     if (!code) {
@@ -1678,7 +1682,7 @@ function handleCouponClick(btn){
         return false;
     }
 
-    openModalForCoupon(couponId, code, url);
+    openModalForCoupon(couponId, code, url, false);
     return false;
 }
 
@@ -1691,10 +1695,12 @@ function closeCouponPopup(){
     const copyBtn = document.getElementById('copyCouponBtn');
     if (copyBtn) {
         copyBtn.disabled = false;
+        copyBtn.style.display = '';
         if (copyBtn.dataset.copyLabelDefault) {
             copyBtn.innerText = copyBtn.dataset.copyLabelDefault;
         }
     }
+    currentCouponIsDeal = false;
     document.getElementById('couponModal').classList.remove('active');
     clearCouponModalHash();
 }
@@ -1722,7 +1728,7 @@ function handleFeedback(btn, worked){
 }
 
 function copyCoupon(btn){
-    if(!currentCode) return;
+    if (currentCouponIsDeal || !currentCode) return;
 
     if (!btn.dataset.copyLabelDefault) {
         btn.dataset.copyLabelDefault = btn.innerText.trim();
@@ -1788,14 +1794,16 @@ document.addEventListener('DOMContentLoaded', function () {
     affiliateAlreadyOpened = urlParams.get('aff_opened') === '1';
     const showCouponId = urlParams.get('show_coupon');
     const codeFromUrl = urlParams.get('code');
-    if (showCouponId && codeFromUrl) {
+    if (restoreDealModalFromUrlParams(affUrl)) {
+        // deal popup from Shop Now / Get Deal tab
+    } else if (showCouponId && codeFromUrl) {
         try {
             const decoded = decodeURIComponent(codeFromUrl);
             currentCode = decoded;
             currentCouponId = showCouponId;
             currentCouponRow = document.querySelector('.coupon-row[data-coupon-id="' + showCouponId + '"]');
             revealCodeInRow(showCouponId, decoded, affUrl);
-            openModalForCoupon(showCouponId, decoded, affUrl);
+            openModalForCoupon(showCouponId, decoded, affUrl, false);
         } catch (e) {}
     } else {
         restoreCouponModalFromHash();
