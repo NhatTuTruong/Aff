@@ -40,6 +40,8 @@ class SitemapController extends Controller
             ];
         }
 
+        // Landing /store/{slug} pages are noindex — not listed in sitemap.
+
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
 
