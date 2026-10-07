@@ -16,13 +16,18 @@ use Illuminate\Support\Facades\DB;
 
 // SEO: robots.txt (dynamic so Sitemap URL matches app.url)
 Route::get('/robots.txt', function () {
-    $sitemap = url('/sitemap.xml');
-    $body = "User-agent: *\nAllow: /\n\nSitemap: {$sitemap}\n";
+    $base = rtrim((string) config('app.url'), '/');
+    $sitemap = $base . '/sitemap.xml';
+    $body = "User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /out/\nDisallow: /visit/\n\nSitemap: {$sitemap}\n";
+
     return response($body, 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
 })->name('robots');
 
-// SEO: sitemap.xml
+// SEO: sitemap index + section sitemaps (canonical URLs from APP_URL)
 Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+Route::get('/sitemap-pages.xml', [App\Http\Controllers\SitemapController::class, 'pages'])->name('sitemap.pages');
+Route::get('/sitemap-blog.xml', [App\Http\Controllers\SitemapController::class, 'blog'])->name('sitemap.blog');
+Route::get('/sitemap-stores.xml', [App\Http\Controllers\SitemapController::class, 'stores'])->name('sitemap.stores');
 
 // Simple health check endpoint (no tracking)
 Route::get('/health', function () {
@@ -50,12 +55,17 @@ Route::get('/login', function () {
     return redirect('/admin/login');
 })->name('login');
 
-// Landing: URL cũ /visit/{user_code}/{slug} → 301 tới /visit/{slug}
+// Landing coupon pages: /store/{slug}
+Route::get('/store/{slug}', [App\Http\Controllers\LandingPageController::class, 'show'])
+    ->name('landing.show')
+    ->where('slug', '[a-z0-9-]+');
+
+// URL cũ /visit/{user_code}/{slug} → 301 tới /store/{slug}
 Route::get('/visit/{userCode}/{slug}', [App\Http\Controllers\LandingPageController::class, 'legacyVisitRedirect'])
     ->where(['userCode' => '[0-9]{5}', 'slug' => '[a-z0-9-]+']);
 
-Route::get('/visit/{slug}', [App\Http\Controllers\LandingPageController::class, 'show'])
-    ->name('landing.show')
+// URL cũ /visit/{slug} → 301 tới /store/{slug}
+Route::get('/visit/{slug}', [App\Http\Controllers\LandingPageController::class, 'visitSlugRedirect'])
     ->where('slug', '[a-z0-9-]+');
 
 // Click tracking: URL cũ /out/{user_code}/{slug} → 301 tới /out/{slug}

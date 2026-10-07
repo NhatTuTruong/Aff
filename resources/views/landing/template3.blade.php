@@ -104,7 +104,8 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ $metaTitle }}">
     <meta property="og:description" content="{{ $metaDescription }}">
-    <meta property="og:url" content="{{ url()->current() }}">
+    <link rel="canonical" href="{{ route('landing.show', ['slug' => $campaignSlug]) }}">
+    <meta property="og:url" content="{{ route('landing.show', ['slug' => $campaignSlug]) }}">
     <meta property="og:image" content="{{ $ogImage }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $metaTitle }}">

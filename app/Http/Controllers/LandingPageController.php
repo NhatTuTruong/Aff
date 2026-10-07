@@ -17,7 +17,7 @@ class LandingPageController extends Controller
     }
 
     /**
-     * Chuyển URL cũ /visit/{user_code}/{segment} sang /visit/{slug} (301).
+     * Chuyển URL cũ /visit/{user_code}/{segment} sang /store/{slug} (301).
      */
     public function legacyVisitRedirect(string $userCode, string $slug, Request $request)
     {
@@ -33,6 +33,16 @@ class LandingPageController extends Controller
         }
 
         return redirect()->route('landing.show', ['slug' => $campaign->slug], 301);
+    }
+
+    /**
+     * Chuyển URL cũ /visit/{slug} sang /store/{slug} (301).
+     */
+    public function visitSlugRedirect(string $slug, Request $request)
+    {
+        Campaign::where('slug', $slug)->whereHas('brand')->firstOrFail();
+
+        return redirect()->route('landing.show', ['slug' => $slug], 301);
     }
 
     public function show(string $slug, Request $request)
