@@ -944,9 +944,7 @@
 <div class="t4-container">
 @php
     use App\Models\Campaign;
-    use App\Services\CouponDescriptionGenerator;
 
-    $couponDescGenerator = app(CouponDescriptionGenerator::class);
     $campaignSeed = (int) ($campaign->id ?? 0);
     $totalCoupons = $coupons->count();
     $codeCount = $coupons->filter(fn ($c) => !empty($c->code))->count();
@@ -1132,18 +1130,10 @@
                         ? $descriptionText
                         : $formatHeadline($coupon, $offerType, $offerValue, $currencySymbol, $isFreeShipping));
 
-                $descSeed = (int) (($campaign->id ?? 0) * 1000 + ($coupon->id ?? 0) + ($coupon->sort_order ?? 0));
-
                 if ($hasCode) {
-                    $couponBody = $couponDescGenerator->generate($offerText, true, $brandName, $descSeed)
-                        . ' – <b style="color: #313131;">Click "Get Code" – to get the code.</b>';
+                    $couponBody = '<b style="color: #313131;">Click "Get Code" – to get the code.</b>';
                 } else {
-                    $couponBody = ($offerText !== ''
-                        ? $offerText
-                        : ($descriptionText !== ''
-                            ? $descriptionText
-                            : $couponDescGenerator->generate($offerText, false, $brandName, $descSeed)))
-                        . ' – <b style="color: #313131;">Click "Get Deal" – discount applied automatically.</b>';
+                    $couponBody = '<b style="color: #313131;">Click "Get Deal" – discount applied automatically.</b>';
                 }
 
                 $codeDisplay = '';
