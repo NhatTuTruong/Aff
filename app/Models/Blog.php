@@ -125,7 +125,21 @@ class Blog extends Model
             Cache::forget('magazine.footer_recent_posts');
         };
 
-        static::saved($clearCaches);
-        static::deleted($clearCaches);
+        $refreshSitemap = function () {
+            try {
+                app(\App\Services\SitemapGenerator::class)->write();
+            } catch (\Throwable) {
+                // Avoid breaking admin saves if filesystem fails
+            }
+        };
+
+        static::saved(function () use ($clearCaches, $refreshSitemap) {
+            $clearCaches();
+            $refreshSitemap();
+        });
+        static::deleted(function () use ($clearCaches, $refreshSitemap) {
+            $clearCaches();
+            $refreshSitemap();
+        });
     }
 }

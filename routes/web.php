@@ -16,8 +16,10 @@ use Illuminate\Support\Facades\DB;
 
 // SEO: robots.txt (dynamic so Sitemap URL matches app.url)
 Route::get('/robots.txt', function () {
-    $sitemap = url('/sitemap.xml');
-    $body = "User-agent: *\nAllow: /\n\nSitemap: {$sitemap}\n";
+    $base = rtrim((string) config('app.url'), '/');
+    $sitemap = $base . '/sitemap.xml';
+    $body = "User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /out/\nDisallow: /visit/\n\nSitemap: {$sitemap}\n";
+
     return response($body, 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
 })->name('robots');
 
@@ -44,6 +46,10 @@ Route::get('/health', function () {
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/blog', [App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [App\Http\Controllers\BlogController::class, 'show'])->name('blog.show')->where('slug', '[a-z0-9\-]+');
+
+Route::get('/review', [App\Http\Controllers\BlogController::class, 'index'])->name('review.index');
+Route::get('/review/{slug}', [App\Http\Controllers\BlogController::class, 'show'])->name('review.show')->where('slug', '[a-z0-9\-]+');
+Route::get('/blogs/{slug}', [App\Http\Controllers\BlogController::class, 'show'])->name('blogs.show')->where('slug', '[a-z0-9\-]+');
 
 // /login -> trang đăng nhập Filament (v3)
 Route::get('/login', function () {
