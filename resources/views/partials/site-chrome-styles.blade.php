@@ -247,9 +247,15 @@
     max-width: 300px;
     line-height: 1.65;
 }
+.site-footer .footer-social {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
 .site-footer .footer-social-link {
     display: inline-flex;
-    margin-top: 1rem;
     color: #6ee7b7;
     transition: color 0.2s, transform 0.2s;
 }

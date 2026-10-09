@@ -112,6 +112,9 @@
             $metaDescription = 'Save more with the latest ' . $brandName . ' coupon codes, deals and promotions.';
         }
 
+        $metaTitle = \App\Support\SeoText::plain($metaTitle);
+        $metaDescription = \App\Support\SeoText::plain($metaDescription);
+
         if ($campaign->brand && $campaign->brand->image) {
             $ogImage = $campaign->brand->image_url;
         } elseif ($campaign->cover_image) {

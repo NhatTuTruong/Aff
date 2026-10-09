@@ -86,6 +86,42 @@ class SiteContent extends Model
         ];
     }
 
+    /** Mặc định link mạng xã hội (để trống = không hiển thị icon). */
+    public static function defaultSocialLinks(): array
+    {
+        return [
+            'facebook' => '',
+            'instagram' => '',
+            'x' => '',
+            'youtube' => '',
+            'tiktok' => '',
+            'linkedin' => '',
+            'pinterest' => '',
+            'threads' => '',
+        ];
+    }
+
+    /**
+     * @return array<string, string> key => URL (chỉ entry có URL)
+     */
+    public static function socialLinksForDisplay(): array
+    {
+        $links = static::get('social_links', static::defaultSocialLinks());
+        if (! is_array($links)) {
+            return [];
+        }
+
+        $out = [];
+        foreach (static::defaultSocialLinks() as $key => $_) {
+            $url = trim((string) ($links[$key] ?? ''));
+            if ($url !== '') {
+                $out[$key] = $url;
+            }
+        }
+
+        return $out;
+    }
+
     /** Mặc định nội dung trang lỗi: title, message */
     public static function defaultErrorContent(string $code): array
     {

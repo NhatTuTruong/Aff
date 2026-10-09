@@ -63,6 +63,7 @@ class SiteContentPage extends Page implements HasForms
             'page_contact' => SiteContent::get('page_contact', SiteContent::defaultPageContact()),
             'page_privacy' => SiteContent::get('page_privacy', SiteContent::defaultPagePrivacy()),
             'page_affiliate' => SiteContent::get('page_affiliate', SiteContent::defaultPageAffiliateDisclosure()),
+            'social_links' => SiteContent::get('social_links', SiteContent::defaultSocialLinks()),
         ]);
     }
 
@@ -145,6 +146,55 @@ class SiteContentPage extends Page implements HasForms
                                             ])
                                             ->columnSpanFull(),
                                     ]),
+                            ]),
+                        Tabs\Tab::make('Mạng xã hội')
+                            ->icon('heroicon-o-share')
+                            ->schema([
+                                Section::make('Liên kết mạng xã hội')
+                                    ->description('Nhập URL đầy đủ (https://...). Để trống thì icon tương ứng sẽ không hiển thị trên footer site.')
+                                    ->schema([
+                                        TextInput::make('social_links.facebook')
+                                            ->label('Facebook')
+                                            ->url()
+                                            ->maxLength(500)
+                                            ->placeholder('https://facebook.com/...'),
+                                        TextInput::make('social_links.instagram')
+                                            ->label('Instagram')
+                                            ->url()
+                                            ->maxLength(500)
+                                            ->placeholder('https://instagram.com/...'),
+                                        TextInput::make('social_links.x')
+                                            ->label('X (Twitter)')
+                                            ->url()
+                                            ->maxLength(500)
+                                            ->placeholder('https://x.com/...'),
+                                        TextInput::make('social_links.youtube')
+                                            ->label('YouTube')
+                                            ->url()
+                                            ->maxLength(500)
+                                            ->placeholder('https://youtube.com/@...'),
+                                        TextInput::make('social_links.tiktok')
+                                            ->label('TikTok')
+                                            ->url()
+                                            ->maxLength(500)
+                                            ->placeholder('https://tiktok.com/@...'),
+                                        TextInput::make('social_links.linkedin')
+                                            ->label('LinkedIn')
+                                            ->url()
+                                            ->maxLength(500)
+                                            ->placeholder('https://linkedin.com/company/...'),
+                                        TextInput::make('social_links.pinterest')
+                                            ->label('Pinterest')
+                                            ->url()
+                                            ->maxLength(500)
+                                            ->placeholder('https://pinterest.com/...'),
+                                        TextInput::make('social_links.threads')
+                                            ->label('Threads')
+                                            ->url()
+                                            ->maxLength(500)
+                                            ->placeholder('https://threads.net/@...'),
+                                    ])
+                                    ->columns(2),
                             ]),
                         Tabs\Tab::make('Trang báo lỗi')
                             ->icon('heroicon-o-exclamation-triangle')
@@ -253,9 +303,10 @@ class SiteContentPage extends Page implements HasForms
         SiteContent::set('page_contact', $data['page_contact'] ?? '');
         SiteContent::set('page_privacy', $data['page_privacy'] ?? '');
         SiteContent::set('page_affiliate', $data['page_affiliate'] ?? '');
+        SiteContent::set('social_links', $data['social_links'] ?? SiteContent::defaultSocialLinks());
 
         Notification::make()
-            ->title('Đã lưu nội dung Header, Footer, trang lỗi và các trang.')
+            ->title('Đã lưu nội dung trang.')
             ->success()
             ->send();
     }
